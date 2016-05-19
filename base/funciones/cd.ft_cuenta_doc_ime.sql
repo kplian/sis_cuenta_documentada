@@ -508,12 +508,7 @@ BEGIN
                        v_registros_proc.obs_pro,
                        v_codigo_tipo_pro,    
                        v_codigo_tipo_pro);
-                       
-                       
            END LOOP; 
-           
-       
-        
            
            IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
               v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
@@ -528,9 +523,6 @@ BEGIN
            END IF;
            
           
-           
-           
-           
           --------------------------------------------------
           --  ACTUALIZA EL NUEVO ESTADO DEL PRESUPUESTO
           ----------------------------------------------------
@@ -719,48 +711,17 @@ BEGIN
         end;     
 	
     
-	/*********************************    
- 	#TRANSACCION:  'CD_INIREND_IME'
- 	#DESCRIPCION: Inicia proceso de rendicion, solo incluye los documentos sin rendicion
- 	#AUTOR:		RAC	
- 	#FECHA:		16-05-2016 12:12:51
+    /*********************************    
+ 	#TRANSACCION:  'CD_CDOCREN_INS'
+ 	#DESCRIPCION:	Insercion de registros de  rendicon para  fondos en avance
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
 	***********************************/
-     elseif(p_transaccion='CD_INIREND_IME')then   
-        
+
+	elseif(p_transaccion='CD_CDOCREN_INS')then
+					
         begin
         
-            v_importe_rendicion = 0;
-            
-            --sumar las facturas a rendir
-            select 
-               sum(COALESCE(dcv.importe_pago_liquido,0))
-            into 
-               v_importe_rendicion
-            from cd.trendicion_det r
-            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
-            where   r.id_cuenta_doc = v_parametros.id_cuenta_doc 
-                     and r.id_cuenta_doc_rendicion is null
-                     and r.estado_reg = 'activo' and dcv.estado_reg = 'activo';
-                     
-                     
-            --TODO sumar los depositos         
-                        
-            IF v_importe_rendicion = 0 THEN
-               raise exception 'No tiene ninguna factura o deposito para rendir';
-            END IF;
-            
-            v_fecha = now();
-            
-            select 
-                per.id_gestion
-             into 
-                v_id_gestion
-             
-            from param.tperiodo per
-            where per.fecha_ini <= v_fecha and per.fecha_fin >= v_fecha
-            limit 1 offset 0;
-            
-            
             -- recuperar datos de la solicitud
              
             select 
@@ -769,30 +730,49 @@ BEGIN
               c.estado,
               c.id_funcionario,
               c.id_depto,
+              c.id_depto_conta,
+              c.id_depto_lb,
               c.id_moneda,
               c.id_uo,
               c.id_funcionario_gerente,
               c.nro_tramite,
-              c.id_gestion
+              c.id_gestion,
+              c.importe
             into
               v_registros_cd
             from cd.tcuenta_doc c
-            where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            where c.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+            
+            
+            --validamos que el total de importes a rendir no sobrepase el total de importe solicitado
+            
+            select 
+              sum(dcr.importe)
+            into
+              v_importe_rendicion
+            from cd.tcuenta_doc dcr
+            where  dcr.estado_reg = 'activo'  and 
+                   dcr.estado != 'anulado' and
+                   dcr.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk;
+            
+            IF COALESCE(v_importe_rendicion,0) + v_parametros.importe >  v_registros_cd.importe THEN
+              raise exception 'el importe a rendir no puede ser mayor que el importe solicitado %. (Revise las otras rendiciones registradas %)'  ,v_registros_cd.importe,(v_importe_rendicion,0);
+            END IF;
+            
             
             -----------------------------------
-            -- registra estado de cotizacion
-            -- dispara el proceso de cotizacion
+            -- dispara el proceso de rendicion
             ----------------------------------
           
-               SELECT
+             SELECT
                            ps_id_proceso_wf,
                            ps_id_estado_wf,
                            ps_codigo_estado
-                  into
+                 into
                            v_id_proceso_wf,
                            v_id_estado_wf,
                            v_codigo_estado
-               FROM wf.f_registra_proceso_disparado_wf(
+             FROM wf.f_registra_proceso_disparado_wf(
                           p_id_usuario,
                           v_parametros._id_usuario_ai,
                           v_parametros._nombre_usuario_ai,
@@ -803,32 +783,45 @@ BEGIN
                           '','');
         
                  
-                 -- recuperar el tipo de cuenta doc para rendiciones
+               -- recuperar el tipo de cuenta doc para rendiciones
                  
-                 select 
-                   tcd.id_tipo_cuenta_doc,
-                   tp.codigo
-                 into
-                    v_id_tipo_cuenta_doc,
-                    v_codigo_tp
-                 from wf.tproceso_wf pwf 
-                 inner join wf.ttipo_proceso tp on tp.id_tipo_proceso = pwf.id_tipo_proceso
-                 inner join cd.ttipo_cuenta_doc tcd on tcd.codigo_wf = tp.codigo
-                 where pwf.id_proceso_wf = v_id_proceso_wf;
+               select 
+                 tcd.id_tipo_cuenta_doc,
+                 tp.codigo
+               into
+                  v_id_tipo_cuenta_doc,
+                  v_codigo_tp
+               from wf.tproceso_wf pwf 
+               inner join wf.ttipo_proceso tp on tp.id_tipo_proceso = pwf.id_tipo_proceso
+               inner join cd.ttipo_cuenta_doc tcd on tcd.codigo_wf = tp.codigo
+               where pwf.id_proceso_wf = v_id_proceso_wf;
             
-                 IF  v_id_tipo_cuenta_doc is null THEN
-                 	raise exception 'No se encontro un tipo de cuenta doc para el proceso de WF %', v_codigo_tp;
-                 END IF;
-                
-                 -- insertar  el registro cuenta doc para la rendicion 
-                 
-                 --Sentencia de la insercion
+               IF  v_id_tipo_cuenta_doc is null THEN
+                  raise exception 'No se encontro un tipo de cuenta doc para el proceso de WF %', v_codigo_tp;
+               END IF;
+               
+               select 
+                per.id_gestion
+               into 
+                  v_id_gestion
+               from param.tperiodo per
+               where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
+               limit 1 offset 0;
+               
+               
+               IF  v_id_tipo_cuenta_doc is null THEN
+                  raise exception 'No se encontro una gestión para la fecha  %', v_parametros.fecha;
+               END IF;
+               
+              --Sentencia de la insercion
                 insert into cd.tcuenta_doc(
                     id_tipo_cuenta_doc,
                     id_proceso_wf,
                     id_uo,
                     id_funcionario,
                     id_depto,
+                    id_depto_conta,
+                    id_depto_lb,
                     nro_tramite,
                     fecha,
                     id_moneda,
@@ -851,8 +844,10 @@ BEGIN
                     v_registros_cd.id_uo,
                     v_registros_cd.id_funcionario,
                     v_registros_cd.id_depto,
+                    v_registros_cd.id_depto_conta,
+                    v_registros_cd.id_depto_lb,
                     v_registros_cd.nro_tramite,
-                    v_fecha,
+                    v_parametros.fecha,
                     v_registros_cd.id_moneda,
                     v_codigo_estado,
                     'activo',
@@ -862,83 +857,214 @@ BEGIN
                     now(),
                     p_id_usuario,
                     v_registros_cd.id_funcionario_gerente,
-                    v_importe_rendicion,  --suma de documentos (liquido pagable) y depositos
+                    v_parametros.importe,  
                     v_id_gestion,
-                    v_parametros.id_cuenta_doc, -- referencia a cuenta de solicitud
-    				'Rendición de cuentas'
-                )RETURNING id_cuenta_doc into v_id_cuenta_doc;
-                
-                
-                -- inserta documentos en estado borrador si estan configurados
-                v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
-                -- verificar documentos
-                v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
+                    v_parametros.id_cuenta_doc_fk, -- referencia a cuenta de solicitud
+    				v_parametros.motivo
+                )RETURNING id_cuenta_doc into v_id_cuenta_doc; 
         
-             
-                -- asociar la los documentos sueltos a la rendición actual  
-                update cd.trendicion_det rd set
-                  id_cuenta_doc_rendicion =  v_id_cuenta_doc
-                where rd.id_cuenta_doc = v_parametros.id_cuenta_doc
-                      and rd.id_cuenta_doc_rendicion is null;
-                   
-                --TODO asociar los depositos a rendidos
-             
-             ------------------------------------------------------------------
-             --cambiar al estado siguiente de cuenta doc de rendicion
-             ------------------------------------------------------------------
-             
-                      SELECT 
-                           ps_id_tipo_estado,
-                           ps_codigo_estado,
-                           ps_disparador,
-                           ps_regla,
-                           ps_prioridad
-                        into
-                          va_id_tipo_estado_pro,
-                          va_codigo_estado_pro,
-                          va_disparador_pro,
-                          va_regla_pro,
-                          va_prioridad_pro
-                      
-                      FROM wf.f_obtener_estado_wf(v_id_proceso_wf, v_id_estado_wf, NULL, 'siguiente');        
-                    
-                     IF  va_id_tipo_estado_pro[2] is not null  THEN
-                       raise exception 'El proceso se encuentra mal parametrizado dentro de Work Flow,  el estado borador de rendición solo  admite un estado siguiente,  no admitido (%)',va_codigo_estado_pro[2];
-                     END IF;
-                      
-                  
-                  
-                  
-                    -- registra estado eactual en el WF para rl procesod e compra
-                    v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado_pro[1], 
-                                                                   NULL, --id_funcionario
-                                                                   v_id_estado_wf, 
-                                                                   v_id_proceso_wf,
-                                                                   p_id_usuario,
-                                                                   v_parametros._id_usuario_ai,
-                    											   v_parametros._nombre_usuario_ai,                                                                   
-                                                                   v_registros_cd.id_depto);
-                     
-                   
-                    
-                    -- actuliaza el stado en la rendicion
-                     update cd.tcuenta_doc  p set 
-                       id_estado_wf =  v_id_estado_actual,
-                       estado = va_codigo_estado_pro[1],
-                       id_usuario_mod=p_id_usuario,
-                       fecha_mod=now()
-                     where id_cuenta_doc = v_id_cuenta_doc;
-                     
-                     
-                -- si hay mas de un estado disponible  preguntamos al usuario
-                v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Inicio de rendición)'); 
-                v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
-                        
-                              
-               --Devuelve la respuesta
-               return v_resp; 
+            
+            
+             -- inserta documentos en estado borrador si estan configurados
+            v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+            -- verificar documentos
+            v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
+			
+			--Definicion de la respuesta
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta de rendicion almacenada con exito (id_cuenta_doc'||v_id_cuenta_doc||')'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_id_cuenta_doc::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+    
+	
+    
+    /*********************************    
+ 	#TRANSACCION:  'CD_CDOCREN_MOD'
+ 	#DESCRIPCION:	Modificacion de rendiciones de FA
+ 	#AUTOR:		rac	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+	elsif(p_transaccion='CD_CDOCREN_MOD')then
+
+		begin
         
-        end;   
+             select 
+                per.id_gestion
+             into 
+                v_id_gestion
+             from param.tperiodo per
+             where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
+             limit 1 offset 0;
+             
+             select 
+              c.id_estado_wf,
+              c.id_proceso_wf,
+              c.estado,
+              c.id_funcionario,
+              c.id_depto,
+              c.id_depto_conta,
+              c.id_depto_lb,
+              c.id_moneda,
+              c.id_uo,
+              c.id_funcionario_gerente,
+              c.nro_tramite,
+              c.id_gestion,
+              c.importe,
+              cdr.estado as estado_cdr
+            into
+              v_registros_cd
+            from cd.tcuenta_doc c
+            inner join cd.tcuenta_doc cdr on   cdr.id_cuenta_doc_fk = c.id_cuenta_doc
+            where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            
+            IF v_registros_cd.estado_cdr not in ('borrador','vbtesoreria') THEN
+              raise exception 'Solo puede modificar facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
+            END IF;
+             
+             
+            --  validamos que el total de importes a rendir no sobrepase el total de importe solicitado
+            
+            select 
+              sum(dcr.importe)
+            into
+              v_importe_rendicion
+            from cd.tcuenta_doc dcr
+            where  dcr.estado_reg = 'activo'  and 
+                   dcr.estado != 'anulado' and
+                   dcr.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk and 
+                   dcr.id_cuenta_doc  != v_parametros.id_cuenta_doc;
+            
+            IF COALESCE(v_importe_rendicion,0) + v_parametros.importe >  v_registros_cd.importe THEN
+              raise exception 'el importe a rendir no puede ser mayor que el importe solicitado %. (Revise las otras rendiciones registradas %)'  ,v_registros_cd.importe,(v_importe_rendicion,0);
+            END IF;
+            
+            
+			--Sentencia de la modificacion
+			update cd.tcuenta_doc set
+               	
+                motivo = v_parametros.motivo,
+                fecha = v_parametros.fecha,
+                importe = v_parametros.importe
+            where id_cuenta_doc=v_parametros.id_cuenta_doc;
+               
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada rendición  modificado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+               
+            --Devuelve la respuesta
+            return v_resp;
+            
+		end;    
+        
+           
+    
+    /*********************************    
+ 	#TRANSACCION:  'CD_CDOCREN_ELI'
+ 	#DESCRIPCION:	Eliminacion de de cuento documentada de rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elsif(p_transaccion='CD_CDOCREN_ELI')then
+
+		begin
+			
+             select 
+                c.id_cuenta_doc,
+                c.estado,
+                c.id_proceso_wf,
+                c.id_estado_wf,
+                c.estado,
+                c.estado_reg
+             into 
+             v_registros_cd
+             from cd.tcuenta_doc c
+             where id_cuenta_doc=v_parametros.id_cuenta_doc; 
+             
+             
+             IF v_registros_cd.estado != 'borrador' THEN  
+                raise exception 'Solo puede eliminar regitros en borrador';
+             END IF;
+             
+             
+             select 
+               count(rd.id_rendicion_det) into v_contador
+             
+             from cd.trendicion_det rd
+             where rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;
+             
+             
+             --TODO contar depositos
+             
+             IF COALESCE(v_contador,0) != 0 THEN
+                raise exception 'Elimine primero las facturas y depositos registrados';
+             END IF;
+             
+             
+            
+             
+             
+             --------------------------
+             --   Anulacion de la rendicion
+             --------------------------
+             
+           
+                 select 
+                  te.id_tipo_estado
+                 into
+                  v_id_tipo_estado
+                 from wf.tproceso_wf pw 
+                 inner join wf.ttipo_proceso tp on pw.id_tipo_proceso = tp.id_tipo_proceso
+                 inner join wf.ttipo_estado te on te.id_tipo_proceso = tp.id_tipo_proceso and te.codigo = 'anulado'               
+                 where pw.id_proceso_wf = v_registros_cd.id_proceso_wf;
+
+                 
+                 IF v_id_tipo_estado is NULL  THEN             
+                    raise exception 'No se parametrizo el estado "anulado" para la rendición';
+                 END IF;
+                 
+                select f.id_funcionario into  v_id_funcionario
+                from segu.tusuario u
+                inner join orga.tfuncionario f on f.id_persona = u.id_persona
+                where u.id_usuario = p_id_usuario;
+                
+                IF v_id_funcionario is null THEN                  
+                   raise exception 'el usaurio no tiene un funcionario';                
+                END IF;
+             
+             
+                v_id_estado_actual =  wf.f_registra_estado_wf(v_id_tipo_estado, 
+                                                   v_id_funcionario, 
+                                                   v_registros_cd.id_estado_wf, 
+                                                   v_registros_cd.id_proceso_wf,
+                                                   p_id_usuario,
+                                                   NULL,
+                                                   NULL,
+                                                   NULL,
+                                                   'Anulacion de la rendición');
+                                                   
+                                                   
+                -- Sentencia de la modificacion
+                 update cd.tcuenta_doc set
+                    estado_reg = 'inactivo',
+                    id_estado_wf = 	v_registros_cd.id_estado_wf,
+                    estado = 'anulado'		
+                 where id_cuenta_doc=v_parametros.id_cuenta_doc;                                     
+             
+             
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada inactivada(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
     
     else
      

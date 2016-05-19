@@ -43,14 +43,32 @@ DECLARE
     v_id_int_comprobante 		integer;
     v_codigo_plantilla_cbte		varchar;
     v_reg_cuenta_doc			record;
+    v_importe_documentos		numeric;
    
 	
     
 BEGIN
 
 	  v_nombre_funcion = 'cd.f_fun_inicio_cuenta_doc_wf';
-    
-     
+      
+      select 
+        c.id_cuenta_doc,
+        tcd.codigo_plantilla_cbte,
+        tcd.sw_solicitud,
+        c.estado,
+        c.id_cuenta_doc_fk,
+        tcd.nombre,
+        c.importe
+      into
+         v_reg_cuenta_doc
+      from cd.tcuenta_doc c
+      inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = c.id_tipo_cuenta_doc
+      where c.id_proceso_wf = p_id_proceso_wf;
+      
+      
+   
+      
+      
       -- actualiza estado en la solicitud
       update cd.tcuenta_doc   set 
          id_estado_wf =  p_id_estado_wf,
@@ -62,27 +80,57 @@ BEGIN
       where id_proceso_wf = p_id_proceso_wf;
       
       
-       -- si es tesoreria actuliza libro de bancos y cuenta bancaria
-      IF p_estado_anterior = 'vbtesoreria' THEN
+       -- si es tesoreria actuliza libro de bancos y cuenta bancaria (solo para la solicitud de fondos)
+      IF p_estado_anterior = 'vbtesoreria' and v_reg_cuenta_doc.sw_solicitud = 'si' THEN
+      
+      
+         
+         
          update cd.tcuenta_doc   set 
             id_depto_lb =  p_id_depto_lb,
             id_cuenta_bancaria = p_id_cuenta_bancaria,
             id_depto_conta = p_id_depto_conta
          where id_proceso_wf = p_id_proceso_wf;
+      
       END IF;
+      
+      
+      --para las rendiciones se verifica que el total de depositos y facturas caudre con la rendicion
+      IF  v_reg_cuenta_doc.sw_solicitud = 'no' THEN
+      
+           IF  v_reg_cuenta_doc.id_cuenta_doc_fk is null THEN
+              raise exception 'El registro de cuanta doc no es una rendición, verifique el tipo de cuenta documentada %',v_reg_cuenta_doc.nombre;
+            END IF;
+         
+            --suma todas las facturas registradas  para la rendicion 
+            select 
+               sum(COALESCE(dcv.importe_pago_liquido,0)) 
+            into
+               v_importe_documentos
+            from cd.trendicion_det rd
+            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+            where dcv.estado_reg = 'activo' and 
+               rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;
+               
+            --TODO sumar el total de depositos registrados par la retencion
+            
+            
+            --verifico importe rendido
+            IF  COALESCE(v_importe_documentos,0)  != v_reg_cuenta_doc.importe  THEN
+               raise exception 'El total a rendir (factuas + depositos) no igual con el monto indicado,   % <> %', COALESCE(v_importe_documentos,0)  ,  v_reg_cuenta_doc.importe;
+            END IF;
+            
+               
+      
+      END IF;
+      
+      
      
 
      -- si ele stado es pendiente genera el comprobante
      IF p_codigo_estado = 'pendiente' THEN
      
-                 select 
-                     c.id_cuenta_doc,
-                     tc.codigo_plantilla_cbte
-                   into
-                     v_reg_cuenta_doc
-                 from cd.tcuenta_doc  c
-                 inner join cd.ttipo_cuenta_doc tc on tc.id_tipo_cuenta_doc = c.id_tipo_cuenta_doc
-                 where id_proceso_wf = p_id_proceso_wf;
+                
      
                 
                 v_sincronizar = pxp.f_get_variable_global('sincronizar');

@@ -417,6 +417,20 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		}
 		
 	],
+	
+	rowExpander: new Ext.ux.grid.RowExpander({
+	        tpl : new Ext.Template(
+	            '<br>',
+	            
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs WF:&nbsp;&nbsp;</b> {obs}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Creado por:&nbsp;&nbsp;</b> {usr_reg}</p>',
+	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Estado Registro:&nbsp;&nbsp;</b> {estado_reg}</p><br>'
+	        )
+    }),
+    
+    arrayDefaultColumHidden:['usr_reg','usr_mod','estado_reg','fecha_reg'],
+
+
 	tam_pag:50,	
 	title:'Cuenta Documentada',
 	ActSave:'../../sis_cuenta_documentada/control/CuentaDoc/insertarCuentaDoc',
@@ -449,7 +463,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'importe',
+		{name:'usr_mod', type: 'string'},'importe','obs',
 		'id_funcionario_cuenta_bancaria','sw_solicitud',
 		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc',
 		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos'

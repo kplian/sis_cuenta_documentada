@@ -22,12 +22,29 @@ Phx.vista.RendicionDetTes = {
 	   Phx.vista.RendicionDetTes.superclass.constructor.call(this,config);
     },
     
+    onReloadPage:function(m){
+		this.maestro=m;
+		this.store.baseParams={id_cuenta_doc_rendicion: this.maestro.id_cuenta_doc};
+		this.load({params:{start:0, limit:50}});
+		
+		 if(this.maestro.estado == 'vbtesoreria' && this.maestro.sw_solicitud == 'no'){
+	          this.getBoton('new').enable();
+	     }
+	     else{
+	        this.getBoton('new').disable();
+	     }   
+	      
+	
+	},
+		
+    
     preparaMenu:function(n){
+    	
+    	
 		var me = this;
 	      var data = this.getSelectedData();
 	      var tb =this.tbar;
 	      Phx.vista.RendicionDetTes.superclass.preparaMenu.call(this,n);  
-	      
 	      if(me.maestro.estado == 'vbtesoreria' && me.maestro.sw_solicitud == 'no'){
 	          this.getBoton('new').enable();
 	          this.getBoton('edit').enable();
@@ -49,6 +66,14 @@ Phx.vista.RendicionDetTes = {
         var tb = Phx.vista.RendicionDetTes.superclass.liberaMenu.call(this);
         if(tb){
             this.getBoton('btnShowDoc').disable();
+            
+            if(this.maestro.estado == 'vbtesoreria' && this.maestro.sw_solicitud == 'no'){
+	         
+	          this.getBoton('new').enable();
+		    }
+		    else{
+		         this.getBoton('new').disable();
+		   }
         }
         return tb
    },

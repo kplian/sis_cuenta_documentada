@@ -64,14 +64,12 @@ BEGIN
            
            
            IF  v_estado in  ('entregados')  THEN
-              v_importe_fac = '(select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
+              v_importe_fac = 'COALESCE((select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
                               inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc)::numeric as importe_documentos  ' ;
+                              where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric as importe_documentos  ' ;
            ELSE
               v_importe_fac =' 0::numeric as importe_documentos ';
            END IF;
-           
-           
            
            
            v_filtro='';
@@ -84,12 +82,22 @@ BEGIN
            ELSE
               v_historico = 'no';
            END IF;
+           
+           
+           IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
         
-           IF p_administrador != 1  and v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
-              v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+               IF p_administrador != 1  THEN
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+               END IF;
+               
+               v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
+           
            END IF;
            
-           IF  lower(v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
+             
+         
+           
+           IF  (v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
            
                 --TODO ver lo usuarios miembros del departemento
                 
@@ -118,7 +126,7 @@ BEGIN
                 
                 END IF;
                 
-                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
+              
           
            END IF;
             
@@ -205,7 +213,7 @@ BEGIN
 	elsif(p_transaccion='CD_CDOC_CONT')then
 
 		begin
-           v_filtro='';
+            v_filtro='';
            IF (v_parametros.id_funcionario_usu is null) then
               	v_parametros.id_funcionario_usu = -1;
            END IF;
@@ -215,12 +223,22 @@ BEGIN
            ELSE
               v_historico = 'no';
            END IF;
+           
+           
+           IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
         
-           IF p_administrador != 1  and v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
-              v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+               IF p_administrador != 1  THEN
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+               END IF;
+               
+               v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
+           
            END IF;
            
-           IF  lower(v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
+             
+         
+           
+           IF  (v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
            
                 --TODO ver lo usuarios miembros del departemento
                 
@@ -249,7 +267,7 @@ BEGIN
                 
                 END IF;
                 
-                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
+              
           
            END IF;
             
@@ -262,6 +280,8 @@ BEGIN
                v_strg_cd = 'cdoc.id_cuenta_doc';
                v_strg_obs = 'ew.obs'; 
            END IF;
+           
+          
         
         
 			--Sentencia de la consulta de conteo de registros
@@ -283,6 +303,140 @@ BEGIN
 			--Devuelve la respuesta
 			return v_consulta;
 		end;
+        
+    /*********************************    
+ 	#TRANSACCION:  'CD_CDOCREN_SEL'
+ 	#DESCRIPCION:	Consulta de datos  rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elseif(p_transaccion='CD_CDOCREN_SEL')then
+     				
+    	begin
+        
+        
+           
+           v_filtro='';
+           IF (v_parametros.id_funcionario_usu is null) then
+              	v_parametros.id_funcionario_usu = -1;
+           END IF;
+            
+           
+           IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
+                IF p_administrador !=1 THEN
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||')  and ';
+                END IF;
+                v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
+           END IF;
+           
+            
+            
+    	  --Sentencia de la consulta
+		  v_consulta:='select
+                            cdoc.id_cuenta_doc,  
+                            cdoc.id_tipo_cuenta_doc,
+                            cdoc.id_proceso_wf,
+                            cdoc.id_caja,
+                            cdoc.nombre_cheque,
+                            cdoc.id_uo,
+                            cdoc.id_funcionario,
+                            cdoc.tipo_pago,
+                            cdoc.id_depto,
+                            cdoc.id_cuenta_doc_fk,
+                            cdoc.nro_tramite,
+                            cdoc.motivo,
+                            cdoc.fecha,
+                            cdoc.id_moneda,
+                            cdoc.estado,
+                            cdoc.estado_reg,
+                            cdoc.id_estado_wf,
+                            cdoc.id_usuario_ai,
+                            cdoc.usuario_ai,
+                            cdoc.fecha_reg,
+                            cdoc.id_usuario_reg,
+                            cdoc.fecha_mod,
+                            cdoc.id_usuario_mod,
+                            usu1.cuenta as usr_reg,
+                            usu2.cuenta as usr_mod,
+                            mon.codigo as desc_moneda,
+                            dep.nombre as desc_depto,
+                            ew.obs, 
+                            fun.desc_funcionario1 as desc_funcionario,
+                            cdoc.importe,
+                            fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
+                            cdoc.id_funcionario_cuenta_bancaria,
+                            cdoc.id_depto_lb,
+                            cdoc.id_depto_conta,
+                            0::numeric as importe_documentos,
+                            tcd.nombre as desc_tipo_cuenta_doc,
+                            tcd.sw_solicitud
+						from cd.tcuenta_doc cdoc
+                        inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
+                        inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
+                        inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
+						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
+                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf 
+						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
+                        left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
+                        where  cdoc.estado_reg = ''activo'' and '||v_filtro;
+			
+			--Definicion de la respuesta
+			v_consulta:=v_consulta||v_parametros.filtro;
+			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+           -- raise exception 'sss';
+            raise NOTICE '%', v_consulta;
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+
+	/*********************************    
+ 	#TRANSACCION:  'CD_CDOCREN_CONT'
+ 	#DESCRIPCION:	Conteo de registros de rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+	elsif(p_transaccion='CD_CDOCREN_CONT')then
+
+		begin
+             v_filtro='';
+             IF (v_parametros.id_funcionario_usu is null) then
+                  v_parametros.id_funcionario_usu = -1;
+             END IF;
+              
+             
+             IF  lower(v_parametros.tipo_interfaz) in ('CuentaDocRen') THEN
+                  IF p_administrador !=1 THEN
+                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||')  and ';
+                  END IF;
+                  v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
+             END IF;
+        
+        
+			--Sentencia de la consulta de conteo de registros
+			v_consulta:='select count(cdoc.id_cuenta_doc)
+					    from cd.tcuenta_doc cdoc
+                        inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
+                        inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
+                        inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
+						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
+                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf 
+						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
+                        left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
+                        where  cdoc.estado_reg = ''activo'' and '||v_filtro;
+			
+			--Definicion de la respuesta		    
+			v_consulta:=v_consulta||v_parametros.filtro;
+			--Devuelve la respuesta
+			return v_consulta;
+		end;    
+        
+        
 	else
 		raise exception 'Transaccion inexistente';
 	end if;

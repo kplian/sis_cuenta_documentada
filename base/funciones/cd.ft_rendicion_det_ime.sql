@@ -52,27 +52,30 @@ BEGIN
 					
         begin
         
-           select  
-              cd.importe,
-              cd.estado
-           into
-              v_registros 
-           from cd.tcuenta_doc cd
-           where cd.id_cuenta_doc = v_parametros.id_cuenta_doc;
+              select  
+                c.importe,
+                c.estado,
+                c.id_cuenta_doc,
+                cdr.estado as estado_cdr,
+                cdr.importe as importe_rendicion
+             into
+                v_registros 
+             from cd.tcuenta_doc c
+             inner join cd.tcuenta_doc cdr on cdr.id_cuenta_doc_fk = c.id_cuenta_doc
+             where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc;
            
            
-           IF v_registros.estado != 'contabilizado' THEN
+             IF v_registros.estado != 'contabilizado' THEN
               raise exception 'Solo puede añadir facturas en solicitudes entragadas (contabilizada)';
-           END IF; 
+             END IF; 
            
            
-          
-            
             --raise exception 'llega..';
         	--Sentencia de la insercion
         	insert into cd.trendicion_det(
               id_doc_compra_venta,
               estado_reg,
+              id_cuenta_doc_rendicion,
               id_cuenta_doc,
               id_usuario_reg,
               usuario_ai,
@@ -83,7 +86,8 @@ BEGIN
           	) values(
               v_parametros.id_doc_compra_venta,
               'activo',
-              v_parametros.id_cuenta_doc,
+              v_parametros.id_cuenta_doc,   -- registro de la rendicion
+              v_registros.id_cuenta_doc, --reg de la solicitud
               p_id_usuario,
               v_parametros._nombre_usuario_ai,
               now(),
@@ -94,6 +98,9 @@ BEGIN
 			)RETURNING id_rendicion_det into v_id_rendicion_det;
             
             
+            --------------------------------------------------------------------------
+            --validar que no soprepasa el monto de facturas en al SOLICITUD
+            --------------------------------------------------------------------------
             
             select 
                sum(COALESCE(dcv.importe_pago_liquido,0)) 
@@ -101,12 +108,37 @@ BEGIN
                v_importe_documentos
             from cd.trendicion_det rd
             inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and rd.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            where dcv.estado_reg = 'activo' and 
+                 rd.id_cuenta_doc = v_registros.id_cuenta_doc;
            
         
             IF v_importe_documentos > v_registros.importe THEN
                raise exception 'El importe del liquido pagado en documentos registrados supera el monto entregado en %, el monto registrado en facturas tiene que ser menor o igual al importe recibido  %',v_importe_documentos - v_registros.importe, v_registros.importe;
             END IF;
+            
+            
+            --------------------------------------------------------------------------
+            --validar que no soprepasa el monto a rendir registrado   EN RENDIRICION
+            --------------------------------------------------------------------------
+            
+            --suma todas las facturas registradas en la rendicion 
+            select 
+               sum(COALESCE(dcv.importe_pago_liquido,0)) 
+            into
+               v_importe_documentos
+            from cd.trendicion_det rd
+            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+            where dcv.estado_reg = 'activo' and 
+               rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;  --registro de rendicion
+               
+            --TODO sumar el monto en depositos para esta rendicion 
+            
+            
+           
+            IF v_importe_documentos  > v_registros.importe_rendicion THEN
+              raise exception 'El monto en documentos  no puede sobrepasar el monto a rendir (sobre pasado por: % )', v_importe_documentos - v_registros.importe_rendicion;
+            END IF; 
+            
             
            
             update conta.tdoc_compra_venta dcv set
@@ -138,19 +170,33 @@ BEGIN
 					
         begin
         
-            select  
-              cd.importe,
-              cd.estado
-            into
-              v_registros 
-            from cd.tcuenta_doc cd
-            where cd.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            
+            
+             select  
+                c.importe,
+                c.estado,
+                c.id_cuenta_doc,
+                cdr.estado as estado_cdr,
+                cdr.importe as importe_rendicion
+             into
+                v_registros 
+             from cd.tcuenta_doc c
+             inner join cd.tcuenta_doc cdr on cdr.id_cuenta_doc_fk = c.id_cuenta_doc
+             where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc; --registro de solicitud
            
            
             IF v_registros.estado != 'contabilizado' THEN
               raise exception 'Solo puede modificar facturas en solicitudes entragada(contabilizada)';
-            END IF; 
-           
+            END IF;
+            
+            
+            IF v_registros.estado_cdr not in ('borrador','vbtesoreria') THEN
+              raise exception 'Solo puede modificar facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
+            END IF;
+            
+             
+            --suma todas las facturas registradas en la colisitud 
             select 
                sum(COALESCE(dcv.importe_pago_liquido,0)) 
             into
@@ -158,12 +204,37 @@ BEGIN
             from cd.trendicion_det rd
             inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
             where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc = v_parametros.id_cuenta_doc;
+               rd.id_cuenta_doc = v_registros.id_cuenta_doc;  --registro deregistor de solicitud
+               
+            --TODO suma todos los depositos registrados en solicitud
+            
+           
            
         
             IF v_importe_documentos > v_registros.importe THEN
                raise exception 'El importe del liquido pagado en documentos registrados supera el monto entregado en %, el monto registrado en facturas tiene que ser menor o igual al importe recibido  %',v_importe_documentos - v_registros.importe, v_registros.importe;
             END IF;
+            
+            --------------------------------------------------------
+            --validar que no soprepasa el monto a rendir registrado 
+            --------------------------------------------------------
+            
+            --suma todas las facturas registradas en la rendicion 
+            select 
+               sum(COALESCE(dcv.importe_pago_liquido,0)) 
+            into
+               v_importe_documentos
+            from cd.trendicion_det rd
+            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+            where dcv.estado_reg = 'activo' and 
+               rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;   --registro de rendicion
+               
+            --TODO sumar el monto en depositos para esta rendicion 
+            
+            IF v_importe_documentos  > v_registros.importe_rendicion THEN
+              raise exception 'El monto en documentos  no puede sobrepasar el monto a rendir (sobre pasado por: % )', v_importe_documentos - v_registros.importe_rendicion;
+            END IF; 
+            
             
         
 			
@@ -207,11 +278,6 @@ BEGIN
             
             -- valida que period de libro de compras y ventas este abierto
             v_tmp_resp = conta.f_revisa_periodo_compra_venta(p_id_usuario, v_registros.id_depto_conta, v_rec.po_id_periodo);
-            
-            
-            IF  v_registros.id_cuenta_doc_rendicion is not null THEN
-               raise exception 'la factura se encuentra asociada a una rendición, no puede eliminar';
-            END IF;
             
             
             --elimina el dadetalle del documento
