@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION cd.ft_tipo_cuenta_doc_sel (
+CREATE OR REPLACE FUNCTION cd.ft_tipo_categoria_sel (
   p_administrador integer,
   p_id_usuario integer,
   p_tabla varchar,
@@ -9,11 +9,11 @@ CREATE OR REPLACE FUNCTION cd.ft_tipo_cuenta_doc_sel (
 RETURNS varchar AS
 $body$
 /**************************************************************************
- SISTEMA:		Cuenta Documenta
- FUNCION: 		cd.ft_tipo_cuenta_doc_sel
- DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.ttipo_cuenta_doc'
+ SISTEMA:		Cuenta Documentada
+ FUNCION: 		cd.ft_tipo_categoria_sel
+ DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.ttipo_categoria'
  AUTOR: 		 (admin)
- FECHA:	        04-05-2016 20:13:26
+ FECHA:	        05-05-2016 13:22:15
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
@@ -32,40 +32,36 @@ DECLARE
 			    
 BEGIN
 
-	v_nombre_funcion = 'cd.ft_tipo_cuenta_doc_sel';
+	v_nombre_funcion = 'cd.ft_tipo_categoria_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'CD_TCD_SEL'
+ 	#TRANSACCION:  'CD_TCA_SEL'
  	#DESCRIPCION:	Consulta de datos
  	#AUTOR:		admin	
- 	#FECHA:		04-05-2016 20:13:26
+ 	#FECHA:		05-05-2016 13:22:15
 	***********************************/
 
-	if(p_transaccion='CD_TCD_SEL')then
+	if(p_transaccion='CD_TCA_SEL')then
      				
     	begin
     		--Sentencia de la consulta
 			v_consulta:='select
-                            tcd.id_tipo_cuenta_doc,
-                            tcd.codigo,
-                            tcd.estado_reg,
-                            tcd.descripcion,
-                            tcd.nombre,
-                            tcd.fecha_reg,
-                            tcd.usuario_ai,
-                            tcd.id_usuario_reg,
-                            tcd.id_usuario_ai,
-                            tcd.fecha_mod,
-                            tcd.id_usuario_mod,
-                            usu1.cuenta as usr_reg,
-                            usu2.cuenta as usr_mod,
-                            tcd.codigo_plantilla_cbte,
-                            tcd.codigo_wf,
-                            tcd.sw_solicitud	
-						from cd.ttipo_cuenta_doc tcd
-						inner join segu.tusuario usu1 on usu1.id_usuario = tcd.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = tcd.id_usuario_mod
+						tca.id_tipo_Categoria,
+						tca.nombre,
+						tca.estado_reg,
+						tca.codigo,
+						tca.id_usuario_ai,
+						tca.id_usuario_reg,
+						tca.fecha_reg,
+						tca.usuario_ai,
+						tca.id_usuario_mod,
+						tca.fecha_mod,
+						usu1.cuenta as usr_reg,
+						usu2.cuenta as usr_mod	
+						from cd.ttipo_categoria tca
+						inner join segu.tusuario usu1 on usu1.id_usuario = tca.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = tca.id_usuario_mod
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -78,20 +74,20 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'CD_TCD_CONT'
+ 	#TRANSACCION:  'CD_TCA_CONT'
  	#DESCRIPCION:	Conteo de registros
  	#AUTOR:		admin	
- 	#FECHA:		04-05-2016 20:13:26
+ 	#FECHA:		05-05-2016 13:22:15
 	***********************************/
 
-	elsif(p_transaccion='CD_TCD_CONT')then
+	elsif(p_transaccion='CD_TCA_CONT')then
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_tipo_cuenta_doc)
-					    from cd.ttipo_cuenta_doc tcd
-					    inner join segu.tusuario usu1 on usu1.id_usuario = tcd.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = tcd.id_usuario_mod
+			v_consulta:='select count(id_tipo_categoria)
+					    from cd.ttipo_categoria tca
+					    inner join segu.tusuario usu1 on usu1.id_usuario = tca.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = tca.id_usuario_mod
 					    where ';
 			
 			--Definicion de la respuesta		    

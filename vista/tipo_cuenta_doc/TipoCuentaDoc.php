@@ -76,6 +76,118 @@ Phx.vista.TipoCuentaDoc=Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:true
 		},
+		 {
+            config: {
+                name: 'codigo_plantilla_cbte',
+                fieldLabel: 'Plantilla Comprobante',
+                allowBlank: true,
+                emptyText: 'Plantilla Comprobante..',
+                store: new Ext.data.JsonStore({
+                    url: '../../sis_contabilidad/control/PlantillaComprobante/listarPlantillaComprobante',
+                    id: 'id_plantilla_comprobante',
+                    root: 'datos',
+                    sortInfo: {
+                        field: 'codigo',
+                        direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_plantilla_comprobante','codigo'],
+                    remoteSort: true,
+                    baseParams: {par_filtro:'codigo'}
+                }),
+                valueField: 'codigo',
+                displayField: 'codigo',
+                gdisplayField: 'codigo_plantilla_cbte',
+                tpl:'<tpl for="."><div class="x-combo-list-item"><p>Código: {codigo}</p></div></tpl>',
+                forceSelection: true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender: true,
+                mode: 'remote',
+                pageSize: 20,
+                queryDelay: 100,
+                anchor: '100%',
+                gwidth: 120,
+                minChars: 2
+            },
+            type: 'ComboBox',
+            filters:{pfiltro:'codigo_plantilla_cbte',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config: {
+                name: 'codigo_wf',
+                fieldLabel: 'Tipo Proceso WF',
+                allowBlank: true,
+                emptyText: 'Elija un proceso WF..',
+                store: new Ext.data.JsonStore({
+                    url: '../../sis_workflow/control/TipoProceso/listarTipoProceso',
+                    id: 'id_tipo_proceso',
+                    root: 'datos',
+                    sortInfo: {
+                        field: 'codigo',
+                        direction: 'ASC'
+                    },
+                    totalProperty: 'total',
+                    fields: ['id_tipo_proceso','codigo','nombre','codigo_llave'],
+                    remoteSort: true,
+                    baseParams: {par_filtro:'tipproc.codigo#tipproc.nombre#tipproc.codigo_llave'}
+                }),
+                valueField: 'codigo',
+                displayField: 'codigo',
+                gdisplayField: 'codigo_wf',
+                forceSelection: true,
+                typeAhead: false,
+                triggerAction: 'all',
+                lazyRender: true,
+                mode: 'remote',
+                pageSize: 20,
+                queryDelay: 100,
+                anchor: '100%',
+                gwidth: 120,
+                enableMultiSelect:false,
+                minChars: 2
+            },
+            type:'AwesomeCombo',
+            filters:{pfiltro:'codigo_wf',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        
+        {
+			config:{
+				name: 'sw_solicitud',
+				fieldLabel: 'Es Solicitud?',
+				qtip: 'Marca los tipo que corresponden a solicitud de efectivo',
+				allowBlank: false,
+				anchor: '40%',
+				gwidth: 50,
+				maxLength:2,
+				emptyText:'si/no...',       			
+       			typeAhead: true,
+       		    triggerAction: 'all',
+       		    lazyRender:true,
+       		    mode: 'local',
+       		    valueField: 'inicio',       		    
+       		    store:['si','no']
+			},
+			type:'ComboBox',
+			//filters:{pfiltro:'promac.inicio',type:'string'},
+			id_grupo:1,
+			filters:{	
+	       		         type: 'list',
+	       				 pfiltro:'tcd.sw_solicitud',
+	       				 options: ['si','no'],	
+	       		 	},
+			grid:true,
+			form:true
+		},
+        
+        
+		
 		{
 			config:{
 				name: 'estado_reg',
@@ -203,7 +315,7 @@ Phx.vista.TipoCuentaDoc=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},
+		{name:'usr_mod', type: 'string'},'codigo_plantilla_cbte','codigo_wf','sw_solicitud'
 		
 	],
 	sortInfo:{

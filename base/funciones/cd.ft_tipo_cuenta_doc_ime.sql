@@ -59,7 +59,10 @@ BEGIN
 			id_usuario_reg,
 			id_usuario_ai,
 			fecha_mod,
-			id_usuario_mod
+			id_usuario_mod,
+            codigo_wf,
+            codigo_plantilla_cbte,
+            sw_solicitud
           	) values(
 			v_parametros.codigo,
 			'activo',
@@ -70,7 +73,10 @@ BEGIN
 			p_id_usuario,
 			v_parametros._id_usuario_ai,
 			null,
-			null
+			null,
+            v_parametros.codigo_wf,
+            v_parametros.codigo_plantilla_cbte,
+            v_parametros.sw_solicitud
 							
 			
 			
@@ -97,13 +103,16 @@ BEGIN
 		begin
 			--Sentencia de la modificacion
 			update cd.ttipo_cuenta_doc set
-			codigo = v_parametros.codigo,
-			descripcion = v_parametros.descripcion,
-			nombre = v_parametros.nombre,
-			fecha_mod = now(),
-			id_usuario_mod = p_id_usuario,
-			id_usuario_ai = v_parametros._id_usuario_ai,
-			usuario_ai = v_parametros._nombre_usuario_ai
+                codigo = v_parametros.codigo,
+                descripcion = v_parametros.descripcion,
+                nombre = v_parametros.nombre,
+                fecha_mod = now(),
+                id_usuario_mod = p_id_usuario,
+                id_usuario_ai = v_parametros._id_usuario_ai,
+                usuario_ai = v_parametros._nombre_usuario_ai,
+                codigo_wf = v_parametros.codigo_wf,
+                codigo_plantilla_cbte =  v_parametros.codigo_plantilla_cbte,
+                sw_solicitud = v_parametros.sw_solicitud
 			where id_tipo_cuenta_doc=v_parametros.id_tipo_cuenta_doc;
                
 			--Definicion de la respuesta
