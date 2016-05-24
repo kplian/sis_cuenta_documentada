@@ -183,3 +183,21 @@ IS 'marca los tipo que son solitud';
 
 /***********************************F-SCP-CD-ADQ-1-04/05/2016****************************************/
 
+
+/***********************************I-SCP-CD-RAC-1-24/05/2016****************************************/
+
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_cuenta_bancaria_mov INTEGER;
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_cuenta_bancaria_mov
+IS 'hace referencia en pago de regionales, (depto LB con prioridad = 2),  al deposito de libro de bancos de donde se originan los fondos';
+
+/***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
+
+
+
+
+

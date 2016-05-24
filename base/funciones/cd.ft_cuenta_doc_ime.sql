@@ -74,6 +74,7 @@ DECLARE
     v_importe_rendicion				numeric;
     v_fecha							date;
     v_contador_libro_bancos			integer;
+    v_id_cuenta_bancaria_mov		integer;
 			    
 BEGIN
 
@@ -523,6 +524,12 @@ BEGIN
               v_id_depto_conta =  v_parametros.id_depto_conta;
            END IF;
            
+           IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+              v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
+           END IF;
+           
+         
+           
           
           --------------------------------------------------
           --  ACTUALIZA EL NUEVO ESTADO DEL PRESUPUESTO
@@ -538,7 +545,8 @@ BEGIN
                                             v_id_depto_lb,
                                             v_id_cuenta_bancaria,
                                             v_id_depto_conta,
-                                            v_codigo_estado
+                                            v_codigo_estado,
+                                            v_id_cuenta_bancaria_mov
                                             ) THEN
           
                                               

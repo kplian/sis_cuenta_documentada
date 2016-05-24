@@ -1,5 +1,4 @@
 /***********************************I-DEP-RAC-CD-0-17/05/2016*****************************************/
-
 CREATE OR REPLACE VIEW cd.vcuenta_doc(
     id_cuenta_doc,
     id_funcionario,
@@ -8,6 +7,7 @@ CREATE OR REPLACE VIEW cd.vcuenta_doc(
     id_moneda,
     id_gestion,
     id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
     importe,
     nro_tramite,
     funcionario_solicitante,
@@ -26,6 +26,7 @@ AS
          cd.id_moneda,
          cd.id_gestion,
          cd.id_cuenta_bancaria,
+         cd.id_cuenta_bancaria_mov,
          cd.importe,
          cd.nro_tramite,
          f.desc_funcionario1 AS funcionario_solicitante,

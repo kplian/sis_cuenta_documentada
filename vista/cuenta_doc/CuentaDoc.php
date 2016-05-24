@@ -566,9 +566,10 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 									emptyText : 'Departamento Libro Bancos...',
 									allowBlank:false,
 									anchor: '80%',
-									baseParams:{tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'TES',modulo:'LB',id_depto_origen: rec.data.id_depto,},									},   
-									type:'ComboRec',
-									form:true
+									baseParams: { tipo_filtro: 'DEPTO_UO', estado:'activo', codigo_subsistema:'TES', modulo:'LB', id_depto_origen: rec.data.id_depto}
+								},   
+								type:'ComboRec',
+								form:true
 							},
 							{
 								config:{
@@ -592,6 +593,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 									valueField: 'id_cuenta_bancaria',
 									hiddenValue: 'id_cuenta_bancaria',
 									displayField: 'nro_cuenta',
+									disabled : true,
 									listWidth:'280',
 									forceSelection:true,
 									typeAhead: false,
@@ -600,13 +602,48 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 									mode:'remote',
 									pageSize:20,
 									queryDelay:500,
-									gwidth: 250,
 									anchor: '80%',
 									minChars:2
 							   },
 							type:'ComboBox',
 							form:true
 						},
+						{
+				            config:{
+				                name: 'id_cuenta_bancaria_mov',
+				                fieldLabel: 'Depósito',
+				                allowBlank: true,
+				                emptyText : 'Depósito...',
+				                store: new Ext.data.JsonStore({
+				                    url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
+				                    id : 'id_cuenta_bancaria_mov',
+				                    root: 'datos',
+				                    sortInfo:{field: 'fecha',direction: 'DESC'},
+				                    totalProperty: 'total',
+				                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
+				                    remoteSort: true,
+				                    baseParams:{par_filtro:'detalle#observaciones#fecha',fecha: rec.data.fecha}
+				               }),
+				               valueField: 'id_libro_bancos',
+				               displayField: 'importe_deposito',
+				               hiddenName: 'id_cuenta_bancaria_mov',
+				               forceSelection:true,
+				               disabled : true,
+				               typeAhead: false,
+				               triggerAction: 'all',
+				               listWidth:350,
+				               lazyRender:true,
+				               mode:'remote',
+				               pageSize:10,
+				               queryDelay:1000,
+				               anchor: '80%',
+				               minChars:2,
+				               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Saldo:<strong>{saldo}</strong></p></div></tpl>'
+				            },
+				            type:'ComboBox',
+				            id_grupo:1,
+				            form:true
+				        },
 						{     
 							config:{
 									name:'id_depto_conta',
@@ -615,14 +652,19 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 									url: '../../sis_parametros/control/Depto/listarDepto',
 									emptyText : 'Departamento Libro Bancos...',
 									allowBlank:false,
+									disabled : true,
 									anchor: '80%'
 							  },
 							type:'ComboRec',
 							form:true
-						}];
+						}
+					];
 						
 			this.eventosExtra = function(obj){
-    							obj.Cmp.id_depto_lb.on('select',function(){
+    							obj.Cmp.id_depto_lb.on('select',function(data,rec,ind){
+    								
+    								        this.Cmp.id_cuenta_bancaria.enable();
+    								        this.Cmp.id_depto_conta.enable();
 								    		this.Cmp.id_cuenta_bancaria.reset();
 								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {par_filtro :'nro_cuenta', permiso: 'todos', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
 								    		this.Cmp.id_cuenta_bancaria.modificado = true;
@@ -630,12 +672,32 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 								    		this.Cmp.id_depto_conta.reset();
 								    		this.Cmp.id_depto_conta.store.baseParams = {tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'CONTA',id_depto_origen: obj.Cmp.id_depto_lb.getValue()};	
 								    		this.Cmp.id_depto_conta.modificado = true;
+								    		this.Cmp.id_cuenta_bancaria_mov.reset();
 								    		
-								    }, obj);};	
+								    		
+								    		//si es de una regional nacional
+								        	if(rec.data.prioridad == 2){
+								        		this.Cmp.id_cuenta_bancaria_mov.enable();
+								        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = false;
+								        	}
+								        	else{
+								        		this.Cmp.id_cuenta_bancaria_mov.disable();
+								        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
+								        	}
+						        	
+								    		
+								    }, obj);	
 								    	
-								    	
+								 
+								 //Evento para filtrar los depósitos a partir de la cuenta bancaria
+						        obj.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+						        	//si es de una regional nacional
+								    this.Cmp.id_cuenta_bancaria_mov.reset();
+						            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+						            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+						        },obj);   	
 								    			
-						
+						};
 	     }
 	     
 	     
@@ -693,6 +755,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	                json_procesos:      Ext.util.JSON.encode(resp.procesos),
 	                id_depto_lb:  		resp.id_depto_lb,
 	                id_cuenta_bancaria: resp.id_cuenta_bancaria,
+	                id_cuenta_bancaria_mov: resp.id_cuenta_bancaria_mov,
 	                id_depto_conta:  	resp.id_depto_conta
 	                
                 },

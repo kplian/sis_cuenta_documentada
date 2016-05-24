@@ -313,6 +313,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_depto_lb','id_depto_lb','int4');
 		$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
 		$this->setParametro('id_depto_conta','id_depto_conta','int4');
+		$this->setParametro('id_cuenta_bancaria_mov','id_cuenta_bancaria_mov','int4');
 
         //Ejecuta la instruccion
         $this->armarConsulta();

@@ -10,7 +10,8 @@ CREATE OR REPLACE FUNCTION cd.f_fun_inicio_cuenta_doc_wf (
   p_id_depto_lb integer = NULL::integer,
   p_id_cuenta_bancaria integer = NULL::integer,
   p_id_depto_conta integer = NULL::integer,
-  p_estado_anterior varchar = 'no'::character varying
+  p_estado_anterior varchar = 'no'::character varying,
+  p_id_cuenta_bancaria_mov integer = NULL::integer
 )
 RETURNS boolean AS
 $body$
@@ -84,10 +85,13 @@ BEGIN
         update cd.tcuenta_doc   set 
             id_depto_lb =  p_id_depto_lb,
             id_cuenta_bancaria = p_id_cuenta_bancaria,
-            id_depto_conta = p_id_depto_conta
+            id_depto_conta = p_id_depto_conta,
+            id_cuenta_bancaria_mov = p_id_cuenta_bancaria_mov
          where id_proceso_wf = p_id_proceso_wf;
       
       END IF;
+      
+     
       
       
       --para las rendiciones se verifica que el total de depositos y facturas cuadre  con la rendicion
