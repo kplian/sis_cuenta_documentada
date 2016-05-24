@@ -602,6 +602,188 @@ class MODRendicionDet extends MODbase{
 	    
 	    return $this->respuesta;
 	}
+
+    function insertarCdDeposito(){
+    	
+		//Abre conexion con PDO
+		$cone = new conexion();
+		$link = $cone->conectarpdo();
+					
+		try {
+				
+				
+			$link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);		
+		  	$link->beginTransaction();
+			//Definicion de variables para ejecucion del procedimiento
+			$this->procedimiento='tes.ft_proceso_caja_ime';
+			$this->transaccion='TES_DEP_INS';
+			$this->tipo_procedimiento='IME';
+	
+			//Define los parametros para la funcion
+			$this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','varchar');
+			$this->setParametro('fecha','fecha','date');
+			$this->setParametro('tipo','tipo','varchar');
+			$this->setParametro('observaciones','observaciones','varchar');
+			$this->setParametro('importe_deposito','importe_deposito','numeric');
+			$this->setParametro('origen','origen','varchar');
+			$this->setParametro('tabla','tabla','varchar');
+	        $this->setParametro('columna_pk','columna_pk','varchar');
+	        $this->setParametro('columna_pk_valor','columna_pk_valor','int4');
+	
+			
+			
+			//Ejecuta la instruccion
+            $this->armarConsulta();
+			$stmt = $link->prepare($this->consulta);		  
+		  	$stmt->execute();
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			
+			//recupera parametros devuelto depues de insertar ... (id_solicitud)
+			$resp_procedimiento = $this->divRespuesta($result['f_intermediario_ime']);
+			
+			if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
+				throw new Exception("Error al verificar cuadre ", 3);
+			}	
+			
+			$respuesta = $resp_procedimiento['datos'];
+			$id_libro_bancos = $respuesta['id_libro_bancos'];
+			
+			
+			
+			////////////////////////////////////////////////
+			//validar ingreso de depostiros en la rendición
+			///////////////////////////////////////////////
+			
+			$this->resetParametros();
+			$this->procedimiento='cd.ft_rendicion_det_ime';
+			$this->transaccion='CD_VALINDDEPREN_VAL';
+			$this->tipo_procedimiento='IME';
+			
+			$this->arreglo['id_libro_bancos'] = $id_libro_bancos;
+			$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+			
+			$this->armarConsulta();
+			$stmt = $link->prepare($this->consulta);		  
+		  	$stmt->execute();
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+			
+			
+			//recupera parametros devuelto depues de insertar ... (id_solicitud)
+			$resp_procedimiento = $this->divRespuesta($result['f_intermediario_ime']);
+			if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
+				throw new Exception("Error al ejecutar en la bd", 3);
+			}
+			
+			
+			//si todo va bien confirmamos y regresamos el resultado
+			$link->commit();
+			$this->respuesta=new Mensaje();
+			$this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
+			$this->respuesta->setDatos($respuesta);
+	
+			
+		
+		} 
+	    catch (Exception $e) {			
+		    	$link->rollBack();
+				$this->respuesta=new Mensaje();
+				if ($e->getCode() == 3) {//es un error de un procedimiento almacenado de pxp
+					$this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
+				} else if ($e->getCode() == 2) {//es un error en bd de una consulta
+					$this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'modelo','','','','');
+				} else {//es un error lanzado con throw exception
+					throw new Exception($e->getMessage(), 2);
+				}
+				
+		}    
+	    
+	    return $this->respuesta;
+	}
+
+    function eliminarCdDeposito(){
+    	
+		//Abre conexion con PDO
+		$cone = new conexion();
+		$link = $cone->conectarpdo();
+		
+		
+		try {
+			    $link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);		
+		      	$link->beginTransaction();
+				//Definicion de variables para ejecucion del procedimiento
+				$this->procedimiento='tes.ft_proceso_caja_ime';
+				$this->transaccion='TES_DEP_ELI';
+				$this->tipo_procedimiento='IME';
+		        //Define los parametros para la funcion
+				$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+				
+				//Ejecuta la instruccion
+	            $this->armarConsulta();
+				$stmt = $link->prepare($this->consulta);		  
+			  	$stmt->execute();
+				$result = $stmt->fetch(PDO::FETCH_ASSOC);
+		
+				//recupera parametros devuelto depues de insertar ... (id_solicitud)
+				$resp_procedimiento = $this->divRespuesta($result['f_intermediario_ime']);
+				if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
+					throw new Exception("Error al ejecutar en la bd", 3);
+				}
+				
+				////////////////////////////////////////////////
+				//validar eliminación de depostiros en la rendición
+				///////////////////////////////////////////////
+				
+				
+				
+				
+				$this->procedimiento='cd.ft_rendicion_det_ime';
+				$this->transaccion='CD_VALDELDDEPREN_VAL';
+				$this->tipo_procedimiento='IME';
+				
+				
+				//$this->setParametro('id_libro_bancos','id_libro_bancos','int4');
+				
+				
+				
+				$this->armarConsulta();
+				$stmt = $link->prepare($this->consulta);	
+				
+					 
+			  	$stmt->execute();
+				$result = $stmt->fetch(PDO::FETCH_ASSOC);
+				
+				
+				
+				
+				//recupera parametros devuelto depues de insertar ... (id_solicitud)
+				$resp_procedimiento = $this->divRespuesta($result['f_intermediario_ime']);
+				if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
+					throw new Exception("Error al ejecutar en la bd", 3);
+				}
+				//si todo va bien confirmamos y regresamos el resultado
+				$link->commit();
+				$this->respuesta=new Mensaje();
+				$this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
+				$this->respuesta->setDatos($respuesta);
+	
+			
+		
+		} 
+	    catch (Exception $e) {			
+		    	$link->rollBack();
+				$this->respuesta=new Mensaje();
+				if ($e->getCode() == 3) {//es un error de un procedimiento almacenado de pxp
+					$this->respuesta->setMensaje($resp_procedimiento['tipo_respuesta'],$this->nombre_archivo,$resp_procedimiento['mensaje'],$resp_procedimiento['mensaje_tec'],'base',$this->procedimiento,$this->transaccion,$this->tipo_procedimiento,$this->consulta);
+				} else if ($e->getCode() == 2) {//es un error en bd de una consulta
+					$this->respuesta->setMensaje('ERROR',$this->nombre_archivo,$e->getMessage(),$e->getMessage(),'modelo','','','','');
+				} else {//es un error lanzado con throw exception
+					throw new Exception($e->getMessage(), 2);
+				}
+				
+		}    
+	    
+	    return $this->respuesta;		
+	}
 			
 }
 ?>

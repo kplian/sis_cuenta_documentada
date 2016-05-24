@@ -59,8 +59,11 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('id_depto_lb','integer');
 		$this->captura('id_depto_conta','integer');
 		$this->captura('importe_documentos','numeric');
+		$this->captura('importe_depositos','numeric');
 		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
+		
+		
 		
 		
 		

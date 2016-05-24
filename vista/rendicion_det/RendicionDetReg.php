@@ -48,6 +48,13 @@ Phx.vista.RendicionDetReg = {
    liberaMenu:function(){
         var tb = Phx.vista.RendicionDetReg.superclass.liberaMenu.call(this);
         if(tb){
+            if(me.maestro.estado == 'borrador' ){
+            	 this.getBoton('new').enable();
+            }
+            else{
+            	this.getBoton('new').disable();
+            }
+            
             this.getBoton('btnShowDoc').disable();
         }
         return tb

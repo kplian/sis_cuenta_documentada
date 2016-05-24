@@ -83,6 +83,23 @@ class ACTRendicionDet extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
+	function insertarCdDeposito(){
+		$this->objFunc=$this->create('MODRendicionDet');
+		if($this->objParam->insertar('id_libro_bancos')){
+			$this->res=$this->objFunc->insertarCdDeposito($this->objParam);
+		} else{
+			$this->res=$this->objFunc->insertarCdDeposito($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	function eliminarCdDeposito(){
+		$this->objFunc=$this->create('MODRendicionDet');
+		$this->res=$this->objFunc->eliminarCdDeposito($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
 	
 			
 }

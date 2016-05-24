@@ -44,6 +44,7 @@ DECLARE
     v_codigo_plantilla_cbte		varchar;
     v_reg_cuenta_doc			record;
     v_importe_documentos		numeric;
+    v_importe_depositos			numeric;
    
 	
     
@@ -66,9 +67,6 @@ BEGIN
       where c.id_proceso_wf = p_id_proceso_wf;
       
       
-   
-      
-      
       -- actualiza estado en la solicitud
       update cd.tcuenta_doc   set 
          id_estado_wf =  p_id_estado_wf,
@@ -83,10 +81,7 @@ BEGIN
        -- si es tesoreria actuliza libro de bancos y cuenta bancaria (solo para la solicitud de fondos)
       IF p_estado_anterior = 'vbtesoreria' and v_reg_cuenta_doc.sw_solicitud = 'si' THEN
       
-      
-         
-         
-         update cd.tcuenta_doc   set 
+        update cd.tcuenta_doc   set 
             id_depto_lb =  p_id_depto_lb,
             id_cuenta_bancaria = p_id_cuenta_bancaria,
             id_depto_conta = p_id_depto_conta
@@ -95,7 +90,7 @@ BEGIN
       END IF;
       
       
-      --para las rendiciones se verifica que el total de depositos y facturas caudre con la rendicion
+      --para las rendiciones se verifica que el total de depositos y facturas cuadre  con la rendicion
       IF  v_reg_cuenta_doc.sw_solicitud = 'no' THEN
       
            IF  v_reg_cuenta_doc.id_cuenta_doc_fk is null THEN
@@ -110,29 +105,32 @@ BEGIN
             from cd.trendicion_det rd
             inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
             where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;
+               rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;  --registro de rendicion
                
-            --TODO sumar el total de depositos registrados par la retencion
+            -- sumar el total de depositos registrados par la retencion
+            
+            select
+              sum(lb.importe_deposito)
+            into
+               v_importe_depositos
+            from tes.tts_libro_bancos lb
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
+            where c.id_cuenta_doc = v_reg_cuenta_doc.id_cuenta_doc  --registro de rendicion
+                  and lb.estado_reg = 'activo' 
+                  and lb.estado != 'anulado';
             
             
             --verifico importe rendido
-            IF  COALESCE(v_importe_documentos,0)  != v_reg_cuenta_doc.importe  THEN
-               raise exception 'El total a rendir (factuas + depositos) no igual con el monto indicado,   % <> %', COALESCE(v_importe_documentos,0)  ,  v_reg_cuenta_doc.importe;
+            IF  COALESCE(v_importe_documentos,0) +  COALESCE(v_importe_depositos,0) != v_reg_cuenta_doc.importe  THEN
+               raise exception 'El total a rendir (factuas + depositos) no igual con el monto indicado,   (% + %) <> %', COALESCE(v_importe_documentos,0) ,  COALESCE(v_importe_depositos,0)  ,  v_reg_cuenta_doc.importe;
             END IF;
-            
-               
-      
+        
       END IF;
       
       
-     
-
      -- si ele stado es pendiente genera el comprobante
      IF p_codigo_estado = 'pendiente' THEN
      
-                
-     
-                
                 v_sincronizar = pxp.f_get_variable_global('sincronizar');
                 --  generacion de comprobante
                 IF (v_sincronizar = 'true') THEN  

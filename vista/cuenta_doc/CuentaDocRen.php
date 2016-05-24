@@ -122,7 +122,13 @@ Phx.vista.CuentaDocRen = {
 	          title:'Facturas', 
 	          height:'50%',
 	          cls:'RendicionDetReg'
-         }
+        },
+        {
+				url:'../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
+				title:'Depositos',
+				height:'50%',
+				cls:'CdDeposito'
+		}
 	   ],
     
     

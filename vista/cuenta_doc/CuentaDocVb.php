@@ -67,12 +67,12 @@ Phx.vista.CuentaDocVb = {
       Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n);  
       if(this.historico == 'no'){
           
-         if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'){
+         if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado == 'rendido'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
          }
             
-         if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'){
+         if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'&&data.estado != 'rendido'){
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
@@ -94,9 +94,15 @@ Phx.vista.CuentaDocVb = {
 	          url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
 	          title:'Facturas', 
 	          height:'50%',
-	          cls:'RendicionDetTes'
-         }
-	   ], 
+	          cls: 'RendicionDetTes'
+         },
+         {
+			  url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
+			  title: 'Depositos',
+			  height: '50%',
+			  cls: 'CdDeposito'
+		 }
+	   ] 
     
     
    

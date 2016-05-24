@@ -35,6 +35,7 @@ DECLARE
     v_rec					record;
     v_tmp_resp				boolean;
     v_importe_documentos	numeric;
+    v_importe_depositos	numeric;
 			    
 BEGIN
 
@@ -68,6 +69,10 @@ BEGIN
              IF v_registros.estado != 'contabilizado' THEN
               raise exception 'Solo puede añadir facturas en solicitudes entragadas (contabilizada)';
              END IF; 
+             
+             IF v_registros.estado_cdr not in ('borrador','vbrendicion') THEN
+              raise exception 'Solo puede añadir facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
+             END IF;
            
            
             --raise exception 'llega..';
@@ -97,47 +102,12 @@ BEGIN
   							
 			)RETURNING id_rendicion_det into v_id_rendicion_det;
             
-            
-            --------------------------------------------------------------------------
-            --validar que no soprepasa el monto de facturas en al SOLICITUD
-            --------------------------------------------------------------------------
-            
-            select 
-               sum(COALESCE(dcv.importe_pago_liquido,0)) 
-            into
-               v_importe_documentos
-            from cd.trendicion_det rd
-            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and 
-                 rd.id_cuenta_doc = v_registros.id_cuenta_doc;
-           
-        
-            IF v_importe_documentos > v_registros.importe THEN
-               raise exception 'El importe del liquido pagado en documentos registrados supera el monto entregado en %, el monto registrado en facturas tiene que ser menor o igual al importe recibido  %',v_importe_documentos - v_registros.importe, v_registros.importe;
+            -------------------------------------
+            --  validar registros de la rendicion
+            -----------------------------------------
+            IF  not cd.f_validar_documentos(p_id_usuario, v_parametros.id_cuenta_doc) THEN
+              raise exception 'error al validar';
             END IF;
-            
-            
-            --------------------------------------------------------------------------
-            --validar que no soprepasa el monto a rendir registrado   EN RENDIRICION
-            --------------------------------------------------------------------------
-            
-            --suma todas las facturas registradas en la rendicion 
-            select 
-               sum(COALESCE(dcv.importe_pago_liquido,0)) 
-            into
-               v_importe_documentos
-            from cd.trendicion_det rd
-            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;  --registro de rendicion
-               
-            --TODO sumar el monto en depositos para esta rendicion 
-            
-            
-           
-            IF v_importe_documentos  > v_registros.importe_rendicion THEN
-              raise exception 'El monto en documentos  no puede sobrepasar el monto a rendir (sobre pasado por: % )', v_importe_documentos - v_registros.importe_rendicion;
-            END IF; 
             
             
            
@@ -146,10 +116,7 @@ BEGIN
                id_origen = v_id_rendicion_det
             where dcv.id_doc_compra_venta = v_parametros.id_doc_compra_venta;
             
-            --validar que la suma de facturas y depositos no sobre pase el total entregado y ampliado
             
-            
-			
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle de Rendición almacenado(a) con exito (id_rendicion_det'||v_id_rendicion_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_rendicion_det',v_id_rendicion_det::varchar);
@@ -170,9 +137,6 @@ BEGIN
 					
         begin
         
-            
-            
-            
              select  
                 c.importe,
                 c.estado,
@@ -191,53 +155,18 @@ BEGIN
             END IF;
             
             
-            IF v_registros.estado_cdr not in ('borrador','vbtesoreria') THEN
+            IF v_registros.estado_cdr not in ('borrador','vbrendicion') THEN
               raise exception 'Solo puede modificar facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
             END IF;
             
-             
-            --suma todas las facturas registradas en la colisitud 
-            select 
-               sum(COALESCE(dcv.importe_pago_liquido,0)) 
-            into
-               v_importe_documentos
-            from cd.trendicion_det rd
-            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc = v_registros.id_cuenta_doc;  --registro deregistor de solicitud
-               
-            --TODO suma todos los depositos registrados en solicitud
-            
-           
-           
-        
-            IF v_importe_documentos > v_registros.importe THEN
-               raise exception 'El importe del liquido pagado en documentos registrados supera el monto entregado en %, el monto registrado en facturas tiene que ser menor o igual al importe recibido  %',v_importe_documentos - v_registros.importe, v_registros.importe;
+            -------------------------------------
+            --  validar registros de la rendicion
+            -----------------------------------------
+            IF  not cd.f_validar_documentos(p_id_usuario, v_parametros.id_cuenta_doc) THEN
+              raise exception 'error al validar';
             END IF;
             
-            --------------------------------------------------------
-            --validar que no soprepasa el monto a rendir registrado 
-            --------------------------------------------------------
             
-            --suma todas las facturas registradas en la rendicion 
-            select 
-               sum(COALESCE(dcv.importe_pago_liquido,0)) 
-            into
-               v_importe_documentos
-            from cd.trendicion_det rd
-            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;   --registro de rendicion
-               
-            --TODO sumar el monto en depositos para esta rendicion 
-            
-            IF v_importe_documentos  > v_registros.importe_rendicion THEN
-              raise exception 'El monto en documentos  no puede sobrepasar el monto a rendir (sobre pasado por: % )', v_importe_documentos - v_registros.importe_rendicion;
-            END IF; 
-            
-            
-        
-			
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','validado factura rendicion'||v_id_rendicion_det||')'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_rendicion_det',v_id_rendicion_det::varchar);
@@ -263,12 +192,22 @@ BEGIN
             select 
                rd.*,
                dcv.id_depto_conta,
-               dcv.fecha 
+               dcv.fecha ,
+               c.estado
+               
             into 
                v_registros
             from cd.trendicion_det rd
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = rd.id_cuenta_doc_rendicion
             inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta  
             where rd.id_rendicion_det = v_parametros.id_rendicion_det;
+            
+            
+            -- solo eliminar documentos en borrador o vbrendicion
+            
+            IF v_registros.estado not in ('borrador','vbrendicion') THEN
+                raise exception 'no puede elimianr documentos que  esten en borrador o visto bueno rendición';
+            END IF;
             
             
             --validar si el periodo de conta esta cerrado o abierto
@@ -304,8 +243,86 @@ BEGIN
             return v_resp;
 
 		end;
-         
-	else
+    /*********************************    
+ 	#TRANSACCION:  'CD_VALINDDEPREN_VAL'
+ 	#DESCRIPCION:	validar registro de depositos en la rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		17-05-2016 18:01:48
+	***********************************/
+
+	elsif(p_transaccion='CD_VALINDDEPREN_VAL')then
+
+		begin
+        
+            
+            
+            select
+               c.id_cuenta_doc,
+               c.estado
+            into
+               v_registros
+            from tes.tts_libro_bancos lb
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
+             where id_libro_bancos=v_parametros.id_libro_bancos;
+            
+			
+             IF v_registros.estado not in ('borrador','vbrendicion') THEN
+                raise exception 'no puede insertar depositos en una rendición en estado  borrador o visto bueno rendición';
+             END IF;
+            
+            IF  not cd.f_validar_documentos(p_id_usuario, v_registros.id_cuenta_doc) THEN
+              raise exception 'error al validar';
+            END IF;
+            
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle de Rendición eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;
+        
+        
+    /*********************************    
+ 	#TRANSACCION:  'CD_VALDELDDEPREN_VAL'
+ 	#DESCRIPCION:	validar la eliminacion de depositos en rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		17-05-2016 18:01:48
+	***********************************/
+
+	elsif(p_transaccion='CD_VALDELDDEPREN_VAL')then
+
+		begin
+        
+           
+          
+            select
+               c.id_cuenta_doc,
+               c.estado
+            into
+               v_registros
+            from tes.tts_libro_bancos lb
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
+             where id_libro_bancos=v_parametros.id_libro_bancos;
+             
+             IF v_registros.estado not in ('borrador','vbrendicion') THEN
+                raise exception 'no puede eliminar depositos que  esten en una rendición en estado  borrador o visto bueno rendición';
+             END IF;
+             
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Detalle de Rendición eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_libro_bancos::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;         
+	
+    
+    else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 

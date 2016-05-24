@@ -25,6 +25,7 @@ DECLARE
 	 v_nombre_funcion   				text;
 	 v_resp							varchar;
      v_registros 					record;
+     v_registros_tmp				record;
      v_id_estado_actual  			integer;
      va_id_tipo_estado 				integer[];
      va_codigo_estado 				varchar[];
@@ -55,6 +56,8 @@ DECLARE
      v_saldo_caja					numeric;
      v_monto						numeric;
      v_registros_cv					record;
+     v_total_rendido				numeric;
+     v_importe_solicitado			numeric;
     
 BEGIN
 
@@ -68,8 +71,7 @@ BEGIN
             pc.id_proceso_wf,
             pc.tipo_pago,
             pc.estado,
-            pc.id_cuenta_doc_fk,
-          
+            pc.id_cuenta_doc_fk,          
             pc.id_cuenta_bancaria ,
             pc.fecha,
             pc.importe,
@@ -88,7 +90,9 @@ BEGIN
             pc.nro_tramite,
             pc.motivo,
             pc.fecha,
-            pc.id_gestion
+            pc.id_gestion,
+            tpc.sw_solicitud,
+            pc.id_cuenta_doc_fk
       into
             v_registros
       
@@ -103,7 +107,7 @@ BEGIN
       where  pc.id_int_comprobante = p_id_int_comprobante; 
     
     
-      --2) Validar que tenga un proceso de caja
+      --2) Validar que tenga una cuenta documentada
     
      IF  v_registros.id_cuenta_doc is NULL  THEN
         raise exception 'El comprobante no esta relacionado con ninguna cuenta documentada';
@@ -112,7 +116,7 @@ BEGIN
      
     
     --------------------------------------------------------
-    ---  cambiar el estado del proceso de caja         -----
+    ---  cambiar el estado de la cuenta dicumentada    -----
     --------------------------------------------------------
         
         
@@ -158,6 +162,128 @@ BEGIN
                            id_usuario_ai = p_id_usuario_ai,
                            usuario_ai = p_usuario_ai
             where pc.id_cuenta_doc  = v_registros.id_cuenta_doc; 
+            
+            --------------------------------------------------
+            --  si es una rendición verificamos si queda saldo
+            --  si no queda saldo finalizamos la solicitud
+            --------------------------------------------------
+            
+            IF v_registros.sw_solicitud = 'no' and v_registros.id_cuenta_doc_fk is not null  THEN
+            
+                  -- sumamos todas las rendiciones que estan contabilizadas
+                  select
+                    sum(c.importe)
+                  into 
+                    v_total_rendido
+                  from cd.tcuenta_doc c
+                  where  c.id_cuenta_doc_fk = v_registros.id_cuenta_doc_fk
+                       and c.estado = 'rendido' and c.estado_reg = 'activo';
+                       
+                       
+                  select 
+                     c.importe,
+                     c.id_estado_wf,
+                     c.id_proceso_wf,
+                     c.estado,
+                     c.id_depto_conta,
+                     c.id_funcionario
+                  into
+                     v_registros_cv
+                  from cd.tcuenta_doc c 
+                  where c.id_cuenta_doc = v_registros.id_cuenta_doc_fk;
+                  
+                  
+                  -- asociamos las facturas rendidas al cbte  de rendicion validado
+                    FOR v_registros_tmp in ( 
+                                      SELECT cv.id_doc_compra_venta,
+                                             cv.id_moneda
+                                      FROM conta.tdoc_compra_venta cv
+                                      INNER JOIN cd.trendicion_det rd on rd.id_doc_compra_venta =cv.id_doc_compra_venta
+                                      WHERE rd.id_cuenta_doc_rendicion = v_registros.id_cuenta_doc) LOOP
+            
+                       
+                              update conta.tdoc_compra_venta set
+                                id_int_comprobante = p_id_int_comprobante
+                              where id_doc_compra_venta = v_registros_tmp.id_doc_compra_venta;
+                       
+                   END LOOP; 
+                  
+                  -- asociamos los depositos al cbte de rendicion  validado
+                   FOR v_registros_tmp in ( 
+                                      SELECT lb.id_libro_bancos
+                                      FROM tes.tts_libro_bancos lb
+                                      WHERE lb.tabla = 'cd.tcuenta_doc' and lb.columna_pk = 'id_cuenta_doc'
+                                            and lb.columna_pk_valor = v_registros.id_cuenta_doc) LOOP
+            
+                       
+                              update tes.tts_libro_bancos lb set
+                                 id_int_comprobante = p_id_int_comprobante
+                              where lb.id_libro_bancos = v_registros_tmp.id_libro_bancos;
+                       
+                   END LOOP; 
+                  
+                  
+                  
+                  
+                  IF  v_total_rendido = v_registros_cv.importe   THEN
+                  
+                        
+                        /************************************
+                           CAMBIA DE ESTADO LA SOLICITUD
+                        *************************************/
+                       
+                         SELECT 
+                             *
+                          into
+                            va_id_tipo_estado,
+                            va_codigo_estado,
+                            va_disparador,
+                            va_regla,
+                            va_prioridad
+                        
+                        FROM wf.f_obtener_estado_wf(v_registros_cv.id_proceso_wf, v_registros_cv.id_estado_wf,NULL,'siguiente');
+                        
+                        
+                        
+                        IF va_codigo_estado[2] is not null THEN              
+                           raise exception 'El proceso de WF esta mal parametrizado,  solo admite un estado siguiente para el estado: %', v_registros.estado;
+                        END IF;
+                        
+                        IF va_codigo_estado[1] is  null THEN
+                           raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %', v_registros.estado;           
+                        END IF;
+                        
+                        -- estado siguiente
+                        v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
+                                                                       v_registros.id_funcionario, 
+                                                                       v_registros_cv.id_estado_wf, 
+                                                                       v_registros_cv.id_proceso_wf,
+                                                                       p_id_usuario,
+                                                                       p_id_usuario_ai, -- id_usuario_ai
+                                                                       p_usuario_ai, -- usuario_ai
+                                                                       v_registros_cv.id_depto_conta,
+                                                                       'Comprobante validado');
+                        -- actualiza estado del proceso
+                      
+                        update cd.tcuenta_doc pc  set 
+                                     id_estado_wf =  v_id_estado_actual,
+                                     estado = va_codigo_estado[1],
+                                     id_usuario_mod=p_id_usuario,
+                                     fecha_mod=now(),
+                                     id_usuario_ai = p_id_usuario_ai,
+                                     usuario_ai = p_usuario_ai
+                        where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
+                        
+                  
+                            
+                       
+                  
+                  ELSEIF v_total_rendido > v_importe_solicitado THEN
+                     raise exception 'el Total rendido (%) no puede ser mayor al importe solicitado (%)',v_total_rendido , v_registros_cv.importe ;
+                  END IF;
+                
+            
+            END IF;
     
  
    RETURN  TRUE;

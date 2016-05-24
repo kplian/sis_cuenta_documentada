@@ -66,9 +66,19 @@ BEGIN
            IF  v_estado in  ('entregados')  THEN
               v_importe_fac = 'COALESCE((select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
                               inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric as importe_documentos  ' ;
+                              where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric as importe_documentos,  ' ;
+                              
+              v_importe_fac = v_importe_fac ||'
+                              COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                              inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                              where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric as importe_documentos  ' ;                
+           
+           
+           
+           
            ELSE
-              v_importe_fac =' 0::numeric as importe_documentos ';
+              v_importe_fac =' 0::numeric as importe_documentos,
+                               0::numeric as importe_depositos ';
            END IF;
            
            
@@ -115,7 +125,7 @@ BEGIN
                   IF p_administrador !=1 THEN
                       v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado = ''vbtesoreria'')  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   ELSE
-                      v_filtro = '  (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
@@ -254,7 +264,7 @@ BEGIN
             
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado = ''vbtesoreria'')  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado = ''vbrendicion'')  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   ELSE
                       v_filtro = '  (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   END IF;

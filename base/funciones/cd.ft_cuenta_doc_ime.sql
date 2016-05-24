@@ -73,6 +73,7 @@ DECLARE
     va_prioridad_pro 				integer[];
     v_importe_rendicion				numeric;
     v_fecha							date;
+    v_contador_libro_bancos			integer;
 			    
 BEGIN
 
@@ -979,7 +980,8 @@ BEGIN
                 c.id_proceso_wf,
                 c.id_estado_wf,
                 c.estado,
-                c.estado_reg
+                c.estado_reg,
+                c.id_cuenta_doc_fk as id_cuenta_doc_solicitud
              into 
              v_registros_cd
              from cd.tcuenta_doc c
@@ -992,20 +994,28 @@ BEGIN
              
              
              select 
-               count(rd.id_rendicion_det) into v_contador
-             
+               count(rd.id_rendicion_det) into v_contador             
              from cd.trendicion_det rd
              where rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;
              
+         
+             -- contar depositos
+             select
+               count(lb.id_libro_bancos) 
+              into 
+               v_contador_libro_bancos  
+             from tes.tts_libro_bancos lb
+             inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
+             where c.id_cuenta_doc_fk = v_registros_cd.id_cuenta_doc_solicitud 
+                  and lb.estado_reg = 'activo' 
+                  and lb.estado != 'anulado';
              
-             --TODO contar depositos
              
-             IF COALESCE(v_contador,0) != 0 THEN
+             
+             IF COALESCE(v_contador,0) != 0 or  COALESCE(v_contador_libro_bancos,0) != 0  THEN
                 raise exception 'Elimine primero las facturas y depositos registrados';
              END IF;
              
-             
-            
              
              
              --------------------------

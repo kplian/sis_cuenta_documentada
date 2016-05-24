@@ -464,7 +464,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},'importe','obs',
-		'id_funcionario_cuenta_bancaria','sw_solicitud',
+		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos',
 		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc',
 		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos'
 	

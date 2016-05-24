@@ -51,8 +51,12 @@ header("content-type: text/javascript; charset=UTF-8");
 		constructor : function(config) {
 			
 			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {
+				    var saldo = value - record.data.importe_documentos - record.data.importe_depositos;
 					if (record.data.estado == 'contabilizado') {
-						return String.format("<font color = 'red'>Entregado: {0}</font><br><font color = 'green' >En Facturas:{1}</font><br>", value, record.data.importe_documentos );
+						return String.format("<font color = 'red'>Entregado: {0}</font><br>"+
+											 "<font color = 'green' >En Facturas:{1}</font><br>"+
+											 "<font color = 'green' >En Depositos:{2}</font><br>"+
+											 "<font color = 'blue' >Saldo:{3}</font>", value, record.data.importe_documentos, record.data.importe_depositos, saldo );
 					} 
 					else {
 						return String.format('<font>Solicitado: {0}</font>', value);
