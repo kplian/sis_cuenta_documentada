@@ -60,7 +60,9 @@ BEGIN
         c.estado,
         c.id_cuenta_doc_fk,
         tcd.nombre,
-        c.importe
+        c.importe,
+        
+        c.id_estado_wf
       into
          v_reg_cuenta_doc
       from cd.tcuenta_doc c
@@ -141,10 +143,11 @@ BEGIN
                   select * into v_nombre_conexion from migra.f_crear_conexion();     
                 END IF;
                 
-                
-               v_id_int_comprobante =   conta.f_gen_comprobante ( 
+              
+                v_id_int_comprobante =   conta.f_gen_comprobante ( 
                                                      v_reg_cuenta_doc.id_cuenta_doc, 
                                                      v_reg_cuenta_doc.codigo_plantilla_cbte ,
+                                                     p_id_estado_wf,                                                     
                                                      p_id_usuario,
                                                      p_id_usuario_ai, 
                                                      p_usuario_ai, 

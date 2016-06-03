@@ -46,14 +46,17 @@ Phx.vista.RendicionDetReg = {
  },
  
    liberaMenu:function(){
-        var tb = Phx.vista.RendicionDetReg.superclass.liberaMenu.call(this);
+        var me = this, tb = Phx.vista.RendicionDetReg.superclass.liberaMenu.call(this);
         if(tb){
-            if(me.maestro.estado == 'borrador' ){
+            
+            console.log('me.maestro.estado',me.maestro.estado)
+            if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'CuentaDocRen' && me.maestro.estado == 'borrador' ){
             	 this.getBoton('new').enable();
-            }
-            else{
-            	this.getBoton('new').disable();
-            }
+	        }
+	        else{
+	            this.getBoton('new').disable();
+	        }
+            
             
             this.getBoton('btnShowDoc').disable();
         }

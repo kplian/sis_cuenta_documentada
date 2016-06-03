@@ -12,6 +12,7 @@ header("content-type: text/javascript; charset=UTF-8");
 Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 
     nombreVista: 'CuentaDoc',
+    tipo_interfaz: 'fondo_avance',
 
 	constructor:function(config){
 		this.maestro=config.maestro;
@@ -552,8 +553,10 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
       	
                
      },
+    
     mostrarWizard : function(rec) {
-     	var configExtra = [],
+     	var me = this,
+     	    configExtra = [],
      		obsValorInicial;
      	   if(rec.data.estado == 'vbtesoreria' &&  rec.data.sw_solicitud == 'si' ){
 		      configExtra = [
@@ -587,7 +590,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 											direction:'ASC'
 										},
 										totalProperty:'total',
-										fields: ['id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
+										baseParams: {'tipo_interfaz':me.tipo_interfaz},
+										fields: [ 'id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
 										remoteSort: true }),
 									tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
 									valueField: 'id_cuenta_bancaria',
@@ -666,7 +670,9 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
     								        this.Cmp.id_cuenta_bancaria.enable();
     								        this.Cmp.id_depto_conta.enable();
 								    		this.Cmp.id_cuenta_bancaria.reset();
-								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {par_filtro :'nro_cuenta', permiso: 'todos', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
+								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', permiso: 'todos', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
+								    		
+								    		
 								    		this.Cmp.id_cuenta_bancaria.modificado = true;
 								    		
 								    		this.Cmp.id_depto_conta.reset();

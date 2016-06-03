@@ -629,6 +629,7 @@ class MODRendicionDet extends MODbase{
 			$this->setParametro('tabla','tabla','varchar');
 	        $this->setParametro('columna_pk','columna_pk','varchar');
 	        $this->setParametro('columna_pk_valor','columna_pk_valor','int4');
+			$this->setParametro('tipo_deposito','tipo_deposito','varchar');
 	
 			
 			

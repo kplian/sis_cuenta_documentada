@@ -390,8 +390,6 @@ BEGIN
         $this->setParametro('json_procesos','json_procesos','text');
         */
         
-        
-        
         --obtenermos datos basicos
           select
               c.id_proceso_wf,
@@ -453,9 +451,9 @@ BEGIN
              
            
            IF   v_codigo_estado_siguiente not in('borrador','finalizado','anulado')   THEN
-                  v_acceso_directo = '../../../sis_cuenta_documentada/vista/CuentaDoc/CuentaDocVb.php';
+                  v_acceso_directo = '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVb.php';
                  v_clase = 'CuentaDocVb';
-                 v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                 v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
                  v_tipo_noti = 'notificacion';
                  v_titulo  = 'Visto Bueno';
              
@@ -669,9 +667,9 @@ BEGIN
              
            
            IF   v_codigo_estado_siguiente not in('borrador','finalizado','anulado')   THEN
-                 v_acceso_directo = '../../../sis_cuenta_documentada/vista/CuentaDoc/CuentaDocVb.php';
+                 v_acceso_directo = '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVb.php';
                  v_clase = 'CuentaDocVb';
-                 v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
+                 v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
                  v_tipo_noti = 'notificacion';
                  v_titulo  = 'Visto Bueno';
              
@@ -705,7 +703,7 @@ BEGIN
             
                raise exception 'Error al retroceder estado';
             
-            END IF;              
+             END IF;              
                          
                          
          -- si hay mas de un estado disponible  preguntamos al usuario
