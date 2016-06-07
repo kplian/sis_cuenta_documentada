@@ -85,8 +85,10 @@ header("content-type: text/javascript; charset=UTF-8");
 				iconCls : 'bballot',
 				disabled : false,
 				handler : this.onBtnRendicion,
-				tooltip : '<b>Rendicion</b>'
+				tooltip : '<b>Rendición</b>'
 			});
+			
+			
 
 			this.init();
 			this.load({
@@ -279,6 +281,8 @@ header("content-type: text/javascript; charset=UTF-8");
 				width : '95%',
 				height : '95%',
 			}, rec.data, this.idContenedor, 'CuentaDocRen');
-		},
+		}
+		
+		
 	}; 
 </script>

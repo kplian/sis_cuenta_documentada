@@ -195,6 +195,21 @@ ALTER TABLE cd.tcuenta_doc
 COMMENT ON COLUMN cd.tcuenta_doc.id_cuenta_bancaria_mov
 IS 'hace referencia en pago de regionales, (depto LB con prioridad = 2),  al deposito de libro de bancos de donde se originan los fondos';
 
+--------------- SQL ---------------
+
+CREATE TABLE cd.tbloqueo_cd (
+  id_bloqueo_cd SERIAL NOT NULL,
+  id_tipo_cuenta_doc INTEGER,
+  id_funcionario INTEGER,
+  estado VARCHAR(40) DEFAULT 'bloqueado' NOT NULL,
+  PRIMARY KEY(id_bloqueo_cd)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+COMMENT ON COLUMN cd.tbloqueo_cd.estado
+IS 'bloqueado o autorizado';
+
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 
 

@@ -22,7 +22,6 @@ $body$
 *  Fecha:   16/05/2016
 *
 */
-
 DECLARE
 
 	v_nombre_funcion   			text;
@@ -46,6 +45,8 @@ DECLARE
     v_reg_cuenta_doc			record;
     v_importe_documentos		numeric;
     v_importe_depositos			numeric;
+    v_limite_fondos				integer;
+    v_contador					integer;
    
 	
     
@@ -61,8 +62,10 @@ BEGIN
         c.id_cuenta_doc_fk,
         tcd.nombre,
         c.importe,
+        c.id_estado_wf,
+        c.id_funcionario,
+        c.id_tipo_cuenta_doc
         
-        c.id_estado_wf
       into
          v_reg_cuenta_doc
       from cd.tcuenta_doc c
@@ -81,6 +84,55 @@ BEGIN
       where id_proceso_wf = p_id_proceso_wf;
       
       
+      
+      IF p_estado_anterior = 'borrador' and v_reg_cuenta_doc.sw_solicitud = 'si' THEN
+          
+              v_limite_fondos = pxp.f_get_variable_global('cd_limite_fondos')::integer;
+             
+              -- validar que no sobre pase el limite de solicitudes abiertas
+              select  count(cd.id_cuenta_doc) into v_contador
+              from cd.tcuenta_doc cd 
+              where cd.estado_reg = 'activo'  
+                   and cd.estado != 'finalizado'
+                   and cd.id_funcionario =  v_reg_cuenta_doc.id_funcionario;
+                   
+                   
+            
+                   
+              
+              --si esta en el limite de solicitudes
+              IF v_contador >= v_limite_fondos THEN
+                     
+                    -- ver si tiene autorizacion para pasar
+                    select b.id_bloqueo_cd,
+                           b.estado
+                    into v_registros
+                    from cd.tbloqueo_cd b
+                    where b.estado_reg = 'activo' and
+                          b.id_tipo_cuenta_doc =
+                            v_reg_cuenta_doc.id_tipo_cuenta_doc and
+                          b.id_funcionario = v_reg_cuenta_doc.id_funcionario;
+                          
+                   
+                     
+                    IF v_registros.estado = 'bloqueado' THEN
+                       raise exception
+                         'El funcionario llego al limite de solicitudes de fondo en avance abiertas (Puede solicitar un desbloqueo en tesoreria)';
+                    ELSIF v_registros.estado = 'autorizado' THEN
+                       --inactiva bloqueo
+                       update cd.tbloqueo_cd
+                       set estado_reg = 'inactivo'
+                       where id_bloqueo_cd = v_registros.id_bloqueo_cd;
+                    
+                    END IF;                                    
+                            
+              END IF;  
+              
+       END IF;
+       
+       
+       --raise exception 'ssss %',p_estado_anterior;
+       
        -- si es tesoreria actuliza libro de bancos y cuenta bancaria (solo para la solicitud de fondos)
       IF p_estado_anterior = 'vbtesoreria' and v_reg_cuenta_doc.sw_solicitud = 'si' THEN
       

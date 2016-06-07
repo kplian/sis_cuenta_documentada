@@ -44,6 +44,15 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                     handler : this.onOpenObs,
                     tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
          });
+         
+         this.addButton('onBtnRepSol', {
+				grupo : [0,1,2,3],
+				text : 'Reporte Sol.',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onBtnRepSol,
+				tooltip : '<b>Reporte de solicitud de fondos</b>'
+		 });
         
     
 		
@@ -805,20 +814,20 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
             handler:this.diagramGanttDinamico,
             scope: this,
             menu:{
-            items: [{
-                id:'b-gantti-' + this.idContenedor,
-                text: 'Gantt Imagen',
-                tooltip: '<b>Mues un reporte gantt en formato de imagen</b>',
-                handler:this.diagramGantt,
-                scope: this
-            }, {
-                id:'b-ganttd-' + this.idContenedor,
-                text: 'Gantt Dinámico',
-                tooltip: '<b>Muestra el reporte gantt facil de entender</b>',
-                handler:this.diagramGanttDinamico,
-                scope: this
+	            items: [{
+	                id:'b-gantti-' + this.idContenedor,
+	                text: 'Gantt Imagen',
+	                tooltip: '<b>Mues un reporte gantt en formato de imagen</b>',
+	                handler:this.diagramGantt,
+	                scope: this
+	            }, {
+	                id:'b-ganttd-' + this.idContenedor,
+	                text: 'Gantt Dinámico',
+	                tooltip: '<b>Muestra el reporte gantt facil de entender</b>',
+	                handler:this.diagramGanttDinamico,
+	                scope: this
+	            }]
             }
-        ]}
         });
 		this.tbar.add(this.menuAdqGantt);
     },
@@ -850,14 +859,34 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
             Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
                     'Observaciones del WF',
                     {
-                        width:'80%',
-                        height:'70%'
+                        width: '80%',
+                        height: '70%'
                     },
                     data,
                     this.idContenedor,
                     'Obs'
         )
     },
+		
+		
+	onBtnRepSol : function() {
+			var rec = this.sm.getSelected();
+			var data = rec.data;
+			if (data) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteSolicitudFondos',
+					params : {
+						'id_proceso_wf' : data.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+
+	}
 	
     
 })

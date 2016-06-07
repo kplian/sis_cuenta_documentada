@@ -446,8 +446,83 @@ BEGIN
 			return v_consulta;
 		end;    
         
+    /*********************************    
+ 	#TRANSACCION:  'CD_REPCDOC_SEL'
+ 	#DESCRIPCION:	Cabecera de reporte de solicitud de fondos
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elsif(p_transaccion='CD_REPCDOC_SEL')then
+     				
+    	begin
         
-	else
+    	  --Sentencia de la consulta
+		  v_consulta:='select
+                            cdoc.id_cuenta_doc, 
+                            cdoc.id_tipo_cuenta_doc,
+                            cdoc.id_proceso_wf,
+                            cdoc.id_caja,
+                            cdoc.nombre_cheque,
+                            cdoc.id_uo,
+                            cdoc.id_funcionario,
+                            cdoc.tipo_pago,
+                            cdoc.id_depto,
+                            cdoc.id_cuenta_doc_fk,
+                            cdoc.nro_tramite,
+                            cdoc.motivo,
+                            cdoc.fecha,
+                            cdoc.id_moneda,
+                            cdoc.estado,
+                            cdoc.estado_reg,
+                            cdoc.id_estado_wf,
+                            cdoc.id_usuario_ai,
+                            cdoc.usuario_ai,
+                            cdoc.fecha_reg,
+                            cdoc.id_usuario_reg,
+                            cdoc.fecha_mod,
+                            cdoc.id_usuario_mod,
+                            usu1.cuenta as usr_reg,
+                            usu2.cuenta as usr_mod,
+                            mon.codigo as desc_moneda,
+                            dep.codigo as desc_depto,
+                            ew.obs, 
+                            fun.desc_funcionario1 as desc_funcionario,
+                            cdoc.importe,
+                            fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
+                            cdoc.id_funcionario_cuenta_bancaria,
+                            cdoc.id_depto_lb,
+                            cdoc.id_depto_conta,
+                            tcd.nombre as desc_tipo_cuenta_doc,
+                            tcd.sw_solicitud,
+                            (select l.nombre  
+                            from param.tlugar l 
+                            inner join orga.tcargo c on  c.id_lugar =  l.id_lugar
+                            where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')))::varchar as lugar, 
+                            orga.f_get_cargo_x_funcionario_str(cdoc.id_funcionario  , cdoc.fecha , ''oficial'') as cargo_funcionario,
+                            uo.nombre_unidad,
+                            pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal
+						from cd.tcuenta_doc cdoc
+                        inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
+                        inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
+                        inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
+                        inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
+						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
+                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
+						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
+                        left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
+                          
+                            
+						where  cdoc.id_proceso_wf = '||v_parametros.id_proceso_wf;
+			
+            return v_consulta;
+						
+		end;    
+	
+    
+    else
 		raise exception 'Transaccion inexistente';
 	end if;
 					

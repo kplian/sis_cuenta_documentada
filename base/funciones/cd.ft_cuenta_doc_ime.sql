@@ -75,27 +75,27 @@ DECLARE
     v_fecha							date;
     v_contador_libro_bancos			integer;
     v_id_cuenta_bancaria_mov		integer;
+    v_limite_fondos					integer;
 			    
 BEGIN
 
     v_nombre_funcion = 'cd.ft_cuenta_doc_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
- 	#TRANSACCION:  'CD_CDOC_INS'
+	/******************************************    
+ 	#TRANSACCION: 'CD_CDOC_INS'
  	#DESCRIPCION:	Insercion de registros de fondos en avance
  	#AUTOR:		admin	
  	#FECHA:		05-05-2016 16:41:21
-	***********************************/
+	*******************************************/
 
 	if(p_transaccion='CD_CDOC_INS')then
 					
         begin
         
-            v_codigo_proceso_macro = pxp.f_get_variable_global('cd_codigo_macro_fondo_avance');
+             v_codigo_proceso_macro = pxp.f_get_variable_global('cd_codigo_macro_fondo_avance');
             
-            
-            --si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
+             --  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
                 
              IF exists(select 1 from orga.tuo_funcionario uof 
                        inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
@@ -243,6 +243,40 @@ BEGIN
 							
 			)RETURNING id_cuenta_doc into v_id_cuenta_doc;
             
+            -------------------------------------
+            -- Evalua el limite de solicitudes
+            -------------------------------------
+            
+            v_limite_fondos = pxp.f_get_variable_global('cd_limite_fondos')::integer;
+             
+            -- validar que no sobre pase el limite de solicitudes abiertas
+            select  count(cd.id_cuenta_doc) into v_contador
+            from cd.tcuenta_doc cd 
+            where cd.estado_reg = 'activo'  
+                   and cd.estado != 'finalizado'
+                   and cd.id_funcionario =  v_parametros.id_funcionario;
+                   
+            IF v_contador = v_limite_fondos THEN        
+                  INSERT INTO  cd.tbloqueo_cd(
+                                              id_usuario_reg,
+                                              fecha_reg,
+                                              estado_reg,
+                                              id_tipo_cuenta_doc,
+                                              id_funcionario,
+                                              estado
+                                            )
+                                            VALUES (
+                                              p_id_usuario,
+                                              now(),
+                                              'activo',
+                                              v_id_tipo_cuenta_doc,
+                                              v_parametros.id_funcionario,
+                                              'bloqueado'
+                                            );       
+                   
+             ELSEIF v_contador > v_limite_fondos THEN
+                 raise exception 'Tiene  mas de % solicitudes abiertas', v_limite_fondos;
+             END IF;
             
              -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);

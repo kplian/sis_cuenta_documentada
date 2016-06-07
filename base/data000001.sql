@@ -17,5 +17,11 @@ VALUES
   (E'cd_codigo_macro_fondo_avance', E'FA', E'codigo de proceso marcro para fondos en avance');  
 
 
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_limite_fondos', E'3', E'numero de solicitudes de fondo en avances donde se bloquea la solicitud');
+
+
+
 /***********************************F-DAT-RAC-ADQ-0-05/05/2016*****************************************/
 
