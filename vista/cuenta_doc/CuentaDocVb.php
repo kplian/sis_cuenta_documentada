@@ -48,6 +48,15 @@ Phx.vista.CuentaDocVb = {
 	   Phx.vista.CuentaDocVb.superclass.constructor.call(this,config);
        this.init();
        
+       this.addButton('onBtnRepSol', {
+				grupo : [0,1,2,3],
+				text : 'Reporte Sol.',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onBtnRepSol,
+				tooltip : '<b>Reporte de solicitud de fondos</b>'
+		});
+       
 		this.store.baseParams = { tipo_interfaz: this.nombreVista };
 		
 		if(config.filtro_directo){
@@ -64,7 +73,18 @@ Phx.vista.CuentaDocVb = {
     preparaMenu:function(n){
       var data = this.getSelectedData();
       var tb =this.tbar;
-      Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n);  
+      Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n); 
+      this.getBoton('btnChequeoDocumentosWf').enable();
+      this.getBoton('diagrama_gantt').enable();
+      this.getBoton('btnObs').enable(); 
+      
+      
+      if(this.sw_solicitud == 'si'){
+        this.getBoton('onBtnRepSol').enable(); 
+      }
+      else{
+      	this.getBoton('onBtnRepSol').disable(); 
+      }
       if(this.historico == 'no'){
           
          if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado == 'rendido'){
@@ -77,9 +97,8 @@ Phx.vista.CuentaDocVb = {
                 this.getBoton('sig_estado').enable();
          }
          
-         this.getBoton('btnChequeoDocumentosWf').enable();
-         this.getBoton('diagrama_gantt').enable();
-         this.getBoton('btnObs').enable();
+         
+        
          
             
       }     
@@ -88,6 +107,19 @@ Phx.vista.CuentaDocVb = {
       }   
       return tb 
    },
+   
+   liberaMenu:function(){
+        var tb = Phx.vista.CuentaDoc.superclass.liberaMenu.call(this);
+        if(tb){
+            this.getBoton('sig_estado').disable();
+            this.getBoton('ant_estado').disable();
+            this.getBoton('btnChequeoDocumentosWf').disable();
+            this.getBoton('diagrama_gantt').disable();
+            this.getBoton('btnObs').disable();
+            this.getBoton('onBtnRepSol').disable(); 
+        }
+        return tb
+    },
     
    tabsouth:[
 	     {

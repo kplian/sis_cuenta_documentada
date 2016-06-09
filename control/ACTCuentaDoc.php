@@ -7,6 +7,7 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 require_once(dirname(__FILE__).'/../reportes/RSolicitudCD.php');
+require_once(dirname(__FILE__).'/../reportes/RRendicionCD.php');
 class ACTCuentaDoc extends ACTbase{    
 			
 	function listarCuentaDoc(){
@@ -153,6 +154,64 @@ class ACTCuentaDoc extends ACTbase{
 		$reporte = new RSolicitudCD($this->objParam); 
 		
 		$reporte->datosHeader($dataSource->getDatos(),  $dataSource->extraData);
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+		
+	}
+   
+   function recuperarRendicionFacturas(){
+    	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarRendicionFacturas($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+        else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}              
+		
+    }
+   
+   function recuperarRendicionDepositos(){
+    	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarRendicionDepositos($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+        else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}              
+		
+    }
+	
+   function reporteRendicionFondos(){
+			
+		$nombreArchivo = uniqid(md5(session_id()).'Egresos') . '.pdf'; 
+		$dataSource = $this->recuperarSolicitudFondos();
+		$dataSourceDet = $this->recuperarRendicionFacturas();
+		$dataSourceDetDepositos = $this->recuperarRendicionDepositos();	
+		//$dataSourceDetDepositos = $this->recuperarRendicionFacturas();		
+		
+		//parametros basicos
+		$tamano = 'LETTER';
+		$orientacion = 'p';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		//Instancia la clase de pdf
+		
+		$reporte = new RRendicionCD($this->objParam); 
+		
+		$reporte->datosHeader($dataSource->getDatos(),  $dataSourceDet->getDatos(), $dataSourceDetDepositos->getDatos());
 		$reporte->generarReporte();
 		$reporte->output($reporte->url_archivo,'F');
 		

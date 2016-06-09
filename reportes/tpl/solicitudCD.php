@@ -1,4 +1,4 @@
-<table width="100%" cellspacing="0" cellpadding="0" border="1">
+<table width="100%" cellpadding="5px"  rules="cols" border="1" style="font-size: 9" border="1">
 	<tbody>
 	<tr>		
 		<td width="33.33%" class="td_label" align="center"><span><b>Nombre y Apellido</b></span></td>		
@@ -12,7 +12,7 @@
 	</tr>
 	<?php if($this->datos_detalle[0]["tipo_pago"] == 'transferencia'){?>
 		<tr>
-			<td width="100%" class="td_label"><font size="9"><b>A FAVOR DE:</b>&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["desc_funcionario"]."(".$this->datos_detalle[0]["desc_funcionario_cuenta_bancaria"].")" ?> </font></td>
+			<td width="100%" class="td_label"><font size="9"><b>A FAVOR DE:</b>&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["desc_funcionario"]."  (".$this->datos_detalle[0]["desc_funcionario_cuenta_bancaria"].")" ?> </font></td>
 		</tr>
 	<?php 
 	 }
@@ -35,23 +35,5 @@
 	</tr>
 	<tr>
 		<td width="30%" class="td_label" align="right"><font size="9"><?php echo number_format($this->datos_detalle[0]["importe"], 2, '.', ',') ?>&nbsp;&nbsp;&nbsp;</font></td>
-	</tr>
-</tbody></table>
-<br><br>
-<table width="100%" cellspacing="0" cellpadding="0" border="1">
-	<tbody><tr>		
-		<td width="33.33%" class="td_label" align="center"><font size="9"><b><span>SOLICITUD</span></b></font></td>		
-		<td width="33.33%" class="td_label" align="center"><font size="9"><b><span>AUTORIZACION</span></b></font></td>
-		<td width="33.33%" class="td_label" align="center"><font size="9"><b><span>Vo. Bo.</span></b></font></td>
-	</tr>
-	<tr>
-		<td width="33.33%" class="td_label"><br><br><br></td>
-		<td width="33.33%" class="td_label"><br><br><br></td>
-		<td width="33.33%" class="td_label"><span></span></td>
-	</tr>
-	<tr>
-		<td width="33.33%" class="td_label"><span></span></td>
-		<td width="33.33%" class="td_label"><span></span></td>
-		<td width="33.33%" class="td_label"><span></span></td>
 	</tr>
 </tbody></table>

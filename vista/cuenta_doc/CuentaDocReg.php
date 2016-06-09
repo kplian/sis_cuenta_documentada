@@ -78,6 +78,15 @@ header("content-type: text/javascript; charset=UTF-8");
 				this.store.baseParams.filtro_valor = config.filtro_directo.valor;
 				this.store.baseParams.filtro_campo = config.filtro_directo.campo;
 			}
+			
+			this.addButton('onBtnRepSol', {
+				grupo : [0,1,2,3],
+				text : 'Reporte Sol.',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onBtnRepSol,
+				tooltip : '<b>Reporte de solicitud de fondos</b>'
+		    });
 
 			this.addButton('btnRendicion', {
 				grupo : [2],
@@ -141,7 +150,8 @@ header("content-type: text/javascript; charset=UTF-8");
 			
 			this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
             this.getBoton('diagrama_gantt').enable();
-            this.getBoton('btnObs').enable(); 
+            this.getBoton('btnObs').enable();
+            this.getBoton('onBtnRepSol').enable(); 
 
 			return tb
 		},
@@ -154,7 +164,9 @@ header("content-type: text/javascript; charset=UTF-8");
 				this.getBoton('btnRendicion').disable();
 				this.getBoton('btnChequeoDocumentosWf').disable();
                 this.getBoton('diagrama_gantt').disable();
-                this.getBoton('btnObs').disable(); 
+                this.getBoton('btnObs').disable();
+                this.getBoton('onBtnRepSol').disable();
+                 
 			}
 			return tb
 		},
@@ -271,6 +283,8 @@ header("content-type: text/javascript; charset=UTF-8");
 			Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
 			this.ocultarComponente(this.Cmp.nombre_cheque);
 			this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
+			this.Cmp.fecha.setValue(new Date());
+            this.Cmp.fecha.fireEvent('change');
 
 		},
 

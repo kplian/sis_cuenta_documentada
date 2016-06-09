@@ -501,7 +501,8 @@ BEGIN
                             where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')))::varchar as lugar, 
                             orga.f_get_cargo_x_funcionario_str(cdoc.id_funcionario  , cdoc.fecha , ''oficial'') as cargo_funcionario,
                             uo.nombre_unidad,
-                            pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal
+                            pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
+                            cdori.motivo::varchar as motivo_ori
 						from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -511,16 +512,142 @@ BEGIN
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
+                        left join cd.tcuenta_doc cdori on cdori.id_cuenta_doc = cdoc.id_cuenta_doc_fk
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
                           
                             
 						where  cdoc.id_proceso_wf = '||v_parametros.id_proceso_wf;
+                        
+                        raise notice '%', v_consulta;
 			
             return v_consulta;
 						
 		end;    
-	
+	/*********************************    
+ 	#TRANSACCION:  'CD_REPRENDET_SEL'
+ 	#DESCRIPCION:	recupera las facturas de la rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		17-05-2016 18:01:48
+	***********************************/
+
+	elsif(p_transaccion='CD_REPRENDET_SEL')then
+     				
+    	begin
+    		--Sentencia de la consulta
+			v_consulta:='select
+                            dcv.id_doc_compra_venta,
+                            dcv.revisado,
+                            dcv.movil,
+                            dcv.tipo,
+                            COALESCE(dcv.importe_excento,0)::numeric as importe_excento,
+                            dcv.id_plantilla,
+                            dcv.fecha,
+                            dcv.nro_documento,
+                            dcv.nit,
+                            COALESCE(dcv.importe_ice,0)::numeric as importe_ice,
+                            dcv.nro_autorizacion,
+                            COALESCE(dcv.importe_iva,0)::numeric as importe_iva,
+                            COALESCE(dcv.importe_descuento,0)::numeric as importe_descuento,
+                            COALESCE(dcv.importe_doc,0)::numeric as importe_doc,
+                            dcv.sw_contabilizar,
+                            COALESCE(dcv.tabla_origen,''ninguno'') as tabla_origen,
+                            dcv.estado,
+                            dcv.id_depto_conta,
+                            dcv.id_origen,
+                            dcv.obs,
+                            dcv.estado_reg,
+                            dcv.codigo_control,
+                            COALESCE(dcv.importe_it,0)::numeric as importe_it,
+                            dcv.razon_social,
+                            dcv.id_usuario_ai,
+                            dcv.id_usuario_reg,
+                            dcv.fecha_reg,
+                            dcv.usuario_ai,
+                            dcv.id_usuario_mod,
+                            dcv.fecha_mod,
+                            usu1.cuenta as usr_reg,
+                            usu2.cuenta as usr_mod,
+                            dep.nombre as desc_depto,
+                            pla.desc_plantilla,
+                            COALESCE(dcv.importe_descuento_ley,0)::numeric as importe_descuento_ley,
+                            COALESCE(dcv.importe_pago_liquido,0)::numeric as importe_pago_liquido,
+                            dcv.nro_dui,
+                            dcv.id_moneda,
+                            mon.codigo as desc_moneda,
+                            dcv.id_int_comprobante,
+                            COALESCE(ic.nro_cbte,dcv.id_int_comprobante::varchar)::varchar  as desc_comprobante,
+                            COALESCE(dcv.importe_pendiente,0)::numeric as importe_pendiente,
+                            COALESCE(dcv.importe_anticipo,0)::numeric as importe_anticipo,
+                            COALESCE(dcv.importe_retgar,0)::numeric as importe_retgar,
+                            COALESCE(dcv.importe_neto,0)::numeric as importe_neto,
+                            aux.id_auxiliar,
+                            aux.codigo_auxiliar,
+                            aux.nombre_auxiliar,
+                            dcv.id_tipo_doc_compra_venta,
+                            (tdcv.codigo||'' - ''||tdcv.nombre)::Varchar as desc_tipo_doc_compra_venta,
+                            rd.id_rendicion_det,
+                            rd.id_cuenta_doc,
+                            rd.id_cuenta_doc_rendicion,
+                            (select pxp.list_br(''-''||cig.desc_ingas||'' (''||d.descripcion||'')'') 
+                            from conta.tdoc_concepto d
+                            inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = d.id_concepto_ingas
+                            where d.id_doc_compra_venta = dcv.id_doc_compra_venta ) as detalle
+                        
+						from conta.tdoc_compra_venta dcv
+                        inner join cd.trendicion_det rd on rd.id_doc_compra_venta = dcv.id_doc_compra_venta
+                        inner join cd.tcuenta_doc cdd on  cdd.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+                          inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
+                          inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
+                          inner join param.tmoneda mon on mon.id_moneda = dcv.id_moneda
+                          inner join conta.ttipo_doc_compra_venta tdcv on tdcv.id_tipo_doc_compra_venta = dcv.id_tipo_doc_compra_venta
+                          left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
+                          left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
+                          left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
+                          left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
+				        where  cdd.id_proceso_wf = '||v_parametros.id_proceso_wf::varchar||' 
+                        order by  dcv.fecha asc';
+                        
+                     
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+    
+    /*********************************    
+ 	#TRANSACCION:  'CD_REPDEPREN_SEL'
+ 	#DESCRIPCION:	listado de depositos para el reporte de rendicion
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elsif(p_transaccion='CD_REPDEPREN_SEL')then
+     				
+    	begin
+        
+    	  --Sentencia de la consulta
+		  v_consulta := 'select cb.id_cuenta_bancaria,
+                             cb.denominacion,
+                             cb.nro_cuenta,
+                             t.fecha,
+                             t.tipo,
+                             t.importe_deposito,
+                             t.origen,
+                             f.nombre_finalidad,
+                             t.id_libro_bancos,
+                             t.observaciones
+                      from tes.tts_libro_bancos t
+                           inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria = t.id_cuenta_bancaria
+                           inner join tes.tfinalidad f on f.id_finalidad = t.id_finalidad
+                           inner join cd.tcuenta_doc cdd on cdd.id_cuenta_doc = t.columna_pk_valor and t.tabla = ''cd.tcuenta_doc''
+                      where  cdd.id_proceso_wf = '||v_parametros.id_proceso_wf;
+                        
+                       
+			
+            return v_consulta;
+						
+		end;    
     
     else
 		raise exception 'Transaccion inexistente';

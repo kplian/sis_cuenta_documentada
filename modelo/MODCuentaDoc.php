@@ -406,6 +406,9 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('cargo_funcionario','varchar');
 		$this->captura('nombre_unidad','VARCHAR');
 		$this->captura('importe_literal','VARCHAR');
+		$this->captura('motivo_ori','VARCHAR');
+		
+		
 		
 		
 		
@@ -418,6 +421,112 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+
+   function recuperarRendicionFacturas(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPRENDET_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_doc_compra_venta','int8');
+		$this->captura('revisado','varchar');
+		$this->captura('movil','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('importe_excento','numeric');
+		$this->captura('id_plantilla','int4');
+		$this->captura('fecha','date');
+		$this->captura('nro_documento','varchar');
+		$this->captura('nit','varchar');
+		$this->captura('importe_ice','numeric');
+		$this->captura('nro_autorizacion','varchar');
+		$this->captura('importe_iva','numeric');
+		$this->captura('importe_descuento','numeric');
+		$this->captura('importe_doc','numeric');
+		$this->captura('sw_contabilizar','varchar');
+		$this->captura('tabla_origen','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('id_depto_conta','int4');
+		$this->captura('id_origen','int4');
+		$this->captura('obs','varchar');
+		$this->captura('estado_reg','varchar');
+		$this->captura('codigo_control','varchar');
+		$this->captura('importe_it','numeric');
+		$this->captura('razon_social','varchar');
+		$this->captura('id_usuario_ai','int4');
+		$this->captura('id_usuario_reg','int4');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('usuario_ai','varchar');
+		$this->captura('id_usuario_mod','int4');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		
+		$this->captura('desc_depto','varchar');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('importe_descuento_ley','numeric');
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('nro_dui','varchar');
+		$this->captura('id_moneda','int4');
+		$this->captura('desc_moneda','varchar');
+		$this->captura('id_int_comprobante','int4');
+		$this->captura('desc_comprobante','varchar');
+		$this->captura('importe_pendiente','numeric');
+		$this->captura('importe_anticipo','numeric');
+		$this->captura('importe_retgar','numeric');
+		$this->captura('importe_neto','numeric');
+		$this->captura('id_auxiliar','integer');
+		$this->captura('codigo_auxiliar','varchar');
+		$this->captura('nombre_auxiliar','varchar');
+		$this->captura('id_tipo_doc_compra_venta','integer');
+		$this->captura('desc_tipo_doc_compra_venta','varchar');
+		$this->captura('id_rendicion_det','integer');
+		$this->captura('id_cuenta_doc','integer');
+		$this->captura('id_cuenta_doc_rendicion','integer');
+		$this->captura('detalle','text');
+		
+		
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+   function recuperarRendicionDepositos(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPDEPREN_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setCount(false);	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_cuenta_bancaria','int4');
+		$this->captura('denominacion','varchar');
+		$this->captura('nro_cuenta','varchar');
+		$this->captura('fecha','date');
+		$this->captura('tipo','varchar');
+		$this->captura('importe_deposito','numeric');
+		$this->captura('origen','varchar');
+		$this->captura('nombre_finalidad','varchar');
+		$this->captura('id_libro_bancos','int4');
+		$this->captura('observaciones','text');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+			
 	
 	
 	

@@ -10,17 +10,12 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
-
     nombreVista: 'CuentaDoc',
     tipo_interfaz: 'fondo_avance',
-
 	constructor:function(config){
-		this.maestro=config.maestro;
-    	
+		this.maestro=config.maestro;    	
     	//llama al constructor de la clase padre
-    	Phx.vista.CuentaDoc.superclass.constructor.call(this,config);
-    	
-    	
+    	Phx.vista.CuentaDoc.superclass.constructor.call(this,config);    	
     	this.addButton('ant_estado',{ argument: {estado: 'anterior'},text:'Rechazar',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
         this.addButton('sig_estado',{ text:'Aprobar', iconCls: 'badelante', disabled: true, handler: this.sigEstado, tooltip: '<b>Pasar al Siguiente Estado</b>'});
         
@@ -44,21 +39,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                     handler : this.onOpenObs,
                     tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
          });
-         
-         this.addButton('onBtnRepSol', {
-				grupo : [0,1,2,3],
-				text : 'Reporte Sol.',
-				iconCls : 'bprint',
-				disabled : false,
-				handler : this.onBtnRepSol,
-				tooltip : '<b>Reporte de solicitud de fondos</b>'
-		 });
-        
-    
-		
 	},
-	
-	
 			
 	Atributos:[
 		{
@@ -484,9 +465,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		direction: 'ASC'
 	},
 	bdel:true,
-	bsave:false,
-	
-	 //deshabilitas botones para informacion historica
+	bsave:false,	
+	//deshabilitas botones para informacion historica
     desBotoneshistorico: function(){
       
       this.getBoton('ant_estado').disable();
@@ -522,8 +502,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 config:[{
                           event:'beforesave',
                           delegate: this.onAntEstado,
-                        }
-                        ],
+                        }],
                scope:this
            });
    },
@@ -678,11 +657,11 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
     								
     								        this.Cmp.id_cuenta_bancaria.enable();
     								        this.Cmp.id_depto_conta.enable();
-								    		this.Cmp.id_cuenta_bancaria.reset();
-								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', permiso: 'todos', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
-								    		
-								    		
+    								        this.Cmp.id_cuenta_bancaria.reset();
+								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', 'permiso':'fondos_avance', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
 								    		this.Cmp.id_cuenta_bancaria.modificado = true;
+								    		
+								    		
 								    		
 								    		this.Cmp.id_depto_conta.reset();
 								    		this.Cmp.id_depto_conta.store.baseParams = {tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'CONTA',id_depto_origen: obj.Cmp.id_depto_lb.getValue()};	
@@ -690,16 +669,6 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 								    		this.Cmp.id_cuenta_bancaria_mov.reset();
 								    		
 								    		
-								    		//si es de una regional nacional
-								        	if(rec.data.prioridad == 2){
-								        		this.Cmp.id_cuenta_bancaria_mov.enable();
-								        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = false;
-								        	}
-								        	else{
-								        		this.Cmp.id_cuenta_bancaria_mov.disable();
-								        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
-								        	}
-						        	
 								    		
 								    }, obj);	
 								    	
@@ -710,6 +679,20 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 								    this.Cmp.id_cuenta_bancaria_mov.reset();
 						            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
 						            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+						            
+						            //si es de una regional nacional
+						        	if(rec.data.centro == 'no'){
+						        		this.Cmp.id_cuenta_bancaria_mov.enable();
+						        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = false;
+						        	}
+						        	else{
+						        		this.Cmp.id_cuenta_bancaria_mov.disable();
+						        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
+						        	}
+						            
+						            
+						            
+						            
 						        },obj);   	
 								    			
 						};
@@ -799,12 +782,13 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				scope: this
 			});			
 	},
+	
 	diagramGanttDinamico: function (){			
 			var data=this.sm.getSelected().data.id_proceso_wf;
 			window.open('../../../sis_workflow/reportes/gantt/gantt_dinamico.html?id_proceso_wf='+data)		
 	}, 
 	
-	 addBotonesGantt: function() {
+	addBotonesGantt: function() {
         this.menuAdqGantt = new Ext.Toolbar.SplitButton({
             id: 'b-diagrama_gantt-' + this.idContenedor,
             text: 'Gantt',
@@ -848,8 +832,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
     },
     
     onOpenObs:function() {
-            var rec=this.sm.getSelected();
-            
+            var rec=this.sm.getSelected();            
             var data = {
             	id_proceso_wf: rec.data.id_proceso_wf,
             	id_estado_wf: rec.data.id_estado_wf,
@@ -864,11 +847,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                     },
                     data,
                     this.idContenedor,
-                    'Obs'
-        )
-    },
-		
-		
+                    'Obs');
+    },		
 	onBtnRepSol : function() {
 			var rec = this.sm.getSelected();
 			var data = rec.data;
@@ -885,11 +865,11 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 					scope : this
 				});
 			}
-
-	}
-	
-    
-})
-</script>
-		
-		
+	},
+	onButtonNew:function(){
+        Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
+        this.Cmp.fecha.setValue(new Date());
+        this.Cmp.fecha.fireEvent('change');
+    }
+});
+</script>		

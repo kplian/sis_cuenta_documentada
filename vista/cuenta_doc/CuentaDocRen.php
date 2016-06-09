@@ -61,6 +61,17 @@ Phx.vista.CuentaDocRen = {
 	   
 	   Phx.vista.CuentaDocRen.superclass.constructor.call(this,config);
        this.init();
+       
+       this.addButton('onBtnRen', {
+				grupo : [0,1,2,3],
+				text : 'Reporte Rendición.',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onBtnRendicion,
+				tooltip : '<b>Reporte de rendición de gastos</b>'
+		});
+		
+		
        this.store.baseParams = { estado : 'borrador',id_cuenta_doc: this.id_cuenta_doc, tipo_interfaz: this.nombreVista}; 
        this.load({params:{start:0, limit:this.tam_pag}});
        this.finCons = true;
@@ -115,6 +126,25 @@ Phx.vista.CuentaDocRen = {
     	Phx.vista.CuentaDocRen.superclass.loadValoresIniciales.call(this);  
     	this.Cmp.id_cuenta_doc_fk.setValue(this.id_cuenta_doc);      
    },
+   
+   onBtnRendicion : function() {
+			var rec = this.sm.getSelected();
+			var data = rec.data;
+			if (data) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionFondos',
+					params : {
+						'id_proceso_wf' : data.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+
+	},
    
    tabsouth:[
 	     {
