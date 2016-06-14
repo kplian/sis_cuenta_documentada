@@ -57,6 +57,11 @@ Phx.vista.CuentaDocRen = {
 	   this.Atributos[this.getIndAtributo('id_funcionario_cuenta_bancaria')].form = false; 
 	   this.Atributos[this.getIndAtributo('nombre_cheque')].form = false; 
 	   this.Atributos[this.getIndAtributo('importe')].config.qtip = 'Monto a rendir entre facturas y depositos';
+	   this.Atributos[this.getIndAtributo('nro_correspondencia')].form = true;
+	   this.Atributos[this.getIndAtributo('nro_correspondencia')].grid = true;
+	   this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
+	   this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
+	   
 	   
 	   
 	   Phx.vista.CuentaDocRen.superclass.constructor.call(this,config);
@@ -101,7 +106,8 @@ Phx.vista.CuentaDocRen = {
   preparaMenu:function(n){
       var data = this.getSelectedData();
       var tb =this.tbar;
-      Phx.vista.CuentaDocRen.superclass.preparaMenu.call(this,n);  
+      Phx.vista.CuentaDocRen.superclass.preparaMenu.call(this,n); 
+      this.getBoton('chkpresupuesto').enable();  
       if(data.estado == 'borrador' ){
           this.getBoton('ant_estado').disable();
           this.getBoton('sig_estado').enable();
@@ -127,24 +133,7 @@ Phx.vista.CuentaDocRen = {
     	this.Cmp.id_cuenta_doc_fk.setValue(this.id_cuenta_doc);      
    },
    
-   onBtnRendicion : function() {
-			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
-				Phx.CP.loadingShow();
-				Ext.Ajax.request({
-					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionFondos',
-					params : {
-						'id_proceso_wf' : data.id_proceso_wf
-					},
-					success : this.successExport,
-					failure : this.conexionFailure,
-					timeout : this.timeout,
-					scope : this
-				});
-			}
-
-	},
+   
    
    tabsouth:[
 	     {

@@ -27,6 +27,8 @@ DECLARE
 
 	v_nro_requerimiento    			integer;
 	v_parametros           			record;
+    v_registros						record;
+    v_sw_max_doc_rend     			varchar;
 	v_id_requerimiento     			integer;
 	v_resp		            		varchar;
 	v_nombre_funcion        		text;
@@ -76,6 +78,7 @@ DECLARE
     v_contador_libro_bancos			integer;
     v_id_cuenta_bancaria_mov		integer;
     v_limite_fondos					integer;
+    v_temp							interval;
 			    
 BEGIN
 
@@ -250,11 +253,13 @@ BEGIN
             v_limite_fondos = pxp.f_get_variable_global('cd_limite_fondos')::integer;
              
             -- validar que no sobre pase el limite de solicitudes abiertas
-            select  count(cd.id_cuenta_doc) into v_contador
-            from cd.tcuenta_doc cd 
-            where cd.estado_reg = 'activo'  
-                   and cd.estado != 'finalizado'
-                   and cd.id_funcionario =  v_parametros.id_funcionario;
+            select  count(c.id_cuenta_doc) into v_contador
+            from cd.tcuenta_doc c 
+            inner join cd.ttipo_cuenta_doc tc on tc.id_tipo_cuenta_doc = c.id_tipo_cuenta_doc  
+            where c.estado_reg = 'activo' 
+                   and tc.sw_solicitud = 'si' 
+                   and c.estado != 'finalizado'
+                   and c.id_funcionario =  v_parametros.id_funcionario;
                    
             IF v_contador = v_limite_fondos THEN        
                   INSERT INTO  cd.tbloqueo_cd(
@@ -877,7 +882,8 @@ BEGIN
                     importe,
                     id_gestion,
                     id_cuenta_doc_fk,
-                    motivo
+                    motivo,
+                    nro_correspondencia
                     
                 ) values(
                     v_id_tipo_cuenta_doc,
@@ -901,7 +907,8 @@ BEGIN
                     v_parametros.importe,  
                     v_id_gestion,
                     v_parametros.id_cuenta_doc_fk, -- referencia a cuenta de solicitud
-    				v_parametros.motivo
+    				v_parametros.motivo,
+                    v_parametros.nro_correspondencia
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc; 
         
             
@@ -989,7 +996,8 @@ BEGIN
                	
                 motivo = v_parametros.motivo,
                 fecha = v_parametros.fecha,
-                importe = v_parametros.importe
+                importe = v_parametros.importe,
+                nro_correspondencia = v_parametros.nro_correspondencia
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
                
 			--Definicion de la respuesta
@@ -1115,8 +1123,82 @@ BEGIN
             return v_resp;
 
 		end;
+        
+        
+     /*********************************    
+ 	#TRANSACCION:  'CD_AMPCDREN_IME'
+ 	#DESCRIPCION:	Ampliar dias para rendir cuenta documentada 
+ 	#AUTOR:		rac	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+	elsif(p_transaccion='CD_AMPCDREN_IME')then
+
+		begin
+            
+             --raise exception '%',v_parametros.dias_ampliado::varchar;
+			v_temp = v_parametros.dias_ampliado::varchar||' days';
+        
+			--Sentencia de la modificacion
+			update cd.tcuenta_doc set            
+                fecha_entrega = (fecha_entrega::Date +  v_temp)::date,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+               
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Dias de rendicion ampliados)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+               
+            --Devuelve la respuesta
+            return v_resp;
+            
+		end;  
     
-    else
+     /*********************************    
+ 	#TRANSACCION:  'CD_CAMBLOQ_IME'
+ 	#DESCRIPCION:	cambia el estado de bloqueo de facturas grandes
+ 	#AUTOR:		admin	
+ 	#FECHA:		17-05-2016 18:01:48
+	***********************************/
+
+	elsif(p_transaccion='CD_CAMBLOQ_IME')then
+
+		begin
+        
+           select
+               c.id_cuenta_doc,
+               c.sw_max_doc_rend
+            into
+               v_registros
+            from cd.tcuenta_doc c
+            where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+             
+            IF v_registros.sw_max_doc_rend = 'si'  THEN
+               v_sw_max_doc_rend = 'no';
+            ELSE
+                v_sw_max_doc_rend = 'si';
+            END IF;
+            
+            update cd.tcuenta_doc set
+             sw_max_doc_rend = v_sw_max_doc_rend,
+             id_usuario_mod = p_id_usuario,
+             fecha_mod = now()
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Camia el bloqueo de facturas grandes para la rendicion'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_cuenta_doc::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;     
+    
+   
+
+
+     else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 

@@ -210,6 +210,28 @@ WITH (oids = false);
 COMMENT ON COLUMN cd.tbloqueo_cd.estado
 IS 'bloqueado o autorizado';
 
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN nro_correspondencia VARCHAR(300);
+  
+  --------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN fecha_entrega DATE DEFAULT now() NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc.fecha_entrega
+IS 'fecha a partir de la cual corren los dias para hacer la rendicion';
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN sw_max_doc_rend VARCHAR(10) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc.sw_max_doc_rend
+IS 'por defecto no permite que se sobre pase el maximo valor configurador en variable globarl para el registro de documentos en rendicion';
+
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 
 

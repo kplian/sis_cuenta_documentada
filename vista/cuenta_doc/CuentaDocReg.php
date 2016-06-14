@@ -50,13 +50,14 @@ header("content-type: text/javascript; charset=UTF-8");
 
 		constructor : function(config) {
 			
-			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {
+			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var saldo = value - record.data.importe_documentos - record.data.importe_depositos;
 					if (record.data.estado == 'contabilizado') {
-						return String.format("<font color = 'red'>Entregado: {0}</font><br>"+
-											 "<font color = 'green' >En Facturas:{1}</font><br>"+
-											 "<font color = 'green' >En Depositos:{2}</font><br>"+
-											 "<font color = 'blue' >Saldo:{3}</font>", value, record.data.importe_documentos, record.data.importe_depositos, saldo );
+						return String.format("<b><font color = 'red'>Entregado: {0}</font></b><br>"+
+											 "<b><font color = 'green' >En Facturas:{1}</font></b><br>"+
+											 "<b><font color = 'green' >En Depositos:{2}</font></b><br>"+
+											 "<b><font color = 'orange' >Retenciones de Ley:{3}</font></b><br>"+
+											 "<b><font color = 'blue' >Saldo:{4}</font></b>", value, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones, saldo );
 					} 
 					else {
 						return String.format('<font>Solicitado: {0}</font>', value);
@@ -97,6 +98,15 @@ header("content-type: text/javascript; charset=UTF-8");
 				tooltip : '<b>Rendición</b>'
 			});
 			
+			this.addButton('onBtnRepRenCon', {
+				grupo : [0,1,2,3],
+				text : 'Rendición Consolidada',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onBtnRepRenCon,
+				tooltip : '<b>Reporte de redición consolidada</b>'
+		    });
+			
 			
 
 			this.init();
@@ -107,6 +117,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 			});
 			this.iniciarEventos();
+			this.obtenerVariableGlobal();
 			this.finCons = true;
 		},
 
@@ -133,6 +144,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			var data = this.getSelectedData();
 			var tb = this.tbar;
 			Phx.vista.CuentaDocReg.superclass.preparaMenu.call(this, n);
+			this.getBoton('chkpresupuesto').enable();  
 
 			if (data.estado == 'borrador') {
 				this.getBoton('ant_estado').disable();
@@ -145,13 +157,21 @@ header("content-type: text/javascript; charset=UTF-8");
 			if (data.estado == 'contabiizado') {
 				this.getBoton('btnRendicion').disable();
 			} else {
-				this.getBoton('btnRendicion').enable();
+				if(data.dias_para_rendir >= 0){
+					this.getBoton('btnRendicion').enable();
+				}
+				else{
+					this.getBoton('btnRendicion').disable();
+				}
+				
 			}
 			
 			this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
             this.getBoton('diagrama_gantt').enable();
             this.getBoton('btnObs').enable();
-            this.getBoton('onBtnRepSol').enable(); 
+            this.getBoton('onBtnRepSol').enable();
+            this.getBoton('onBtnRepRenCon').enable();  
+            
 
 			return tb
 		},
@@ -166,6 +186,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 this.getBoton('diagrama_gantt').disable();
                 this.getBoton('btnObs').disable();
                 this.getBoton('onBtnRepSol').disable();
+                this.getBoton('onBtnRepRenCon').disable(); 
                  
 			}
 			return tb
@@ -295,8 +316,43 @@ header("content-type: text/javascript; charset=UTF-8");
 				width : '95%',
 				height : '95%',
 			}, rec.data, this.idContenedor, 'CuentaDocRen');
-		}
+		},
+		
+		obtenerVariableGlobal: function(){
+				//Verifica que la fecha y la moneda hayan sido elegidos
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+						url:'../../sis_seguridad/control/Subsistema/obtenerVariableGlobal',
+						params:{
+							codigo: 'cd_tipo_pago'  
+						},
+						success: function(resp){
+							Phx.CP.loadingHide();
+							var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+							
+							if (reg.ROOT.error) {
+								Ext.Msg.alert('Error','Error a recuperar la variable global')
+							} else {
+								if(reg.ROOT.datos.valor == 'todos'){
+									this.Cmp.tipo_pago.store = new Ext.data.ArrayStore({
+				                            fields :['variable','valor'],
+				                            data :  [['cheque','cheque'],['transferencia','transferencia']]});
+								}
+								if(reg.ROOT.datos.valor == 'cheque'){
+									this.Cmp.tipo_pago.store = new Ext.data.ArrayStore({fields :['variable','valor'],data :  [['cheque','cheque']]});
+								}
+								if(reg.ROOT.datos.valor == 'transferencia'){
+									this.Cmp.tipo_pago.store = new Ext.data.ArrayStore({ fields :['variable','valor'],data :  [['transferencia','transferencia']]});
+								}
+							}
+						},
+						failure: this.conexionFailure,
+						timeout: this.timeout,
+						scope:this
+					});
+		
+		},
 		
 		
-	}; 
+}; 
 </script>

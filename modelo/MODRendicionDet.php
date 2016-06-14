@@ -248,6 +248,7 @@ class MODRendicionDet extends MODbase{
 			$this->arreglo['id_doc_compra_venta'] = $id_doc_compra_venta;
 			$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');
 			$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+			
 			$this->armarConsulta();			
 			$stmt = $link->prepare($this->consulta);	
 			
@@ -449,6 +450,7 @@ class MODRendicionDet extends MODbase{
 			$this->arreglo['id_doc_compra_venta'] = $id_doc_compra_venta;
 			$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');
 			$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+			
 			$this->armarConsulta();			
 			$stmt = $link->prepare($this->consulta);	
 			

@@ -233,6 +233,12 @@ AS
   FROM tes.tts_libro_bancos lb
        JOIN cd.tcuenta_doc cdr ON cdr.id_cuenta_doc = lb.columna_pk_valor AND
          lb.tabla::text = 'cd.tcuenta_doc'::text AND lb.columna_pk::text =
-         'id_cuenta_doc'::text;         
+         'id_cuenta_doc'::text; 
+         
+
+CREATE TRIGGER trig_tcuenta_doc
+  AFTER UPDATE OF estado 
+  ON cd.tcuenta_doc FOR EACH ROW 
+  EXECUTE PROCEDURE cd.trig_tcuenta_doc();       
          
 /***********************************F-DEP-RAC-CD-0-17/05/2016*****************************************/

@@ -23,22 +23,29 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
         this.addButton('btnChequeoDocumentosWf',
             {
                 text: 'Documentos',
-                grupo:[0,1,2,3],
+                grupo:[0,1,2,3,4],
                 iconCls: 'bchecklist',
                 disabled: true,
                 handler: this.loadCheckDocumentosSolWf,
                 tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
-            }
-        );
+            });
         
         this.addButton('btnObs',{
                     text :'Obs Wf',
-                    grupo:[0,1,2,3],
+                    grupo:[0,1,2,3,4],
                     iconCls : 'bchecklist',
                     disabled: true,
                     handler : this.onOpenObs,
                     tooltip : '<b>Observaciones</b><br/><b>Observaciones del WF</b>'
          });
+         
+         this.addButton('chkpresupuesto',{text:'Chk Presupuesto', grupo:[0,1,2,3,4],
+				iconCls: 'blist',
+				disabled: true,
+				handler: this.checkPresupuesto,
+				tooltip: '<b>Revisar Presupuesto</b><p>Revisar estado de ejecución presupeustaria para el tramite</p>'
+			});
+		   
 	},
 			
 	Atributos:[
@@ -92,10 +99,89 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				maxLength:150
 			},
 				type:'TextField',
+				bottom_filter:true,
 				filters:{pfiltro:'cdoc.nro_tramite',type:'string'},
 				id_grupo:1,
 				grid:true,
 				form:false
+		},
+		
+		{
+			config:{
+				name: 'motivo',
+				qtip: 'Explique el objetivo del fondo solicitado',
+				fieldLabel: 'Objetivo',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 200,
+				maxLength:500
+			},
+			type:'TextArea',
+			filters:{pfiltro:'cdoc.motivo',type:'string'},
+			bottom_filter:true,
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config:{
+				name: 'sw_max_doc_rend',
+				fieldLabel: 'Bloq',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 50,
+				maxLength:150,
+                renderer: function (value, p, record){
+                	if(record.data.sw_solicitud == 'no' ){
+                		if(record.data.sw_max_doc_rend == 'no' ){
+	                	     return String.format('<div title="No permite regitro de facturas grandes"><b><font color="green">{0}</font></b></div>', value);
+	                	}
+	                	else{
+	                		 return String.format('<div title="Si permite el registro de facturas grandes"><b><font color="red">{0}</font></b></div>', value);
+	                	}
+                	}
+	               else{
+	               	   return '<b>--</b>';
+	               }
+                }
+			},
+			type:'Field',
+			id_grupo:1,
+			grid:false,
+			form:false
+		},
+		
+		{
+			config:{
+				name: 'dias_para_rendir',
+				fieldLabel: 'Lim Rend.',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:150,
+                renderer: function (value, p, record){
+                	if(record.data.estado != 'finalizado' && record.data.estado != 'rendido'){
+                		if(value < 0){
+	                		   return String.format('<div title="Días vencidos"><b><font color="red">{0}</font></b></div>', value);
+	                	}
+	                	else{
+	                		if(value < 5){
+	                		   return String.format('<div title="Días restante para rendir"><b><font color="orange">{0}</font></b></div>', value);
+	                	    }
+	                	    else{
+	                	    	return String.format('<div title="Días restante para rendir"><b><font color="green">{0}</font></b></div>', value);
+	                	    }
+	                	}
+                	}
+	               else{
+	               	   return '<b>--</b>';
+	               }
+                }
+			},
+			type:'TextField',
+			id_grupo:1,
+			grid:true,
+			form:false
 		},
 		{
 			config:{
@@ -158,6 +244,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
        	     },
    			type:'ComboRec',//ComboRec
+   			
    			id_grupo:0,
    			filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
    			bottom_filter:true,
@@ -280,22 +367,21 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
             grid: true,
             form: true
         },
-		
 		{
 			config:{
-				name: 'motivo',
-				qtip: 'Explique el objetivo del fondo solicitado',
-				fieldLabel: 'Objetivo',
-				allowBlank: false,
+				name: 'nro_correspondencia',
+				fieldLabel: 'Nro Correspondencia',
+				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-				maxLength:500
+				maxLength:150
 			},
-			type:'TextArea',
-			filters:{pfiltro:'cdoc.motivo',type:'string'},
-			id_grupo:1,
-			grid:true,
-			form:true
+				type:'TextField',
+				filters:{pfiltro:'cdoc.nro_correspondencia',type:'string'},
+				id_grupo:1,
+				bottom_filter:true,
+				grid:false,
+				form:false
 		},
 		
 		
@@ -453,11 +539,11 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
-		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'importe','obs',
+		{name:'usr_reg', type: 'string'},'sw_max_doc_rend',
+		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia',
 		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos',
-		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc',
-		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos'
+		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc','importe_retenciones',
+		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos','dias_para_rendir'
 	
 	],
 	sortInfo:{
@@ -481,7 +567,9 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
             this.getBoton('ant_estado').disable();
             this.getBoton('btnChequeoDocumentosWf').disable();
             this.getBoton('diagrama_gantt').disable();
-             this.getBoton('btnObs').disable();
+            this.getBoton('btnObs').disable();
+            this.getBoton('chkpresupuesto').disable();
+            
         }
         return tb
     },
@@ -866,6 +954,70 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				});
 			}
 	},
+	
+	onBtnRepRenCon : function() {
+			var rec = this.sm.getSelected();
+			var data = rec.data;
+			if (data) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionCon',
+					params : {
+						'id_proceso_wf' : data.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+	},
+	
+	onBtnRendicion : function() {
+			var rec = this.sm.getSelected();
+			var data = rec.data;
+			if (data) {
+				Phx.CP.loadingShow();
+				Ext.Ajax.request({
+					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionFondos',
+					params : {
+						'id_proceso_wf' : data.id_proceso_wf
+					},
+					success : this.successExport,
+					failure : this.conexionFailure,
+					timeout : this.timeout,
+					scope : this
+				});
+			}
+
+	},
+	
+	checkPresupuesto:function(){                   
+			  var rec=this.sm.getSelected();
+			  var configExtra = [];
+			  this.objChkPres = Phx.CP.loadWindows('../../../sis_presupuestos/vista/presup_partida/ChkPresupuesto.php',
+										'Estado del Presupuesto',
+										{
+											modal:true,
+											width:700,
+											height:450
+										}, {
+											data:{
+											   nro_tramite: rec.data.nro_tramite								  
+											}}, this.idContenedor,'ChkPresupuesto',
+										{
+											config:[{
+													  event:'onclose',
+													  delegate: this.onCloseChk												  
+													}],
+											
+											scope:this
+										 });
+			   
+	 },
+	 
+	
+	
 	onButtonNew:function(){
         Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
         this.Cmp.fecha.setValue(new Date());

@@ -35,7 +35,9 @@ DECLARE
     v_rec					record;
     v_tmp_resp				boolean;
     v_importe_documentos	numeric;
-    v_importe_depositos	numeric;
+    v_importe_depositos		numeric;
+    v_tope					numeric;
+    v_sw_max_doc_rend       varchar;
 			    
 BEGIN
 
@@ -53,10 +55,14 @@ BEGIN
 					
         begin
         
+        
+             v_tope  = pxp.f_get_variable_global('cd_monto_factura_maximo')::numeric;
+        
               select  
                 c.importe,
                 c.estado,
                 c.id_cuenta_doc,
+                cdr.sw_max_doc_rend,
                 cdr.estado as estado_cdr,
                 cdr.importe as importe_rendicion
              into
@@ -73,8 +79,13 @@ BEGIN
              IF v_registros.estado_cdr not in ('borrador','vbrendicion') THEN
               raise exception 'Solo puede añadir facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
              END IF;
-           
-           
+             
+             --TODO considerar moenda del documentos, el tope esta en moenda base ...
+             
+             IF v_registros.sw_max_doc_rend = 'no' and  v_parametros.importe_doc > v_tope THEN
+                    raise exception 'no puede registrar documentos mayortes a %, si es necesario pida permiso en tesoreria para proceder',v_tope;
+             END IF;
+             
             --raise exception 'llega..';
         	--Sentencia de la insercion
         	insert into cd.trendicion_det(
@@ -319,7 +330,9 @@ BEGIN
             --Devuelve la respuesta
             return v_resp;
 
-		end;         
+		end; 
+   
+                
 	
     
     else

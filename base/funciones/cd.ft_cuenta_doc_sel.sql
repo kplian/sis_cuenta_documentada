@@ -37,6 +37,8 @@ DECLARE
     v_importe_fac			varchar;
     v_estado				varchar;
     va_id_depto				integer[];
+    v_cd_dias_entrega		varchar;
+    v_gaf					varchar[];
 			    
 BEGIN
 
@@ -54,6 +56,8 @@ BEGIN
      				
     	begin
         
+           v_cd_dias_entrega = pxp.f_get_variable_global('cd_dias_entrega');
+        
         
            
            IF  pxp.f_existe_parametro(p_tabla,'estado') THEN
@@ -62,24 +66,40 @@ BEGIN
               v_estado = 'ninguno';
            END IF;
            
-           
-           IF  v_estado in  ('entregados')  THEN
-              v_importe_fac = 'COALESCE((select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
-                              inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric as importe_documentos,  ' ;
+         
+              
+          v_importe_fac = '
+                              CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                             	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
+                              ELSE
+                                 0::numeric 
+                              END  as  importe_documentos,
                               
-              v_importe_fac = v_importe_fac ||'
-                              COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
-                              inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
-                              where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric as importe_documentos  ' ;                
-           
-           
-           
-           
-           ELSE
-              v_importe_fac =' 0::numeric as importe_documentos,
-                               0::numeric as importe_depositos ';
-           END IF;
+                              ' ;
+                              
+            v_importe_fac = v_importe_fac ||'
+                              CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                             	 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
+                              ELSE
+                                 0::numeric 
+                              END  as  importe_retenciones,
+                              
+                              ' ;                  
+                              
+            v_importe_fac = v_importe_fac ||'
+                              CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                             	 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                             	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                              	where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric  
+                              ELSE
+                                 0::numeric 
+                              END  as  importe_depositos
+                              
+                              ' ;                
            
            
            v_filtro='';
@@ -151,11 +171,12 @@ BEGIN
            END IF;
            
           
-          
+           
             
     	  --Sentencia de la consulta
 		  v_consulta:='select
-                            '||v_strg_cd||',  
+                            '||v_strg_cd||',
+                            (cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||')::integer  as dias_para_rendir,
                             cdoc.id_tipo_cuenta_doc,
                             cdoc.id_proceso_wf,
                             cdoc.id_caja,
@@ -191,7 +212,8 @@ BEGIN
                             cdoc.id_depto_conta,
                             '||v_importe_fac||' ,
                             tcd.nombre as desc_tipo_cuenta_doc,
-                            tcd.sw_solicitud
+                            tcd.sw_solicitud,
+                            cdoc.sw_max_doc_rend
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -335,7 +357,7 @@ BEGIN
            
            IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
                 IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||')  and ';
+                      v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||')and ';
                 END IF;
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
            END IF;
@@ -380,7 +402,8 @@ BEGIN
                             cdoc.id_depto_conta,
                             0::numeric as importe_documentos,
                             tcd.nombre as desc_tipo_cuenta_doc,
-                            tcd.sw_solicitud
+                            tcd.sw_solicitud,
+                            cdoc.nro_correspondencia
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -418,12 +441,13 @@ BEGIN
              END IF;
               
              
-             IF  lower(v_parametros.tipo_interfaz) in ('CuentaDocRen') THEN
-                  IF p_administrador !=1 THEN
-                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||')  and ';
-                  END IF;
-                  v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
-             END IF;
+            IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
+                IF p_administrador !=1 THEN
+                      v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||')and ';
+                END IF;
+                v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
+            END IF;
+           
         
         
 			--Sentencia de la consulta de conteo de registros
@@ -456,6 +480,10 @@ BEGIN
 	elsif(p_transaccion='CD_REPCDOC_SEL')then
      				
     	begin
+   
+           --recupera el gerente financiero ...
+          v_gaf = orga.f_obtener_gerente_x_codigo_uo('gerente_financiero', now()::Date);
+          
         
     	  --Sentencia de la consulta
 		  v_consulta:='select
@@ -499,11 +527,13 @@ BEGIN
                             from param.tlugar l 
                             inner join orga.tcargo c on  c.id_lugar =  l.id_lugar
                             where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')))::varchar as lugar, 
-                            orga.f_get_cargo_x_funcionario_str(cdoc.id_funcionario  , cdoc.fecha , ''oficial'') as cargo_funcionario,
+                            upper(orga.f_get_cargo_x_funcionario_str(cdoc.id_funcionario  , cdoc.fecha , ''oficial''))::Varchar as cargo_funcionario,
                             uo.nombre_unidad,
                             pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
-                            cdori.motivo::varchar as motivo_ori
-						from cd.tcuenta_doc cdoc
+                            cdori.motivo::varchar as motivo_ori,
+                            '''||v_gaf[3]||'''::varchar as  gerente_financiero,
+                            upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero
+                       	from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -647,7 +677,99 @@ BEGIN
 			
             return v_consulta;
 						
-		end;    
+		end; 
+        
+      
+    
+     /*********************************    
+ 	#TRANSACCION:  'CD_REPDEPRENCO_SEL'
+ 	#DESCRIPCION:	listado de depositos para el reporte de rendicion consolidado
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elsif(p_transaccion='CD_REPDEPRENCO_SEL')then
+     				
+    	begin
+        
+    	  --Sentencia de la consulta
+		  v_consulta := 'select cb.id_cuenta_bancaria,
+                             cb.denominacion,
+                             cb.nro_cuenta,
+                             t.fecha,
+                             t.tipo,
+                             t.importe_deposito,
+                             t.origen,
+                             f.nombre_finalidad,
+                             t.id_libro_bancos,
+                             t.observaciones
+                      from tes.tts_libro_bancos t
+                           inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria = t.id_cuenta_bancaria
+                           inner join tes.tfinalidad f on f.id_finalidad = t.id_finalidad
+                           inner join cd.tcuenta_doc cdd on cdd.id_cuenta_doc = t.columna_pk_valor and t.tabla = ''cd.tcuenta_doc''
+                           inner join cd.tcuenta_doc cddo on cddo.id_cuenta_doc = cdd.id_cuenta_doc_fk
+                      where  cddo.id_proceso_wf = '||v_parametros.id_proceso_wf;
+                        
+                       
+			
+            return v_consulta;
+						
+		end;   
+           
+    /*********************************    
+ 	#TRANSACCION:  'CD_REPCONFA_SEL'
+ 	#DESCRIPCION:	listado para reporte consolidado de fondo en avance
+ 	#AUTOR:		admin	
+ 	#FECHA:		05-05-2016 16:41:21
+	***********************************/
+
+	elsif(p_transaccion='CD_REPCONFA_SEL')then
+     				
+    	begin
+        
+    	  --Sentencia de la consulta
+		  v_consulta := 'select 
+                          dc.id_doc_concepto,
+                          cc.codigo_cc,
+                          cc.desc_tipo_presupuesto,
+                          cp.descripcion as desc_categoria_programatica,
+                          cp.codigo_categoria,
+                          cig.desc_ingas,
+                          dc.descripcion,
+                          dc.precio_total_final,
+                          dc.precio_total,
+                          dc.precio_unitario,
+                          dc.cantidad_sol,
+                          dcv.fecha,
+                          dcv.razon_social,
+                          dcv.nro_documento,
+                          plt.desc_plantilla,
+                          (SELECT 
+                               par.codigo || '' - ''||par.nombre_partida 
+                           FROM conta.f_get_config_relacion_contable(''CUECOMP'', 
+                                                                      cc.id_gestion, 
+                                                                      cig.id_concepto_ingas, 
+                                                                      cc.id_centro_costo,  
+                                                                      ''No se encontro relación contable para el conceto de gasto: ''||cig.desc_ingas||''. <br> Mensaje: '') rel
+                                                                      inner join pre.tpartida par on par.id_partida = rel.ps_id_partida )::varchar as partida
+                                    
+                               
+                          from cd.trendicion_det rd
+                          inner join cd.tcuenta_doc c on c.id_cuenta_doc = rd.id_cuenta_doc
+                          inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                          inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta
+                          inner join pre.vpresupuesto_cc cc on cc.id_centro_costo = dc.id_centro_costo
+                          inner join pre.vcategoria_programatica cp on cp.id_categoria_programatica = cc.id_categoria_prog
+                          inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = dc.id_concepto_ingas
+                          inner join param.tplantilla plt on plt.id_plantilla = dcv.id_plantilla
+                      where  c.id_proceso_wf = '||v_parametros.id_proceso_wf;
+                        
+                       
+			
+            return v_consulta;
+						
+		end; 
+    
     
     else
 		raise exception 'Transaccion inexistente';

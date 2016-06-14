@@ -8,6 +8,10 @@
 */
 require_once(dirname(__FILE__).'/../reportes/RSolicitudCD.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionCD.php');
+require_once(dirname(__FILE__).'/../reportes/RRendicionConXls.php');
+require_once(dirname(__FILE__).'/../reportes/RMemoAsignacion.php');
+
+
 class ACTCuentaDoc extends ACTbase{    
 			
 	function listarCuentaDoc(){
@@ -72,6 +76,48 @@ class ACTCuentaDoc extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	
+	function listarCuentaDocConsulta(){
+		$this->objParam->defecto('ordenacion','id_cuenta_doc');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if(strtolower($this->objParam->getParametro('estado'))=='borrador'){
+             $this->objParam->addFiltro("(cdoc.estado in (''borrador'')) and tcd.sw_solicitud = ''si''");
+        }
+		if(strtolower($this->objParam->getParametro('estado'))=='validacion'){
+             $this->objParam->addFiltro("(cdoc.estado not in (''borrador'',''contabilizado'',''finalizado'',''anulado'') and tcd.sw_solicitud = ''si'')");
+        }
+		if(strtolower($this->objParam->getParametro('estado'))=='entregados'){
+             $this->objParam->addFiltro("(cdoc.estado in (''contabilizado'') and tcd.sw_solicitud = ''si'')");
+        }
+
+        if(strtolower($this->objParam->getParametro('estado'))=='rendiciones'){
+             $this->objParam->addFiltro("(cdoc.estado not in (''rendido'') and tcd.sw_solicitud = ''no'')");
+        }
+
+
+		if(strtolower($this->objParam->getParametro('estado'))=='finalizados'){
+             $this->objParam->addFiltro("(cdoc.estado in (''finalizado'',''anulado'',''rendido''))");
+        }
+		
+		if($this->objParam->getParametro('id_gestion')!=''){
+            $this->objParam->addFiltro("cdoc.id_gestion = ".$this->objParam->getParametro('id_gestion'));    
+        }
+		
+		
+		
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarCuentaDoc');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarCuentaDoc($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
 				
 	function insertarCuentaDoc(){
 		$this->objFunc=$this->create('MODCuentaDoc');	
@@ -98,6 +144,8 @@ class ACTCuentaDoc extends ACTbase{
 		$this->res=$this->objFunc->eliminarCuentaDoc($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	
+	
 	
 	function eliminarCuentaDocRendicion(){
 		$this->objFunc=$this->create('MODCuentaDoc');	
@@ -191,6 +239,20 @@ class ACTCuentaDoc extends ACTbase{
 		}              
 		
     }
+   
+    function recuperarRendicionDepositosConsolidado(){
+    	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarRendicionDepositosConsolidado($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+        else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}              
+		
+    }
 	
    function reporteRendicionFondos(){
 			
@@ -222,9 +284,88 @@ class ACTCuentaDoc extends ACTbase{
 		
 	}
 
-    
+    function recuperarDetalleConsolidado(){    	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarDetalleConsolidado($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+        else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}              
+		
+    }
 
-			
+    function reporteRendicionCon(){
+		
+			    if($this->objParam->getParametro('formato_reporte')=='pdf'){
+					$nombreArchivo = uniqid(md5(session_id()).'Programacion').'.pdf'; 
+				}
+				else{
+					$nombreArchivo = uniqid(md5(session_id()).'Programacion').'.xls'; 
+				}
+				
+				$dataSourceHeader = $this->recuperarSolicitudFondos();				
+				$dataSource = $this->recuperarDetalleConsolidado();
+				$dataSourceDep = $this->recuperarRendicionDepositosConsolidado();
+				
+				
+				
+				//parametros basicos
+				$tamano = 'LETTER';
+				$orientacion = 'L';
+				$titulo = 'Consolidado';
+				
+				
+				$this->objParam->addParametro('orientacion',$orientacion);
+				$this->objParam->addParametro('tamano',$tamano);		
+				$this->objParam->addParametro('titulo_archivo',$titulo);        
+				$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+				
+				
+				$reporte = new RRendicionConXls($this->objParam); 
+				$reporte->datosHeader($dataSource->getDatos(),  $dataSourceHeader->getDatos(), $dataSourceDep->getDatos());
+				$reporte->generarReporte(); 
+				
+		         
+				$this->mensajeExito=new Mensaje();
+				$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+				$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+				$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+		
+	}
+
+   function ampliarRendicion(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->ampliarRendicion($this->objParam);
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+   
+   function cambiarBloqueo(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->cambiarBloqueo($this->objParam);
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+    function reporteMemoDesignacion(){
+    	
+	            $dataSource = $this->recuperarSolicitudFondos();				
+				$nombreArchivo = uniqid(md5(session_id()).'MemoAsignación').'.docx'; 
+				$reporte = new RMemoAsignacion($this->objParam); 
+				
+				
+				$reporte->datosHeader($dataSource->getDatos());
+				
+				$reporte->write(dirname(__FILE__).'/../../reportes_generados/'.$nombreArchivo);
+				
+				$this->mensajeExito=new Mensaje();
+				$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+				$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+				$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+				
+    }	
 }
-
 ?>

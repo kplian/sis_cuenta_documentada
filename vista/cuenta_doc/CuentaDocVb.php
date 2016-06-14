@@ -56,6 +56,17 @@ Phx.vista.CuentaDocVb = {
 				handler : this.onBtnRepSol,
 				tooltip : '<b>Reporte de solicitud de fondos</b>'
 		});
+		
+		this.addButton('onBtnMemo', {
+				grupo : [0,1,2,3],
+				text : 'Memo',
+				iconCls : 'bprint',
+				disabled : false,
+				handler : this.onButtonMemoDesignacion,
+				tooltip : '<b>Reporte de designación</b>'
+		});
+		
+		
        
 		this.store.baseParams = { tipo_interfaz: this.nombreVista };
 		
@@ -76,8 +87,8 @@ Phx.vista.CuentaDocVb = {
       Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n); 
       this.getBoton('btnChequeoDocumentosWf').enable();
       this.getBoton('diagrama_gantt').enable();
-      this.getBoton('btnObs').enable(); 
-      
+      this.getBoton('btnObs').enable();
+      this.getBoton('chkpresupuesto').enable(); 
       
       if(this.sw_solicitud == 'si'){
         this.getBoton('onBtnRepSol').enable(); 
@@ -96,11 +107,6 @@ Phx.vista.CuentaDocVb = {
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
-         
-         
-        
-         
-            
       }     
       else{
           this.desBotoneshistorico();
@@ -121,6 +127,22 @@ Phx.vista.CuentaDocVb = {
         return tb
     },
     
+    onButtonMemoDesignacion: function(){
+                var rec=this.sm.getSelected();
+                Ext.Ajax.request({
+                    url:'../../sis_cuenta_documentada/control/CuentaDoc/reporteMemoDesignacion',
+                    params: {'id_proceso_wf':rec.data.id_proceso_wf},
+                    success: this.successExport,
+                    failure: function() {
+                        alert("fail");
+                    },
+                    timeout: function() {
+                        alert("timeout");
+                    },
+                    scope:this
+                });
+        },
+    
    tabsouth:[
 	     {
 	          url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
@@ -135,9 +157,5 @@ Phx.vista.CuentaDocVb = {
 			  cls: 'CdDeposito'
 		 }
 	   ] 
-    
-    
-   
-    
 };
 </script>

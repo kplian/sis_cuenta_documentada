@@ -25,6 +25,8 @@ class MODCuentaDoc extends MODbase{
 				
 		
 		$this->captura('id_cuenta_doc','INTEGER');
+		$this->captura('dias_para_rendir','INTEGER');
+		
 		$this->captura('id_tipo_cuenta_doc','INTEGER');
 		$this->captura('id_proceso_wf','INTEGER');
 		$this->captura('id_caja','INTEGER');
@@ -59,9 +61,12 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('id_depto_lb','integer');
 		$this->captura('id_depto_conta','integer');
 		$this->captura('importe_documentos','numeric');
+		$this->captura('importe_retenciones','numeric');		
 		$this->captura('importe_depositos','numeric');
 		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
+		$this->captura('sw_max_doc_rend','VARCHAR');
+		
 		
 		
 		
@@ -124,6 +129,8 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('importe_documentos','numeric');
 		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
+		$this->captura('nro_correspondencia','VARCHAR');
+		
 		
 		
 		//Ejecuta la instruccion
@@ -240,6 +247,9 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('motivo','motivo','varchar');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
+		
+		
 		$this->setParametro('id_cuenta_doc_fk','id_cuenta_doc_fk','integer');
 		
 		
@@ -265,6 +275,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('motivo','motivo','varchar');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
 		
 
 		//Ejecuta la instruccion
@@ -407,6 +418,10 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('nombre_unidad','VARCHAR');
 		$this->captura('importe_literal','VARCHAR');
 		$this->captura('motivo_ori','VARCHAR');
+		$this->captura('gerente_financiero','VARCHAR');
+		$this->captura('cargo_gerente_financiero','VARCHAR');
+		
+		
 		
 		
 		
@@ -526,11 +541,113 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+   
+   function recuperarRendicionDepositosConsolidado(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPDEPRENCO_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setCount(false);	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+		//Definicion de la lista del resultado del query
+		$this->captura('id_cuenta_bancaria','int4');
+		$this->captura('denominacion','varchar');
+		$this->captura('nro_cuenta','varchar');
+		$this->captura('fecha','date');
+		$this->captura('tipo','varchar');
+		$this->captura('importe_deposito','numeric');
+		$this->captura('origen','varchar');
+		$this->captura('nombre_finalidad','varchar');
+		$this->captura('id_libro_bancos','int4');
+		$this->captura('observaciones','text');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+   
+   function recuperarDetalleConsolidado(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPCONFA_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setCount(false);	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+
+		//Definicion de la lista del resultado del query
+		
+		$this->captura('id_doc_concepto','INTEGER');
+		$this->captura('codigo_cc','TEXT');
+		$this->captura('desc_tipo_presupuesto','VARCHAR');
+		$this->captura('desc_categoria_programatica','TEXT');
+		$this->captura('codigo_categoria','VARCHAR');
+		$this->captura('desc_ingas','VARCHAR');
+		$this->captura('descripcion','TEXT');
+		$this->captura('precio_total_final','NUMERIC');
+		$this->captura('precio_total','NUMERIC');
+		$this->captura('precio_unitario','NUMERIC');
+		$this->captura('cantidad_sol','NUMERIC');
+		$this->captura('fecha','DATE');
+		$this->captura('razon_social','VARCHAR');
+		$this->captura('nro_documento','VARCHAR');
+		$this->captura('desc_plantilla','VARCHAR');
+		$this->captura('partida','VARCHAR');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+    function ampliarRendicion(){
+    	
+		
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_ime';
+		$this->transaccion='CD_AMPCDREN_IME';
+		$this->tipo_procedimiento='IME';//tipo de transaccion
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+		$this->setParametro('dias_ampliado','dias_ampliado','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 	
+	function cambiarBloqueo(){
+    	
+		
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_ime';
+		$this->transaccion='CD_CAMBLOQ_IME';
+		$this->tipo_procedimiento='IME';//tipo de transaccion
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 	
-	
-	
-			
-}
+		
+
+
+		
+}  	
 ?>

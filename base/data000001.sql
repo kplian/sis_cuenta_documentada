@@ -23,5 +23,26 @@ VALUES
 
 
 
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_dias_entrega', E'15', E'numero de dias donde esta permitida la rendición');
+
+
+
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_monto_factura_maximo', E'20000', E'monto de factura maximo permitido en la rendiciones  en moneda base');
+  
+  
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_tipo_pago', E'cheque', E'opciones cheuqe, transferencia, caja, todos  (como la instacia permite realizar pagos de cuenta documentada)');  
+  
 /***********************************F-DAT-RAC-ADQ-0-05/05/2016*****************************************/
 
