@@ -79,6 +79,7 @@ DECLARE
     v_id_cuenta_bancaria_mov		integer;
     v_limite_fondos					integer;
     v_temp							interval;
+    v_num_rend						integer;
 			    
 BEGIN
 
@@ -566,12 +567,9 @@ BEGIN
            END IF;
            
          
-           
-          
           --------------------------------------------------
           --  ACTUALIZA EL NUEVO ESTADO DEL PRESUPUESTO
           ----------------------------------------------------
-               
            
           IF  cd.f_fun_inicio_cuenta_doc_wf(p_id_usuario, 
            									v_parametros._id_usuario_ai, 
@@ -589,8 +587,7 @@ BEGIN
                                               
           END IF;
           
-         
-             
+          
           -- si hay mas de un estado disponible  preguntamos al usuario
           v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del cuenta documentada id='||v_parametros.id_cuenta_doc); 
           v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
@@ -859,7 +856,21 @@ BEGIN
                   raise exception 'No se encontro una gestión para la fecha  %', v_parametros.fecha;
                END IF;
                
-              --Sentencia de la insercion
+               --contamos la cantidad rendciones para la misma solicitud
+               
+               
+               
+               select 
+                 count(c.id_cuenta_doc)
+               into
+                 v_num_rend
+               from cd.tcuenta_doc c
+               where c.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk;
+               
+               
+               v_num_rend = COALESCE(v_num_rend,0) + 1;
+               
+               --Sentencia de la insercion
                 insert into cd.tcuenta_doc(
                     id_tipo_cuenta_doc,
                     id_proceso_wf,
@@ -883,7 +894,8 @@ BEGIN
                     id_gestion,
                     id_cuenta_doc_fk,
                     motivo,
-                    nro_correspondencia
+                    nro_correspondencia,
+                    num_rendicion
                     
                 ) values(
                     v_id_tipo_cuenta_doc,
@@ -908,7 +920,8 @@ BEGIN
                     v_id_gestion,
                     v_parametros.id_cuenta_doc_fk, -- referencia a cuenta de solicitud
     				v_parametros.motivo,
-                    v_parametros.nro_correspondencia
+                    v_parametros.nro_correspondencia,
+                    'R'||v_num_rend::varchar
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc; 
         
             
@@ -1053,12 +1066,16 @@ BEGIN
               into 
                v_contador_libro_bancos  
              from tes.tts_libro_bancos lb
-             inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
-             where c.id_cuenta_doc_fk = v_registros_cd.id_cuenta_doc_solicitud 
+             inner join cd.tcuenta_doc c  
+             								on c.id_cuenta_doc = lb.columna_pk_valor 
+                                                and  lb.columna_pk = 'id_cuenta_doc' 
+                                                and lb.tabla = 'cd.tcuenta_doc' 
+             where c.id_cuenta_doc = v_parametros.id_cuenta_doc 
                   and lb.estado_reg = 'activo' 
                   and lb.estado != 'anulado';
              
              
+          
              
              IF COALESCE(v_contador,0) != 0 or  COALESCE(v_contador_libro_bancos,0) != 0  THEN
                 raise exception 'Elimine primero las facturas y depositos registrados';
@@ -1066,9 +1083,9 @@ BEGIN
              
              
              
-             --------------------------
+             ---------------------------------
              --   Anulacion de la rendicion
-             --------------------------
+             ----------------------------------
              
            
                  select 
@@ -1187,13 +1204,64 @@ BEGIN
             
             
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Camia el bloqueo de facturas grandes para la rendicion'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cambia el bloqueo de facturas grandes para la rendicion'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_libro_bancos',v_parametros.id_cuenta_doc::varchar);
               
             --Devuelve la respuesta
             return v_resp;
 
-		end;     
+		end; 
+        
+    /*********************************    
+ 	#TRANSACCION:  'CD_CAMBUSUREG_IME'
+ 	#DESCRIPCION:	Cambia el usuario responsable red registro
+ 	#AUTOR:		admin	
+ 	#FECHA:		17-05-2016 18:01:48
+	***********************************/
+
+	elsif(p_transaccion='CD_CAMBUSUREG_IME')then
+
+		begin
+        
+           
+              select 
+                c.id_cuenta_doc,
+                c.id_usuario_reg,
+                c.id_usuario_reg_ori
+              into
+               v_registros
+              from cd.tcuenta_doc c 
+              where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+              
+              
+              IF v_registros.id_usuario_reg_ori is NULL  THEN
+                 update cd.tcuenta_doc set
+                 id_usuario_reg_ori = v_registros.id_usuario_reg
+                where id_cuenta_doc = v_parametros.id_cuenta_doc;
+              END IF;
+              
+              
+              update cd.tcuenta_doc set
+                id_usuario_reg = v_parametros.id_usuario_new,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+              where id_cuenta_doc = v_parametros.id_cuenta_doc;
+              
+               update cd.tcuenta_doc set
+                id_usuario_reg = v_parametros.id_usuario_new,
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now()
+              where id_cuenta_doc_fk = v_parametros.id_cuenta_doc;
+              
+              
+              --Definicion de la respuesta
+              v_resp = pxp.f_agrega_clave(v_resp,'mensaje',format('Se cambio el usuario de registro de  id  %s por el id %s ', v_registros.id_usuario_reg::varchar, v_parametros.id_usuario_new::varchar)); 
+              v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+              
+            --Devuelve la respuesta
+            return v_resp;
+
+		end;           
     
    
 

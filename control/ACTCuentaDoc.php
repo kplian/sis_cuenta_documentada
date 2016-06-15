@@ -366,6 +366,12 @@ class ACTCuentaDoc extends ACTbase{
 				$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 				$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 				
+    }
+	
+	function cambioUsuarioReg(){
+        $this->objFunc=$this->create('MODCuentaDoc');  
+        $this->res=$this->objFunc->cambioUsuarioReg($this->objParam);
+        $this->res->imprimirRespuesta($this->res->generarJson());
     }	
 }
 ?>

@@ -239,6 +239,16 @@ AS
 CREATE TRIGGER trig_tcuenta_doc
   AFTER UPDATE OF estado 
   ON cd.tcuenta_doc FOR EACH ROW 
-  EXECUTE PROCEDURE cd.trig_tcuenta_doc();       
+  EXECUTE PROCEDURE cd.trig_tcuenta_doc();   
+  
+
+  
+select wf.f_import_ttipo_documento_estado ('insert','SOLFA','SFA','borrador','SFA','crear','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','SOLFA','SFA','borrador','SFA','insertar','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','REDFA','RFA','borrador','RFA','crear','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','REDFA','RFA','borrador','RFA','insertar','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','REDFA','RFA','rendido','RFA','insertar','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','MEMOFA','SFA','contabilizado','SFA','crear','superior','');
+select wf.f_import_ttipo_documento_estado ('insert','MEMOFA','SFA','contabilizado','SFA','insertar','superior','');      
          
 /***********************************F-DEP-RAC-CD-0-17/05/2016*****************************************/

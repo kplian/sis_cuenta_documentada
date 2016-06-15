@@ -301,11 +301,28 @@ header("content-type: text/javascript; charset=UTF-8");
 		},
 
 		onButtonNew : function() {
-			Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
+			Phx.vista.CuentaDocReg.superclass.onButtonNew.call(this);
+			this.Cmp.id_funcionario.enable();
 			this.ocultarComponente(this.Cmp.nombre_cheque);
 			this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
 			this.Cmp.fecha.setValue(new Date());
             this.Cmp.fecha.fireEvent('change');
+
+		},
+		
+		onButtonEdit : function() {
+			Phx.vista.CuentaDocReg.superclass.onButtonEdit.call(this);
+			this.Cmp.id_funcionario.disable();
+			
+			if (this.Cmp.tipo_pago.getValue() == 'cheque') {
+					this.mostrarComponente(this.Cmp.nombre_cheque);
+					this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
+			}
+			if (this.Cmp.tipo_pago.getValue() == 'transferencia') {
+					this.ocultarComponente(this.Cmp.nombre_cheque);
+					this.mostrarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
+            }
+			
 
 		},
 

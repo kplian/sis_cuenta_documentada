@@ -66,6 +66,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
 		$this->captura('sw_max_doc_rend','VARCHAR');
+		$this->captura('num_rendicion','VARCHAR');
 		
 		
 		
@@ -130,6 +131,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
 		$this->captura('nro_correspondencia','VARCHAR');
+		$this->captura('num_rendicion','VARCHAR');
 		
 		
 		
@@ -421,7 +423,9 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('gerente_financiero','VARCHAR');
 		$this->captura('cargo_gerente_financiero','VARCHAR');
 		
-		
+		$this->captura('nro_cbte','VARCHAR');
+		$this->captura('num_memo','VARCHAR');
+		$this->captura('num_rendicion','VARCHAR');
 		
 		
 		
@@ -644,6 +648,27 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+	
+	function cambioUsuarioReg(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_ime';
+		$this->transaccion='CD_CAMBUSUREG_IME';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+		$this->setParametro('id_usuario_new','id_usuario_new','int4');
+		
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
 	
 		
 

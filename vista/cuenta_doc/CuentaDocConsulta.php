@@ -82,7 +82,7 @@ Phx.vista.CuentaDocConsulta = {
 				grupo : [0,1,2,3],
 				text : 'Reporte Sol.',
 				iconCls : 'bprint',
-				disabled : false,
+				disabled : true,
 				handler : this.onBtnRepSol,
 				tooltip : '<b>Reporte de solicitud de fondos</b>'
 		});
@@ -91,7 +91,7 @@ Phx.vista.CuentaDocConsulta = {
 				grupo : [0,1,2,3],
 				text : 'Reporte Rendición.',
 				iconCls : 'bprint',
-				disabled : false,
+				disabled : true,
 				handler : this.onBtnRendicion,
 				tooltip : '<b>Reporte de rendición de gastos</b>'
 		});
@@ -100,7 +100,7 @@ Phx.vista.CuentaDocConsulta = {
 				grupo : [0,1,2,3],
 				text : 'Rendición Consolidada',
 				iconCls : 'bprint',
-				disabled : false,
+				disabled : true,
 				handler : this.onBtnRepRenCon,
 				tooltip : '<b>Reporte de redición consolidada</b>'
 		 });
@@ -109,7 +109,7 @@ Phx.vista.CuentaDocConsulta = {
 				grupo : [0,1,2,3],
 				text : 'Ampliar Días',
 				iconCls : 'blist',
-				disabled : false,
+				disabled : true,
 				handler : this.onBtnAmpRen,
 				tooltip : '<b>Agergar días para rendir</b><br>permite  sumar o restar días al limite de rendición indicado por la columna "Lim Rend"'
 		 });
@@ -118,10 +118,19 @@ Phx.vista.CuentaDocConsulta = {
 				grupo : [0,1,2,3],
 				text : 'Cambio Bloqueo',
 				iconCls : 'blist',
-				disabled : false,
+				disabled : true,
 				handler : this.onSwBloq,
 				tooltip : '<b>Cambia el estado del bloqueo para facturas grandes</b> <BR>NO = no permite facturas grandes <br>SI = permite facturas grandes mayores a 20 000 BS'
 		 });
+		 
+		 this.addButton('cambioUsu',{ 
+		 	grupo :[0,1,2,3], 
+		 	text:'Cambiar Reg.',
+		 	iconCls: 'blist',
+		 	disabled: true,
+		 	handler: this.cambioUsu,
+		 	tooltip: '<b>Cambiar usuario de registro</b>'});
+        
 		 
 		this.store.baseParams = { estado : 'borrador',tipo_interfaz: this.nombreVista };
 		this.load({params:{start:0, limit:this.tam_pag}});
@@ -194,6 +203,7 @@ Phx.vista.CuentaDocConsulta = {
       this.getBoton('diagrama_gantt').enable();
       this.getBoton('btnObs').enable();     
       this.getBoton('btnChequeoDocumentosWf').enable();
+     
       
       if(data.sw_solicitud == 'si'){
       	this.getBoton('onBtnRepSol').enable();
@@ -207,10 +217,12 @@ Phx.vista.CuentaDocConsulta = {
       }
       
       if(data.sw_solicitud == 'si' && data.estado == 'contabilizado'){
-        this.getBoton('onBtnAmpRen').enable();   
+        this.getBoton('onBtnAmpRen').enable();
+         this.getBoton('cambioUsu').enable();    
       }
       else{
-        this.getBoton('onBtnAmpRen').disable();   
+        this.getBoton('onBtnAmpRen').disable(); 
+        this.getBoton('cambioUsu').disable();   
       }
       
       if(data.sw_solicitud == 'no' ){
@@ -231,6 +243,8 @@ Phx.vista.CuentaDocConsulta = {
             this.getBoton('btnObs').disable();
             this.getBoton('onBtnRepSol').disable(); 
             this.getBoton('onSwBloq').disable(); 
+            this.getBoton('cambioUsu').disable(); 
+            
         }
         return tb
    },
@@ -282,6 +296,48 @@ Phx.vista.CuentaDocConsulta = {
 						});
 			}
 	},
+	
+	
+	
+	 //cambiar usuario de registro
+    cambioUsu: function(res){
+         var rec=this.sm.getSelected();
+         Phx.CP.loadWindows('../../../sis_seguridad/vista/usuario/FormUsuario.php',
+            'Estado de Wf',
+            {   modal: true,
+                width: 450,
+                height: 250
+            }, 
+            {    data: rec.data }, 
+            this.idContenedor,'FormUsuario',
+            {
+                config:[{
+                          event:'beforesave',
+                          delegate: this.onCambioUsu,
+                        }],
+               scope:this
+           });
+     },
+     
+      onCambioUsu: function(wizard,resp){
+           
+            
+              
+             Phx.CP.loadingShow(); 
+             Ext.Ajax.request({
+                url:'../../sis_cuenta_documentada/control/CuentaDoc/cambioUsuarioReg',
+                params:{
+                        id_usuario_new: resp.id_usuario,
+                        id_cuenta_doc: resp.data.id_cuenta_doc
+                 },
+                argument: { wizard: wizard },  
+                success: this.successEstadoSinc,
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope: this
+            });
+           
+    },
 	
 	successRep:function(resp){        
         Phx.CP.loadingHide();

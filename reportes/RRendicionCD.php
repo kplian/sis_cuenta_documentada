@@ -29,7 +29,7 @@ class RRendicionCD extends  ReportePDF {
 		$newDate = date("d/m/Y", strtotime( $this->datos_detalle[0]['fecha']));		
 		$dataSource = $this->datos_detalle; 
 	    ob_start();
-		include(dirname(__FILE__).'/../reportes/tpl/cabeceraSol.php');
+		include(dirname(__FILE__).'/../reportes/tpl/cabeceraRen.php');
         $content = ob_get_clean();
 		$this->writeHTML($content, true, false, true, false, '');
 		

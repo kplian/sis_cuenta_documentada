@@ -226,11 +226,43 @@ IS 'fecha a partir de la cual corren los dias para hacer la rendicion';
 
 --------------- SQL ---------------
 
+
+
 ALTER TABLE cd.tcuenta_doc
   ADD COLUMN sw_max_doc_rend VARCHAR(10) DEFAULT 'no' NOT NULL;
 
 COMMENT ON COLUMN cd.tcuenta_doc.sw_max_doc_rend
 IS 'por defecto no permite que se sobre pase el maximo valor configurador en variable globarl para el registro de documentos en rendicion';
+
+
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN num_memo VARCHAR(200);
+
+COMMENT ON COLUMN cd.tcuenta_doc.num_memo
+IS 'nro de memo de asignacion de fondos se creea al validar el cbte contable';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN num_rendicion VARCHAR(20);
+
+COMMENT ON COLUMN cd.tcuenta_doc.num_rendicion
+IS 'numera el correlativo';
+
+--------------- SQL ---------------
+
+
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_usuario_reg_ori INTEGER;
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_usuario_reg_ori
+IS 'almacena el usuario que registro originalmente, solo en caso de que sea cambio el usuaario que debe regitrar la rendiciones';
+
 
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 

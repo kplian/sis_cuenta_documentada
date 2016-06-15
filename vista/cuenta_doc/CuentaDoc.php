@@ -95,12 +95,21 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				fieldLabel: 'Nro Trámite',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
-				maxLength:150
+				gwidth: 120,
+				maxLength:150,
+                renderer: function (value, p, record){
+                	if(record.data.sw_solicitud == 'no' ){
+                	     return String.format('{0}-{1}', value,record.data.num_rendicion );
+                	}
+                	else{
+                		 return String.format('{0}', value);
+                	}
+                	
+                }
 			},
 				type:'TextField',
 				bottom_filter:true,
-				filters:{pfiltro:'cdoc.nro_tramite',type:'string'},
+				filters: { pfiltro: 'cdoc.nro_tramite', type:'string' },
 				id_grupo:1,
 				grid:true,
 				form:false
@@ -539,7 +548,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
-		{name:'usr_reg', type: 'string'},'sw_max_doc_rend',
+		{name:'usr_reg', type: 'string'},'sw_max_doc_rend','num_rendicion',
 		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia',
 		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos',
 		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc','importe_retenciones',

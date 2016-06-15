@@ -213,7 +213,8 @@ BEGIN
                             '||v_importe_fac||' ,
                             tcd.nombre as desc_tipo_cuenta_doc,
                             tcd.sw_solicitud,
-                            cdoc.sw_max_doc_rend
+                            cdoc.sw_max_doc_rend,
+                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -403,7 +404,8 @@ BEGIN
                             0::numeric as importe_documentos,
                             tcd.nombre as desc_tipo_cuenta_doc,
                             tcd.sw_solicitud,
-                            cdoc.nro_correspondencia
+                            cdoc.nro_correspondencia,
+                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -487,43 +489,43 @@ BEGIN
         
     	  --Sentencia de la consulta
 		  v_consulta:='select
-                            cdoc.id_cuenta_doc, 
-                            cdoc.id_tipo_cuenta_doc,
-                            cdoc.id_proceso_wf,
-                            cdoc.id_caja,
-                            cdoc.nombre_cheque,
-                            cdoc.id_uo,
-                            cdoc.id_funcionario,
-                            cdoc.tipo_pago,
-                            cdoc.id_depto,
-                            cdoc.id_cuenta_doc_fk,
-                            cdoc.nro_tramite,
-                            cdoc.motivo,
-                            cdoc.fecha,
-                            cdoc.id_moneda,
-                            cdoc.estado,
-                            cdoc.estado_reg,
-                            cdoc.id_estado_wf,
-                            cdoc.id_usuario_ai,
-                            cdoc.usuario_ai,
-                            cdoc.fecha_reg,
-                            cdoc.id_usuario_reg,
-                            cdoc.fecha_mod,
-                            cdoc.id_usuario_mod,
-                            usu1.cuenta as usr_reg,
-                            usu2.cuenta as usr_mod,
-                            mon.codigo as desc_moneda,
-                            dep.codigo as desc_depto,
-                            ew.obs, 
-                            fun.desc_funcionario1 as desc_funcionario,
-                            cdoc.importe,
-                            fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
-                            cdoc.id_funcionario_cuenta_bancaria,
-                            cdoc.id_depto_lb,
-                            cdoc.id_depto_conta,
-                            tcd.nombre as desc_tipo_cuenta_doc,
-                            tcd.sw_solicitud,
-                            (select l.nombre  
+                              cdoc.id_cuenta_doc, 
+                              cdoc.id_tipo_cuenta_doc,
+                              cdoc.id_proceso_wf,
+                              cdoc.id_caja,
+                              cdoc.nombre_cheque,
+                              cdoc.id_uo,
+                              cdoc.id_funcionario,
+                              cdoc.tipo_pago,
+                              cdoc.id_depto,
+                              cdoc.id_cuenta_doc_fk,
+                              cdoc.nro_tramite,
+                              upper(cdoc.motivo)::varchar as motivo,
+                              cdoc.fecha,
+                              cdoc.id_moneda,
+                              cdoc.estado,
+                              cdoc.estado_reg,
+                              cdoc.id_estado_wf,
+                              cdoc.id_usuario_ai,
+                              cdoc.usuario_ai,
+                              cdoc.fecha_reg,
+                              cdoc.id_usuario_reg,
+                              cdoc.fecha_mod,
+                              cdoc.id_usuario_mod,
+                              usu1.cuenta as usr_reg,
+                              usu2.cuenta as usr_mod,
+                              mon.codigo as desc_moneda,
+                              dep.codigo as desc_depto,
+                              ew.obs, 
+                              fun.desc_funcionario1 as desc_funcionario,
+                              cdoc.importe,
+                              fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
+                              cdoc.id_funcionario_cuenta_bancaria,
+                              cdoc.id_depto_lb,
+                              cdoc.id_depto_conta,
+                              tcd.nombre as desc_tipo_cuenta_doc,
+                              tcd.sw_solicitud,
+                              (select l.nombre  
                             from param.tlugar l 
                             inner join orga.tcargo c on  c.id_lugar =  l.id_lugar
                             where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')))::varchar as lugar, 
@@ -532,7 +534,10 @@ BEGIN
                             pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
                             cdori.motivo::varchar as motivo_ori,
                             '''||v_gaf[3]||'''::varchar as  gerente_financiero,
-                            upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero
+                            upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero,
+                            cbte.nro_cbte,
+                            cdoc.num_memo,
+                            COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion
                        	from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -542,6 +547,7 @@ BEGIN
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
+                        left join conta.tint_comprobante cbte on cbte.id_int_comprobante = cdoc.id_int_comprobante
                         left join cd.tcuenta_doc cdori on cdori.id_cuenta_doc = cdoc.id_cuenta_doc_fk
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria

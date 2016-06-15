@@ -18,7 +18,6 @@ Class RMemoAsignacion {
 		setlocale(LC_ALL,"es_ES@euro","es_ES","esp");
 		
 		
-		
 		$document->setValue('NOMBRE_SOLICITANTE', $this->dataSource[0]['desc_funcionario']); // On section/content
 		$document->setValue('CARGO_SOLICITANTE', $this->dataSource[0]['cargo_funcionario']); // On section/content
 		$document->setValue('ASUNTO', $this->dataSource[0]['motivo']); // On section/content
@@ -32,6 +31,10 @@ Class RMemoAsignacion {
 		$document->setValue('NUMDOC', $this->dataSource[0]['nro_tramite']); // On section/content
 		$document->setValue('NOMBRE_GERENTE', $this->dataSource[0]['gerente_financiero']); // On section/content
 		$document->setValue('CARGO_GERENTE', $this->dataSource[0]['cargo_gerente_financiero']); // On section/content
+		
+		$document->setValue('NRO_DOC', $this->dataSource[0]['num_memo']); // On section/content
+		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content
+		
 		
 		
 		
