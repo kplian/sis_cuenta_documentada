@@ -1021,11 +1021,13 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 													}],
 											
 											scope:this
-										 });
+										 });  
 			   
 	 },
-	 
-	
+	  
+	roundTwo: function(can){
+    	 return  Math.round(can*Math.pow(10,2))/Math.pow(10,2);
+    },
 	
 	onButtonNew:function(){
         Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
