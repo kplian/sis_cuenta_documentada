@@ -52,18 +52,29 @@ header("content-type: text/javascript; charset=UTF-8");
 		constructor : function(config) {
 			var me = this;
 			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
-				    var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_documentos) - me.roundTwo(record.data.importe_depositos);
-				    saldo = me.roundTwo(saldo);
+				    
 					if (record.data.estado == 'contabilizado') {
+						var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_documentos) - me.roundTwo(record.data.importe_depositos) +  me.roundTwo(record.data.importe_retenciones);
+				        saldo = me.roundTwo(saldo);
 						return String.format("<b><font color = 'red'>Entregado: {0}</font></b><br>"+
-											 "<b><font color = 'green' >En Facturas:{1}</font></b><br>"+
+											 "<b><font color = 'green' >En Documentos:{1}</font></b><br>"+
 											 "<b><font color = 'green' >En Depositos:{2}</font></b><br>"+
 											 "<b><font color = 'orange' >Retenciones de Ley:{3}</font></b><br>"+
 											 "<b><font color = 'blue' >Saldo:{4}</font></b>", value, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones, saldo );
 					} 
+					else if (record.data.estado == 'finalizado') {
+						var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_total_rendido);
+				        saldo = me.roundTwo(saldo);
+						return String.format("<b><font color = 'red'>Solicitado: {0}</font></b><br>"+
+											     "<b><font color = 'orange' >Total Rendido: {1}</font></b><br>"+
+											     "<b><font color = 'blue' >Saldo: {2}</font></b>", value, record.data.importe_total_rendido, saldo );
+					
+					}
 					else {
 						return String.format('<font>Solicitado: {0}</font>', value);
 					}
+					
+					
 
 			};
 			

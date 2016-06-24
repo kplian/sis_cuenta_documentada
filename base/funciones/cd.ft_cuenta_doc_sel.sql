@@ -70,9 +70,15 @@ BEGIN
               
           v_importe_fac = '
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
-                             	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido,0)) from cd.trendicion_det rd
+                             	 COALESCE((select sum(COALESCE(dcv.importe_doc,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                               	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
+                              
+                              WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                             	 COALESCE((select sum(COALESCE(dcv.importe_doc,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric 
+                              
                               ELSE
                                  0::numeric 
                               END  as  importe_documentos,
@@ -80,10 +86,14 @@ BEGIN
                               ' ;
                               
             v_importe_fac = v_importe_fac ||'
-                              CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                              CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si''   THEN
                              	 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                               	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
+                              WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                                 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric 
                               ELSE
                                  0::numeric 
                               END  as  importe_retenciones,
@@ -94,7 +104,12 @@ BEGIN
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
                              	 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
                              	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
-                              	where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric  
+                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric  
+                              WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                                 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                             	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric  
+                              
                               ELSE
                                  0::numeric 
                               END  as  importe_depositos
@@ -214,7 +229,8 @@ BEGIN
                             tcd.nombre as desc_tipo_cuenta_doc,
                             tcd.sw_solicitud,
                             cdoc.sw_max_doc_rend,
-                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion
+                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion,
+                            importe_total_rendido
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -375,7 +391,32 @@ BEGIN
            
            
            
-           
+           v_importe_fac = '
+                             
+                             	 COALESCE((select sum(COALESCE(dcv.importe_doc,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric   
+                               as  importe_documentos,
+                              
+                              ' ;
+                              
+            v_importe_fac = v_importe_fac ||'
+                              
+                             	 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
+                              	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric   
+                                as  importe_retenciones,
+                              
+                              ' ;                  
+                              
+            v_importe_fac = v_importe_fac ||'
+                              
+                             	 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                             	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                              	where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric  
+                                as  importe_depositos
+                              
+                              ' ;  
            
             
             
@@ -415,12 +456,15 @@ BEGIN
                             cdoc.id_funcionario_cuenta_bancaria,
                             cdoc.id_depto_lb,
                             cdoc.id_depto_conta,
-                            0::numeric as importe_documentos,
+                             '||v_importe_fac||' ,
                             tcd.nombre as desc_tipo_cuenta_doc,
                             tcd.sw_solicitud,
                             cdoc.nro_correspondencia,
-                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion
+                            COALESCE(cdoc.num_rendicion,'''') as num_rendicion,
+                            cdo.importe::numeric as importe_solicitado,
+                            cdo.importe_total_rendido::numeric
 						from cd.tcuenta_doc cdoc
+                        inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
                         inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
@@ -436,7 +480,7 @@ BEGIN
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
            -- raise exception 'sss';
-            raise NOTICE '%', v_consulta;
+            raise notice '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -469,6 +513,7 @@ BEGIN
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(cdoc.id_cuenta_doc)
 					    from cd.tcuenta_doc cdoc
+                        inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
                         inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
@@ -713,22 +758,22 @@ BEGIN
     	begin
         
     	  --Sentencia de la consulta
-		  v_consulta := 'select cb.id_cuenta_bancaria,
-                             cb.denominacion,
-                             cb.nro_cuenta,
-                             t.fecha,
-                             t.tipo,
-                             t.importe_deposito,
-                             t.origen,
-                             f.nombre_finalidad,
-                             t.id_libro_bancos,
-                             t.observaciones
-                      from tes.tts_libro_bancos t
-                           inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria = t.id_cuenta_bancaria
-                           inner join tes.tfinalidad f on f.id_finalidad = t.id_finalidad
-                           inner join cd.tcuenta_doc cdd on cdd.id_cuenta_doc = t.columna_pk_valor and t.tabla = ''cd.tcuenta_doc''
-                           inner join cd.tcuenta_doc cddo on cddo.id_cuenta_doc = cdd.id_cuenta_doc_fk
-                      where  cddo.id_proceso_wf = '||v_parametros.id_proceso_wf;
+		  v_consulta := 'select  cb.id_cuenta_bancaria,
+                                 cb.denominacion,
+                                 cb.nro_cuenta,
+                                 t.fecha,
+                                 t.tipo,
+                                 t.importe_deposito,
+                                 t.origen,
+                                 f.nombre_finalidad,
+                                 t.id_libro_bancos,
+                                 t.observaciones
+                          from tes.tts_libro_bancos t
+                               inner join tes.tcuenta_bancaria cb on cb.id_cuenta_bancaria = t.id_cuenta_bancaria
+                               inner join tes.tfinalidad f on f.id_finalidad = t.id_finalidad
+                               inner join cd.tcuenta_doc cdd on cdd.id_cuenta_doc = t.columna_pk_valor and t.tabla = ''cd.tcuenta_doc''
+                               inner join cd.tcuenta_doc cddo on cddo.id_cuenta_doc = cdd.id_cuenta_doc_fk
+                          where  cddo.id_proceso_wf = '||v_parametros.id_proceso_wf;
                         
                        
 			

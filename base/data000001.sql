@@ -83,6 +83,16 @@ select wf.f_import_testructura_estado ('insert','vbrendicion','pendiente','RFA',
 select wf.f_import_testructura_estado ('insert','pendiente','rendido','RFA',1,'');
 select wf.f_import_testructura_estado ('insert','vbgerencia','vbtesoreria','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','vbtesoreria','pendiente','SFA',1,''); 
+
+
+/* Data for the 'pxp.variable_global' table  (Records 1 - 1) */
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_comprometer_presupuesto', E'si', E'si compromete presupuesto en las rendiciones');
+  
+  
+  
   
   
 /***********************************F-DAT-RAC-ADQ-0-05/05/2016*****************************************/

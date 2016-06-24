@@ -288,6 +288,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 fieldLabel: 'Moneda',
                 gdisplayField: 'desc_moneda',//mapea al store del grid
                 gwidth: 50,
+                baseParams: { 'filtrar_base': 'si' },
                 renderer: function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
              },
             type: 'ComboRec',
@@ -516,8 +517,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
     
     arrayDefaultColumHidden:['usr_reg','usr_mod','estado_reg','fecha_reg'],
 
-
-	tam_pag:50,	
+	tam_pag: 50,	
 	title:'Cuenta Documentada',
 	ActSave:'../../sis_cuenta_documentada/control/CuentaDoc/insertarCuentaDoc',
 	ActDel:'../../sis_cuenta_documentada/control/CuentaDoc/eliminarCuentaDoc',
@@ -548,8 +548,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'id_usuario_mod', type: 'numeric'},
-		{name:'usr_reg', type: 'string'},'sw_max_doc_rend','num_rendicion',
-		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia',
+		{name:'usr_reg', type: 'string'},'sw_max_doc_rend','num_rendicion','importe_solicitado',
+		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia','importe_total_rendido',
 		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos',
 		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc','importe_retenciones',
 		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos','dias_para_rendir'

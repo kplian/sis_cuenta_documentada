@@ -38,11 +38,13 @@ DECLARE
     v_importe_depositos		numeric;
     v_tope					numeric;
     v_sw_max_doc_rend       varchar;
+    v_cd_comprometer_presupuesto     varchar;
 			    
 BEGIN
 
     v_nombre_funcion = 'cd.ft_rendicion_det_ime';
     v_parametros = pxp.f_get_record(p_tabla);
+    v_cd_comprometer_presupuesto  = pxp.f_get_variable_global('cd_comprometer_presupuesto');
 
 	/*********************************    
  	#TRANSACCION:  'CD_REND_INS'
@@ -80,7 +82,12 @@ BEGIN
               raise exception 'Solo puede añadir facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
              END IF;
              
-             --TODO considerar moenda del documentos, el tope esta en moenda base ...
+             
+             IF v_registros.estado_cdr not in ('borrador')  and v_cd_comprometer_presupuesto = 'si' THEN
+                raise exception 'Solo puede añadir  en borrador por que los documentos se encuentran comprometidos';
+             END IF;
+             
+             --TODO considerar moneda del documento, el tope esta en moneda base ...
              
              IF v_registros.sw_max_doc_rend = 'no' and  v_parametros.importe_doc > v_tope THEN
                     raise exception 'no puede registrar documentos mayortes a %, si es necesario pida permiso en tesoreria para proceder',v_tope;
@@ -170,6 +177,11 @@ BEGIN
               raise exception 'Solo puede modificar facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
             END IF;
             
+           
+            IF v_registros.estado_cdr not in ('borrador')  and v_cd_comprometer_presupuesto = 'si' THEN
+                raise exception 'Solo puede añadir  en borrador por que los documentos se encuentran comprometidos';
+            END IF;
+            
             -------------------------------------
             --  validar registros de la rendicion
             -----------------------------------------
@@ -218,6 +230,10 @@ BEGIN
             
             IF v_registros.estado not in ('borrador','vbrendicion') THEN
                 raise exception 'no puede elimianr documentos que  esten en borrador o visto bueno rendición';
+            END IF;
+            
+            IF v_cd_comprometer_presupuesto = 'si' THEN
+                raise exception 'Solo puede eliminar  en estado borrador por que los documentos se encuentran comprometidos';
             END IF;
             
             

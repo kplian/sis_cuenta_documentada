@@ -264,6 +264,26 @@ COMMENT ON COLUMN cd.tcuenta_doc.id_usuario_reg_ori
 IS 'almacena el usuario que registro originalmente, solo en caso de que sea cambio el usuaario que debe regitrar la rendiciones';
 
 
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN presu_comprometido VARCHAR(3) DEFAULT 'no' NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc.presu_comprometido
+IS 'indica si el presupeusto ya se encuentra comprometido';
+
+
+--------------- SQL ---------------
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN importe_total_rendido NUMERIC(32,2) DEFAULT 0 NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc.importe_total_rendido
+IS 'importe rendido, solo en solicitudesse llena cuando las rendiciones son finalizadas, peude llegar a ser negativo si se rinde mas de lo solicitado';
+
+
+
+
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 
 

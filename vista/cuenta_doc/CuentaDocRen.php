@@ -48,6 +48,7 @@ Phx.vista.CuentaDocRen = {
 	bexcelGroups : [0, 1, 2, 3],
 		
 	constructor: function(config) {
+	   var me = this;
 		
 	   this.Atributos[this.getIndAtributo('id_cuenta_doc_fk')].form = true;
 	   this.Atributos[this.getIndAtributo('id_funcionario')].form = false;
@@ -61,6 +62,43 @@ Phx.vista.CuentaDocRen = {
 	   this.Atributos[this.getIndAtributo('nro_correspondencia')].grid = true;
 	   this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
 	   this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
+	   this.Atributos[this.getIndAtributo('importe')].form = false;
+	   
+	   this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
+				    saldo = me.roundTwo(saldo);
+				    
+				    if (record.data.estado != 'rendido') {
+						
+						var saldo_final = record.data.importe_solicitado - record.data.importe_total_rendido - saldo;
+				        saldo_final = me.roundTwo(saldo_final);
+						
+						return String.format("<b><font color = 'red' >Solicitado: {0}</font></b><br>"+
+											 "<b><font color = 'green' >En Documentos: {1}</font></b><br>"+
+											 "<b><font color = 'green' >En Depositos: {2}</font></b><br>"+
+											 "<b><font color = 'orange' >Retenciones de Ley: {3}</font></b><br>"+
+											 "<b><font color = 'blue' >Monto a rendir: {4}</font></b><br>"+
+											 "<b><font color = 'blue' >Otras Rendiciones: {5}</font></b><br>"+
+											 "<b><font color = 'red' >Saldo: {6}</font></b>",  record.data.importe_solicitado, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones, saldo, record.data.importe_total_rendido, saldo_final );
+					}
+					else{
+						
+						var saldo_final = record.data.importe_solicitado - record.data.importe_total_rendido;
+				        saldo_final = me.roundTwo(saldo_final);
+						return String.format("<b><font color = 'red' >Solicitado: {0}</font></b><br>"+
+										 "<b><font color = 'green' >En Documentos: {1}</font></b><br>"+
+										 "<b><font color = 'green' >En Depositos: {2}</font></b><br>"+
+										 "<b><font color = 'orange' >Retenciones de Ley: {3}</font></b><br>"+
+										 "<b><font color = 'blue' >Monto a rendido: {4}</font></b><br>"+
+										 "<b><font color = 'blue' >Total Rendido: {5}</font></b><br>"+
+										 "<b><font color = 'red' >Saldo: {6}</font></b>",  record.data.importe_solicitado, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones, saldo, record.data.importe_total_rendido, saldo_final );
+				
+					
+					}	
+
+			};
+	   
+	   
 	   
 	   
 	   
@@ -90,6 +128,7 @@ Phx.vista.CuentaDocRen = {
    
    actualizarSegunTab : function(name, indice) {
 			this.swEstado = name;
+			
 			this.getParametrosFiltro();
 			if (this.finCons) {
 				this.load({
@@ -124,34 +163,30 @@ Phx.vista.CuentaDocRen = {
    },
    
    
-   
-   
-   
    loadValoresIniciales: function() {
     	
     	Phx.vista.CuentaDocRen.superclass.loadValoresIniciales.call(this);  
     	this.Cmp.id_cuenta_doc_fk.setValue(this.id_cuenta_doc);      
    },
    
-   
+   onButtonNew : function() {   
+			Phx.vista.CuentaDocRen.superclass.onButtonNew.call(this);
+			this.Cmp.motivo.setValue(this.motivo);
+   },
    
    tabsouth:[
-	     {
-	          url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
-	          title:'Facturas', 
-	          height:'50%',
-	          cls:'RendicionDetReg'
+	    {
+	         url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
+	         title:'Facturas', 
+	         height:'50%',
+	         cls:'RendicionDetReg'
         },
         {
-				url:'../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
-				title:'Depositos',
-				height:'50%',
-				cls:'CdDeposito'
+			url:'../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
+			title:'Depositos',
+			height:'50%',
+			cls:'CdDeposito'
 		}
-	   ],
-    
-    
-   
-    
+	   ]
 };
 </script>

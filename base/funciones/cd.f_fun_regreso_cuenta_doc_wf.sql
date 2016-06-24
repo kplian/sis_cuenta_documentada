@@ -23,13 +23,34 @@ DECLARE
 	v_nombre_funcion   		text;
     v_resp    				varchar;
     v_mensaje 				varchar;
-    v_obligacion			record;
+    v_reg_cuenta_doc		record;
+    v_cd_comprometer_presupuesto		varchar;
    
 	
     
 BEGIN
 
 	v_nombre_funcion = 'cd.f_fun_regreso_cuenta_doc_wf';
+    v_cd_comprometer_presupuesto = pxp.f_get_variable_global('cd_comprometer_presupuesto');
+    
+    
+     select 
+        c.id_cuenta_doc,
+        tcd.codigo_plantilla_cbte,
+        tcd.sw_solicitud,
+        c.estado,
+        c.id_cuenta_doc_fk,
+        tcd.nombre,
+        c.importe,
+        c.id_estado_wf,
+        c.id_funcionario,
+        c.id_tipo_cuenta_doc
+        
+      into
+         v_reg_cuenta_doc
+      from cd.tcuenta_doc c
+      inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = c.id_tipo_cuenta_doc
+      where c.id_proceso_wf = p_id_proceso_wf;
     
     
     -- actualiza estado en la solicitud
@@ -41,6 +62,15 @@ BEGIN
          id_usuario_ai = p_id_usuario_ai,
          usuario_ai = p_usuario_ai
     where id_proceso_wf = p_id_proceso_wf;
+    
+    -- si estado al que regresa es borrador, revertimos presupeusto 
+    
+    IF p_codigo_estado = 'borrador'  and v_reg_cuenta_doc.sw_solicitud = 'no'  and v_cd_comprometer_presupuesto = 'si' THEN    
+        -- revertir  presupuesto
+        IF not cd.f_gestionar_presupuesto_cd(v_reg_cuenta_doc.id_cuenta_doc, p_id_usuario, 'revertir')  THEN                 
+               raise exception 'Error al revertir el presupuesto';                 
+        END IF;
+    END IF;
     
    
       

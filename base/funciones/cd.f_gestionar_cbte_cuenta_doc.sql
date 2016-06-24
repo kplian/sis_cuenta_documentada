@@ -9,20 +9,17 @@ CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_cuenta_doc (
 )
 RETURNS boolean AS
 $body$
-/*
 
+/*
 Autor: RAC KPLIAN
 Fecha:   17  abril  de 2016
-Descripcion  Esta funcion gestiona los cbtes de cuenta_documentada cuando son validados
-
-               
-
+Descripcion  Esta funcion gestiona los cbtes de cuenta_documentada cuando son validados          
 */
 
 
 DECLARE
 
-	 v_nombre_funcion   				text;
+	 v_nombre_funcion   			text;
 	 v_resp							varchar;
      v_registros 					record;
      v_registros_tmp				record;
@@ -221,11 +218,16 @@ BEGIN
                               where lb.id_libro_bancos = v_registros_tmp.id_libro_bancos;
                        
                    END LOOP; 
+                   
+                  
+                  -- actuliza el total rendido
+                  update cd.tcuenta_doc pc  set 
+                     importe_total_rendido = v_total_rendido
+                  where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
                   
                   
                   
-                  
-                  IF  v_total_rendido = v_registros_cv.importe   THEN
+                  IF  v_total_rendido >= v_registros_cv.importe   THEN
                   
                         
                         /************************************
@@ -274,12 +276,8 @@ BEGIN
                                      usuario_ai = p_usuario_ai
                         where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
                         
-                  
-                            
                        
-                  
-                  ELSEIF v_total_rendido > v_importe_solicitado THEN
-                     raise exception 'el Total rendido (%) no puede ser mayor al importe solicitado (%)',v_total_rendido , v_registros_cv.importe ;
+                       
                   END IF;
                 
             

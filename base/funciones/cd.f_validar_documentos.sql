@@ -28,7 +28,7 @@ DECLARE
 BEGIN
 
 	         v_nombre_funcion = 'cd.f_validar_documentos';
-      
+      /*
              select  
                 c.importe,
                 c.estado,
@@ -109,7 +109,7 @@ BEGIN
             IF COALESCE(v_importe_documentos,0)  + COALESCE(v_importe_depositos,0) > v_registros.importe_rendicion THEN
               raise exception 'El monto en documentos  no puede sobrepasar el monto a rendir (sobre pasado por: % )',  COALESCE(v_importe_documentos,0)  + COALESCE(v_importe_depositos,0) - v_registros.importe_rendicion;
             END IF; 
-      
+      */
      
    
 

@@ -44,6 +44,25 @@ Phx.vista.CuentaDocVb = {
              },
             scope: this
            }];
+           
+        var me = this;
+		this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+			    
+				if (record.data.estado == 'vbrendicion') {
+					var  saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
+			        saldo = me.roundTwo(saldo);
+					return String.format("<b><font color = 'red'>Monto a Rendir: {0}</font></b><br>"+
+										 "<b><font color = 'green' >En Documentos:{1}</font></b><br>"+
+										 "<b><font color = 'green' >En Depositos:{2}</font></b><br>"+
+										 "<b><font color = 'orange' >Retenciones de Ley:{3}</font></b>", saldo, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones );
+				} 
+				else {
+					return String.format('<font>Solicitado: {0}</font>', value);
+				}
+				
+				
+
+		};
 	   
 	   Phx.vista.CuentaDocVb.superclass.constructor.call(this,config);
        this.init();
@@ -77,6 +96,8 @@ Phx.vista.CuentaDocVb = {
 		//primera carga
 		this.store.baseParams.pes_estado = 'borrador';
     	this.load({params:{start:0, limit:this.tam_pag}});
+    	
+    	
 		
 		this.finCons = true;
    },
@@ -142,6 +163,8 @@ Phx.vista.CuentaDocVb = {
                     scope:this
                 });
         },
+        
+     
     
    tabsouth:[
 	     {

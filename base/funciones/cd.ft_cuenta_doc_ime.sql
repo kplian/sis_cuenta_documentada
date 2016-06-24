@@ -786,7 +786,7 @@ BEGIN
             from cd.tcuenta_doc c
             where c.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
             
-            
+            /*
             --validamos que el total de importes a rendir no sobrepase el total de importe solicitado
             
             select 
@@ -800,7 +800,7 @@ BEGIN
             
             IF COALESCE(v_importe_rendicion,0) + v_parametros.importe >  v_registros_cd.importe THEN
               raise exception 'el importe a rendir no puede ser mayor que el importe solicitado %. (Revise las otras rendiciones registradas %)'  ,v_registros_cd.importe,(v_importe_rendicion,0);
-            END IF;
+            END IF;*/
             
             
             -----------------------------------
@@ -890,7 +890,6 @@ BEGIN
                     fecha_reg,
                     id_usuario_reg,
                     id_funcionario_gerente,
-                    importe,
                     id_gestion,
                     id_cuenta_doc_fk,
                     motivo,
@@ -916,7 +915,6 @@ BEGIN
                     now(),
                     p_id_usuario,
                     v_registros_cd.id_funcionario_gerente,
-                    v_parametros.importe,  
                     v_id_gestion,
                     v_parametros.id_cuenta_doc_fk, -- referencia a cuenta de solicitud
     				v_parametros.motivo,
@@ -986,7 +984,7 @@ BEGIN
               raise exception 'Solo puede modificar facturas en rediciones en borrador o vbtesoreria, (no en  %)',v_registros.estado_cdr;
             END IF;
              
-             
+             /*
             --  validamos que el total de importes a rendir no sobrepase el total de importe solicitado
             
             select 
@@ -1001,7 +999,7 @@ BEGIN
             
             IF COALESCE(v_importe_rendicion,0) + v_parametros.importe >  v_registros_cd.importe THEN
               raise exception 'el importe a rendir no puede ser mayor que el importe solicitado %. (Revise las otras rendiciones registradas %)'  ,v_registros_cd.importe,(v_importe_rendicion,0);
-            END IF;
+            END IF;*/
             
             
 			--Sentencia de la modificacion
@@ -1009,7 +1007,6 @@ BEGIN
                	
                 motivo = v_parametros.motivo,
                 fecha = v_parametros.fecha,
-                importe = v_parametros.importe,
                 nro_correspondencia = v_parametros.nro_correspondencia
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
                

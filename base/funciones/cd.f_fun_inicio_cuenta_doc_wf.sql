@@ -47,12 +47,17 @@ DECLARE
     v_importe_depositos			numeric;
     v_limite_fondos				integer;
     v_contador					integer;
+    v_rendicion					record;
+    v_rendicion_det				record;
+    v_cd_comprometer_presupuesto		varchar;
+    v_total_documentos		numeric;
    
 	
     
 BEGIN
 
 	  v_nombre_funcion = 'cd.f_fun_inicio_cuenta_doc_wf';
+      v_cd_comprometer_presupuesto = pxp.f_get_variable_global('cd_comprometer_presupuesto');
       
       select 
         c.id_cuenta_doc,
@@ -64,7 +69,8 @@ BEGIN
         c.importe,
         c.id_estado_wf,
         c.id_funcionario,
-        c.id_tipo_cuenta_doc
+        c.id_tipo_cuenta_doc,
+        c.id_cuenta_doc_fk
         
       into
          v_reg_cuenta_doc
@@ -130,7 +136,7 @@ BEGIN
               
        END IF;
        
-       
+      
        --raise exception 'ssss %',p_estado_anterior;
        
        -- si es tesoreria actuliza libro de bancos y cuenta bancaria (solo para la solicitud de fondos)
@@ -155,40 +161,55 @@ BEGIN
               raise exception 'El registro de cuanta doc no es una rendición, verifique el tipo de cuenta documentada %',v_reg_cuenta_doc.nombre;
             END IF;
          
-            --suma todas las facturas registradas  para la rendicion 
+     END IF;
+      
+       -- si es uan rendicion y esta saliendo del estado borrador, comprometemos presupeusto
+     IF p_estado_anterior = 'borrador' and v_reg_cuenta_doc.sw_solicitud = 'no' THEN       
+            -- verificar presupuesto            
+            IF not cd.f_gestionar_presupuesto_cd(v_reg_cuenta_doc.id_cuenta_doc, p_id_usuario, 'verificar')  THEN                 
+                   raise exception 'Error al verificar el presupuesto';                 
+            END IF;
+            
+            IF v_cd_comprometer_presupuesto = 'si'  THEN       
+                -- comprometer presupuesto
+                IF not cd.f_gestionar_presupuesto_cd(v_reg_cuenta_doc.id_cuenta_doc, p_id_usuario, 'comprometer')  THEN                 
+                       raise exception 'Error al comprometer el presupuesto';                 
+                END IF;
+            END IF;
+     END IF;
+     
+      -- calcular el importe de la rendicion sumando documentos, y depositos
+      -- para las rendiciones
+      IF  v_reg_cuenta_doc.sw_solicitud = 'no' THEN
+                  
             select 
-               sum(COALESCE(dcv.importe_pago_liquido,0)) 
+               COALESCE(sum(COALESCE(dcv.importe_pago_liquido,0)),0)::numeric 
             into
-               v_importe_documentos
+              v_total_documentos                
             from cd.trendicion_det rd
             inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-            where dcv.estado_reg = 'activo' and 
-               rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;  --registro de rendicion
-               
-            -- sumar el total de depositos registrados par la retencion
-            
-            select
-              sum(lb.importe_deposito)
-            into
-               v_importe_depositos
-            from tes.tts_libro_bancos lb
-            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc' 
-            where c.id_cuenta_doc = v_reg_cuenta_doc.id_cuenta_doc  --registro de rendicion
-                  and lb.estado_reg = 'activo' 
-                  and lb.estado != 'anulado';
-            
-            
-            --verifico importe rendido
-            IF  COALESCE(v_importe_documentos,0) +  COALESCE(v_importe_depositos,0) != v_reg_cuenta_doc.importe  THEN
-               raise exception 'El total a rendir (factuas + depositos) no igual con el monto indicado,   (% + %) <> %', COALESCE(v_importe_documentos,0) ,  COALESCE(v_importe_depositos,0)  ,  v_reg_cuenta_doc.importe;
-            END IF;
-        
-      END IF;
+            where dcv.estado_reg = 'activo' and rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;
+                        
+           select  
+             COALESCE(sum(COALESCE(lb.importe_deposito,0)),0)::numeric 
+           into
+             v_importe_depositos
+           from tes.tts_libro_bancos lb
+           inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc'
+           where c.estado_reg = 'activo' and c.id_cuenta_doc =  v_reg_cuenta_doc.id_cuenta_doc;
+                        
+                    
+           update  cd.tcuenta_doc   p set 
+              importe =  v_total_documentos +   v_importe_depositos       
+           where id_proceso_wf = p_id_proceso_wf;
+                 
+     END IF;
       
       
      -- si ele stado es pendiente genera el comprobante
      IF p_codigo_estado = 'pendiente' THEN
      
+                
                 v_sincronizar = pxp.f_get_variable_global('sincronizar');
                 --  generacion de comprobante
                 IF (v_sincronizar = 'true') THEN  
@@ -206,11 +227,11 @@ BEGIN
                                                      v_nombre_conexion);
             
           
-                 
-                
                 update  cd.tcuenta_doc   p set 
                     id_int_comprobante = v_id_int_comprobante          
-                where id_proceso_wf = p_id_proceso_wf;          
+                where id_proceso_wf = p_id_proceso_wf;
+                
+                     
                     	
                 IF (v_sincronizar = 'true') THEN  
                   select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
