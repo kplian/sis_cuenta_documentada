@@ -275,18 +275,10 @@ BEGIN
                                      id_usuario_ai = p_id_usuario_ai,
                                      usuario_ai = p_usuario_ai
                         where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
-                        
-                       
-                       
                   END IF;
-                
-            
             END IF;
-    
- 
+            
    RETURN  TRUE;
-
-
 
 EXCEPTION
 					

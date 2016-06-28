@@ -119,7 +119,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name: 'motivo',
 				qtip: 'Explique el objetivo del fondo solicitado',
-				fieldLabel: 'Objetivo',
+				fieldLabel: 'Motivo',
 				allowBlank: false,
 				anchor: '80%',
 				gwidth: 200,
