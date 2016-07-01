@@ -326,6 +326,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		onButtonEdit : function() {
 			Phx.vista.CuentaDocReg.superclass.onButtonEdit.call(this);
 			this.Cmp.id_funcionario.disable();
+			this.Cmp.id_depto.disable();
 			
 			if (this.Cmp.tipo_pago.getValue() == 'cheque') {
 					this.mostrarComponente(this.Cmp.nombre_cheque);

@@ -17,7 +17,7 @@ CREATE TABLE cd.ttipo_categoria (
   id_tipo_categoria SERIAL NOT NULL,
   codigo VARCHAR(100),
   nombre VARCHAR(400),
-  PRIMARY KEY("id_tipo_Categoria")
+  PRIMARY KEY("id_tipo_categoria")
 ) INHERITS (pxp.tbase)
 
 WITH (oids = false);

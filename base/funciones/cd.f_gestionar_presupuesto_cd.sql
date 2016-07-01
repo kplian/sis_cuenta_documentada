@@ -47,20 +47,18 @@ DECLARE
   v_comprometido_ga     numeric;
   v_ejecutado     	    numeric;
   
-  v_men_presu			varchar;
-  v_monto_a_revertir_mb  numeric;
-  v_ano_1 integer;
-  v_ano_2 integer;
-  v_reg_sol				record;
-  va_num_tramite		varchar[];
-  v_mensage_error		varchar;
-  v_sw_error			boolean;
-  v_resp_pre 			varchar;
-  
-  
-  v_rendicion				record;
-  v_rendicion_det			record;
-  v_id_presupuesto			integer;
+  v_men_presu						varchar;
+  v_monto_a_revertir_mb  			numeric;
+  v_ano_1 							integer;
+  v_ano_2 							integer;
+  v_reg_sol							record;
+  va_num_tramite					varchar[];
+  v_mensage_error					varchar;
+  v_sw_error						boolean;
+  v_resp_pre 						varchar;  
+  v_rendicion						record;
+  v_rendicion_det					record;
+  v_id_presupuesto					integer;
   v_pre_verificar_categoria			varchar;
   
 
@@ -77,9 +75,6 @@ BEGIN
    v_reg_sol
   from cd.tcuenta_doc c
   where c.id_cuenta_doc = p_id_cuenta_doc;
-  
- 
-  
   
       IF p_operacion = 'comprometer' THEN
       
@@ -100,8 +95,7 @@ BEGIN
                                  r.id_rendicion_det
                              FROM  cd.trendicion_det r
                              inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
-                             where r.id_cuenta_doc_rendicion = p_id_cuenta_doc
-                             
+                             where r.id_cuenta_doc_rendicion = p_id_cuenta_doc                             
                              ) LOOP
              
              -- recorrer todos los detalles
@@ -112,48 +106,53 @@ BEGIN
                                          dc.precio_total_final,
                                          dc.id_doc_concepto,
                                          cig.desc_ingas,
-                                         dc.id_partida
+                                         dc.id_partida,
+                                         par.sw_movimiento,
+                                         tp.movimiento
                                       from  conta.tdoc_concepto dc 
                                       inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = dc.id_concepto_ingas
+                                      inner join pre.vpresupuesto p on p.id_presupuesto = dc.id_centro_costo
+                                      inner join pre.ttipo_presupuesto tp on p.tipo_pres = tp.codigo
+                                      inner join pre.tpartida par on par.id_partida = dc.id_partida
                                       where dc.id_doc_compra_venta = v_rendicion.id_doc_compra_venta
                                       ) LOOP
                                       
-                    
+                     IF v_rendicion_det.sw_movimiento = 'flujo'  THEN                              
+                           IF v_rendicion_det.movimiento != 'administrativo'  THEN
+                                 raise exception 'partida de flujo solo son admitidas con presupuestos administrativos';
+                           END IF;
+                     ELSE
              
-                    --  determinar partida a comprometer
-                     v_i = v_i +1;
-                           
-                     --armamos los array para enviar a presupuestos          
-           
-                    va_id_presupuesto[v_i] = v_rendicion_det.id_centro_costo;
-                    va_id_partida[v_i] = v_rendicion_det.id_partida; 
-                    va_momento[v_i]	= 1; --el momento 1 es el comprometido
-                    va_monto[v_i]  = v_rendicion_det.precio_total_final; --RAC Cambio por moneda de la solicitud , v_registros.precio_ga_mb;
-                    va_id_moneda[v_i]  = v_reg_sol.id_moneda;        --  RAC Cambio por moneda de la solicitud , v_id_moneda_base;
-                  
-                    va_columna_relacion[v_i]= 'id_doc_concepto';
-                    va_fk_llave[v_i] = v_rendicion_det.id_doc_concepto;
-                    va_id_doc_concepto[v_i]= v_rendicion_det.id_doc_concepto;
-                    va_num_tramite[v_i] = v_reg_sol.nro_tramite; 
-                    
-                    -- la fecha de solictud es la fecha de compromiso 
-                    IF  now()  < v_reg_sol.fecha THEN
-                      va_fecha[v_i] = v_reg_sol.fecha::date;
-                    ELSE
-                       -- la fecha de reversion como maximo puede ser el 31 de diciembre   
-                       va_fecha[v_i] = now()::date;
-                       v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
-                       v_ano_2 =  EXTRACT(YEAR FROM  v_reg_sol.fecha::date);
-                       
-                       IF  v_ano_1  >  v_ano_2 THEN
-                         va_fecha[v_i] = ('31-12-'|| v_ano_2::varchar)::date;
-                       END IF;
-                    END IF;
-                     
+                          --  determinar partida a comprometer
+                          v_i = v_i +1;                                 
+                          --armamos los array para enviar a presupuestos        
+                          va_id_presupuesto[v_i] = v_rendicion_det.id_centro_costo;
+                          va_id_partida[v_i] = v_rendicion_det.id_partida; 
+                          va_momento[v_i]	= 1; --el momento 1 es el comprometido
+                          va_monto[v_i]  = v_rendicion_det.precio_total_final; --RAC Cambio por moneda de la solicitud , v_registros.precio_ga_mb;
+                          va_id_moneda[v_i]  = v_reg_sol.id_moneda;        --  RAC Cambio por moneda de la solicitud , v_id_moneda_base;
+                        
+                          va_columna_relacion[v_i]= 'id_doc_concepto';
+                          va_fk_llave[v_i] = v_rendicion_det.id_doc_concepto;
+                          va_id_doc_concepto[v_i]= v_rendicion_det.id_doc_concepto;
+                          va_num_tramite[v_i] = v_reg_sol.nro_tramite; 
+                          
+                          -- la fecha de solictud es la fecha de compromiso 
+                          IF  now()  < v_reg_sol.fecha THEN
+                            va_fecha[v_i] = v_reg_sol.fecha::date;
+                          ELSE
+                             -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                             va_fecha[v_i] = now()::date;
+                             v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                             v_ano_2 =  EXTRACT(YEAR FROM  v_reg_sol.fecha::date);
+                             
+                             IF  v_ano_1  >  v_ano_2 THEN
+                               va_fecha[v_i] = ('31-12-'|| v_ano_2::varchar)::date;
+                             END IF;
+                          END IF;
+                 END IF;    
                      
              END LOOP; 
-            
-         
          END LOOP; 
            
              
@@ -176,24 +175,17 @@ BEGIN
                                                                p_conexion);
                  
                    --  actualizacion de los id_partida_ejecucion en el detalle de solicitud
-               
                     FOR v_cont IN 1..v_i LOOP
-                   
                       update conta.tdoc_concepto  d set
                          id_partida_ejecucion = va_resp_ges[v_cont],
                          fecha_mod = now(),
                          id_usuario_mod = p_id_usuario
                       where d.id_doc_concepto =  va_id_doc_concepto[v_cont];
-                   
-                     
                    END LOOP;
-                   
                   update cd.tcuenta_doc c set
                     presu_comprometido = 'si'
                   where c.id_cuenta_doc = p_id_cuenta_doc;  
-                   
            END IF;
-      
       
       
        ELSEIF p_operacion = 'revertir' THEN
@@ -209,72 +201,73 @@ BEGIN
                                    cig.desc_ingas,
                                    dc.id_partida,
                                    dc.id_partida_ejecucion,
-                                   r.id_rendicion_det
+                                   r.id_rendicion_det,
+                                   par.sw_movimiento
                                    
                                 from  cd.trendicion_det r
                                 inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = r.id_doc_compra_venta 
                                 inner join param.tconcepto_ingas cig on cig.id_concepto_ingas = dc.id_concepto_ingas
+                                inner join pre.tpartida par on par.id_partida = dc.id_partida
                                 where r.id_cuenta_doc_rendicion =  p_id_cuenta_doc
                                 	  and dc.estado_reg = 'activo' ) LOOP
                                      
-                     IF(v_registros.id_partida_ejecucion is NULL) THEN                     
-                        raise exception 'El presupuesto del detalle con el identificador (%)  no se encuentra comprometido',v_registros.id_doc_concepto;
-                     END IF;
                      
-                     v_comprometido=0;
-                     v_ejecutado=0;
+                     IF v_registros.sw_movimiento != 'flujo'  THEN 
                      
-                     SELECT 
-                           COALESCE(ps_comprometido,0), 
-                           COALESCE(ps_ejecutado,0)  
-                       into 
-                           v_comprometido,
-                           v_ejecutado
-                     FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion, v_reg_sol.id_moneda);   --  RAC,  v_id_moneda_base);
-                     
-                     
-                    v_monto_a_revertir = COALESCE(v_comprometido,0) - COALESCE(v_ejecutado,0);  
-                     
-                     
-                    --armamos los array para enviar a presupuestos          
-                    IF v_monto_a_revertir != 0 THEN
-                     
-                       	v_i = v_i +1;                
-                       
-                        va_id_presupuesto[v_i] = v_registros.id_centro_costo;
-                        va_id_partida[v_i]= v_registros.id_partida;
-                        va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
-                        va_monto[v_i]  = (v_monto_a_revertir)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
-                        va_id_moneda[v_i]  = v_reg_sol.id_moneda; -- RAC,  v_id_moneda_base;
-                        va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion;
-                        va_columna_relacion[v_i]= 'id_doc_concepto';
-                        va_fk_llave[v_i] = v_registros.id_doc_concepto;
-                        va_id_doc_concepto[v_i]= v_registros.id_doc_concepto;
-                        va_num_tramite[v_i] = v_reg_sol.nro_tramite;
-                        
-                        
-                         -- la fecha de solictud es la fecha de compromiso 
-                        IF  now()  < v_reg_sol.fecha THEN
-                          va_fecha[v_i] = v_reg_sol.fecha::date;
-                        ELSE
-                           -- la fecha de reversion como maximo puede ser el 31 de diciembre   
-                           va_fecha[v_i] = now()::date;
-                           v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
-                           v_ano_2 =  EXTRACT(YEAR FROM  v_reg_sol.fecha::date);
-                           
-                           IF  v_ano_1  >  v_ano_2 THEN
-                             va_fecha[v_i] = ('31-12-'|| v_ano_2::varchar)::date;
-                           END IF;
-                        END IF;
-                    
-                        
+                             
+                             IF(v_registros.id_partida_ejecucion is NULL) THEN                     
+                                raise exception 'El presupuesto del detalle con el identificador (%)  no se encuentra comprometido',v_registros.id_doc_concepto;
+                             END IF;
+                             
+                             
+                             v_comprometido=0;
+                             v_ejecutado=0;
+                             
+                             SELECT 
+                                   COALESCE(ps_comprometido,0), 
+                                   COALESCE(ps_ejecutado,0)  
+                               into 
+                                   v_comprometido,
+                                   v_ejecutado
+                            FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion, v_reg_sol.id_moneda);   --  RAC,  v_id_moneda_base);
+                             
+                            v_monto_a_revertir = COALESCE(v_comprometido,0) - COALESCE(v_ejecutado,0);  
+                            --armamos los array para enviar a presupuestos          
+                            IF v_monto_a_revertir != 0 THEN
+                             
+                                v_i = v_i +1;                
+                               
+                                va_id_presupuesto[v_i] = v_registros.id_centro_costo;
+                                va_id_partida[v_i]= v_registros.id_partida;
+                                va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
+                                va_monto[v_i]  = (v_monto_a_revertir)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
+                                va_id_moneda[v_i]  = v_reg_sol.id_moneda; -- RAC,  v_id_moneda_base;
+                                va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion;
+                                va_columna_relacion[v_i]= 'id_doc_concepto';
+                                va_fk_llave[v_i] = v_registros.id_doc_concepto;
+                                va_id_doc_concepto[v_i]= v_registros.id_doc_concepto;
+                                va_num_tramite[v_i] = v_reg_sol.nro_tramite;
+                                
+                                
+                                 -- la fecha de solictud es la fecha de compromiso 
+                                IF  now()  < v_reg_sol.fecha THEN
+                                  va_fecha[v_i] = v_reg_sol.fecha::date;
+                                ELSE
+                                   -- la fecha de reversion como maximo puede ser el 31 de diciembre   
+                                   va_fecha[v_i] = now()::date;
+                                   v_ano_1 =  EXTRACT(YEAR FROM  now()::date);
+                                   v_ano_2 =  EXTRACT(YEAR FROM  v_reg_sol.fecha::date);
+                                   
+                                   IF  v_ano_1  >  v_ano_2 THEN
+                                     va_fecha[v_i] = ('31-12-'|| v_ano_2::varchar)::date;
+                                   END IF;
+                                END IF;
+                            END IF;
+                            v_men_presu = ' comprometido: '||COALESCE(v_comprometido,0)::varchar||'  ejecutado: '||COALESCE(v_ejecutado,0)::varchar||' \n'||v_men_presu;
+              
                     END IF;
-                    
-                    
-                    v_men_presu = ' comprometido: '||COALESCE(v_comprometido,0)::varchar||'  ejecutado: '||COALESCE(v_ejecutado,0)::varchar||' \n'||v_men_presu;
-                    
-             
-             END LOOP;
+           
+            END LOOP;
              
                --raise exception '%', v_men_presu;
              
@@ -302,15 +295,12 @@ BEGIN
             where c.id_cuenta_doc = p_id_cuenta_doc;  
              
        
-       
        ELSIF p_operacion = 'verificar' THEN
         
            --  verifica si tenemos suficiente presupuesto para comprometer
            v_i = 0;
            v_mensage_error = '';
            v_sw_error = false;
-           
-           
           v_pre_verificar_categoria = pxp.f_get_variable_global('pre_verificar_categoria');
           
           IF v_pre_verificar_categoria = 'no' THEN 
@@ -327,13 +317,14 @@ BEGIN
                                           c.id_moneda,
                                           par.codigo,
                                           par.nombre_partida,
-                                          p.codigo_cc
+                                          p.codigo_cc,
+                                          par.sw_movimiento
                                     FROM  cd.tcuenta_doc c
                                     INNER JOIN cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
                                     INNER JOIN conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
                                     INNER JOIN conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta 
-                                    inner join pre.tpartida par on par.id_partida = dc.id_partida
-                                    inner join pre.vpresupuesto_cc   p  on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
+                                    INNER JOIN pre.tpartida par on par.id_partida = dc.id_partida
+                                    INNER JOIN pre.vpresupuesto_cc   p  on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
                                     WHERE  dc.estado_reg = 'activo'   and c.id_cuenta_doc = p_id_cuenta_doc                           
                                     group by                              
                                               dc.id_centro_costo,
@@ -344,30 +335,28 @@ BEGIN
                                               c.id_moneda,
                                               par.codigo,
                                               par.nombre_partida,
-                                              p.codigo_cc
+                                              p.codigo_cc,
+                                              par.sw_movimiento
                                               ) LOOP
                                          
                                     
-                                  v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
-                                                            v_registros.id_partida,
-                                                            v_registros.id_moneda,
-                                                            v_registros.precio_total_final);
-                                                            
-                                                            
-                                  IF   v_resp_pre = 'false' THEN        
-                                       v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
-                                       v_sw_error = true;
+                                  IF v_registros.sw_movimiento != 'flujo'  THEN 
                                   
-                                  END IF;                         
-                       
-                 
-                 
+                                        v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_presupuesto,
+                                                                  v_registros.id_partida,
+                                                                  v_registros.id_moneda,
+                                                                  v_registros.precio_total_final);                                                                  
+                                        IF   v_resp_pre = 'false' THEN        
+                                             v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
+                                             v_sw_error = true;
+                                        END IF;
+                                        
+                                  END IF;   
                  END LOOP;
              ELSE
              
              --  verifica agrupando por categoria programatica
-             
-                FOR v_registros in (SELECT               
+             FOR v_registros in (SELECT               
                                             c.id_gestion,
                                             c.id_cuenta_doc,
                                             dc.id_partida,
@@ -376,14 +365,15 @@ BEGIN
                                             par.codigo,
                                             par.nombre_partida,
                                             p.id_categoria_prog,
-                                            cp.codigo_categoria
+                                            cp.codigo_categoria,
+                                            par.sw_movimiento
                                       FROM  cd.tcuenta_doc c
                                       INNER JOIN cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
                                       INNER JOIN conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
                                       INNER JOIN conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta 
-                                      inner join pre.tpartida par on par.id_partida = dc.id_partida
-                                      inner join pre.vpresupuesto_cc   p  on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
-                                      inner join pre.vcategoria_programatica cp on p.id_categoria_prog = cp.id_categoria_programatica
+                                      INNER JOIN pre.tpartida par on par.id_partida = dc.id_partida
+                                      INNER JOIN pre.vpresupuesto_cc   p  on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
+                                      INNER JOIN pre.vcategoria_programatica cp on p.id_categoria_prog = cp.id_categoria_programatica
                                       WHERE  
                                              dc.estado_reg = 'activo'
                                              and c.id_cuenta_doc = p_id_cuenta_doc                            
@@ -397,48 +387,40 @@ BEGIN
                                             par.codigo,
                                             par.nombre_partida) LOOP
                                       
-                                      
-                                      --recupera un presupuesto cualqueira con la misma categoria para la verificacion
-                                      select 
-                                         p.id_presupuesto
-                                      into 
-                                         v_id_presupuesto                                      
-                                      from pre.vpresupuesto_cc p
-                                      where p.id_categoria_prog =  v_registros.id_categoria_prog
-                                      OFFSET 0 limit 1; 
-                                           
-                                      
-                                    v_resp_pre = pre.f_verificar_presupuesto_partida ( v_id_presupuesto,
-                                                              v_registros.id_partida,
-                                                              v_registros.id_moneda,
-                                                              v_registros.precio_total_final);
-                                                              
-                                                              
-                                    IF   v_resp_pre = 'false' THEN        
-                                         v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
-                                         v_sw_error = true;
-                                    
-                                    END IF;                         
-                         
-                   
-                   
+                                        
+                                     IF v_registros.sw_movimiento != 'flujo'  THEN                                       
+                                            --recupera un presupuesto cualqueira con la misma categoria para la verificacion
+                                            select 
+                                               p.id_presupuesto
+                                            into 
+                                               v_id_presupuesto                                      
+                                            from pre.vpresupuesto_cc p
+                                            where p.id_categoria_prog =  v_registros.id_categoria_prog
+                                            OFFSET 0 limit 1; 
+                                                 
+                                            
+                                            v_resp_pre = pre.f_verificar_presupuesto_partida ( v_id_presupuesto,
+                                                                    v_registros.id_partida,
+                                                                    v_registros.id_moneda,
+                                                                    v_registros.precio_total_final);
+                                                                    
+                                                                    
+                                          IF   v_resp_pre = 'false' THEN        
+                                               v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <BR/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);    
+                                               v_sw_error = true;
+                                          END IF; 
+                                    END IF;  
                    END LOOP;
-             
-             
-             END IF;     
-             
+             END IF;    
              
              IF v_sw_error THEN
                  raise exception 'No se tiene suficiente presupuesto para: <BR/> %', v_mensage_error;
              END IF;
-              
-       
+             
              return TRUE;
        
-       ELSE
-       
+       ELSE       
           raise exception 'Operacion no implementada';
-       
        END IF;
    
 
