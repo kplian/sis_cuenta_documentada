@@ -560,7 +560,7 @@ BEGIN
                               cdoc.id_cuenta_doc_fk,
                               cdoc.nro_tramite,
                               upper(cdoc.motivo)::varchar as motivo,
-                              cdoc.fecha,
+                              lb.fecha,
                               cdoc.id_moneda,
                               cdoc.estado,
                               cdoc.estado_reg,
@@ -596,7 +596,8 @@ BEGIN
                             upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero,
                             cbte.nro_cbte,
                             cdoc.num_memo,
-                            COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion
+                            COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion,
+                            lb.nro_cheque
                        	from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -607,6 +608,7 @@ BEGIN
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
                         left join conta.tint_comprobante cbte on cbte.id_int_comprobante = cdoc.id_int_comprobante
+                        left join tes.tts_libro_bancos lb on lb.id_int_comprobante=cbte.id_int_comprobante
                         left join cd.tcuenta_doc cdori on cdori.id_cuenta_doc = cdoc.id_cuenta_doc_fk
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria

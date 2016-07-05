@@ -33,8 +33,8 @@ Class RMemoAsignacion {
 		$document->setValue('CARGO_GERENTE', $this->dataSource[0]['cargo_gerente_financiero']); // On section/content
 		
 		$document->setValue('NRO_DOC', $this->dataSource[0]['num_memo']); // On section/content
-		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content
-		
+		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content
+		$document->setValue('NUM_CHEQUE', $this->dataSource[0]['nro_cheque']); // On section/content
 		
 		
 		

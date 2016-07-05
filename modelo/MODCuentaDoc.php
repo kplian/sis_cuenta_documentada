@@ -432,7 +432,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('nro_cbte','VARCHAR');
 		$this->captura('num_memo','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
-		
+		$this->captura('nro_cheque','integer');		
 		
 		
 		
