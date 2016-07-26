@@ -191,7 +191,7 @@ BEGIN
     	  --Sentencia de la consulta
 		  v_consulta:='select
                             '||v_strg_cd||',
-                            (cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||')::integer  as dias_para_rendir,
+                            (cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||' + pxp.f_get_weekend_days(cdoc.fecha_entrega::date,now()::date))::integer  as dias_para_rendir,
                             cdoc.id_tipo_cuenta_doc,
                             cdoc.id_proceso_wf,
                             cdoc.id_caja,
@@ -246,7 +246,7 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-           -- raise exception 'sss';
+            
             raise NOTICE '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
@@ -560,7 +560,7 @@ BEGIN
                               cdoc.id_cuenta_doc_fk,
                               cdoc.nro_tramite,
                               upper(cdoc.motivo)::varchar as motivo,
-                              lb.fecha,
+                              case when cdoc.id_tipo_cuenta_doc = 1 then lb.fecha else cdoc.fecha end as fecha,
                               cdoc.id_moneda,
                               cdoc.estado,
                               cdoc.estado_reg,
@@ -594,6 +594,8 @@ BEGIN
                             cdori.motivo::varchar as motivo_ori,
                             '''||v_gaf[3]||'''::varchar as  gerente_financiero,
                             upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero,
+                            funapro.desc_funcionario1 as aprobador,
+	       					upper(orga.f_get_cargo_x_funcionario_str(funapro.id_funcionario,CURRENT_DATE)) as cargo_aprobador,
                             cbte.nro_cbte,
                             cdoc.num_memo,
                             COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion,
@@ -605,6 +607,7 @@ BEGIN
                         inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
+                        inner join orga.vfuncionario funapro on funapro.id_funcionario = cdoc.id_funcionario_gerente
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
                         left join conta.tint_comprobante cbte on cbte.id_int_comprobante = cdoc.id_int_comprobante
@@ -615,7 +618,7 @@ BEGIN
                           
                             
 						where  cdoc.id_proceso_wf = '||v_parametros.id_proceso_wf;
-                        
+
                         raise notice '%', v_consulta;
 			
             return v_consulta;
@@ -832,7 +835,7 @@ BEGIN
                       where  c.id_proceso_wf = '||v_parametros.id_proceso_wf;
                         
                        
-			
+			raise notice 'consulta %', v_consulta;
             return v_consulta;
 						
 		end; 

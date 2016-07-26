@@ -429,6 +429,9 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('gerente_financiero','VARCHAR');
 		$this->captura('cargo_gerente_financiero','VARCHAR');
 		
+		$this->captura('aprobador','TEXT');
+		$this->captura('cargo_aprobador','TEXT');
+		
 		$this->captura('nro_cbte','VARCHAR');
 		$this->captura('num_memo','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
@@ -442,7 +445,6 @@ class MODCuentaDoc extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
-		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

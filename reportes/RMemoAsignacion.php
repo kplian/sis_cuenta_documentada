@@ -29,8 +29,8 @@ Class RMemoAsignacion {
 		
 		$document->setValue('IMPORTE_LITERAL', $this->dataSource[0]['importe_literal']); // On section/content
 		$document->setValue('NUMDOC', $this->dataSource[0]['nro_tramite']); // On section/content
-		$document->setValue('NOMBRE_GERENTE', $this->dataSource[0]['gerente_financiero']); // On section/content
-		$document->setValue('CARGO_GERENTE', $this->dataSource[0]['cargo_gerente_financiero']); // On section/content
+		$document->setValue('NOMBRE_GERENTE', $this->dataSource[0]['aprobador']); // On section/content
+		$document->setValue('CARGO_GERENTE', $this->dataSource[0]['cargo_aprobador']); // On section/content
 		
 		$document->setValue('NRO_DOC', $this->dataSource[0]['num_memo']); // On section/content
 		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content		$document->setValue('NUM_CBTE', $this->dataSource[0]['nro_cbte']); // On section/content

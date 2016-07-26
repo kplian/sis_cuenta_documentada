@@ -44,15 +44,13 @@ header("content-type: text/javascript; charset=UTF-8");
 		}],
 
 		beditGroups : [0],
-		bactGroups : [0, 1, 2, 3],
+		bactGroups :  [0, 1, 2, 3],
 		btestGroups : [0],
-		bexcelGroups : [0, 1, 2, 3],
-		
-		
+		bexcelGroups : [0, 1, 2, 3],		
 		constructor : function(config) {
 			var me = this;
-			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
-				    
+			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) { 
+								    
 					if (record.data.estado == 'contabilizado') {
 						var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_documentos) - me.roundTwo(record.data.importe_depositos) +  me.roundTwo(record.data.importe_retenciones);
 				        saldo = me.roundTwo(saldo);
@@ -73,16 +71,11 @@ header("content-type: text/javascript; charset=UTF-8");
 					else {
 						return String.format('<font>Solicitado: {0}</font>', value);
 					}
-					
-					
-
 			};
 			
 			Phx.vista.CuentaDocReg.superclass.constructor.call(this, config);
 			this.bloquearOrdenamientoGrid();
-
 			this.iniciarEventos();
-
 			this.store.baseParams = {
 				estado : 'borrador',
 				tipo_interfaz : this.nombreVista
@@ -118,9 +111,7 @@ header("content-type: text/javascript; charset=UTF-8");
 				disabled : false,
 				handler : this.onBtnRepRenCon,
 				tooltip : '<b>Reporte de redición consolidada</b>'
-		    });
-			
-			
+		    });			
 
 			this.init();
 			this.load({
@@ -150,15 +141,13 @@ header("content-type: text/javascript; charset=UTF-8");
 					}
 				});
 			}
-
 		},
 
 		preparaMenu : function(n) {
 			var data = this.getSelectedData();
 			var tb = this.tbar;
 			Phx.vista.CuentaDocReg.superclass.preparaMenu.call(this, n);
-			this.getBoton('chkpresupuesto').enable();  
-
+			this.getBoton('chkpresupuesto').enable(); 
 			if (data.estado == 'borrador') {
 				this.getBoton('ant_estado').disable();
 				this.getBoton('sig_estado').enable();
@@ -175,17 +164,13 @@ header("content-type: text/javascript; charset=UTF-8");
 				}
 				else{
 					this.getBoton('btnRendicion').disable();
-				}
-				
-			}
-			
+				}				
+			}			
 			this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
             this.getBoton('diagrama_gantt').enable();
             this.getBoton('btnObs').enable();
             this.getBoton('onBtnRepSol').enable();
-            this.getBoton('onBtnRepRenCon').enable();  
-            
-
+            this.getBoton('onBtnRepRenCon').enable(); 
 			return tb
 		},
 
@@ -199,22 +184,18 @@ header("content-type: text/javascript; charset=UTF-8");
                 this.getBoton('diagrama_gantt').disable();
                 this.getBoton('btnObs').disable();
                 this.getBoton('onBtnRepSol').disable();
-                this.getBoton('onBtnRepRenCon').disable(); 
-                 
+                this.getBoton('onBtnRepRenCon').disable();                  
 			}
 			return tb
 		},
 		iniciarEventos : function() {
-
 			this.Cmp.fecha.on('change', function(f) {
-
 				this.Cmp.id_funcionario.reset();
 				this.Cmp.id_depto.reset();
 				this.Cmp.tipo_pago.reset();
 				this.Cmp.id_funcionario.enable();
 				this.Cmp.id_funcionario.store.baseParams.fecha = this.Cmp.fecha.getValue().dateFormat(this.Cmp.fecha.format);
 				this.Cmp.id_funcionario.modificado = true;
-
 				this.Cmp.id_funcionario.store.load({
 					params : {
 						start : 0,
@@ -226,7 +207,6 @@ header("content-type: text/javascript; charset=UTF-8");
 							this.Cmp.id_funcionario.setValue(r[0].data.id_funcionario);
 							this.Cmp.id_funcionario.fireEvent('select', this.Cmp.id_funcionario, r[0]);
 						}
-
 					},
 					scope : this
 				});
@@ -234,12 +214,10 @@ header("content-type: text/javascript; charset=UTF-8");
 			}, this);
 
 			this.Cmp.id_funcionario.on('select', function(combo, record, index) {
-
 				if (!record.data.id_lugar) {
 					alert('El funcionario no tiene oficina definida');
 					return;
 				}
-
 				this.Cmp.id_depto.reset();
 				this.Cmp.tipo_pago.reset();
 				this.Cmp.id_depto.store.baseParams.id_lugar = record.data.id_lugar;
@@ -254,7 +232,6 @@ header("content-type: text/javascript; charset=UTF-8");
 						if (r.length == 1) {
 							this.Cmp.id_depto.setValue(r[0].data.id_depto);
 						}
-
 					},
 					scope : this
 				});
@@ -262,24 +239,19 @@ header("content-type: text/javascript; charset=UTF-8");
 			}, this);
 
 			this.Cmp.tipo_pago.on('select', function(combo, rec, index) {
-				console.log('record', rec.data.variable)
-
+				console.log('record', rec.data.variable);
 				if (rec.data.variable == 'cheque') {
-
 					this.mostrarComponente(this.Cmp.nombre_cheque);
 					this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
 					this.Cmp.nombre_cheque.setValue(this.Cmp.id_funcionario.getRawValue());
 
 				}
 				if (rec.data.variable == 'transferencia') {
-
 					this.ocultarComponente(this.Cmp.nombre_cheque);
 					this.mostrarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
-
 					this.Cmp.id_funcionario_cuenta_bancaria.store.baseParams.id_funcionario = this.Cmp.id_funcionario.getValue();
 					this.Cmp.id_funcionario_cuenta_bancaria.store.baseParams.fecha = this.Cmp.fecha.getValue().dateFormat(this.Cmp.fecha.format);
 					this.Cmp.id_funcionario_cuenta_bancaria.modificado = true;
-
 					this.Cmp.id_funcionario_cuenta_bancaria.store.load({
 						params : {
 							start : 0,
@@ -291,14 +263,11 @@ header("content-type: text/javascript; charset=UTF-8");
 								this.Cmp.id_funcionario_cuenta_bancaria.setValue(r[0].data.id_funcionario_cuenta_bancaria);
 								this.Cmp.id_funcionario_cuenta_bancaria.fireEvent('select', this.Cmp.id_funcionario_cuenta_bancaria, r[0]);
 							}
-
 						},
 						scope : this
 					});
-
 				}
-
-			}, this)
+			}, this);
 
 		},
 		onButtonEdit : function() {
@@ -320,14 +289,12 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
 			this.Cmp.fecha.setValue(new Date());
             this.Cmp.fecha.fireEvent('change');
-
 		},
 		
 		onButtonEdit : function() {
 			Phx.vista.CuentaDocReg.superclass.onButtonEdit.call(this);
 			this.Cmp.id_funcionario.disable();
-			this.Cmp.id_depto.disable();
-			
+			this.Cmp.id_depto.disable();			
 			if (this.Cmp.tipo_pago.getValue() == 'cheque') {
 					this.mostrarComponente(this.Cmp.nombre_cheque);
 					this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
@@ -335,9 +302,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			if (this.Cmp.tipo_pago.getValue() == 'transferencia') {
 					this.ocultarComponente(this.Cmp.nombre_cheque);
 					this.mostrarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
-            }
-			
-
+            }			
 		},
 
 		onBtnRendicion : function() {
@@ -380,10 +345,7 @@ header("content-type: text/javascript; charset=UTF-8");
 						failure: this.conexionFailure,
 						timeout: this.timeout,
 						scope:this
-					});
-		
-		}
-		
-		
+					});		
+		}		
 }; 
 </script>

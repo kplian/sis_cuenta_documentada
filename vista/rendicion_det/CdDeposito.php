@@ -19,6 +19,7 @@ Phx.vista.CdDeposito = {
 	
 	tablaOrigen: 'cd.tcuenta_doc',
 	idOrigen: 'id_cuenta_doc',
+	idOrigenValor : '',
 	
 	ActSave: '../../sis_cuenta_documentada/control/RendicionDet/insertarCdDeposito',
 	ActDel: '../../sis_cuenta_documentada/control/RendicionDet/eliminarCdDeposito',
@@ -42,6 +43,7 @@ Phx.vista.CdDeposito = {
 		this.maestro=m;
 		var me = this;
 		this.maestro = m;
+		this.idOrigenValor = me.maestro[me.idOrigen];
 		this.store.baseParams={tabla : me.tablaOrigen,columna_pk: me.idOrigen,columna_pk_valor : me.maestro[me.idOrigen]};
 		this.load({params : {start : 0,limit : me.tam_pag}});
 		
