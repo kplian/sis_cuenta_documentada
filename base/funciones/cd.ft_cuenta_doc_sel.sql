@@ -573,7 +573,7 @@ BEGIN
                               cdoc.id_usuario_mod,
                               usu1.cuenta as usr_reg,
                               usu2.cuenta as usr_mod,
-                              mon.codigo as desc_moneda,
+                              mon.moneda as desc_moneda,
                               dep.codigo as desc_depto,
                               ew.obs, 
                               fun.desc_funcionario1 as desc_funcionario,
@@ -607,7 +607,7 @@ BEGIN
                         inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
-                        inner join orga.vfuncionario funapro on funapro.id_funcionario = cdoc.id_funcionario_gerente
+                        left join orga.vfuncionario funapro on funapro.id_funcionario = cdoc.id_funcionario_aprobador
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
                         left join conta.tint_comprobante cbte on cbte.id_int_comprobante = cdoc.id_int_comprobante

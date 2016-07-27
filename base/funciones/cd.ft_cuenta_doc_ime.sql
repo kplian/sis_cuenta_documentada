@@ -476,7 +476,15 @@ BEGIN
            ELSE
                   v_obs='---';
            END IF;
-            
+           
+           IF v_codigo_estado_siguiente in ('vbgerencia','vbgaf') THEN
+           		
+                UPDATE cd.tcuenta_doc 
+                SET id_funcionario_aprobador = v_parametros.id_funcionario_wf
+                WHERE id_cuenta_doc=v_parametros.id_cuenta_doc;
+                
+           END IF;
+           
            ---------------------------------------
            -- REGISTA EL SIGUIENTE ESTADO DEL WF.
            ---------------------------------------
