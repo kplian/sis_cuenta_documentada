@@ -53,7 +53,8 @@ Phx.vista.CdDeposito = {
    
     liberaMenu:function(){
         var tb = Phx.vista.CdDeposito.superclass.liberaMenu.call(this);
-        if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'CuentaDocRen'){
+        /*
+		if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'CuentaDocRen'){
         	if( this.maestro.estado == 'borrador'){     	            		
 				this.getBoton('new').enable();  
 			} 
@@ -70,7 +71,7 @@ Phx.vista.CdDeposito = {
 				this.getBoton('new').disable();   
 			} 
         }
-        
+        */
         return tb
     },
     
