@@ -70,12 +70,12 @@ BEGIN
               
           v_importe_fac = '
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
-                             	 COALESCE((select sum(COALESCE(dcv.importe_doc,0)) from cd.trendicion_det rd
+                             	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                               	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
                               
                               WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
-                             	 COALESCE((select sum(COALESCE(dcv.importe_doc,0)) from cd.trendicion_det rd
+                             	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                               	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric 
                               
