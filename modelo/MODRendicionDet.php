@@ -626,6 +626,7 @@ class MODRendicionDet extends MODbase{
 			$this->setParametro('fecha','fecha','date');
 			$this->setParametro('tipo','tipo','varchar');
 			$this->setParametro('observaciones','observaciones','varchar');
+			$this->setParametro('nro_deposito','nro_deposito','varchar');
 			$this->setParametro('importe_deposito','importe_deposito','numeric');
 			$this->setParametro('origen','origen','varchar');
 			$this->setParametro('tabla','tabla','varchar');
