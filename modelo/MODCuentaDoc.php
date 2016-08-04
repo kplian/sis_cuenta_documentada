@@ -436,6 +436,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('num_memo','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
 		$this->captura('nro_cheque','integer');		
+		$this->captura('importe_solicitado','numeric');		
 		
 		
 		
@@ -524,6 +525,25 @@ class MODCuentaDoc extends MODbase{
 		return $this->respuesta;
 	}
 
+	function recuperarRetenciones(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPRENRET_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('retenciones','numeric');	
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
    function recuperarRendicionDepositos(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='cd.ft_cuenta_doc_sel';

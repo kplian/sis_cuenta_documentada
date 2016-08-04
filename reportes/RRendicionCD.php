@@ -12,12 +12,13 @@ class RRendicionCD extends  ReportePDF {
 	var $cantidad_columnas_estaticas;
 	var $total;
 	
-	function datosHeader ( $detalle, $facturas, $datos_depositos) {
+	function datosHeader ( $detalle, $facturas, $datos_depositos, $retenciones) {
 		
 		$this->ancho_hoja = $this->getPageWidth()-PDF_MARGIN_LEFT-PDF_MARGIN_RIGHT-10;
 		$this->datos_detalle = $detalle;
 		$this->datos_depositos = $datos_depositos;		
 		$this->facturas = $facturas;
+		$this->retenciones = $retenciones[0]['retenciones'];
 		$this->subtotal = 0;
 		$this->SetMargins(15, 35, 5);
 	}

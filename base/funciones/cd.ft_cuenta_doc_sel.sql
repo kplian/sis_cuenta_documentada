@@ -599,7 +599,8 @@ BEGIN
                             cbte.nro_cbte,
                             cdoc.num_memo,
                             COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion,
-                            lb.nro_cheque
+                            lb.nro_cheque,
+                            cdori.importe as importe_solicitado
                        	from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -715,6 +716,28 @@ BEGIN
 						
 		end;
     
+    /*********************************    
+ 	#TRANSACCION:  'CD_REPRENRET_SEL'
+ 	#DESCRIPCION:	recupera el importe total de las rendiciones
+ 	#AUTOR:		Gonzalo Sarmiento Sejas
+ 	#FECHA:		04-08-2016
+	***********************************/
+
+	elsif(p_transaccion='CD_REPRENRET_SEL')then
+     				
+    	begin
+    		--Sentencia de la consulta
+			v_consulta:='select COALESCE(sum(dcv.importe_descuento_ley),0) as retenciones
+						from conta.tdoc_compra_venta dcv
+     					inner join cd.trendicion_det rd on rd.id_doc_compra_venta = dcv.id_doc_compra_venta
+     					inner join cd.tcuenta_doc cdd on cdd.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+						where cdd.id_proceso_wf = '||v_parametros.id_proceso_wf::varchar||'';
+
+			--Devuelve la respuesta
+			return v_consulta;
+						
+		end;
+        
     /*********************************    
  	#TRANSACCION:  'CD_REPDEPREN_SEL'
  	#DESCRIPCION:	listado de depositos para el reporte de rendicion

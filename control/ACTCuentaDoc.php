@@ -225,6 +225,20 @@ class ACTCuentaDoc extends ACTbase{
 		}              
 		
     }
+	
+	function recuperarRetenciones(){
+    	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarRetenciones($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+        else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}              
+		
+    }
    
    function recuperarRendicionDepositos(){
     	
@@ -257,8 +271,9 @@ class ACTCuentaDoc extends ACTbase{
    function reporteRendicionFondos(){
 			
 		$nombreArchivo = uniqid(md5(session_id()).'Egresos') . '.pdf'; 
-		$dataSource = $this->recuperarSolicitudFondos();
+		$dataSource = $this->recuperarSolicitudFondos();		
 		$dataSourceDet = $this->recuperarRendicionFacturas();
+		$dataSourceRetenciones = $this->recuperarRetenciones();
 		$dataSourceDetDepositos = $this->recuperarRendicionDepositos();	
 		//$dataSourceDetDepositos = $this->recuperarRendicionFacturas();		
 		
@@ -273,7 +288,7 @@ class ACTCuentaDoc extends ACTbase{
 		
 		$reporte = new RRendicionCD($this->objParam); 
 		
-		$reporte->datosHeader($dataSource->getDatos(),  $dataSourceDet->getDatos(), $dataSourceDetDepositos->getDatos());
+		$reporte->datosHeader($dataSource->getDatos(),  $dataSourceDet->getDatos(), $dataSourceDetDepositos->getDatos(),$dataSourceRetenciones->getDatos());
 		$reporte->generarReporte();
 		$reporte->output($reporte->url_archivo,'F');
 		
