@@ -193,7 +193,7 @@ class RRendicionConXls
 	   
 		
 		
-		$inicio_listado=$inicio_listado + 8;
+		$inicio_listado=$inicio_listado + $contador + 2;
 		
 		
 		//*************************************  DEPOSITOS  *****************************************
