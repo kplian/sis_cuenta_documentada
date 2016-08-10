@@ -850,12 +850,10 @@ BEGIN
                                                                       cc.id_centro_costo,  
                                                                       ''No se encontro relación contable para el conceto de gasto: ''||cig.desc_ingas||''. <br> Mensaje: '') rel
                                                                       inner join pre.tpartida par on par.id_partida = rel.ps_id_partida )::varchar as partida,
-                          ren.id_int_comprobante,
-       					  lb.nro_cheque
+                          ren.id_int_comprobante
                           from cd.trendicion_det rd
                           inner join cd.tcuenta_doc c on c.id_cuenta_doc = rd.id_cuenta_doc
-                          inner join cd.tcuenta_doc ren on ren.id_cuenta_doc=rd.id_cuenta_doc_rendicion     
-     					  inner join tes.tts_libro_bancos lb on lb.id_int_comprobante=c.id_int_comprobante
+                          inner join cd.tcuenta_doc ren on ren.id_cuenta_doc=rd.id_cuenta_doc_rendicion   
                           inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                           inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta
                           inner join pre.vpresupuesto_cc cc on cc.id_centro_costo = dc.id_centro_costo

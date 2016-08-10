@@ -630,7 +630,6 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_plantilla','VARCHAR');
 		$this->captura('partida','VARCHAR');
 		$this->captura('id_int_comprobante','INTEGER');
-		$this->captura('nro_cheque','INTEGER');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
