@@ -85,7 +85,7 @@ class RRendicionConXls
 		$config = $this->objParam->getParametro('config');
 		$columnas = 0;
 		
-		$inicio_listado = 9;
+		$inicio_listado = 10;
 		
 		
 		$styleTitulos = array(
@@ -108,7 +108,7 @@ class RRendicionConXls
 								         )
 								     ));
 
-       $this->docexcel->getActiveSheet()->getStyle('A'.$inicio_listado.':J'.$inicio_listado)->applyFromArray($styleTitulos);
+       $this->docexcel->getActiveSheet()->getStyle('A'.$inicio_listado.':K'.$inicio_listado)->applyFromArray($styleTitulos);
 	   
 	   
 	    /************************************** HEADER MAESTRO********************************/
@@ -120,11 +120,11 @@ class RRendicionConXls
 		 $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,5,'CARGO');
 	     $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,5,$this->datos_titulo[0]['cargo_funcionario']);
 		 
-		 $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,5,'NRO CHEQUE');
-	     $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,5,$this->datos_titulo[0]['nro_cheque']);
+		 $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,6,'NRO CHEQUE');
+	     $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,6,$this->datos_titulo[0]['nro_cheque']);
 		 
-		 $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,6,'MONEDA');
-	     $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,6,strtoupper($this->datos_titulo[0]['desc_moneda']));
+		 $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,7,'MONEDA');
+	     $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,7,strtoupper($this->datos_titulo[0]['desc_moneda']));
 	   
 	   
 		
