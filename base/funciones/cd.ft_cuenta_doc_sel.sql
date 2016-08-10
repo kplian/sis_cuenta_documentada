@@ -191,7 +191,12 @@ BEGIN
     	  --Sentencia de la consulta
 		  v_consulta:='select
                             '||v_strg_cd||',
-                            (cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||' + pxp.f_get_weekend_days(cdoc.fecha_entrega::date,now()::date))::integer  as dias_para_rendir,
+                            CASE WHEN (select DISTINCT d.id_cuenta_doc_fk from cd.tcuenta_doc d
+                            		   where d.id_cuenta_doc_fk = cdoc.id_cuenta_doc) is null THEN
+                            	(cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||' + pxp.f_get_weekend_days(cdoc.fecha_entrega::date,now()::date))::integer
+                            ELSE
+                            	0
+                            END as dias_para_rendir,
                             cdoc.id_tipo_cuenta_doc,
                             cdoc.id_proceso_wf,
                             cdoc.id_caja,
@@ -246,7 +251,7 @@ BEGIN
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-            
+
             raise NOTICE '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
@@ -844,11 +849,13 @@ BEGIN
                                                                       cig.id_concepto_ingas, 
                                                                       cc.id_centro_costo,  
                                                                       ''No se encontro relación contable para el conceto de gasto: ''||cig.desc_ingas||''. <br> Mensaje: '') rel
-                                                                      inner join pre.tpartida par on par.id_partida = rel.ps_id_partida )::varchar as partida
-                                    
-                               
+                                                                      inner join pre.tpartida par on par.id_partida = rel.ps_id_partida )::varchar as partida,
+                          ren.id_int_comprobante,
+       					  lb.nro_cheque
                           from cd.trendicion_det rd
                           inner join cd.tcuenta_doc c on c.id_cuenta_doc = rd.id_cuenta_doc
+                          inner join cd.tcuenta_doc ren on ren.id_cuenta_doc=rd.id_cuenta_doc_rendicion     
+     					  inner join tes.tts_libro_bancos lb on lb.id_int_comprobante=c.id_int_comprobante
                           inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                           inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta
                           inner join pre.vpresupuesto_cc cc on cc.id_centro_costo = dc.id_centro_costo
