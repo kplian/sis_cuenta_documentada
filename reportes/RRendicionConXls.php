@@ -129,7 +129,7 @@ class RRendicionConXls
 		$this->docexcel->getActiveSheet()->getStyle('A'.($inicio_listado-1))->applyFromArray($styleTitulos);
 	    $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$inicio_listado-1,'DOCUMENTOS');
 		
-		$this->docexcel->getActiveSheet()->getStyle('A'.$inicio_listado.':J'.$inicio_listado)->applyFromArray($styleTitulos);
+		$this->docexcel->getActiveSheet()->getStyle('A'.$inicio_listado.':L'.$inicio_listado)->applyFromArray($styleTitulos);
 	   
 	   
 		//*************************************Cabecera*****************************************
@@ -151,8 +151,14 @@ class RRendicionConXls
 		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(7,$inicio_listado,'Razon Social');
 		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[8])->setWidth(20);
 		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(8,$inicio_listado,'Nro Documento');
+		
 		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[9])->setWidth(20);
-		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(9,$inicio_listado,'Importe');
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(9,$inicio_listado,'Id Int Comprobante');
+		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[10])->setWidth(15);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(10,$inicio_listado,'Nro Cheque');
+		
+		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[11])->setWidth(30);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(11,$inicio_listado,'Importe');
 		//*************************************Fin Cabecera*****************************************
 		
 		$fila = $inicio_listado + 1;
@@ -173,7 +179,11 @@ class RRendicionConXls
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(6,$fila,$value['desc_plantilla']);
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(7,$fila,$value['razon_social']);
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(8,$fila,$value['nro_documento']);
-			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(9,$fila,$value['precio_total_final']);
+			
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(9,$fila,$value['id_int_comprobante']);
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(10,$fila,$value['nro_cheque']);
+			
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(11,$fila,$value['precio_total_final']);
 			
 			$total = $total + $value['precio_total_final'];
 			
@@ -181,8 +191,8 @@ class RRendicionConXls
 			$contador++;
 		}
 		//************************************************Fin Detalle***********************************************
-		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(8,$fila,'TOTAL');
-        $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(9,$fila,$total);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(10,$fila,'TOTAL');
+        $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(11,$fila,$total);
 		
 		
 		
