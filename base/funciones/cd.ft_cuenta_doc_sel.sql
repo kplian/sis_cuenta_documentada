@@ -344,6 +344,26 @@ BEGIN
               
           
            END IF;
+           
+           IF  (v_parametros.tipo_interfaz) in ('CuentaDocVbContaCentral') THEN
+                                       
+               IF v_historico =  'no' THEN  
+                  IF p_administrador !=1 THEN
+                      --v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                  ELSE
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                  END IF;
+                ELSE
+                  IF p_administrador !=1 THEN
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'')  and ';
+                  ELSE
+                      v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and ';
+                  END IF;
+                
+                END IF;            
+          
+           END IF;
             
            IF v_historico =  'si' THEN            
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = cdoc.id_proceso_wf';
