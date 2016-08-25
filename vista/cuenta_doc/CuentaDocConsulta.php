@@ -236,11 +236,13 @@ Phx.vista.CuentaDocConsulta = {
       
       if(data.sw_solicitud == 'si' && data.estado == 'contabilizado'){
         this.getBoton('onBtnAmpRen').enable();
-         this.getBoton('cambioUsu').enable();    
+         this.getBoton('cambioUsu').enable();
+		 this.getBoton('btnRendicion').enable();		 
       }
       else{
         this.getBoton('onBtnAmpRen').disable(); 
-        this.getBoton('cambioUsu').disable();   
+        this.getBoton('cambioUsu').disable();  
+		this.getBoton('btnRendicion').disable();		
       }
       
       if(data.sw_solicitud == 'no' ){
@@ -256,6 +258,7 @@ Phx.vista.CuentaDocConsulta = {
         if(tb){
             this.getBoton('sig_estado').disable();
             this.getBoton('ant_estado').disable();
+			this.getBoton('btnRendicion').disable();
             this.getBoton('btnChequeoDocumentosWf').disable();
             this.getBoton('diagrama_gantt').disable();
             this.getBoton('btnObs').disable();
