@@ -52,7 +52,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) { 
 								    
 					if (record.data.estado == 'contabilizado') {
-						var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_documentos) - me.roundTwo(record.data.importe_depositos);
+						var  saldo = me.roundTwo(value) - me.roundTwo(record.data.importe_documentos) - me.roundTwo(record.data.importe_depositos) + me.roundTwo(record.data.importe_retenciones);
 				        saldo = me.roundTwo(saldo);
 						return String.format("<b><font color = 'red'>Entregado: {0}</font></b><br>"+
 											 "<b><font color = 'green' >En Documentos:{1}</font></b><br>"+

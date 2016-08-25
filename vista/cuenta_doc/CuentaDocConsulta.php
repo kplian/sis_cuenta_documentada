@@ -86,6 +86,15 @@ Phx.vista.CuentaDocConsulta = {
 	   
 	   Phx.vista.CuentaDocConsulta.superclass.constructor.call(this,config);
        this.init();
+	   
+	   this.addButton('btnRendicion', {
+				grupo : [2],
+				text : 'Rendicion Efectivo',
+				iconCls : 'bballot',
+				disabled : false,
+				handler : this.onBtnRendicion,
+				tooltip : '<b>Rendición</b>'
+			});
        
        this.addButton('onBtnRepSol', {
 				grupo : [0,1,2,3],
@@ -327,6 +336,15 @@ Phx.vista.CuentaDocConsulta = {
                scope:this
            });
      },
+	 
+	 onBtnRendicion : function() {
+			var rec = this.sm.getSelected();
+			Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocRen.php', 'Rendicion', {
+				modal : true,
+				width : '95%',
+				height : '95%',
+			}, rec.data, this.idContenedor, 'CuentaDocRen');
+		},
      
       onCambioUsu: function(wizard,resp){              
              Phx.CP.loadingShow(); 

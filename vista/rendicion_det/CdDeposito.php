@@ -53,7 +53,12 @@ Phx.vista.CdDeposito = {
    
     liberaMenu:function(){
         var tb = Phx.vista.CdDeposito.superclass.liberaMenu.call(this);
-        /*
+        if(this.maestro.estado == 'vbrendicion'){
+			this.getBoton('corregir_importe_contable').enable();
+		}else{
+			this.getBoton('corregir_importe_contable').disable();
+		}
+		/*
 		if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'CuentaDocRen'){
         	if( this.maestro.estado == 'borrador'){     	            		
 				this.getBoton('new').enable();  
@@ -78,23 +83,7 @@ Phx.vista.CdDeposito = {
     preparaMenu : function(n) {
 			var data = this.getSelectedData();
 			var tb = this.tbar;
-			Phx.vista.CdDeposito.superclass.preparaMenu.call(this, n);
-	    	if(Phx.CP.getPagina(this.idContenedorPadre).nombreVista == 'CuentaDocRen'){	
-		        if( this.maestro.estado == 'borrador'){     	            		
-					this.getBoton('del').enable();  
-				} 
-				else{                              
-					this.getBoton('del').disable();   
-				} 
-		    }
-		    else{
-		    	if( this.maestro.estado == 'vbrendicion'){     	            		
-					this.getBoton('del').enable();  
-				} 
-				else{                              
-					this.getBoton('del').disable();   
-				}
-		    }  
+			Phx.vista.CdDeposito.superclass.preparaMenu.call(this, n);	    	 
 			return tb
     	
     }

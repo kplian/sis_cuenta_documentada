@@ -114,12 +114,12 @@
 	</tr>
 	<tr>
 		<td width="85%" align="right"><b>TOTAL DESCARGOS&nbsp;&nbsp;&nbsp;&nbsp;</b></td>	
-	    <td width="15%" align="right" class="td_currency"><span><b><?php  echo number_format($total_deposito + $total_facturas + $this->retenciones, 2, '.', ','); ?></b></span></td>
+	    <td width="15%" align="right" class="td_currency"><span><b><?php  echo number_format($total_deposito + $total_facturas, 2, '.', ','); ?></b></span></td>
 	</tr>
 	
 	<tr>
 		<td width="85%" align="right"><b>SALDO A FAVOR DE LA EMPRESA&nbsp;&nbsp;&nbsp;&nbsp;</b></td>	
-	    <td width="15%" align="right" class="td_currency"><span><b><?php  echo number_format($this->datos_detalle[0]["importe_solicitado"] - ($total_deposito + $total_facturas + $this->retenciones), 2, '.', ','); ?></b></span></td>
+	    <td width="15%" align="right" class="td_currency"><span><b><?php  echo number_format($this->datos_detalle[0]["importe_solicitado"] - ($total_deposito + $total_facturas), 2, '.', ','); ?></b></span></td>
 	</tr>
 	
     </tbody>
