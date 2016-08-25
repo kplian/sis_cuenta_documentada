@@ -85,8 +85,7 @@ Phx.vista.CuentaDocConsulta = {
 	   this.Atributos[this.getIndAtributo('sw_max_doc_rend')].grid = true;
 	   
 	   Phx.vista.CuentaDocConsulta.superclass.constructor.call(this,config);
-       this.init();
-	   
+       	   
 	   this.addButton('btnRendicion', {
 				grupo : [2],
 				text : 'Rendicion Efectivo',
@@ -149,7 +148,7 @@ Phx.vista.CuentaDocConsulta = {
 		 	handler: this.cambioUsu,
 		 	tooltip: '<b>Cambiar usuario de registro</b>'});
         
-		 
+		this.init();
 		this.store.baseParams = { estado : 'borrador',tipo_interfaz: this.nombreVista };
 		this.load({params:{start:0, limit:this.tam_pag}});
 		
