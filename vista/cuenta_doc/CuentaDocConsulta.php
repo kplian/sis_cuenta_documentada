@@ -341,11 +341,11 @@ Phx.vista.CuentaDocConsulta = {
 	 
 	 onBtnRendicion : function() {
 			var rec = this.sm.getSelected();
-			Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocRen.php', 'Rendicion', {
+			Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocRenConsulta.php', 'Rendicion', {
 				modal : true,
 				width : '95%',
 				height : '95%',
-			}, rec.data, this.idContenedor, 'CuentaDocRen');
+			}, rec.data, this.idContenedor, 'CuentaDocRenConsulta');
 		},
      
       onCambioUsu: function(wizard,resp){              

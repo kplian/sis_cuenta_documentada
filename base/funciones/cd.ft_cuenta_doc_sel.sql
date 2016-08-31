@@ -429,9 +429,7 @@ BEGIN
            
            
                 IF p_administrador !=1 THEN
-					IF p_id_usuario not in (42,56,137,138,140,453) THEN
                       v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'  ) and ';
-					END IF;
                 END IF;
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
            END IF;
