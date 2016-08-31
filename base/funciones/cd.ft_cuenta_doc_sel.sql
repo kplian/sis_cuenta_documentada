@@ -431,10 +431,10 @@ BEGIN
                 IF p_administrador !=1 THEN
                       v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'  ) and ';
                 END IF;
+
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
            END IF;
-           
-           
+                     
            
            v_importe_fac = '
                              
@@ -923,8 +923,3 @@ EXCEPTION
 			raise exception '%',v_resp;
 END;
 $body$
-LANGUAGE 'plpgsql'
-VOLATILE
-CALLED ON NULL INPUT
-SECURITY INVOKER
-COST 100;
