@@ -923,3 +923,8 @@ EXCEPTION
 			raise exception '%',v_resp;
 END;
 $body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;
