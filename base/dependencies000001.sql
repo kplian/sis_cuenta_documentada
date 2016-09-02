@@ -224,13 +224,14 @@ CREATE OR REPLACE VIEW cd.vlibro_bancos_deposito(
     id_libro_bancos)
 AS
   SELECT cdr.id_cuenta_doc,
-         lb.importe_deposito,
+         COALESCE(dpcd.importe_contable_deposito, lb.importe_deposito, 0::numeric(20,2)) AS importe_deposito,
          lb.id_cuenta_bancaria,
          cdr.id_funcionario,
          cdr.id_depto_lb,
          cdr.id_depto_conta,
          lb.id_libro_bancos
   FROM tes.tts_libro_bancos lb
+     LEFT JOIN cd.tdeposito_cd dpcd ON dpcd.id_libro_bancos = lb.id_libro_bancos
        JOIN cd.tcuenta_doc cdr ON cdr.id_cuenta_doc = lb.columna_pk_valor AND
          lb.tabla::text = 'cd.tcuenta_doc'::text AND lb.columna_pk::text =
          'id_cuenta_doc'::text; 

@@ -183,7 +183,7 @@ BEGIN
       IF  v_reg_cuenta_doc.sw_solicitud = 'no' THEN
                   
             select 
-               COALESCE(sum(COALESCE(dcv.importe_pago_liquido,0)),0)::numeric 
+               COALESCE(sum(COALESCE(dcv.importe_pago_liquido,0)),0)::numeric
             into
               v_total_documentos                
             from cd.trendicion_det rd
@@ -191,10 +191,11 @@ BEGIN
             where dcv.estado_reg = 'activo' and rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc;
                         
            select  
-             COALESCE(sum(COALESCE(lb.importe_deposito,0)),0)::numeric 
+             COALESCE(sum(COALESCE(dpcd.importe_contable_deposito,lb.importe_deposito,0)),0)::numeric
            into
              v_importe_depositos
            from tes.tts_libro_bancos lb
+             left join cd.tdeposito_cd dpcd ON dpcd.id_libro_bancos = lb.id_libro_bancos
            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc'
            where c.estado_reg = 'activo' and c.id_cuenta_doc =  v_reg_cuenta_doc.id_cuenta_doc;
                         
