@@ -929,7 +929,7 @@ BEGIN
                                    > Mensaje: '') rel
                                       inner join pre.tpartida par on par.id_partida = rel.ps_id_partida
                                )::varchar as partida ,
-                               sum(dc.precio_total) as importe
+                               sum(dc.precio_total_final) as importe
                         from cd.trendicion_det rd
                         inner join cd.tcuenta_doc c on c.id_cuenta_doc = rd.id_cuenta_doc
                         inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
