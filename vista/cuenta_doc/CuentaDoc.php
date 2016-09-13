@@ -276,7 +276,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
    			},
    			type: 'ComboRec',
    			id_grupo: 0,
-   			filters: { pfiltro:'depto.nombre', type:'string'},
+   			filters: { pfiltro:'dep.nombre', type:'string'},
    		    grid: true,
    			form: true
        	},

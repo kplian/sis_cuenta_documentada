@@ -312,6 +312,19 @@ class ACTCuentaDoc extends ACTbase{
 		
     }
 
+	function recuperarConsolidado(){
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarConsolidado($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+
+	}
+
     function reporteRendicionCon(){
 		
 			    if($this->objParam->getParametro('formato_reporte')=='pdf'){
@@ -323,6 +336,7 @@ class ACTCuentaDoc extends ACTbase{
 				
 				$dataSourceHeader = $this->recuperarSolicitudFondos();				
 				$dataSource = $this->recuperarDetalleConsolidado();
+				$dataSourceCon = $this->recuperarConsolidado();
 				$dataSourceDep = $this->recuperarRendicionDepositosConsolidado();
 				
 				
@@ -340,7 +354,7 @@ class ACTCuentaDoc extends ACTbase{
 				
 				
 				$reporte = new RRendicionConXls($this->objParam); 
-				$reporte->datosHeader($dataSource->getDatos(),  $dataSourceHeader->getDatos(), $dataSourceDep->getDatos());
+				$reporte->datosHeader($dataSource->getDatos(),  $dataSourceHeader->getDatos(), $dataSourceDep->getDatos(), $dataSourceCon->getDatos());
 				$reporte->generarReporte(); 
 				
 		         

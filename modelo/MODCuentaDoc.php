@@ -639,6 +639,29 @@ class MODCuentaDoc extends MODbase{
 		return $this->respuesta;
 	}
 
+	function recuperarConsolidado(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPCON_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		$this->setCount(false);
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
+
+		//Definicion de la lista del resultado del query
+
+		$this->captura('codigo_categoria','VARCHAR');
+		$this->captura('partida','VARCHAR');
+		$this->captura('importe','NUMERIC');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->consulta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
     function ampliarRendicion(){
     	
 		

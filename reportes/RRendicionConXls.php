@@ -31,7 +31,7 @@ class RRendicionConXls
 	var $ult_codigo_partida;
 	var $ult_concepto;	
 	var $datos_depositos;
-	
+	var $datos_consolidado;
 	
 	
 	function __construct(CTParametro $objParam){
@@ -70,12 +70,12 @@ class RRendicionConXls
 									
 	}
 	
-	function datosHeader ( $detalle, $datos_titulo, $depositos) {
+	function datosHeader ( $detalle, $datos_titulo, $depositos, $consolidado) {
 		
 		$this->datos_detalle = $detalle;
 		$this->datos_titulo = $datos_titulo;
 		$this->datos_depositos = $depositos;
-		
+		$this->datos_consolidado = $consolidado;
 		
 	}
 			
@@ -231,7 +231,7 @@ class RRendicionConXls
 			
 			$newDate = date("d/m/Y", strtotime( $value['fecha']));	
 							
-			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$fila,$value['tipo']);			
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$fila,$value['codigo_partida']);
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(1,$fila,$value['nombre_finalidad']);
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,$fila,$value['denominacion']);
 			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(3,$fila,'"'.$value['nro_cuenta'].'"');
@@ -246,8 +246,44 @@ class RRendicionConXls
 		
 		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(4,$fila,'TOTAL');
         $this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(5,$fila,$total);
-		
-		
+
+		$inicio_listado=$inicio_listado + $contador + 2;
+
+		//*************************************  CONSOLIDADO  *****************************************
+
+		$this->docexcel->getActiveSheet()->getStyle('A'.($inicio_listado-1))->applyFromArray($styleTitulos);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$inicio_listado-1,'CONSOLIDADO');
+
+		$this->docexcel->getActiveSheet()->getStyle('A'.$inicio_listado.':C'.$inicio_listado)->applyFromArray($styleTitulos);
+
+		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[0])->setWidth(20);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$inicio_listado,'Cod Cat Prog');
+		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[1])->setWidth(40);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(1,$inicio_listado,'Partida');
+		$this->docexcel->getActiveSheet()->getColumnDimension($this->equivalencias[2])->setWidth(30);
+		$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,$inicio_listado,'Importe');
+
+		$total = 0;
+
+		$fila = $inicio_listado + 1;
+		$contador = 1;
+		$total = 0;
+		foreach($this->datos_consolidado  as $value) {
+
+			$newDate = date("d/m/Y", strtotime( $value['fecha']));
+
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(0,$fila,$value['codigo_categoria']);
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(1,$fila,$value['partida']);
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,$fila,$value['importe']);
+
+			$total = $total + $value['importe'];
+
+			$fila++;
+			$contador++;
+
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(1,$fila,'TOTAL');
+			$this->docexcel->setActiveSheetIndex(0)->setCellValueByColumnAndRow(2,$fila,$total);
+		}
 		
 	}
 
