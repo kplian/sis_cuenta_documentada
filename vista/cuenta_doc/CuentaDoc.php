@@ -281,6 +281,33 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
    			form: true
        	},
 		{
+			config: {
+				name: 'tipo_fondo',
+				fieldLabel: 'Tipo Fondo Avance',
+				allowBlank: false,
+				width: 250,
+				gwidth: 180,
+				maxLength: 50,
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'local',
+				forceSelection: true,
+				valueField: 'variable',
+				displayField: 'valor',
+				store:new Ext.data.ArrayStore({
+					fields :['variable','valor'],
+					data :  [['1','Comun'],['2','Charter']]})
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters:{ type: 'list',
+				options: ['comun','charter'],
+			},
+			grid: true,
+			form: true
+		},
+		{
             config:{
                 name: 'id_moneda',
                 origen: 'MONEDA',
