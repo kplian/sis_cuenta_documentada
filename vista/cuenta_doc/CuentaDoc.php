@@ -280,7 +280,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
    		    grid: true,
    			form: true
        	},
-		{
+		/*{
 			config: {
 				name: 'tipo_fondo',
 				fieldLabel: 'Tipo Fondo Avance',
@@ -306,6 +306,57 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			},
 			grid: true,
 			form: true
+		},*/
+		{
+			config:{
+				name:'id_tipo_cuenta_doc',
+				fieldLabel:'Tipo Fondo Avance',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
+				gwidth: 120,
+
+				store: new Ext.data.JsonStore({
+					url: '../../sis_cuenta_documentada/control/TipoCuentaDoc/listarTipoCuentaDoc',
+					id: 'id_tipo_cuenta_doc',
+					root: 'datos',
+					sortInfo:{
+						field: 'nombre',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_tipo_cuenta_doc','nombre','codigo','descripcion'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams:{par_filtro:'nombre', sw_solicitud: 'si'
+					}
+				}),
+				valueField: 'id_tipo_cuenta_doc',
+				displayField: 'nombre',
+				hiddenName: 'codigo',
+				forceSelection:true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode:'remote',
+				pageSize:10,
+				queryDelay:1000,
+				listWidth:300,
+				resizable:true,
+				anchor:'80%',
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['nombre']);
+				}
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			//filters:{pfiltro:'ren.tipo',type:'string'},
+			grid:true,
+			form:true
 		},
 		{
             config:{

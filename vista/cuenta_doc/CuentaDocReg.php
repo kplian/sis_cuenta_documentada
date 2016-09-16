@@ -238,13 +238,15 @@ header("content-type: text/javascript; charset=UTF-8");
 
 			}, this);
 
-			this.Cmp.tipo_fondo.on('select', function(combo, rec, index) {
-				if (rec.data.valor == 'Charter') {
+			this.Cmp.id_tipo_cuenta_doc.on('select', function(combo, rec, index) {
+				console.log(rec.data);
+				if (rec.data.codigo == 'SOLFONCHAR') {
 					this.Cmp.id_moneda.store.baseParams.filtrar_base = 'no';
+					this.Cmp.id_moneda.store.baseParams.id_moneda = 2;
 				}else{
-					this.Cmp.id_moneda.store.baseParams.filtrar_base = 'si'
+					this.Cmp.id_moneda.store.baseParams.filtrar_base = 'si';
+					this.Cmp.id_moneda.store.baseParams.id_moneda = '';
 				}
-				this.Cmp.id_moneda.store.baseParams.id_moneda = rec.data.variable;
 				this.Cmp.id_moneda.modificado = true;
 				this.Cmp.id_moneda.reset();
 			}, this);
