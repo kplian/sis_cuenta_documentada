@@ -339,9 +339,27 @@ class MODRendicionDet extends MODbase{
 			if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
 				throw new Exception("Error al verificar cuadre ", 3);
 			}
+
+			//verifica si el documento no excede el total del fondo
+			$this->resetParametros();
+			$this->procedimiento='cd.ft_rendicion_det_ime';
+			$this->transaccion='CD_CHKDOCFON_IME';
+			$this->tipo_procedimiento='IME';
+
+			$this->arreglo['id_doc_compra_venta'] = $id_doc_compra_venta;
+			$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int4');
+
+			$this->armarConsulta();
+			$stmt = $link->prepare($this->consulta);
+			$stmt->execute();
+			$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+			//recupera parametros devuelto depues de insertar ... (id_solicitud)
+			$resp_procedimiento = $this->divRespuesta($result['f_intermediario_ime']);
+			if ($resp_procedimiento['tipo_respuesta']=='ERROR') {
+				throw new Exception("Error al verificar cuadre ", 3);
+			}
 			
-			
-							
 			
 			//si todo va bien confirmamos y regresamos el resultado
 			$link->commit();
