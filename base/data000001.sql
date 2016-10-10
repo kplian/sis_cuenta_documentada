@@ -1,6 +1,6 @@
 
 
-/***********************************I-DAT-RAC-ADQ-0-05/05/2016*****************************************/
+/***********************************I-DAT-RAC-CD-0-05/05/2016*****************************************/
 
 
 /* Data for the 'segu.tsubsistema' table  (Records 1 - 1) */
@@ -179,9 +179,9 @@ select wf.f_import_testructura_estado ('insert','vbgaf','vbtesoreria','SFA',1,''
 select wf.f_import_testructura_estado ('insert','borrador','vbgaf','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','vbgerencia','vbtesoreria','SFA',1,'');
 select wf.f_import_tfuncionario_tipo_estado ('insert','vbgaf','SFA','3027798',NULL,'');
-----------------------------------
+--------------------------------------
 --COPY LINES TO SUBSYSTEM dependencies.sql FILE  
----------------------------------
+------------------------------------
 
 select wf.f_import_ttipo_documento_estado ('insert','SOLFA','SFA','borrador','SFA','crear','superior','');
 select wf.f_import_ttipo_documento_estado ('insert','SOLFA','SFA','borrador','SFA','insertar','superior','');
@@ -205,12 +205,311 @@ VALUES
   (1, 1, E'2016-05-04 16:23:47.525', E'2016-05-18 16:29:16.449', E'activo', NULL, E'NULL', E'SOLFONAVA', E'Solicitud', E'Solicitud de Fondo en avance', E'SFA', E'SOLFONDAV', E'si', 1),
   (1, 1, E'2016-05-18 12:38:43.915', E'2016-05-20 09:11:11.344', E'activo', NULL, E'NULL', E'RFA', E'Rendición', E'Rendición de fondo en avance', E'RFA', E'RENDICIONFONDO', E'no', 4);
   
-/***********************************F-DAT-RAC-ADQ-0-05/05/2016*****************************************/
 
 
 
+--------------------------------
+--COPY LINES TO data.sql FILE  
+---------------------------------
+
+select pxp.f_insert_tgui ('FONDOS EN AVANCE', '', 'CD', 'si', 1, '', 1, '', '', 'CD');
+select pxp.f_insert_tgui ('Configuraciones', 'Configuraciones', 'CBCONF', 'si', 1, '', 2, '', '', 'CD');
+select pxp.f_insert_tgui ('Tipo de cuenta documentada', 'Tipo de cuenta documentada', 'TCUD', 'si', 1, 'sis_cuenta_documentada/vista/tipo_cuenta_doc/TipoCuentaDoc.php', 3, '', 'TipoCuentaDoc', 'CD');
+select pxp.f_insert_tgui ('Tipo de categoría', 'tipo de categoría', 'TIPCAT', 'si', 2, 'sis_cuenta_documentada/vista/tipo_categoria/TipoCategoria.php', 3, '', 'TipoCategoria', 'CD');
+select pxp.f_insert_tgui ('Solicitud de Fondos', 'Solicitud de fondos', 'SOLFND', 'si', 3, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocReg.php', 3, '', 'CuentaDocReg', 'CD');
+select pxp.f_insert_tgui ('VoBo Fondos en Avance', 'VoBo Fondoe en Avance', 'VBCUDOC', 'si', 4, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVb.php', 3, '', 'CuentaDocVb', 'CD');
+select pxp.f_insert_tgui ('Lista de Bloqueos', 'Lista de Bloqueos', 'LISBLO', 'si', 3, 'sis_cuenta_documentada/vista/bloqueo_cd/BloqueoCd.php', 3, '', 'BloqueoCd', 'CD');
+select pxp.f_insert_tgui ('Categorías', 'Categorías', 'TIPCAT.1', 'no', 0, 'sis_cuenta_documentada/vista/categoria/Categoria.php', 4, '', '60%', 'CD');
+select pxp.f_insert_tgui ('Rendicion', 'Rendicion', 'SOLFND.1', 'no', 0, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocRen.php', 4, '', '95%', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLFND.2', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLFND.3', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', 'FormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'SOLFND.4', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'SOLFND.5', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 4, '', '80%', 'CD');
+select pxp.f_insert_tgui ('Facturas', 'Facturas', 'SOLFND.1.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php', 5, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Depositos', 'Depositos', 'SOLFND.1.2', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php', 5, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLFND.1.3', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 5, '', 'AntFormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'SOLFND.1.4', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 5, '', 'FormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'SOLFND.1.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 5, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'SOLFND.1.6', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 5, '', '80%', 'CD');
+select pxp.f_insert_tgui ('Formulario de rendicion', 'Formulario de rendicion', 'SOLFND.1.1.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 6, '', '95%', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'SOLFND.1.4.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 6, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Subir ', 'Subir ', 'SOLFND.1.4.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 7, '', 'SubirArchivoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos de Origen', 'Documentos de Origen', 'SOLFND.1.4.1.2', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 7, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Histórico', 'Histórico', 'SOLFND.1.4.1.3', 'no', 0, 'sis_workflow/vista/documento_historico_wf/DocumentoHistoricoWf.php', 7, '', '30%', 'CD');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'SOLFND.1.4.1.4', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 7, '', '40%', 'CD');
+select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'SOLFND.1.4.1.5', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 7, '', '90%', 'CD');
+select pxp.f_insert_tgui ('73%', '73%', 'SOLFND.1.4.1.5.1', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepPlanPago.php', 8, '', 'RepPlanPago', 'CD');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'SOLFND.1.4.1.5.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 9, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Funcionarios', 'Funcionarios', 'SOLFND.1.6.1', 'no', 0, 'sis_organigrama/vista/funcionario/Funcionario.php', 6, '', 'funcionario', 'CD');
+select pxp.f_insert_tgui ('Cuenta Bancaria del Empleado', 'Cuenta Bancaria del Empleado', 'SOLFND.1.6.1.1', 'no', 0, 'sis_organigrama/vista/funcionario_cuenta_bancaria/FuncionarioCuentaBancaria.php', 7, '', 'FuncionarioCuentaBancaria', 'CD');
+select pxp.f_insert_tgui ('Especialidad del Empleado', 'Especialidad del Empleado', 'SOLFND.1.6.1.2', 'no', 0, 'sis_organigrama/vista/funcionario_especialidad/FuncionarioEspecialidad.php', 7, '', 'FuncionarioEspecialidad', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'SOLFND.1.6.1.3', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 7, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Instituciones', 'Instituciones', 'SOLFND.1.6.1.1.1', 'no', 0, 'sis_parametros/vista/institucion/Institucion.php', 8, '', 'Institucion', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'SOLFND.1.6.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 9, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'SOLFND.1.6.1.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 10, '', 'subirFotoPersona', 'CD');
+select pxp.f_insert_tgui ('Facturas', 'Facturas', 'VBCUDOC.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php', 4, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Depositos', 'Depositos', 'VBCUDOC.2', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php', 4, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBCUDOC.3', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBCUDOC.4', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', 'FormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'VBCUDOC.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'VBCUDOC.6', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 4, '', '80%', 'CD');
+select pxp.f_insert_tgui ('Formulario de rendicion', 'Formulario de rendicion', 'VBCUDOC.1.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 5, '', '95%', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'VBCUDOC.4.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 5, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Subir ', 'Subir ', 'VBCUDOC.4.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 6, '', 'SubirArchivoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos de Origen', 'Documentos de Origen', 'VBCUDOC.4.1.2', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 6, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Histórico', 'Histórico', 'VBCUDOC.4.1.3', 'no', 0, 'sis_workflow/vista/documento_historico_wf/DocumentoHistoricoWf.php', 6, '', '30%', 'CD');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'VBCUDOC.4.1.4', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 6, '', '40%', 'CD');
+select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'VBCUDOC.4.1.5', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 6, '', '90%', 'CD');
+select pxp.f_insert_tgui ('73%', '73%', 'VBCUDOC.4.1.5.1', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepPlanPago.php', 7, '', 'RepPlanPago', 'CD');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'VBCUDOC.4.1.5.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 8, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Funcionarios', 'Funcionarios', 'VBCUDOC.6.1', 'no', 0, 'sis_organigrama/vista/funcionario/Funcionario.php', 5, '', 'funcionario', 'CD');
+select pxp.f_insert_tgui ('Cuenta Bancaria del Empleado', 'Cuenta Bancaria del Empleado', 'VBCUDOC.6.1.1', 'no', 0, 'sis_organigrama/vista/funcionario_cuenta_bancaria/FuncionarioCuentaBancaria.php', 6, '', 'FuncionarioCuentaBancaria', 'CD');
+select pxp.f_insert_tgui ('Especialidad del Empleado', 'Especialidad del Empleado', 'VBCUDOC.6.1.2', 'no', 0, 'sis_organigrama/vista/funcionario_especialidad/FuncionarioEspecialidad.php', 6, '', 'FuncionarioEspecialidad', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'VBCUDOC.6.1.3', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 6, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Instituciones', 'Instituciones', 'VBCUDOC.6.1.1.1', 'no', 0, 'sis_parametros/vista/institucion/Institucion.php', 7, '', 'Institucion', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'VBCUDOC.6.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 8, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'VBCUDOC.6.1.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 9, '', 'subirFotoPersona', 'CD');
+select pxp.f_insert_tgui ('Consulta Fondos en Avance', 'Consulta de fondos en Avance', 'CONFA', 'si', 5, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocConsulta.php', 3, '', 'CuentaDocConsulta', 'CD');
+select pxp.f_insert_tgui ('Estado del Presupuesto', 'Estado del Presupuesto', 'SOLFND.6', 'no', 0, 'sis_presupuestos/vista/presup_partida/ChkPresupuesto.php', 4, '', 'ChkPresupuesto', 'CD');
+select pxp.f_insert_tgui ('Estado del Presupuesto', 'Estado del Presupuesto', 'SOLFND.1.7', 'no', 0, 'sis_presupuestos/vista/presup_partida/ChkPresupuesto.php', 5, '', 'ChkPresupuesto', 'CD');
+select pxp.f_insert_tgui ('Estado del Presupuesto', 'Estado del Presupuesto', 'VBCUDOC.7', 'no', 0, 'sis_presupuestos/vista/presup_partida/ChkPresupuesto.php', 4, '', 'ChkPresupuesto', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'CONFA.1', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 4, '', 'AntFormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'CONFA.2', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 4, '', 'FormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'CONFA.3', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'CONFA.4', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 4, '', '80%', 'CD');
+select pxp.f_insert_tgui ('Estado del Presupuesto', 'Estado del Presupuesto', 'CONFA.5', 'no', 0, 'sis_presupuestos/vista/presup_partida/ChkPresupuesto.php', 4, '', 'ChkPresupuesto', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'CONFA.2.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 5, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Subir ', 'Subir ', 'CONFA.2.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 6, '', 'SubirArchivoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos de Origen', 'Documentos de Origen', 'CONFA.2.1.2', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 6, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Histórico', 'Histórico', 'CONFA.2.1.3', 'no', 0, 'sis_workflow/vista/documento_historico_wf/DocumentoHistoricoWf.php', 6, '', '30%', 'CD');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'CONFA.2.1.4', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 6, '', '40%', 'CD');
+select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'CONFA.2.1.5', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 6, '', '90%', 'CD');
+select pxp.f_insert_tgui ('73%', '73%', 'CONFA.2.1.5.1', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepPlanPago.php', 7, '', 'RepPlanPago', 'CD');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'CONFA.2.1.5.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 8, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Funcionarios', 'Funcionarios', 'CONFA.4.1', 'no', 0, 'sis_organigrama/vista/funcionario/Funcionario.php', 5, '', 'funcionario', 'CD');
+select pxp.f_insert_tgui ('Cuenta Bancaria del Empleado', 'Cuenta Bancaria del Empleado', 'CONFA.4.1.1', 'no', 0, 'sis_organigrama/vista/funcionario_cuenta_bancaria/FuncionarioCuentaBancaria.php', 6, '', 'FuncionarioCuentaBancaria', 'CD');
+select pxp.f_insert_tgui ('Especialidad del Empleado', 'Especialidad del Empleado', 'CONFA.4.1.2', 'no', 0, 'sis_organigrama/vista/funcionario_especialidad/FuncionarioEspecialidad.php', 6, '', 'FuncionarioEspecialidad', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'CONFA.4.1.3', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 6, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Instituciones', 'Instituciones', 'CONFA.4.1.1.1', 'no', 0, 'sis_parametros/vista/institucion/Institucion.php', 7, '', 'Institucion', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'CONFA.4.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 8, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'CONFA.4.1.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 9, '', 'subirFotoPersona', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'CONFA.6', 'no', 0, 'sis_seguridad/vista/usuario/FormUsuario.php', 4, '', 'FormUsuario', 'CD');
+select pxp.f_insert_tgui ('Relacionar Deposito', 'Relacionar Deposito', 'SOLFND.1.2.1', 'no', 0, 'sis_tesoreria/vista/deposito/FormRelacionarDeposito.php', 6, '', 'FormRelacionarDeposito', 'CD');
+select pxp.f_insert_tgui ('Relacionar Deposito', 'Relacionar Deposito', 'VBCUDOC.2.1', 'no', 0, 'sis_tesoreria/vista/deposito/FormRelacionarDeposito.php', 5, '', 'FormRelacionarDeposito', 'CD');
+select pxp.f_insert_tgui ('VoBo Fondos en Avance Conta Central', 'VoBo Fondos en Avance Conta Central', 'VBFACC', 'si', 4, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVbContaCentral.php', 2, '', 'CuentaDocVbContaCentral', 'CD');
+select pxp.f_insert_tgui ('Facturas', 'Facturas', 'VBFACC.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php', 3, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Depositos', 'Depositos', 'VBFACC.2', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php', 3, '', '50%', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBFACC.3', 'no', 0, 'sis_workflow/vista/estado_wf/AntFormEstadoWf.php', 3, '', 'AntFormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Estado de Wf', 'Estado de Wf', 'VBFACC.4', 'no', 0, 'sis_workflow/vista/estado_wf/FormEstadoWf.php', 3, '', 'FormEstadoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'VBFACC.5', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 3, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Observaciones del WF', 'Observaciones del WF', 'VBFACC.6', 'no', 0, 'sis_workflow/vista/obs/Obs.php', 3, '', '80%', 'CD');
+select pxp.f_insert_tgui ('Estado del Presupuesto', 'Estado del Presupuesto', 'VBFACC.7', 'no', 0, 'sis_presupuestos/vista/presup_partida/ChkPresupuesto.php', 3, '', 'ChkPresupuesto', 'CD');
+select pxp.f_insert_tgui ('Formulario de rendicion', 'Formulario de rendicion', 'VBFACC.1.1', 'no', 0, 'sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 4, '', '95%', 'CD');
+select pxp.f_insert_tgui ('Relacionar Deposito', 'Relacionar Deposito', 'VBFACC.2.1', 'no', 0, 'sis_tesoreria/vista/deposito/FormRelacionarDeposito.php', 4, '', 'FormRelacionarDeposito', 'CD');
+select pxp.f_insert_tgui ('Documentos del Proceso', 'Documentos del Proceso', 'VBFACC.4.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 4, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Subir ', 'Subir ', 'VBFACC.4.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/SubirArchivoWf.php', 5, '', 'SubirArchivoWf', 'CD');
+select pxp.f_insert_tgui ('Documentos de Origen', 'Documentos de Origen', 'VBFACC.4.1.2', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 5, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Histórico', 'Histórico', 'VBFACC.4.1.3', 'no', 0, 'sis_workflow/vista/documento_historico_wf/DocumentoHistoricoWf.php', 5, '', '30%', 'CD');
+select pxp.f_insert_tgui ('Estados por momento', 'Estados por momento', 'VBFACC.4.1.4', 'no', 0, 'sis_workflow/vista/tipo_documento_estado/TipoDocumentoEstadoWF.php', 5, '', '40%', 'CD');
+select pxp.f_insert_tgui ('Pagos similares', 'Pagos similares', 'VBFACC.4.1.5', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepFilPlanPago.php', 5, '', '90%', 'CD');
+select pxp.f_insert_tgui ('73%', '73%', 'VBFACC.4.1.5.1', 'no', 0, 'sis_tesoreria/vista/plan_pago/RepPlanPago.php', 6, '', 'RepPlanPago', 'CD');
+select pxp.f_insert_tgui ('Chequear documento del WF', 'Chequear documento del WF', 'VBFACC.4.1.5.1.1', 'no', 0, 'sis_workflow/vista/documento_wf/DocumentoWf.php', 7, '', '90%', 'CD');
+select pxp.f_insert_tgui ('Funcionarios', 'Funcionarios', 'VBFACC.6.1', 'no', 0, 'sis_organigrama/vista/funcionario/Funcionario.php', 4, '', 'funcionario', 'CD');
+select pxp.f_insert_tgui ('Cuenta Bancaria del Empleado', 'Cuenta Bancaria del Empleado', 'VBFACC.6.1.1', 'no', 0, 'sis_organigrama/vista/funcionario_cuenta_bancaria/FuncionarioCuentaBancaria.php', 5, '', 'FuncionarioCuentaBancaria', 'CD');
+select pxp.f_insert_tgui ('Especialidad del Empleado', 'Especialidad del Empleado', 'VBFACC.6.1.2', 'no', 0, 'sis_organigrama/vista/funcionario_especialidad/FuncionarioEspecialidad.php', 5, '', 'FuncionarioEspecialidad', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'VBFACC.6.1.3', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 5, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Instituciones', 'Instituciones', 'VBFACC.6.1.1.1', 'no', 0, 'sis_parametros/vista/institucion/Institucion.php', 6, '', 'Institucion', 'CD');
+select pxp.f_insert_tgui ('Personas', 'Personas', 'VBFACC.6.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/Persona.php', 7, '', 'persona', 'CD');
+select pxp.f_insert_tgui ('Subir foto', 'Subir foto', 'VBFACC.6.1.1.1.1.1', 'no', 0, 'sis_seguridad/vista/persona/subirFotoPersona.php', 8, '', 'subirFotoPersona', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_fun_inicio_cuenta_doc_wf', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_fun_regreso_cuenta_doc_wf', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_gestionar_cbte_cd_prevalidacion', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_gestionar_cbte_cuenta_doc', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_gestionar_cbte_cuenta_doc_eliminacion', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_gestionar_presupuesto_cd', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_lista_depto_conta_wf_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_lista_funcionario_gerente_cd_wf_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.f_validar_documentos', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_bloqueo_cd_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_bloqueo_cd_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_categoria_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_categoria_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_cuenta_doc_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_cuenta_doc_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_rendicion_det_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_rendicion_det_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_tipo_categoria_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_tipo_categoria_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_tipo_cuenta_doc_ime', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.ft_tipo_cuenta_doc_sel', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tfuncion ('cd.trig_tcuenta_doc', 'Funcion para tabla     ', 'CD');
+select pxp.f_insert_tprocedimiento ('CD_BLOCD_ELI', 'Modificacion de registros', 'si', '', '', 'cd.ft_bloqueo_cd_ime');
+select pxp.f_insert_tprocedimiento ('CD_BLOCD_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_bloqueo_cd_sel');
+select pxp.f_insert_tprocedimiento ('CD_BLOCD_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_bloqueo_cd_sel');
+select pxp.f_insert_tprocedimiento ('CD_CAT_INS', 'Insercion de registros', 'si', '', '', 'cd.ft_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_CAT_MOD', 'Modificacion de registros', 'si', '', '', 'cd.ft_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_CAT_ELI', 'Eliminacion de registros', 'si', '', '', 'cd.ft_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_CAT_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_categoria_sel');
+select pxp.f_insert_tprocedimiento ('CD_CAT_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_categoria_sel');
+select pxp.f_insert_tprocedimiento ('CD_CDOC_INS', 'Insercion de registros de fondos en avance', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOC_MOD', 'Modificacion de registros', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOC_ELI', 'Eliminacion de registros', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_SIGESCD_IME', 'cambia al siguiente estado', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_ANTECD_IME', 'retrocede el estado de la cuenta documentada', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOCREN_INS', 'Insercion de registros de  rendicon para  fondos en avance', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOCREN_MOD', 'Modificacion de rendiciones de FA', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOCREN_ELI', 'Eliminacion de de cuento documentada de rendicion', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_AMPCDREN_IME', 'Ampliar dias para rendir cuenta documentada', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CAMBLOQ_IME', 'cambia el estado de bloqueo de facturas grandes', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CAMBUSUREG_IME', 'Cambia el usuario responsable red registro', 'si', '', '', 'cd.ft_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_CDOC_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_CDOC_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_CDOCREN_SEL', 'Consulta de datos  rendicion', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_CDOCREN_CONT', 'Conteo de registros de rendicion', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPCDOC_SEL', 'Cabecera de reporte de solicitud de fondos', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPRENDET_SEL', 'recupera las facturas de la rendicion', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPDEPREN_SEL', 'listado de depositos para el reporte de rendicion', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPDEPRENCO_SEL', 'listado de depositos para el reporte de rendicion consolidado', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPCONFA_SEL', 'listado para reporte consolidado de fondo en avance', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REND_INS', 'Insercion de registros', 'si', '', '', 'cd.ft_rendicion_det_ime');
+select pxp.f_insert_tprocedimiento ('CD_VALEDI_MOD', 'Valida la edicion de facturas', 'si', '', '', 'cd.ft_rendicion_det_ime');
+select pxp.f_insert_tprocedimiento ('CD_RENDET_ELI', 'Eliminacion de registros', 'si', '', '', 'cd.ft_rendicion_det_ime');
+select pxp.f_insert_tprocedimiento ('CD_VALINDDEPREN_VAL', 'validar registro de depositos en la rendicion', 'si', '', '', 'cd.ft_rendicion_det_ime');
+select pxp.f_insert_tprocedimiento ('CD_VALDELDDEPREN_VAL', 'validar la eliminacion de depositos en rendicion', 'si', '', '', 'cd.ft_rendicion_det_ime');
+select pxp.f_insert_tprocedimiento ('CD_RENDET_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_rendicion_det_sel');
+select pxp.f_insert_tprocedimiento ('CD_RENDET_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_rendicion_det_sel');
+select pxp.f_insert_tprocedimiento ('CD_TCA_INS', 'Insercion de registros', 'si', '', '', 'cd.ft_tipo_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCA_MOD', 'Modificacion de registros', 'si', '', '', 'cd.ft_tipo_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCA_ELI', 'Eliminacion de registros', 'si', '', '', 'cd.ft_tipo_categoria_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCA_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_tipo_categoria_sel');
+select pxp.f_insert_tprocedimiento ('CD_TCA_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_tipo_categoria_sel');
+select pxp.f_insert_tprocedimiento ('CD_TCD_INS', 'Insercion de registros', 'si', '', '', 'cd.ft_tipo_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCD_MOD', 'Modificacion de registros', 'si', '', '', 'cd.ft_tipo_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCD_ELI', 'Eliminacion de registros', 'si', '', '', 'cd.ft_tipo_cuenta_doc_ime');
+select pxp.f_insert_tprocedimiento ('CD_TCD_SEL', 'Consulta de datos', 'si', '', '', 'cd.ft_tipo_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_TCD_CONT', 'Conteo de registros', 'si', '', '', 'cd.ft_tipo_cuenta_doc_sel');
+select pxp.f_insert_tprocedimiento ('CD_REPRENRET_SEL', 'recupera el importe total de las rendiciones', 'si', '', '', 'cd.ft_cuenta_doc_sel');
+select pxp.f_insert_trol ('CD - Solicitud de Fondos en Avance', 'CD - Solicitud de Fondos en Avance', 'CD');
+select pxp.f_insert_trol ('CD - VoBo Tesoreria', 'CD - VoBo Tesoreria', 'CD');
+select pxp.f_insert_trol ('CD - VoBo Cuenta Documentada', 'CD - VoBo Cuenta Documentada', 'CD');
+select pxp.f_insert_trol ('CD - Consulta Fondos en Avance', 'CD - Consulta Fondos en Avance', 'CD');
+select pxp.f_insert_trol ('CD - VoBo Cuenta Documentada Central', 'CD - VoBo Cuenta Documentada Central', 'CD');
+----------------------------------
+--COPY LINES TO dependencies.sql FILE  
+---------------------------------
+
+select pxp.f_insert_testructura_gui ('CD', 'SISTEMA');
+select pxp.f_insert_testructura_gui ('CBCONF', 'CD');
+select pxp.f_insert_testructura_gui ('TCUD', 'CBCONF');
+select pxp.f_insert_testructura_gui ('TIPCAT', 'CBCONF');
+select pxp.f_insert_testructura_gui ('LISBLO', 'CBCONF');
+select pxp.f_insert_testructura_gui ('TIPCAT.1', 'TIPCAT');
+select pxp.f_insert_testructura_gui ('SOLFND.1', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.2', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.3', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.4', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.5', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.1.1', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.2', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.3', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.5', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.1.1', 'SOLFND.1.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1', 'SOLFND.1.4');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.1', 'SOLFND.1.4.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.2', 'SOLFND.1.4.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.3', 'SOLFND.1.4.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.4', 'SOLFND.1.4.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.5', 'SOLFND.1.4.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.5.1', 'SOLFND.1.4.1.5');
+select pxp.f_insert_testructura_gui ('SOLFND.1.4.1.5.1.1', 'SOLFND.1.4.1.5.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1', 'SOLFND.1.6');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.1', 'SOLFND.1.6.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.2', 'SOLFND.1.6.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.3', 'SOLFND.1.6.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.1.1', 'SOLFND.1.6.1.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.1.1.1', 'SOLFND.1.6.1.1.1');
+select pxp.f_insert_testructura_gui ('SOLFND.1.6.1.1.1.1.1', 'SOLFND.1.6.1.1.1.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.1', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.2', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.3', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.5', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('VBCUDOC.1.1', 'VBCUDOC.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1', 'VBCUDOC.4');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.1', 'VBCUDOC.4.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.2', 'VBCUDOC.4.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.3', 'VBCUDOC.4.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.4', 'VBCUDOC.4.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.5', 'VBCUDOC.4.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.5.1', 'VBCUDOC.4.1.5');
+select pxp.f_insert_testructura_gui ('VBCUDOC.4.1.5.1.1', 'VBCUDOC.4.1.5.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1', 'VBCUDOC.6');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.1', 'VBCUDOC.6.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.2', 'VBCUDOC.6.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.3', 'VBCUDOC.6.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.1.1', 'VBCUDOC.6.1.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.1.1.1', 'VBCUDOC.6.1.1.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.6.1.1.1.1.1', 'VBCUDOC.6.1.1.1.1');
+select pxp.f_insert_testructura_gui ('SOLFND.6', 'SOLFND');
+select pxp.f_insert_testructura_gui ('SOLFND.1.7', 'SOLFND.1');
+select pxp.f_insert_testructura_gui ('VBCUDOC.7', 'VBCUDOC');
+select pxp.f_insert_testructura_gui ('CONFA.1', 'CONFA');
+select pxp.f_insert_testructura_gui ('CONFA.2', 'CONFA');
+select pxp.f_insert_testructura_gui ('CONFA.3', 'CONFA');
+select pxp.f_insert_testructura_gui ('CONFA.4', 'CONFA');
+select pxp.f_insert_testructura_gui ('CONFA.5', 'CONFA');
+select pxp.f_insert_testructura_gui ('CONFA.2.1', 'CONFA.2');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.1', 'CONFA.2.1');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.2', 'CONFA.2.1');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.3', 'CONFA.2.1');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.4', 'CONFA.2.1');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.5', 'CONFA.2.1');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.5.1', 'CONFA.2.1.5');
+select pxp.f_insert_testructura_gui ('CONFA.2.1.5.1.1', 'CONFA.2.1.5.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1', 'CONFA.4');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.1', 'CONFA.4.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.2', 'CONFA.4.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.3', 'CONFA.4.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.1.1', 'CONFA.4.1.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.1.1.1', 'CONFA.4.1.1.1');
+select pxp.f_insert_testructura_gui ('CONFA.4.1.1.1.1.1', 'CONFA.4.1.1.1.1');
+select pxp.f_insert_testructura_gui ('SOLFND', 'CD');
+select pxp.f_insert_testructura_gui ('VBCUDOC', 'CD');
+select pxp.f_insert_testructura_gui ('CONFA', 'CD');
+select pxp.f_insert_testructura_gui ('CONFA.6', 'CONFA');
+select pxp.f_insert_testructura_gui ('SOLFND.1.2.1', 'SOLFND.1.2');
+select pxp.f_insert_testructura_gui ('VBCUDOC.2.1', 'VBCUDOC.2');
+select pxp.f_insert_testructura_gui ('VBFACC', 'CD');
+select pxp.f_insert_testructura_gui ('VBFACC.1', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.2', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.3', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.4', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.5', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.6', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.7', 'VBFACC');
+select pxp.f_insert_testructura_gui ('VBFACC.1.1', 'VBFACC.1');
+select pxp.f_insert_testructura_gui ('VBFACC.2.1', 'VBFACC.2');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1', 'VBFACC.4');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.1', 'VBFACC.4.1');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.2', 'VBFACC.4.1');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.3', 'VBFACC.4.1');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.4', 'VBFACC.4.1');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.5', 'VBFACC.4.1');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.5.1', 'VBFACC.4.1.5');
+select pxp.f_insert_testructura_gui ('VBFACC.4.1.5.1.1', 'VBFACC.4.1.5.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1', 'VBFACC.6');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.1', 'VBFACC.6.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.2', 'VBFACC.6.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.3', 'VBFACC.6.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.1.1', 'VBFACC.6.1.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.1.1.1', 'VBFACC.6.1.1.1');
+select pxp.f_insert_testructura_gui ('VBFACC.6.1.1.1.1.1', 'VBFACC.6.1.1.1.1');
 
 
+/***********************************F-DAT-RAC-CD-0-05/05/2016*****************************************/
 
 
 
