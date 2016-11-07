@@ -8,6 +8,7 @@
 */
 require_once(dirname(__FILE__).'/../reportes/RSolicitudCD.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionCD.php');
+require_once(dirname(__FILE__).'/../reportes/RCuentaDoc.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionConXls.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoAsignacion.php');
 
@@ -401,6 +402,33 @@ class ACTCuentaDoc extends ACTbase{
         $this->objFunc=$this->create('MODCuentaDoc');  
         $this->res=$this->objFunc->cambioUsuarioReg($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
-    }	
+    }
+
+	function listarReporteCuentaDoc(){
+
+		$this->objParam->addParametro('tipo','detalle');
+		$this->objFunc=$this->create('MODCuentaDoc');
+		$this->res=$this->objFunc->listarReporteCuentaDoc($this->objParam);
+		$this->objParam->addParametro('datos',$this->res->datos);
+
+		//obtener titulo del reporte
+		$titulo = 'RepCuentaDoc';
+
+		//Genera el nombre del archivo (aleatorio + titulo)
+		$nombreArchivo=uniqid(md5(session_id()).$titulo);
+		$nombreArchivo.='.xls';
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+
+		$this->objReporteFormato=new RCuentaDoc($this->objParam);
+		$this->objReporteFormato->imprimeDetalle();
+
+		$this->objReporteFormato->generarReporte();
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado',
+				'Se generó con éxito el reporte: '.$nombreArchivo,'control');
+
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}
 }
 ?>

@@ -148,7 +148,35 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+
+	function listarReporteCuentaDoc(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPCD_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		$this->setParametro('id_funcionario','id_funcionario','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
+
+
+		$this->captura('fecha','DATE');
+		$this->captura('fecha_entrega','DATE');
+		$this->captura('desc_funcionario1','TEXT');
+		$this->captura('nro_tramite','VARCHAR');
+		$this->captura('motivo','VARCHAR');
+		$this->captura('nro_cheque','INTEGER');
+		$this->captura('importe_solicitado','NUMERIC');
+		$this->captura('importe_cheque','NUMERIC');
+		$this->captura('importe_documentos','NUMERIC');
+		$this->captura('saldo','NUMERIC');
+		$this->captura('estado','VARCHAR');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 			
 	function insertarCuentaDoc(){
 		//Definicion de variables para ejecucion del procedimiento
@@ -176,7 +204,6 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_estado_wf','id_estado_wf','int4');
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_funcionario_cuenta_bancaria','id_funcionario_cuenta_bancaria','int4');
-		
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
