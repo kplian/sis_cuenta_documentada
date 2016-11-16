@@ -18,6 +18,7 @@ Phx.vista.FormRendicionCD = {
 	mostrarFormaPago : false,
 	heightHeader: 245,
 	autorizacion: 'fondo_avance',
+	autorizacion_nulos: 'no',
 		
 	constructor: function(config) {		
 	   Phx.vista.FormRendicionCD.superclass.constructor.call(this,config);	   

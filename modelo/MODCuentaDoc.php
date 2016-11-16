@@ -169,6 +169,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('importe_solicitado','NUMERIC');
 		$this->captura('importe_cheque','NUMERIC');
 		$this->captura('importe_documentos','NUMERIC');
+		$this->captura('importe_depositos','NUMERIC');
 		$this->captura('saldo','NUMERIC');
 		$this->captura('estado','VARCHAR');
 		//Ejecuta la instruccion

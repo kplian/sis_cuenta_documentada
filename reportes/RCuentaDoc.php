@@ -77,6 +77,7 @@ class RCuentaDoc
         $this->docexcel->getActiveSheet()->getColumnDimension('I')->setWidth(20);
         $this->docexcel->getActiveSheet()->getColumnDimension('J')->setWidth(20);
         $this->docexcel->getActiveSheet()->getColumnDimension('K')->setWidth(20);
+        $this->docexcel->getActiveSheet()->getColumnDimension('L')->setWidth(20);
 
 
         $styleTitulos = array(
@@ -100,9 +101,9 @@ class RCuentaDoc
                     'style' => PHPExcel_Style_Border::BORDER_THIN
                 )
             ));
-        $this->docexcel->getActiveSheet()->getStyle('A1:K1')->getAlignment()->setWrapText(true);
+        $this->docexcel->getActiveSheet()->getStyle('A1:L1')->getAlignment()->setWrapText(true);
 
-        $this->docexcel->getActiveSheet()->getStyle('A1:K1')->applyFromArray($styleTitulos);
+        $this->docexcel->getActiveSheet()->getStyle('A1:L1')->applyFromArray($styleTitulos);
 
         //*************************************Cabecera*****************************************
         $this->docexcel->getActiveSheet()->setCellValue('A1','Fecha Solicitud');
@@ -114,8 +115,9 @@ class RCuentaDoc
         $this->docexcel->getActiveSheet()->setCellValue('G1','Importe Fondo Solicitado Bs.');
         $this->docexcel->getActiveSheet()->setCellValue('H1','Importe Fondo Entregado Bs.');
         $this->docexcel->getActiveSheet()->setCellValue('I1','Importe Rendicion Parcial Bs');
-        $this->docexcel->getActiveSheet()->setCellValue('J1','Saldo por Rendir Bs');
-        $this->docexcel->getActiveSheet()->setCellValue('K1','Estado');
+        $this->docexcel->getActiveSheet()->setCellValue('J1','Importe Depositos Bs');
+        $this->docexcel->getActiveSheet()->setCellValue('K1','Saldo por Rendir Bs');
+        $this->docexcel->getActiveSheet()->setCellValue('L1','Estado');
 
 
         //*************************************Detalle*****************************************
