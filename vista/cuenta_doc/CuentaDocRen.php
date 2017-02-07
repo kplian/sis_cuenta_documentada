@@ -64,7 +64,7 @@ Phx.vista.CuentaDocRen = {
 	   this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
 	   this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
 	   this.Atributos[this.getIndAtributo('importe')].form = false;
-	   
+
 	   this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
 				    saldo = me.roundTwo(saldo);
@@ -114,8 +114,8 @@ Phx.vista.CuentaDocRen = {
 				handler : this.onBtnRendicion,
 				tooltip : '<b>Reporte de rendición de gastos</b>'
 		});
-		
-		
+
+
        this.store.baseParams = { estado : 'borrador',id_cuenta_doc: this.id_cuenta_doc, tipo_interfaz: this.nombreVista}; 
        this.load({params:{start:0, limit:this.tam_pag}});
        this.finCons = true;
@@ -158,10 +158,34 @@ Phx.vista.CuentaDocRen = {
       }
       this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
       this.getBoton('diagrama_gantt').enable();
-      this.getBoton('btnObs').enable(); 
+      this.getBoton('btnObs').enable();
+
+	  if(this.dias_para_rendir < 0 ){
+		  this.disableTabFacturasDepositos();
+	  }else{
+		  this.enableTabFacturasDepositos();
+	  }
             
       return tb;
    },
+
+	disableTabFacturasDepositos:function(){
+		if(this.TabPanelSouth.get(0)){
+			this.TabPanelSouth.get(0).disable();
+		}
+		if(this.TabPanelSouth.get(1)){
+			this.TabPanelSouth.get(1).disable();
+		}
+	},
+
+	enableTabFacturasDepositos:function(){
+		if(this.TabPanelSouth.get(0)){
+			this.TabPanelSouth.get(0).enable();
+		}
+		if(this.TabPanelSouth.get(1)){
+			this.TabPanelSouth.get(1).enable();
+		}
+	},
    
    
    loadValoresIniciales: function() {

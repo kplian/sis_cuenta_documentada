@@ -211,12 +211,7 @@ BEGIN
     	  --Sentencia de la consulta
 		  v_consulta:='select
                             '||v_strg_cd||',
-                            CASE WHEN (select DISTINCT d.id_cuenta_doc_fk from cd.tcuenta_doc d
-                            		   where d.id_cuenta_doc_fk = cdoc.id_cuenta_doc) is null THEN
-                            	(cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||' + pxp.f_get_weekend_days(cdoc.fecha_entrega::date,now()::date))::integer
-                            ELSE
-                            	0
-                            END as dias_para_rendir,
+                            (cdoc.fecha_entrega::date - (now()::date) +'||v_cd_dias_entrega||' + pxp.f_get_weekend_days(cdoc.fecha_entrega::date,now()::date))::integer as dias_para_rendir,
                             cdoc.id_tipo_cuenta_doc,
                             cdoc.id_proceso_wf,
                             cdoc.id_caja,

@@ -159,13 +159,8 @@ header("content-type: text/javascript; charset=UTF-8");
 			if (data.estado == 'contabiizado') {
 				this.getBoton('btnRendicion').disable();
 			} else {
-				if(data.dias_para_rendir >= 0){
-					this.getBoton('btnRendicion').enable();
-				}
-				else{
-					this.getBoton('btnRendicion').disable();
-				}				
-			}			
+				this.getBoton('btnRendicion').enable();
+			}
 			this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
             this.getBoton('diagrama_gantt').enable();
             this.getBoton('btnObs').enable();
