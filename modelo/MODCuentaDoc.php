@@ -178,7 +178,7 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-			
+
 	function insertarCuentaDoc(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='cd.ft_cuenta_doc_ime';
@@ -270,7 +270,22 @@ class MODCuentaDoc extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-	
+
+
+	function alertarFondosLimiteRendicion(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_ime';
+		$this->transaccion='CD_LIMREN_INS';
+		$this->tipo_procedimiento='IME';
+		//definicion de variables
+		$this->tipo_conexion='seguridad';
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 	
 	 function insertarCuentaDocRendicion(){
 		//Definicion de variables para ejecucion del procedimiento
