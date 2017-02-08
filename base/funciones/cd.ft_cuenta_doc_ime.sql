@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -80,6 +78,10 @@ DECLARE
     v_limite_fondos					integer;
     v_temp							interval;
     v_num_rend						integer;
+    v_asunto						varchar;
+    v_destinatorio					varchar;
+    v_template						varchar;
+    v_id_alarma  					integer[];
 
 BEGIN
 
@@ -297,6 +299,88 @@ BEGIN
             return v_resp;
 
 		end;
+
+    /*********************************
+ 	#TRANSACCION:  'CD_LIMREN_INS'
+ 	#DESCRIPCION:	  Registra alertas por limite de fecha en dias de rendicion
+ 	#AUTOR:		Gonzalo Sarmiento
+ 	#FECHA:		07-02-2017
+	***********************************/
+
+	ELSEIF (p_transaccion='CD_LIMREN_INS')then
+
+       begin
+
+        -- seleccionar los fondos en avanccr que requieren alerta
+         FOR v_registros in (
+         			with fondos_entregados as(
+                            select ((cdoc.fecha_entrega::date -(now()::date))::integer +
+                              pxp.f_get_variable_global('cd_dias_entrega')::integer + pxp.f_get_weekend_days
+                              (cdoc.fecha_entrega::date, now()::date))::integer as dias_para_rendir,
+                                   cdoc.nro_tramite,
+                                   cdoc.id_funcionario,
+                                   sol.desc_funcionario1,
+                                   sol.email_empresa,
+                                   cdoc.importe,
+                                   cdoc.motivo,
+                                   cdoc.id_usuario_reg
+                            from cd.tcuenta_doc cdoc
+                                 inner join cd.ttipo_cuenta_doc tcdoc on tcdoc.id_tipo_cuenta_doc =
+                                   cdoc.id_tipo_cuenta_doc
+                                 inner join orga.vfuncionario_persona sol on sol.id_funcionario =
+                                   cdoc.id_funcionario
+                                 inner join orga.vfuncionario_persona sup on sup.id_funcionario =
+                                   cdoc.id_funcionario_aprobador
+                            where tcdoc.codigo = 'SOLFONAVA' and
+                                  cdoc.estado in ('contabilizado'))
+                            select *
+                            from fondos_entregados
+                            where dias_para_rendir = pxp.f_get_variable_global('cd_alerta_dias_finalizar_rendicion')::integer)  LOOP
+
+
+                ----------------------------
+                -- arma template de correo
+                -----------------------------
+
+
+                v_asunto = 'Fondo en Avance :  '||v_registros.nro_tramite;
+                v_destinatorio = '<br>Estimad@';
+                v_template = '<br>
+                			  <br>A la fecha esta por cumplirse el plazo previsto para realizar sus rendiciones,
+                              <br>aun cuenta con 2 dias para realizar sus rendiciones, el monto a rendir es  '||v_registros.importe||' Bs.
+                              <br>del fondo en avance con numero de tramite <b>'||v_registros.nro_tramite||'
+                              <br>solicitado con el motivo '||v_registros.motivo || '</b>
+                              <br>
+                              <br>Es obligatorio realizar sus rendiciones antes del plazo establecido segun la normativa de Tesoreria.
+                              <br>
+                              <br> Atentamente
+                              <br> &nbsp;&nbsp;&nbsp;Control de limite de rendiciones de Fondos en Avance del Sistema ERP BOA';
+
+         		v_titulo  = 'Recordatorio de rendicion fondo en avance';
+
+                v_parametros_ad = '{}';
+
+                -- inserta registros de alarmas par ael usario que creo la obligacion
+                v_id_alarma[1]:=param.f_inserta_alarma(v_registros.id_funcionario,
+                                                    v_destinatorio||v_template ,    --descripcion alarmce
+                                                    COALESCE(v_acceso_directo,''),--acceso directo
+                                                    now()::date,
+                                                    'notificacion',
+                                                    '',   -->
+                                                    p_id_usuario,
+                                                    v_clase,
+                                                    v_titulo,--titulo
+                                                    COALESCE(v_parametros_ad,''),
+                                                    v_registros.id_usuario_reg::integer,  --destino de la alarma
+                                                    v_asunto,
+                                                    v_registros.email_empresa);
+
+       END LOOP;
+
+        --Devuelve la respuesta
+        return v_resp;
+
+       end;
 
 	/*********************************
  	#TRANSACCION:  'CD_CDOC_MOD'
@@ -575,7 +659,7 @@ BEGIN
 
 
           --------------------------------------------------
-          --  ACTUALIZA EL NUEVO ESTADO DEL PRESUPUESTO
+          --  ACTUALIZA EL NUEVO ESTADO DE LA CUENTA DOCUMENTADA
           ----------------------------------------------------
 
           IF  cd.f_fun_inicio_cuenta_doc_wf(p_id_usuario,
