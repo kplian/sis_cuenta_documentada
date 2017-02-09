@@ -9,6 +9,7 @@ session_start();
 $_SESSION["_SESION"]= new CTSesion();
 include(dirname(__FILE__).'/../../lib/DatosGenerales.php');
 include_once(dirname(__FILE__).'/../../lib/lib_general/Errores.php');
+include_once(dirname(__FILE__).'/../../lib/rest/PxpRestClient.php');
 include_once(dirname(__FILE__).'/../../lib/FirePHPCore-0.3.2/lib/FirePHPCore/FirePHP.class.php');
 
 
