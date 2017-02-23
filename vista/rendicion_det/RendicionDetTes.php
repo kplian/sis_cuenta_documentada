@@ -20,6 +20,14 @@ Phx.vista.RendicionDetTes = {
 	
 	constructor: function(config) {
 	   Phx.vista.RendicionDetTes.superclass.constructor.call(this,config);
+		this.addButton('btnCambiarApropiacion',
+				{
+					text: 'Cambiar Apropiacion',
+					iconCls: 'brenew',
+					disabled: false,
+					handler: this.cambiarApropiacion,
+					tooltip: 'Cambiar apropiacion de Centro de Costo'
+				});
 	   this.obtenerVariableGlobal();
     },
     
@@ -59,7 +67,8 @@ Phx.vista.RendicionDetTes = {
 	      }
 	      
 	      this.getBoton('btnShowDoc').enable();
-	            
+	      this.getBoton('btnCambiarApropiacion').enable();
+
 	      return tb;
  },
  
@@ -67,7 +76,8 @@ Phx.vista.RendicionDetTes = {
         var tb = Phx.vista.RendicionDetTes.superclass.liberaMenu.call(this);
         if(tb){
             this.getBoton('btnShowDoc').disable();
-            
+            this.getBoton('btnCambiarApropiacion').disable();
+
             if(this.maestro.estado == 'vbrendicion' && this.maestro.sw_solicitud == 'no' && this.bloquearDocumento == 'no'){
 	             this.getBoton('new').enable();
 		    }
@@ -108,6 +118,18 @@ Phx.vista.RendicionDetTes = {
 				timeout: this.timeout,
 				scope:this
 			});
+	},
+
+	cambiarApropiacion : function() {
+		var rec = this.sm.getSelected();
+		Phx.CP.loadWindows('../../../sis_contabilidad/vista/doc_concepto/DocConceptoCtaDoc.php', 'DocConceptoCtaDoc', {
+			modal : true,
+			width : '95%',
+			height : '95%',
+		}, {
+			data : rec.data,
+			id_depto : this.maestro.id_depto_conta
+		}, this.idContenedor, 'DocConceptoCtaDoc');
 	}
 };
 </script>
