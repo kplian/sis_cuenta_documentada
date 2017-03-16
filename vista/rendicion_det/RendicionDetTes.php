@@ -67,8 +67,10 @@ Phx.vista.RendicionDetTes = {
 	      }
 	      
 	      this.getBoton('btnShowDoc').enable();
-	      this.getBoton('btnCambiarApropiacion').enable();
-
+		if(me.maestro.estado == 'borrador')
+			this.getBoton('btnCambiarApropiacion').enable();
+		else
+			this.getBoton('btnCambiarApropiacion').disable();
 	      return tb;
  },
  
@@ -76,7 +78,7 @@ Phx.vista.RendicionDetTes = {
         var tb = Phx.vista.RendicionDetTes.superclass.liberaMenu.call(this);
         if(tb){
             this.getBoton('btnShowDoc').disable();
-            this.getBoton('btnCambiarApropiacion').disable();
+			this.getBoton('btnCambiarApropiacion').disable();
 
             if(this.maestro.estado == 'vbrendicion' && this.maestro.sw_solicitud == 'no' && this.bloquearDocumento == 'no'){
 	             this.getBoton('new').enable();
