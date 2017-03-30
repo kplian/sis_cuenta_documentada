@@ -440,6 +440,22 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		
 		},
 		{
+			config:{
+				name: 'fecha_entrega',
+				fieldLabel: 'Fecha Entrega Cheque',
+				allowBlank: false,
+				anchor: '80%',
+				gwidth: 120,
+				format: 'd/m/Y',
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+			type:'DateField',
+			filters: { pfiltro:'cdoc.fecha', type:'date' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
             config:{
                 name: 'id_funcionario_cuenta_bancaria',
                 origen: 'FUNCUENTABANC',
@@ -616,6 +632,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'nro_tramite', type: 'string'},
 		{name:'motivo', type: 'string'},
 		{name:'fecha', type: 'date',dateFormat:'Y-m-d'},
+		{name:'fecha_entrega', type: 'date',dateFormat:'Y-m-d'},
 		{name:'id_moneda', type: 'numeric'},
 		{name:'estado', type: 'string'},
 		{name:'estado_reg', type: 'string'},

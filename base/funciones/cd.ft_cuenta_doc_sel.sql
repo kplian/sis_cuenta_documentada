@@ -179,35 +179,34 @@ BEGIN
                                        
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-                      --v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
-					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
-                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'')  and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
-                      v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and ';
+                      v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
-                
-                END IF;            
-          
+
+                END IF;
+
            END IF;
-            
-           IF v_historico =  'si' THEN            
+
+           IF v_historico =  'si' THEN
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = cdoc.id_proceso_wf';
-               v_strg_cd = 'DISTINCT(cdoc.id_cuenta_doc)'; 
-               v_strg_obs = '''---''::text';               
-           ELSE            
+               v_strg_cd = 'DISTINCT(cdoc.id_cuenta_doc)';
+               v_strg_obs = '''---''::text';
+           ELSE
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf';
                v_strg_cd = 'cdoc.id_cuenta_doc';
-               v_strg_obs = 'ew.obs'; 
+               v_strg_obs = 'ew.obs';
            END IF;
-           
-          
-           
-            
+
+
+
+
     	  --Sentencia de la consulta
 		  v_consulta:='select
                             '||v_strg_cd||',
@@ -224,6 +223,7 @@ BEGIN
                             cdoc.nro_tramite,
                             cdoc.motivo,
                             cdoc.fecha,
+                            cdoc.fecha_entrega,
                             cdoc.id_moneda,
                             cdoc.estado,
                             cdoc.estado_reg,
@@ -238,7 +238,7 @@ BEGIN
                             usu2.cuenta as usr_mod,
                             mon.codigo as desc_moneda,
                             dep.nombre as desc_depto,
-                            '||v_strg_obs||', 
+                            '||v_strg_obs||',
                             fun.desc_funcionario1 as desc_funcionario,
                             cdoc.importe,
                             fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
@@ -254,15 +254,15 @@ BEGIN
 						from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
-                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
-                        '||v_inner||' 
+                        '||v_inner||'
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
                         where  cdoc.estado_reg = ''activo'' and '||v_filtro;
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -270,13 +270,13 @@ BEGIN
             raise NOTICE '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_CDOC_CONT'
  	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		05-05-2016 16:41:21
 	***********************************/
 	elsif(p_transaccion='CD_CDOC_CONT')then
@@ -286,42 +286,42 @@ BEGIN
            IF (v_parametros.id_funcionario_usu is null) then
               	v_parametros.id_funcionario_usu = -1;
            END IF;
-            
+
            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
               v_historico =  v_parametros.historico;
            ELSE
               v_historico = 'no';
            END IF;
-           
-           
+
+
            IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
-        
+
                IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
                END IF;
-               
+
                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
-           
+
            END IF;
-           
-             
-         
-           
+
+
+
+
            IF  (v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
-           
+
                 --TODO ver lo usuarios miembros del departemento
-                
-                
-                select  
+
+
+                select
                    pxp.aggarray(depu.id_depto)
-                into 
+                into
                    va_id_depto
-                from param.tdepto_usuario depu 
+                from param.tdepto_usuario depu
                 where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
-                
-                
-            
-               IF v_historico =  'no' THEN  
+
+
+
+               IF v_historico =  'no' THEN
                   IF p_administrador !=1 THEN
                       v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbrendicion'',''vbtesoreria''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   ELSE
@@ -333,136 +333,135 @@ BEGIN
                   ELSE
                       v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and ';
                   END IF;
-                
+
                 END IF;
-                
-              
-          
+
+
+
            END IF;
-           
+
            IF  (v_parametros.tipo_interfaz) in ('CuentaDocVbContaCentral') THEN
-                                       
-               IF v_historico =  'no' THEN  
+
+               IF v_historico =  'no' THEN
                   IF p_administrador !=1 THEN
-                      --v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
-					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
-                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'')  and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'') and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
-                      v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and ';
+                      v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
-                
-                END IF;            
-          
+
+                END IF;
+
            END IF;
-            
-           IF v_historico =  'si' THEN            
+
+           IF v_historico =  'si' THEN
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = cdoc.id_proceso_wf';
-               v_strg_cd = 'DISTINCT(cdoc.id_cuenta_doc)'; 
-               v_strg_obs = '''---''::text';               
-           ELSE            
+               v_strg_cd = 'DISTINCT(cdoc.id_cuenta_doc)';
+               v_strg_obs = '''---''::text';
+           ELSE
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf';
                v_strg_cd = 'cdoc.id_cuenta_doc';
-               v_strg_obs = 'ew.obs'; 
+               v_strg_obs = 'ew.obs';
            END IF;
-           
-          
-        
-        
+
+
+
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count('||v_strg_cd||')
 					    from cd.tcuenta_doc cdoc
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
-                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
-                        '||v_inner||' 
+                        '||v_inner||'
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
       				    where  cdoc.estado_reg = ''activo'' and '||v_filtro;
-			
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			--Devuelve la respuesta
 			return v_consulta;
 		end;
-        
-    /*********************************    
+
+    /*********************************
  	#TRANSACCION:  'CD_CDOCREN_SEL'
  	#DESCRIPCION:	Consulta de datos  rendicion
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		05-05-2016 16:41:21
 	***********************************/
 
 	elseif(p_transaccion='CD_CDOCREN_SEL')then
-     				
+
     	begin
-        
-        
-           
+
+
+
            v_filtro='';
            IF (v_parametros.id_funcionario_usu is null) then
               	v_parametros.id_funcionario_usu = -1;
            END IF;
-            
-           
+
+
            IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
-                
-                select  
+
+                select
                    pxp.aggarray(depu.id_depto)
-                into 
+                into
                    va_id_depto
-                from param.tdepto_usuario depu 
+                from param.tdepto_usuario depu
                 where depu.id_usuario =  p_id_usuario;-- and depu.cargo in ('responsable','auxiliar');
-           
-           
-           
+
+
+
                 IF p_administrador !=1 THEN
                       v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'  ) and ';
                 END IF;
 
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
            END IF;
-                     
-           
+
+
            v_importe_fac = '
-                             
+
                              	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric   
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric
                                as  importe_documentos,
-                              
+
                               ' ;
-                              
+
             v_importe_fac = v_importe_fac ||'
-                              
+
                              	 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric   
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric
                                 as  importe_retenciones,
-                              
-                              ' ;                  
-                              
+
+                              ' ;
+
             v_importe_fac = v_importe_fac ||'
-                              
+
                              	 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
                              	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
-                              	where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric  
+                              	where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
                                 as  importe_depositos
-                              
-                              ' ;  
-           
-            
-            
+
+                              ' ;
+
+
+
     	  --Sentencia de la consulta
 		  v_consulta:='select
-                            cdoc.id_cuenta_doc,  
+                            cdoc.id_cuenta_doc,
                             cdoc.id_tipo_cuenta_doc,
                             cdoc.id_proceso_wf,
                             cdoc.id_caja,
@@ -489,7 +488,7 @@ BEGIN
                             usu2.cuenta as usr_mod,
                             mon.codigo as desc_moneda,
                             dep.nombre as desc_depto,
-                            ew.obs, 
+                            ew.obs,
                             fun.desc_funcionario1 as desc_funcionario,
                             cdoc.importe,
                             fcb.nro_cuenta as desc_funcionario_cuenta_bancaria,
@@ -507,15 +506,15 @@ BEGIN
                         inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
-                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
-                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf 
+                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
                         where  cdoc.estado_reg = ''activo'' and '||v_filtro;
-			
+
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -523,13 +522,13 @@ BEGIN
             raise notice '%', v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
-						
+
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_CDOCREN_CONT'
  	#DESCRIPCION:	Conteo de registros de rendicion
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		05-05-2016 16:41:21
 	***********************************/
 	elsif(p_transaccion='CD_CDOCREN_CONT')then
@@ -539,37 +538,37 @@ BEGIN
              IF (v_parametros.id_funcionario_usu is null) then
                   v_parametros.id_funcionario_usu = -1;
              END IF;
-              
-             
+
+
             IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
                 IF p_administrador !=1 THEN
                       v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||')and ';
                 END IF;
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
             END IF;
-           
-        
-        
+
+
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(cdoc.id_cuenta_doc)
 					    from cd.tcuenta_doc cdoc
                         inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
-                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto 
+                        inner join param.tdepto dep on dep.id_depto = cdoc.id_depto
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
-                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf 
+                        inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
 						left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
                         where  cdoc.estado_reg = ''activo'' and '||v_filtro;
-			
-			--Definicion de la respuesta		    
+
+			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			--Devuelve la respuesta
 			return v_consulta;
-		end;    
+		end;
 
     /*********************************
  	#TRANSACCION:  'CD_REPCD_SEL'
@@ -596,19 +595,41 @@ BEGIN
                       ELSE
                          0::numeric
                       END  as  importe_documentos,
+                      CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                         COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                         inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                         where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric
+                      WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                         COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                         inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                         where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
+                      ELSE
+                         0::numeric
+                      END  as  importe_depositos,
                       cdoc.importe - (CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
                        COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                        inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                        where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
 
-                      WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                       WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
                        COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                        inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
                        where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric
-                    ELSE
+                       ELSE
                        0::numeric
-                    END) as saldo,
-                    cdoc.estado
+                       END) + (CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
+                           COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                           inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                           where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric
+                        WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
+                           COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
+                           inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
+                           where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
+                        ELSE
+                           0::numeric
+                        END)
+                       as saldo,
+                       cdoc.estado
           	from cd.tcuenta_doc cdoc
           	inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc=cdoc.id_tipo_cuenta_doc
           	inner join orga.vfuncionario fun on fun.id_funcionario=cdoc.id_funcionario

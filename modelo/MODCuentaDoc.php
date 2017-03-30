@@ -39,6 +39,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('nro_tramite','VARCHAR');
 		$this->captura('motivo','VARCHAR');
 		$this->captura('fecha','DATE');
+		$this->captura('fecha_entrega','DATE');
 		$this->captura('id_moneda','INTEGER');
 		$this->captura('estado','VARCHAR');
 		$this->captura('estado_reg','VARCHAR');
