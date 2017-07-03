@@ -253,3 +253,14 @@ select wf.f_import_ttipo_documento_estado ('insert','MEMOFA','SFA','contabilizad
 select wf.f_import_ttipo_documento_estado ('insert','MEMOFA','SFA','contabilizado','SFA','insertar','superior','');      
          
 /***********************************F-DEP-RAC-CD-0-17/05/2016*****************************************/
+
+/***********************************I-DEP-GSS-CD-0-14/06/2017*****************************************/
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_periodo FOREIGN KEY (id_periodo)
+    REFERENCES param.tperiodo(id_periodo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+/***********************************F-DEP-GSS-CD-0-14/06/2017*****************************************/

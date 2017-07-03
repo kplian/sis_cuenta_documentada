@@ -15,7 +15,7 @@ header("content-type: text/javascript; charset=UTF-8");
         bedit:false,
         bnew:false,
         bsave:false,
-        bdel:false,
+        bdel:true,
         require: '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDoc.php',
         requireclase: 'Phx.vista.CuentaDoc',
         title: 'Cuenta Documentada',

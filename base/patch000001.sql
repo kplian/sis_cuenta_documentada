@@ -287,6 +287,9 @@ IS 'importe rendido, solo en solicitudesse llena cuando las rendiciones son fina
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 
 
+/***********************************I-SCP-CD-GSS-1-14/06/2017****************************************/
 
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_periodo INTEGER;
 
-
+/***********************************F-SCP-CD-GSS-1-14/06/2017****************************************/
