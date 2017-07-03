@@ -43,6 +43,7 @@ DECLARE
     v_importe_fondo			numeric;
     v_verifica_rendiciones_menor_fondo	varchar;
 	v_tipo_informe			varchar;
+    v_fecha_doc				date;
 
 BEGIN
 
@@ -70,11 +71,14 @@ BEGIN
                 c.id_cuenta_doc,
                 cdr.sw_max_doc_rend,
                 cdr.estado as estado_cdr,
-                cdr.importe as importe_rendicion
+                cdr.importe as importe_rendicion,
+                per.fecha_ini,
+                per.fecha_fin
              into
                 v_registros
              from cd.tcuenta_doc c
              inner join cd.tcuenta_doc cdr on cdr.id_cuenta_doc_fk = c.id_cuenta_doc
+             left join param.tperiodo per on per.id_periodo=cdr.id_periodo
              where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
 
@@ -95,6 +99,14 @@ BEGIN
 
              IF v_registros.sw_max_doc_rend = 'no' and  v_parametros.importe_doc > v_tope THEN
                     raise exception 'no puede registrar documentos mayortes a %, si es necesario pida permiso en tesoreria para proceder',v_tope;
+             END IF;
+
+             select fecha into v_fecha_doc
+             from conta.tdoc_compra_venta
+             where id_doc_compra_venta=v_parametros.id_doc_compra_venta;
+
+             IF NOT v_fecha_doc BETWEEN v_registros.fecha_ini AND v_registros.fecha_fin THEN
+             	raise exception 'El documento no corresponde al periodo % %', v_registros.fecha_ini, v_registros.fecha_fin;
              END IF;
 
             --raise exception 'llega..';
@@ -164,11 +176,14 @@ BEGIN
                 c.estado,
                 c.id_cuenta_doc,
                 cdr.estado as estado_cdr,
-                cdr.importe as importe_rendicion
+                cdr.importe as importe_rendicion,
+                per.fecha_ini,
+                per.fecha_fin
              into
                 v_registros
              from cd.tcuenta_doc c
              inner join cd.tcuenta_doc cdr on cdr.id_cuenta_doc_fk = c.id_cuenta_doc
+             left join param.tperiodo per on per.id_periodo=cdr.id_periodo
              where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc; --registro de solicitud
 
 
@@ -185,6 +200,14 @@ BEGIN
             IF v_registros.estado_cdr not in ('borrador')  and v_cd_comprometer_presupuesto = 'si' THEN
                 raise exception 'Solo puede añadir  en borrador por que los documentos se encuentran comprometidos';
             END IF;
+
+            select fecha into v_fecha_doc
+             from conta.tdoc_compra_venta
+             where id_doc_compra_venta=v_parametros.id_doc_compra_venta;
+
+             IF NOT v_fecha_doc BETWEEN v_registros.fecha_ini AND v_registros.fecha_fin THEN
+             	raise exception 'El documento no corresponde al periodo % %', v_registros.fecha_ini, v_registros.fecha_fin;
+             END IF;
 
             -------------------------------------
             --  validar registros de la rendicion
