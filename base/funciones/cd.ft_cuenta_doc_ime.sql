@@ -84,6 +84,8 @@ DECLARE
     v_id_alarma  					integer[];
     v_fecha_ini						date;
     v_fecha_fin						date;
+    v_id_periodo					integer;
+    v_periodo						integer;
 
 BEGIN
 
@@ -1061,6 +1063,18 @@ BEGIN
              from param.tperiodo per
              where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
              limit 1 offset 0;
+
+             select per.id_periodo, per.periodo into v_id_periodo, v_periodo
+			 from cd.tcuenta_doc cd
+			 inner join cd.trendicion_det ren on ren.id_cuenta_doc_rendicion = cd.id_cuenta_doc
+			 inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta = ren.id_doc_compra_venta
+			 inner join param.tperiodo per on per.fecha_ini<=doc.fecha and per.fecha_fin>=doc.fecha
+             where cd.id_cuenta_doc=v_parametros.id_cuenta_doc
+             limit 1 offset 0;
+
+             IF v_id_periodo != v_parametros.id_periodo THEN
+             	raise exception 'Ya existen facturas registradas pertenecientes al periodo %, el periodo debe ser registrado como %', pxp.f_obtener_literal_periodo(v_periodo,0), v_periodo;
+             END IF;
 
              select
               c.id_estado_wf,
