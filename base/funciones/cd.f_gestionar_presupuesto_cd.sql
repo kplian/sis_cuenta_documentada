@@ -385,7 +385,8 @@ BEGIN
                                             dc.id_partida,
                                             c.id_moneda,
                                             par.codigo,
-                                            par.nombre_partida) LOOP
+                                            par.nombre_partida,
+                                            par.sw_movimiento) LOOP
                                       
                                         
                                      IF v_registros.sw_movimiento != 'flujo'  THEN                                       
