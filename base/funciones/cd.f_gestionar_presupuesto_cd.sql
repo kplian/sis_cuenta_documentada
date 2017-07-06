@@ -366,7 +366,8 @@ BEGIN
                                             par.nombre_partida,
                                             p.id_categoria_prog,
                                             cp.codigo_categoria,
-                                            par.sw_movimiento
+                                            par.sw_movimiento,
+                                            p.codigo_cc
                                       FROM  cd.tcuenta_doc c
                                       INNER JOIN cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
                                       INNER JOIN conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
@@ -386,7 +387,8 @@ BEGIN
                                             c.id_moneda,
                                             par.codigo,
                                             par.nombre_partida,
-                                            par.sw_movimiento) LOOP
+                                            par.sw_movimiento,
+                                            p.codigo_cc) LOOP
                                       
                                         
                                      IF v_registros.sw_movimiento != 'flujo'  THEN                                       
