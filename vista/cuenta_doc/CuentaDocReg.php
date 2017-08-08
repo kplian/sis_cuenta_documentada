@@ -96,7 +96,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		    });
 
 			this.addButton('btnRendicion', {
-				grupo : [2],
+				grupo : [2,3],
 				text : 'Rendicion Efectivo',
 				iconCls : 'bballot',
 				disabled : false,

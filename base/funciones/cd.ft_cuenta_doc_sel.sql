@@ -14,13 +14,13 @@ $body$
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tcuenta_doc'
  AUTOR: 		 rac kplian
  FECHA:	        05-05-2016 16:41:21
- COMENTARIOS:	
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION:
+ AUTOR:
+ FECHA:
 ***************************************************************************/
 
 DECLARE
@@ -39,124 +39,124 @@ DECLARE
     va_id_depto				integer[];
     v_cd_dias_entrega		varchar;
     v_gaf					varchar[];
-			    
+
 BEGIN
 
 	v_nombre_funcion = 'cd.ft_cuenta_doc_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_CDOC_SEL'
  	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		05-05-2016 16:41:21
 	***********************************/
 
 	if(p_transaccion='CD_CDOC_SEL')then
-     				
+
     	begin
-        
+
            v_cd_dias_entrega = pxp.f_get_variable_global('cd_dias_entrega');
-        
-        
-           
+
+
+
            IF  pxp.f_existe_parametro(p_tabla,'estado') THEN
               v_estado =  v_parametros.estado;
            ELSE
               v_estado = 'ninguno';
            END IF;
-           
-         
-              
+
+
+
           v_importe_fac = '
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
                              	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
-                              
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
+
                               WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
                              	 COALESCE((select sum(COALESCE(dcv.importe_pago_liquido + dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric 
-                              
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric
+
                               ELSE
-                                 0::numeric 
+                                 0::numeric
                               END  as  importe_documentos,
-                              
+
                               ' ;
-                              
+
             v_importe_fac = v_importe_fac ||'
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si''   THEN
                              	 COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric   
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
                               WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
                                  COALESCE((select sum(COALESCE(dcv.importe_descuento_ley,0)) from cd.trendicion_det rd
                               	 inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
-                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric 
+                              	 where dcv.estado_reg = ''activo'' and rd.id_cuenta_doc_rendicion = cdoc.id_cuenta_doc),0)::numeric
                               ELSE
-                                 0::numeric 
+                                 0::numeric
                               END  as  importe_retenciones,
-                              
-                              ' ;                  
-                              
+
+                              ' ;
+
             v_importe_fac = v_importe_fac ||'
                               CASE WHEN  lower(cdoc.estado)!=''contabilidao'' and sw_solicitud = ''si'' THEN
                              	 COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
                              	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
-                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric  
+                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc_fk = cdoc.id_cuenta_doc),0)::numeric
                               WHEN  lower(cdoc.estado)=''vbrendicion'' and sw_solicitud = ''no'' THEN
                                  COALESCE((select sum(COALESCE(lb.importe_deposito,0)) from tes.tts_libro_bancos lb
                              	 inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = ''id_cuenta_doc'' and lb.tabla = ''cd.tcuenta_doc''
-                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric  
-                              
+                              	 where c.estado_reg = ''activo'' and c.id_cuenta_doc = cdoc.id_cuenta_doc),0)::numeric
+
                               ELSE
-                                 0::numeric 
+                                 0::numeric
                               END  as  importe_depositos
-                              
-                              ' ;                
-           
-           
+
+                              ' ;
+
+
            v_filtro='';
            IF (v_parametros.id_funcionario_usu is null) then
               	v_parametros.id_funcionario_usu = -1;
            END IF;
-            
+
            IF  pxp.f_existe_parametro(p_tabla,'historico') THEN
               v_historico =  v_parametros.historico;
            ELSE
               v_historico = 'no';
            END IF;
-           
-           
+
+
            IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
-        
+
                IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
                END IF;
-               
+
                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
-           
+
            END IF;
-           
-             
-         
-           
+
+
+
+
            IF  (v_parametros.tipo_interfaz) in ('CuentaDocVb') THEN
-           
+
                 --TODO ver lo usuarios miembros del departemento
-                
-                
-                select  
+
+
+                select
                    pxp.aggarray(depu.id_depto)
-                into 
+                into
                    va_id_depto
-                from param.tdepto_usuario depu 
+                from param.tdepto_usuario depu
                 where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
-                
-                
-            
-               IF v_historico =  'no' THEN  
+
+
+
+               IF v_historico =  'no' THEN
                   IF p_administrador !=1 THEN
                       v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                   ELSE
@@ -168,16 +168,16 @@ BEGIN
                   ELSE
                       v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and ';
                   END IF;
-                
+
                 END IF;
-                
-              
-          
+
+
+
            END IF;
-           
+
            IF  (v_parametros.tipo_interfaz) in ('CuentaDocVbContaCentral') THEN
-                                       
-               IF v_historico =  'no' THEN  
+
+               IF v_historico =  'no' THEN
                   IF p_administrador !=1 THEN
 					  v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
@@ -246,7 +246,7 @@ BEGIN
                             cdoc.id_depto_lb,
                             cdoc.id_depto_conta,
                             '||v_importe_fac||' ,
-                            tcd.nombre as desc_tipo_cuenta_doc,
+                            tcd.nombre as tipo_cuenta_doc,
                             tcd.sw_solicitud,
                             cdoc.sw_max_doc_rend,
                             COALESCE(cdoc.num_rendicion,'''') as num_rendicion,
@@ -496,17 +496,20 @@ BEGIN
                             cdoc.id_depto_lb,
                             cdoc.id_depto_conta,
                              '||v_importe_fac||' ,
-                            tcd.nombre as desc_tipo_cuenta_doc,
+                            tcd.nombre as tipo_cuenta_doc,
                             tcd.sw_solicitud,
                             cdoc.nro_correspondencia,
                             COALESCE(cdoc.num_rendicion,'''') as num_rendicion,
                             cdo.importe::numeric as importe_solicitado,
-                            cdo.importe_total_rendido::numeric
+                            cdo.importe_total_rendido::numeric,
+                            cdoc.id_periodo,
+                            pxp.f_obtener_literal_periodo(per.periodo,0) as periodo
 						from cd.tcuenta_doc cdoc
                         inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                         inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
                         inner join param.tdepto dep on dep.id_depto = cdoc.id_depto
+                        left join param.tperiodo per on per.id_periodo = cdoc.id_periodo
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
@@ -697,7 +700,7 @@ BEGIN
                               cdoc.id_funcionario_cuenta_bancaria,
                               cdoc.id_depto_lb,
                               cdoc.id_depto_conta,
-                              tcd.nombre as desc_tipo_cuenta_doc,
+                              tcd.nombre as tipo_cuenta_doc,
                               tcd.sw_solicitud,
                               (select l.nombre
                             from param.tlugar l
@@ -1015,13 +1018,13 @@ BEGIN
             return v_consulta;
 
 		end;
-    
+
     else
 		raise exception 'Transaccion inexistente';
 	end if;
-					
+
 EXCEPTION
-					
+
 	WHEN OTHERS THEN
 			v_resp='';
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);

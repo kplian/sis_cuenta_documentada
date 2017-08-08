@@ -64,6 +64,8 @@ Phx.vista.CuentaDocRen = {
 	   this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
 	   this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
 	   this.Atributos[this.getIndAtributo('importe')].form = false;
+		this.Atributos[this.getIndAtributo('id_periodo')].form = true;
+		this.Atributos[this.getIndAtributo('id_periodo')].grid = true;
 
 	   this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
@@ -118,6 +120,7 @@ Phx.vista.CuentaDocRen = {
 
        this.store.baseParams = { estado : 'borrador',id_cuenta_doc: this.id_cuenta_doc, tipo_interfaz: this.nombreVista}; 
        this.load({params:{start:0, limit:this.tam_pag}});
+	   this.iniciarEventos();
        this.finCons = true;
 		
    }, 
@@ -169,6 +172,49 @@ Phx.vista.CuentaDocRen = {
       return tb;
    },
 
+	iniciarEventos:function(){
+		this.Cmp.fecha.on('change', function (calendar, newValue, oldValue) {
+			//this.Cmp.id_periodo.reset();
+			this.Cmp.id_periodo.setDisabled(false);
+			this.Cmp.id_periodo.store.baseParams.id_gestion = this.getGestion(new Date());
+			this.Cmp.id_periodo.modificado = true;
+
+		}, this);
+	},
+
+	onButtonEdit:function(){
+		Phx.vista.CuentaDocRen.superclass.onButtonEdit.call(this);
+		this.Cmp.fecha.fireEvent('change');
+	},
+
+	getGestion:function(x){
+		if(Ext.isDate(x)){
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_parametros/control/Gestion/obtenerGestionByFecha',
+				params:{fecha:x},
+				success:this.successGestion,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});
+		} else{
+			alert('Error al obtener gestión: fecha inválida')
+		}
+	},
+
+	successGestion: function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		if(!reg.ROOT.error){
+			var id_gestion = reg.ROOT.datos.id_gestion;
+			//Setea los stores de partida, cuenta, etc. con la gestion obtenida
+			Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: id_gestion})
+
+		} else{
+			alert('Error al obtener la gestión. Cierre y vuelva a intentarlo')
+		}
+	},
 	disableTabFacturasDepositos:function(){
 		if(this.TabPanelSouth.get(0)){
 			this.TabPanelSouth.get(0).disable();

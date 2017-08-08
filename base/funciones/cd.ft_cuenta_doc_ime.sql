@@ -82,6 +82,10 @@ DECLARE
     v_destinatorio					varchar;
     v_template						varchar;
     v_id_alarma  					integer[];
+    v_fecha_ini						date;
+    v_fecha_fin						date;
+    v_id_periodo					integer;
+    v_periodo						integer;
 
 BEGIN
 
@@ -371,7 +375,7 @@ BEGIN
                                                     v_clase,
                                                     v_titulo,--titulo
                                                     COALESCE(v_parametros_ad,''),
-                                                    v_registros.id_usuario_reg::integer,  --destino de la alarma
+                                                    null::integer,  --destino de la alarma
                                                     v_asunto,
                                                     v_registros.email_empresa);
 
@@ -946,6 +950,17 @@ BEGIN
                   raise exception 'No se encontro una gestión para la fecha  %', v_parametros.fecha;
                END IF;
 
+                --validamos que es la unica rendicion del periodo
+        		SELECT per.fecha_ini, per.fecha_fin into v_fecha_ini, v_fecha_fin
+                FROM cd.tcuenta_doc cd
+                INNER JOIN param.tperiodo per on per.id_periodo=cd.id_periodo
+                WHERE cd.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk
+                AND cd.id_periodo=v_parametros.id_periodo;
+
+                IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
+                	raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
+                END IF;
+
                --contamos la cantidad rendciones para la misma solicitud
 
 
@@ -984,8 +999,8 @@ BEGIN
                     id_cuenta_doc_fk,
                     motivo,
                     nro_correspondencia,
-                    num_rendicion
-
+                    num_rendicion,
+                    id_periodo
                 ) values(
                     v_id_tipo_cuenta_doc,
                     v_id_proceso_wf,
@@ -1009,7 +1024,8 @@ BEGIN
                     v_parametros.id_cuenta_doc_fk, -- referencia a cuenta de solicitud
     				v_parametros.motivo,
                     v_parametros.nro_correspondencia,
-                    'R'||v_num_rend::varchar
+                    'R'||v_num_rend::varchar,
+                    v_parametros.id_periodo
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
 
@@ -1047,6 +1063,18 @@ BEGIN
              from param.tperiodo per
              where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
              limit 1 offset 0;
+
+             select per.id_periodo, per.periodo into v_id_periodo, v_periodo
+			 from cd.tcuenta_doc cd
+			 inner join cd.trendicion_det ren on ren.id_cuenta_doc_rendicion = cd.id_cuenta_doc
+			 inner join conta.tdoc_compra_venta doc on doc.id_doc_compra_venta = ren.id_doc_compra_venta
+			 inner join param.tperiodo per on per.fecha_ini<=doc.fecha and per.fecha_fin>=doc.fecha
+             where cd.id_cuenta_doc=v_parametros.id_cuenta_doc
+             limit 1 offset 0;
+
+             IF v_id_periodo != v_parametros.id_periodo THEN
+             	raise exception 'Ya existen facturas registradas pertenecientes al periodo %, el periodo debe ser registrado como %', pxp.f_obtener_literal_periodo(v_periodo,0), v_periodo;
+             END IF;
 
              select
               c.id_estado_wf,
@@ -1091,13 +1119,25 @@ BEGIN
               raise exception 'el importe a rendir no puede ser mayor que el importe solicitado %. (Revise las otras rendiciones registradas %)'  ,v_registros_cd.importe,(v_importe_rendicion,0);
             END IF;*/
 
+            SELECT per.fecha_ini, per.fecha_fin into v_fecha_ini, v_fecha_fin
+                FROM cd.tcuenta_doc cd
+                INNER JOIN param.tperiodo per on per.id_periodo=cd.id_periodo
+                WHERE cd.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk
+                AND cd.id_periodo=v_parametros.id_periodo
+                AND cd.id_cuenta_doc!=v_parametros.id_cuenta_doc;
+
+                IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
+                	raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
+                END IF;
+
 
 			--Sentencia de la modificacion
 			update cd.tcuenta_doc set
 
                 motivo = v_parametros.motivo,
                 fecha = v_parametros.fecha,
-                nro_correspondencia = v_parametros.nro_correspondencia
+                nro_correspondencia = v_parametros.nro_correspondencia,
+                id_periodo = v_parametros.id_periodo
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
 
 			--Definicion de la respuesta
