@@ -64,7 +64,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('importe_documentos','numeric');
 		$this->captura('importe_retenciones','numeric');		
 		$this->captura('importe_depositos','numeric');
-		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
+		$this->captura('tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
 		$this->captura('sw_max_doc_rend','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
@@ -132,15 +132,15 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('importe_documentos','numeric');
 		$this->captura('importe_retenciones','numeric');		
 		$this->captura('importe_depositos','numeric');
-		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
+		$this->captura('tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
 		$this->captura('nro_correspondencia','VARCHAR');		
 		$this->captura('num_rendicion','VARCHAR');
 		
 		$this->captura('importe_solicitado','numeric');	
 		$this->captura('importe_total_rendido','numeric');	
-		
-		
+		$this->captura('id_periodo','integer');
+	    $this->captura('periodo','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -299,6 +299,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('motivo','motivo','varchar');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('id_periodo','id_periodo','int4');
 		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
 		
 		
@@ -327,6 +328,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('motivo','motivo','varchar');
 		$this->setParametro('fecha','fecha','date');
 		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('id_periodo','id_periodo','int4');
 		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
 		
 
@@ -463,7 +465,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('id_funcionario_cuenta_bancaria','integer');
 		$this->captura('id_depto_lb','integer');
 		$this->captura('id_depto_conta','integer');
-		$this->captura('desc_tipo_cuenta_doc','VARCHAR');
+		$this->captura('tipo_cuenta_doc','VARCHAR');
 		$this->captura('sw_solicitud','VARCHAR');
 		$this->captura('lugar','VARCHAR');
 		$this->captura('cargo_funcionario','varchar');

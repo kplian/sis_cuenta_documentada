@@ -194,7 +194,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'desc_tipo_cuenta_doc',
+				name: 'tipo_cuenta_doc',
 				fieldLabel: 'Tipo',
 				allowBlank: false,
 				anchor: '80%',
@@ -207,7 +207,6 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:false
 		},
-		
 		{
 			config:{
 				name: 'fecha',
@@ -223,6 +222,25 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:true
+		},
+		{
+			config:{
+				name : 'id_periodo',
+				origen : 'PERIODO',
+				fieldLabel : 'Periodo',
+				allowBlank : false,
+				pageSize:12,
+				width:230,
+				listWidth:'230',
+				renderer:function(value, p, record){return String.format('{0}', record.data['periodo']);},
+				valueField: 'id_periodo',
+				displayField: 'periodo',
+				disabled:false
+			},
+			type : 'ComboRec',
+			id_grupo : 0,
+			form : false,
+			grid: false
 		},
 		{
 			config:{
@@ -453,7 +471,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			filters: { pfiltro:'cdoc.fecha', type:'date' },
 			id_grupo:1,
 			grid:true,
-			form:true
+			form:false
 		},
 		{
             config:{
@@ -645,8 +663,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'usr_reg', type: 'string'},'sw_max_doc_rend','num_rendicion','importe_solicitado',
 		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia','importe_total_rendido',
-		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos',
-		'desc_funcionario_cuenta_bancaria','desc_tipo_cuenta_doc','importe_retenciones',
+		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos', 'id_periodo', 'periodo',
+		'desc_funcionario_cuenta_bancaria','tipo_cuenta_doc','importe_retenciones',
 		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos','dias_para_rendir'
 	
 	],
@@ -677,6 +695,20 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
         }
         return tb
     },
+
+	successGestion: function(resp){
+		Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		if(!reg.ROOT.error){
+			var id_gestion = reg.ROOT.datos.id_gestion;
+			//Setea los stores de partida, cuenta, etc. con la gestion obtenida
+			Ext.apply(this.Cmp.id_cuenta.store.baseParams,{id_gestion: id_gestion})
+
+		} else{
+			alert('Error al obtener la gestión. Cierre y vuelva a intentarlo')
+		}
+	},
+
     //para retroceder de estado
     antEstado:function(res){
          var rec=this.sm.getSelected(),

@@ -28,7 +28,9 @@ class RRendicionCD extends  ReportePDF {
 		$titulo1='<b>RENDICION DE FONDOS</b>';
 		$titulo2='Cuenta Documentada';
 		$newDate = date("d/m/Y", strtotime( $this->datos_detalle[0]['fecha']));		
-		$dataSource = $this->datos_detalle; 
+		$dataSource = $this->datos_detalle;
+		
+		$titulo3 = $dataSource[0]['estado'];
 	    ob_start();
 		include(dirname(__FILE__).'/../reportes/tpl/cabeceraRen.php');
         $content = ob_get_clean();
