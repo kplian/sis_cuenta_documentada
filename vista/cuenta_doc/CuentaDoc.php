@@ -227,7 +227,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			config:{
 				name : 'id_periodo',
 				origen : 'PERIODO',
-				fieldLabel : 'Periodo',
+				fieldLabel : 'Periodo/Mes',
 				allowBlank : false,
 				pageSize:12,
 				width:230,
