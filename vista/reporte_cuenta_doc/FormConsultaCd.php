@@ -1,16 +1,45 @@
 <?php
 /**
- *@package pXP
- *@file    ReporteCuentaDoc.php
- *@author  Gonzalo Sarmiento Sejas
- *@date    04-11-2016
- *@description Reporte Cuenta Doc
- */
+*@package pXP
+*@file    SolModPresupuesto.php
+*@author  Rensi Arteaga Copari 
+*@date    30-01-2014
+*@description permites subir archivos a la tabla de documento_sol
+*/
 header("content-type: text/javascript; charset=UTF-8");
 ?>
+
 <script>
-    Phx.vista.ReporteCuentaDoc = Ext.extend(Phx.frmInterfaz, {
-        Atributos : [
+Phx.vista.FormConsultaCd=Ext.extend(Phx.frmInterfaz,{
+    constructor:function(config)
+    {   
+    	
+    	console.log('configuracion.... ',config)
+    	this.panelResumen = new Ext.Panel({html:''});
+    	
+				    
+        Phx.vista.FormConsultaCd.superclass.constructor.call(this,config);
+        this.init(); 
+        this.iniciarEventos(); 
+        
+        if(config.detalle){
+        	
+			//cargar los valores para el filtro
+			this.loadForm({data: config.detalle});
+			var me = this;
+			setTimeout(function(){
+				me.onSubmit()
+			}, 1500);
+			
+		}  
+       
+        
+        
+    },
+    
+  
+    
+   Atributos : [
             {
                 config:{
                     name:'id_funcionario',
@@ -18,10 +47,10 @@ header("content-type: text/javascript; charset=UTF-8");
                     origen:'FUNCIONARIO',
                     fieldLabel:'Funcionario',
                     allowBlank:false,
-                    width:200,
+                    width:180,
                     valueField: 'id_funcionario',
                     gdisplayField: 'desc_funcionario',
-                    baseParams: { todos : 'si', fecha:new Date() }
+                    baseParams: { todos : 'si' }
                 },
                 type:'ComboRec',//ComboRec
 				id_grupo:0,
@@ -33,7 +62,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     fieldLabel: 'Fecha Inicio',
                     allowBlank: false,
                     disabled: false,
-                    width:200,
+                    width:180,
                     format: 'd/m/Y'
 
                 },
@@ -47,7 +76,7 @@ header("content-type: text/javascript; charset=UTF-8");
                     fieldLabel: 'Fecha Fin',
                     allowBlank: false,
                     disabled: false,
-                    width:200,
+                    width:180,
                     format: 'd/m/Y'
 
                 },
@@ -89,7 +118,7 @@ header("content-type: text/javascript; charset=UTF-8");
 					triggerAction: 'all',
 					lazyRender:true,
 					mode:'remote',
-					width:200,
+					width:180,
 					pageSize:10,
 					queryDelay:1000,
 					listWidth:300,
@@ -132,7 +161,7 @@ header("content-type: text/javascript; charset=UTF-8");
 		   				mode:'remote',
 		   				pageSize:10,
 		   				queryDelay:1000,
-		   				width:200,
+		   				width:180,
 		   				minChars:2
 		    },
 			type : 'AwesomeCombo',
@@ -172,24 +201,41 @@ header("content-type: text/javascript; charset=UTF-8");
 		   				mode:'remote',
 		   				pageSize:10,
 		   				queryDelay:1000,
-		   				width:200,
+		   				width:180,
 		   				minChars:2
 		    },
 			type : 'AwesomeCombo',
 			form : true
 		}
-        ],
-        title : 'Generar Reporte',
-        ActSave : '../../sis_cuenta_documentada/control/CuentaDoc/listarReporteCuentaDoc',
-        topBar : true,
-        botones : false,
-        labelSubmit : 'Imprimir',
-        tooltipSubmit : '<b>Generar Reporte</b>',
-        constructor : function(config) {
-            Phx.vista.ReporteCuentaDoc.superclass.constructor.call(this, config);
-            this.init();
-        },
-        tipo : 'reporte',
-        clsSubmit : 'bprint'
-    })
+    ],
+    labelSubmit: '<i class="fa fa-check"></i> Aplicar Filtro',
+    east: {
+          url: '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocConsulta2.php',
+          title: undefined, 
+          width: '70%',
+          cls: 'CuentaDocConsulta2'
+         },
+    title: 'Filtro de mayores',
+    // Funcion guardar del formulario
+    onSubmit: function(o) {
+    	var me = this;
+    	if (me.form.getForm().isValid()) {
+             var parametros = me.getValForm()
+             this.onEnablePanel(this.idContenedor + '-east', parametros)                    
+        }
+
+    },
+    iniciarEventos:function(){
+    	
+    	
+    },
+    
+    loadValoresIniciales: function(){
+    	Phx.vista.FormConsultaCd.superclass.loadValoresIniciales.call(this);
+    	
+    	
+    	
+    }
+    
+})    
 </script>

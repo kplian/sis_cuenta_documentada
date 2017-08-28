@@ -150,36 +150,7 @@ class MODCuentaDoc extends MODbase{
 		return $this->respuesta;
 	}
 
-	function listarReporteCuentaDoc(){
-		//Definicion de variables para ejecucion del procedimientp
-		$this->procedimiento='cd.ft_cuenta_doc_sel';
-		$this->transaccion='CD_REPCD_SEL';
-		$this->tipo_procedimiento='SEL';//tipo de transaccion
-
-		$this->setParametro('id_funcionario','id_funcionario','int4');
-		$this->setParametro('fecha_ini','fecha_ini','date');
-		$this->setParametro('fecha_fin','fecha_fin','date');
-
-
-		$this->captura('fecha','DATE');
-		$this->captura('fecha_entrega','DATE');
-		$this->captura('desc_funcionario1','TEXT');
-		$this->captura('nro_tramite','VARCHAR');
-		$this->captura('motivo','VARCHAR');
-		$this->captura('nro_cheque','INTEGER');
-		$this->captura('importe_solicitado','NUMERIC');
-		$this->captura('importe_cheque','NUMERIC');
-		$this->captura('importe_documentos','NUMERIC');
-		$this->captura('importe_depositos','NUMERIC');
-		$this->captura('saldo','NUMERIC');
-		$this->captura('estado','VARCHAR');
-		//Ejecuta la instruccion
-		$this->armarConsulta();
-		$this->ejecutarConsulta();
-		//Devuelve la respuesta
-		return $this->respuesta;
-	}
-
+	
 	function insertarCuentaDoc(){
 		//Definicion de variables para ejecucion del procedimiento
 		$this->procedimiento='cd.ft_cuenta_doc_ime';
@@ -766,11 +737,91 @@ class MODCuentaDoc extends MODbase{
 		return $this->respuesta;
 	}
 	
-	
-	
+	function listarReporteCuentaDoc(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPCD_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this-> setCount(false);
+
+		$this->setParametro('id_funcionario','id_funcionario','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
+		$this->setParametro('codigo_tipo_cuenta_doc','codigo_tipo_cuenta_doc','varchar');
+		$this->setParametro('estado','estado','varchar');		
+		$this->setParametro('fuera_estado','fuera_estado','varchar');
+		
 		
 
 
+		$this->captura('id_cuenta_doc','INTEGER');
+		$this->captura('fecha','DATE');
+		$this->captura('fecha_entrega','DATE');
+		$this->captura('desc_funcionario1','TEXT');
+		$this->captura('nro_tramite','VARCHAR');
+		$this->captura('motivo','VARCHAR');
+		$this->captura('nro_cheque','INTEGER');
+		$this->captura('importe_solicitado','NUMERIC');
+		$this->captura('importe_cheque','NUMERIC');
+		$this->captura('importe_documentos','NUMERIC');
+		$this->captura('importe_depositos','NUMERIC');
+		$this->captura('saldo','NUMERIC');
+		$this->captura('estado','VARCHAR');
+		$this->captura('id_proceso_wf','INTEGER');
+		$this->captura('id_estado_wf','INTEGER');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	
+	
+	function listarCuentaDocConsulta2(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_REPCD2_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+
+		$this->setParametro('id_funcionario','id_funcionario','int4');
+		$this->setParametro('fecha_ini','fecha_ini','date');
+		$this->setParametro('fecha_fin','fecha_fin','date');
+		$this->setParametro('codigo_tipo_cuenta_doc','codigo_tipo_cuenta_doc','varchar');
+		$this->setParametro('estado','estado','varchar');		
+		$this->setParametro('fuera_estado','fuera_estado','varchar');
+		
+		$this->capturaCount('importe_solicitado','numeric');
+		$this->capturaCount('importe_cheque','numeric');
+		$this->capturaCount('importe_documentos','numeric');
+		$this->capturaCount('importe_depositos','numeric');
+		$this->capturaCount('saldo','numeric');
+		
+		
+		
+		$this->captura('id_cuenta_doc','INTEGER');
+		$this->captura('fecha','DATE');
+		$this->captura('fecha_entrega','DATE');
+		$this->captura('desc_funcionario1','TEXT');
+		$this->captura('nro_tramite','VARCHAR');
+		$this->captura('motivo','VARCHAR');
+		$this->captura('nro_cheque','INTEGER');
+		$this->captura('importe_solicitado','NUMERIC');
+		$this->captura('importe_cheque','NUMERIC');
+		$this->captura('importe_documentos','NUMERIC');
+		$this->captura('importe_depositos','NUMERIC');
+		$this->captura('saldo','NUMERIC');
+		$this->captura('estado','VARCHAR');		
+		$this->captura('id_proceso_wf','INTEGER');
+		$this->captura('id_estado_wf','INTEGER');
+		
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 		
 }  	
 ?>
