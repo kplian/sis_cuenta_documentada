@@ -513,3 +513,16 @@ select pxp.f_insert_testructura_gui ('VBFACC.6.1.1.1.1.1', 'VBFACC.6.1.1.1.1');
 
 
 
+/***********************************I-DAT-RAC-CD-0-05/08/2017*****************************************/
+
+
+select pxp.f_insert_tgui ('Consulta de Cuentas Documentas', 'Conslta de Cuentas Documentadas', 'CONCD', 'si', 6, 'sis_cuenta_documentada/vista/reporte_cuenta_doc/FormConsultaCd.php', 2, '', 'FormConsultaCd', 'CD');
+select pxp.f_insert_testructura_gui ('CONCD', 'CD');
+select pxp.f_insert_tgui ('Reporte Fondo Avance', 'Reporte Fondo Avance', 'REPFA', 'si', 5, 'sis_cuenta_documentada/vista/reporte_cuenta_doc/ReporteCuentaDoc.php', 2, '', 'ReporteCuentaDoc', 'CD');
+select pxp.f_insert_testructura_gui ('REPFA', 'CD');
+
+
+
+/***********************************F-DAT-RAC-CD-0-05/08/2017*****************************************/
+
+
