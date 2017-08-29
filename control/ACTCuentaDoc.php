@@ -42,6 +42,8 @@ class ACTCuentaDoc extends ACTbase{
 			
 			$this->res=$this->objFunc->listarCuentaDoc($this->objParam);
 		}
+		
+		
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 
@@ -403,12 +405,26 @@ class ACTCuentaDoc extends ACTbase{
         $this->res=$this->objFunc->cambioUsuarioReg($this->objParam);
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
+	
+	function recuperarReporteCuentaDoc(){
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->listarReporteCuentaDoc($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+
+	}
 
 	function listarReporteCuentaDoc(){
 
 		$this->objParam->addParametro('tipo','detalle');
 		$this->objFunc=$this->create('MODCuentaDoc');
-		$this->res=$this->objFunc->listarReporteCuentaDoc($this->objParam);
+		$this->res=$this->recuperarReporteCuentaDoc();
+		
 		$this->objParam->addParametro('datos',$this->res->datos);
 
 		//obtener titulo del reporte
@@ -430,5 +446,89 @@ class ACTCuentaDoc extends ACTbase{
 		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
 	}
+	
+	function listarCuentaDocReporte(){
+		$this->objParam->defecto('ordenacion','id_cuenta_doc');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if(strtolower($this->objParam->getParametro('estado'))=='borrador'){
+             $this->objParam->addFiltro("(cdoc.estado in (''borrador'')) and tcd.sw_solicitud = ''si''");
+        }
+		if(strtolower($this->objParam->getParametro('estado'))=='validacion'){
+             $this->objParam->addFiltro("(cdoc.estado not in (''borrador'',''contabilizado'',''finalizado'',''anulado'') and tcd.sw_solicitud = ''si'')");
+        }
+		if(strtolower($this->objParam->getParametro('estado'))=='entregados'){
+             $this->objParam->addFiltro("(cdoc.estado in (''contabilizado'') and tcd.sw_solicitud = ''si'')");
+        }
+
+        if(strtolower($this->objParam->getParametro('estado'))=='rendiciones'){
+             $this->objParam->addFiltro("(cdoc.estado not in (''rendido'') and tcd.sw_solicitud = ''no'')");
+        }
+
+
+		if(strtolower($this->objParam->getParametro('estado'))=='finalizados'){
+             $this->objParam->addFiltro("(cdoc.estado in (''finalizado'',''anulado'',''rendido''))");
+        }
+		
+		if($this->objParam->getParametro('id_gestion')!=''){
+            $this->objParam->addFiltro("cdoc.id_gestion = ".$this->objParam->getParametro('id_gestion'));    
+        }
+		
+		
+		
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarCuentaDocReporte');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarCuentaDocReporte($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
+	function listarCuentaDocConsulta2(){
+		$this->objParam->defecto('ordenacion','id_cuenta_doc');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
+		
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarCuentaDocConsulta2');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarCuentaDocConsulta2($this->objParam);
+		}
+		
+		if($this->objParam->getParametro('resumen')!='no'){
+			//adicionar una fila al resultado con el summario
+			$temp = Array();
+			$temp['importe_solicitado'] = $this->res->extraData['importe_solicitado'];
+			$temp['importe_cheque'] = $this->res->extraData['importe_cheque'];
+			$temp['importe_documentos'] = $this->res->extraData['importe_documentos'];
+			$temp['importe_depositos'] = $this->res->extraData['importe_depositos'];
+			$temp['saldo'] = $this->res->extraData['saldo'];
+			$temp['tipo_reg'] = 'summary';
+			$temp['id_cuenta_doc'] = 0;
+			
+			$this->res->total++;
+			
+			$this->res->addLastRecDatos($temp);
+		}
+		
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+	
+	
+	
+				
+	
+	
 }
 ?>
