@@ -282,14 +282,21 @@ COMMENT ON COLUMN cd.tcuenta_doc.importe_total_rendido
 IS 'importe rendido, solo en solicitudesse llena cuando las rendiciones son finalizadas, peude llegar a ser negativo si se rinde mas de lo solicitado';
 
 
-
-
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
+
+
+
+
 
 
 /***********************************I-SCP-CD-GSS-1-14/06/2017****************************************/
 
 ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_funcionario_aprobador INTEGER;
+   
+
+ALTER TABLE cd.tcuenta_doc
   ADD COLUMN id_periodo INTEGER;
 
 /***********************************F-SCP-CD-GSS-1-14/06/2017****************************************/
+
