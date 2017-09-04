@@ -326,5 +326,128 @@ ALTER TABLE cd.tcuenta_doc
     ON UPDATE NO ACTION
     NOT DEFERRABLE;
 
+
 /***********************************F-DEP-GSS-CD-0-14/06/2017*****************************************/
+
+
+/***********************************I-DEP-RAC-CD-0-24/08/2017*****************************************/
+
+CREATE OR REPLACE VIEW cd.vcuenta_doc_revision(
+    fecha,
+    fecha_entrega,
+    desc_funcionario1,
+    nro_tramite,
+    motivo,
+    nro_cheque,
+    importe_solicitado,
+    importe_cheque,
+    importe_documentos,
+    importe_depositos,
+    estado,
+    id_funcionario,
+    id_cuenta_doc,
+    id_tipo_cuenta_doc,
+    id_int_comprobante,
+    id_proceso_wf,
+    id_estado_wf)
+AS
+  SELECT cdoc.fecha,
+         cdoc.fecha_entrega,
+         fun.desc_funcionario1,
+         cdoc.nro_tramite,
+         cdoc.motivo,
+         lb.nro_cheque,
+         cdoc.importe AS importe_solicitado,
+         lb.importe_cheque,
+         CASE
+           WHEN tcd.sw_solicitud::text = 'si'::text THEN COALESCE((
+                                                                    SELECT sum(
+                                                                      COALESCE(
+                                                                      
+                                                                      dcv.importe_pago_liquido,
+                                                                      0::numeric
+                                                                      )) AS sum
+                                                                    FROM
+                                                                      cd.trendicion_det
+                                                                      rd
+                                                                         JOIN
+                                                                           conta.tdoc_compra_venta
+                                                                           dcv
+                                                                           ON
+                                                                           dcv.id_doc_compra_venta
+                                                                           =
+                                                                           rd.id_doc_compra_venta
+                                                                    WHERE
+                                                                      dcv.estado_reg
+                                                                      ::text =
+                                                                      'activo'::
+                                                                      text AND
+                                                                          rd.id_cuenta_doc
+                                                                            =
+                                                                            cdoc.id_cuenta_doc
+         ), 0::numeric)
+           ELSE 0::numeric
+         END AS importe_documentos,
+         CASE
+           WHEN tcd.sw_solicitud::text = 'si'::text THEN COALESCE((
+                                                                    SELECT sum(
+                                                                      COALESCE(
+                                                                      
+                                                                      lb_1.importe_deposito,
+                                                                      0::numeric
+                                                                      )) AS sum
+                                                                    FROM
+                                                                      tes.tts_libro_bancos
+                                                                      lb_1
+                                                                         JOIN
+                                                                           cd.tcuenta_doc
+                                                                           c ON
+                                                                           c.id_cuenta_doc
+                                                                           =
+                                                                           lb_1.columna_pk_valor
+                                                                           AND
+                                                                           lb_1.columna_pk
+                                                                           ::
+                                                                           text
+                                                                           =
+                                                                           'id_cuenta_doc'
+                                                                           ::
+                                                                           text
+                                                                           AND
+                                                                           lb_1.tabla
+                                                                           ::
+                                                                           text
+                                                                           =
+                                                                           'cd.tcuenta_doc'
+                                                                           ::
+                                                                           text
+                                                                    WHERE
+                                                                      c.estado_reg
+                                                                      ::text =
+                                                                      'activo'::
+                                                                      text AND
+                                                                          c.id_cuenta_doc_fk
+                                                                            =
+                                                                            cdoc.id_cuenta_doc
+         ), 0::numeric)
+           ELSE 0::numeric
+         END AS importe_depositos,
+         cdoc.estado,
+         fun.id_funcionario,
+         cdoc.id_cuenta_doc,
+         tcd.id_tipo_cuenta_doc,
+         lb.id_int_comprobante,
+         cdoc.id_proceso_wf,
+         cdoc.id_estado_wf
+  FROM cd.tcuenta_doc cdoc
+       JOIN cd.ttipo_cuenta_doc tcd ON tcd.id_tipo_cuenta_doc =
+         cdoc.id_tipo_cuenta_doc
+       JOIN orga.vfuncionario fun ON fun.id_funcionario = cdoc.id_funcionario
+       JOIN tes.tts_libro_bancos lb ON lb.id_int_comprobante =
+         cdoc.id_int_comprobante;
+
+
+
+/***********************************F-DEP-RAC-CD-0-24/08/2017*****************************************/
+
 
