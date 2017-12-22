@@ -49,6 +49,7 @@ Phx.vista.CuentaDocRen = {
 		
 	constructor: function(config) {
 	   var me = this;
+	   this.maestro = config;
 		
 	   this.Atributos[this.getIndAtributo('id_cuenta_doc_fk')].form = true;
 	   this.Atributos[this.getIndAtributo('id_funcionario')].form = false;
@@ -100,10 +101,13 @@ Phx.vista.CuentaDocRen = {
 					}	
 
 			};
-	   
-	   
-	   
-	   
+			console.log('aaaaa',this.maestro);
+			if(this.maestro.codigo_tipo_cuenta_doc=='SOLVIA'){
+				this.Atributos[this.getIndAtributo('id_plantilla')].grid = true;
+				this.Atributos[this.getIndAtributo('id_plantilla')].form = true;
+				this.Atributos[this.getIndAtributo('id_plantilla')].config.allowBlank = false;	
+			}
+			
 	   
 	   Phx.vista.CuentaDocRen.superclass.constructor.call(this,config);
        this.init();
@@ -122,7 +126,14 @@ Phx.vista.CuentaDocRen = {
        this.load({params:{start:0, limit:this.tam_pag}});
 	   this.iniciarEventos();
        this.finCons = true;
-		
+
+       	//Desactiva tab Itinerarios si no es rendición de viáticos
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
+		if(config.codigo_tipo_cuenta_doc=='SOLVIA'){
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
+		}
+		//Oculta/Muestra componentes
+		this.ocultarMostrarComp(config.codigo_tipo_cuenta_doc,true);
    }, 
   
    getParametrosFiltro : function() {
@@ -216,21 +227,23 @@ Phx.vista.CuentaDocRen = {
 		}
 	},
 	disableTabFacturasDepositos:function(){
-		if(this.TabPanelSouth.get(0)){
+		//RCM 05/12/2017: comentado temporalemente
+		/*if(this.TabPanelSouth.get(0)){
 			this.TabPanelSouth.get(0).disable();
 		}
 		if(this.TabPanelSouth.get(1)){
 			this.TabPanelSouth.get(1).disable();
-		}
+		}*/
 	},
 
 	enableTabFacturasDepositos:function(){
-		if(this.TabPanelSouth.get(0)){
+		//RCM 05/12/2017: comentado temporalemente
+		/*if(this.TabPanelSouth.get(0)){
 			this.TabPanelSouth.get(0).enable();
 		}
 		if(this.TabPanelSouth.get(1)){
 			this.TabPanelSouth.get(1).enable();
-		}
+		}*/
 	},
    
    
@@ -245,7 +258,7 @@ Phx.vista.CuentaDocRen = {
 			this.Cmp.motivo.setValue(this.motivo);
    },
    
-   tabsouth:[
+	tabsouth: [
 	    {
 	         url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
 	         title:'Facturas', 
@@ -257,7 +270,112 @@ Phx.vista.CuentaDocRen = {
 			title:'Depositos',
 			height:'50%',
 			cls:'CdDeposito'
+		},
+		{
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_itinerario/CuentaDocItinerario.php',
+            title: 'Itinerario',
+            height: '40%',
+            cls: 'CuentaDocItinerario'
+        },
+        {
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_calculo/CuentaDocCalculo.php',
+            title: 'Cálculo de Viáticos',
+            height: '40%',
+            cls: 'CuentaDocCalculo'
+        }, {
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
+            title: 'Prorrateo',
+            height: '40%',
+            cls: 'CuentaDocProrrateo'
+        }
+
+	],
+	ocultarMostrarComp: function(codigoPadre,limpiar=false){
+		//Oculta los componentes del viático por defecto
+		this.Cmp.fecha_salida.hide();
+		this.Cmp.hora_salida.hide();
+		this.Cmp.fecha_llegada.hide();
+		this.Cmp.hora_llegada.hide();
+		this.Cmp.cobertura.hide();
+
+		this.Cmp.fecha_salida.allowBlank = true;
+		this.Cmp.hora_salida.allowBlank = true;
+		this.Cmp.fecha_llegada.allowBlank = true;
+		this.Cmp.hora_llegada.allowBlank = true;
+		this.Cmp.cobertura.allowBlank = true;
+
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
+
+		if(limpiar){
+			this.Cmp.fecha_salida.setValue('');
+			this.Cmp.hora_salida.setValue('');
+			this.Cmp.fecha_llegada.setValue('');
+			this.Cmp.hora_llegada.setValue('');
+			this.Cmp.cobertura.setValue('');
 		}
-	   ]
+
+		if(codigoPadre=='SOLVIA') {
+			this.Cmp.fecha_salida.show();
+			this.Cmp.hora_salida.show();
+			this.Cmp.fecha_llegada.show();
+			this.Cmp.hora_llegada.show();
+			this.Cmp.cobertura.show();
+
+			this.Cmp.fecha_salida.allowBlank = false;
+			this.Cmp.hora_salida.allowBlank = false;
+			this.Cmp.fecha_llegada.allowBlank = false;
+			this.Cmp.hora_llegada.allowBlank = false;
+			this.Cmp.cobertura.allowBlank = false;
+
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
+		}
+	},
+	sigEstado:function(){                   
+      	var rec=this.sm.getSelected();
+      	//Verificacion de cantidad de documentos registrados
+      	Phx.CP.loadingShow();
+		Ext.Ajax.request({
+			url:'../../sis_cuenta_documentada/control/CuentaDoc/cuentaDocumentosRendicion',
+			params:{id_cuenta_doc: rec.data.id_cuenta_doc},
+			success:this.successCuentaDoc,
+			failure: this.conexionFailure,
+			timeout:this.timeout,
+			scope:this
+		});
+      	
+     },
+     successCuentaDoc: function(resp){
+     	var rec=this.sm.getSelected();
+     	Phx.CP.loadingHide();
+		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+		//Si no tiene documentos registrados pregunta si quiere seguir
+		if(reg.ROOT.datos.total_docs<=0) {
+			Ext.MessageBox.confirm('Descargos no registrados','La rendición seleccionada no tiene registrado ningún documento de descargo. ¿Está seguro de continuar y devolver la totalidad de los fondos entregados?', function(conf){
+				if(conf=='yes'){
+					this.mostrarWizard(rec);				
+				}
+			},this)
+		} else {
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_cuenta_documentada/control/CuentaDoc/cuentaItinerarioRendicion',
+				params:{id_cuenta_doc: rec.data.id_cuenta_doc},
+				success: function(resp1){
+					Phx.CP.loadingHide();
+					var reg1 = Ext.util.JSON.decode(Ext.util.Format.trim(resp1.responseText));
+					//Si no tiene itinerario registrado pregunta si quiere seguir
+					if(reg1.ROOT.datos.total_itinerario<=0) {
+						Ext.MessageBox.alert('Itinerario no registrado','Debe registrar el Itinerario del viaje realizado',this)
+					} else {
+						this.mostrarWizard(rec);
+					}
+				},
+				failure: this.conexionFailure,
+				timeout: this.timeout,
+				scope: this
+			});	
+
+		}
+     }
 };
 </script>

@@ -32,6 +32,7 @@ class MODTipoCategoria extends MODbase{
 		$this->captura('fecha_mod','timestamp');
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
+		$this->captura('id_escala_viatico','int4');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -51,6 +52,7 @@ class MODTipoCategoria extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('codigo','codigo','varchar');
+		$this->setParametro('id_escala_viatico','id_escala_viatico','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -71,6 +73,7 @@ class MODTipoCategoria extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('codigo','codigo','varchar');
+		$this->setParametro('id_escala_viatico','id_escala_viatico','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

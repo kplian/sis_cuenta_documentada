@@ -818,13 +818,56 @@ header("content-type: text/javascript; charset=UTF-8");
 		
 	 abrirFormulario : function(tipo, record, readOnly) {
 			//abrir formulario de solicitud
-			var me = this;
-			me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 'Formulario de rendicion', {
+			var me = this,_autoriz,_plantilla=[];
+			console.log('codigo ... ', me.maestro.codigo_tipo_cuenta_doc);
+
+			//Define el filtro para los conceptos de gasto
+			_autoriz=me.maestro.codigo_tipo_cuenta_doc=='RVI'?'viatico':'fondo_avance'
+
+			//Obtiene la plantilla de prorrateo si corresponde
+			if(me.maestro.codigo_tipo_cuenta_doc=='RVI'){
+				Phx.CP.loadingShow();
+
+	            Ext.Ajax.request({
+	                url:'../../sis_cuenta_documentada/control/CuentaDocProrrateo/listarCuentaDocProrrateoRes',
+	                params: {
+						id_cuenta_doc: me.maestro.id_cuenta_doc
+	                },
+	                success: function(resp){
+	                	Phx.CP.loadingHide();
+	                	var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+	                	_plantilla = reg.datos;
+	                	//Abre la interfaz de registro documentos
+				        this.abrirFormularioDocumentos(tipo,record,readOnly,_plantilla,_autoriz);
+	                },
+	                failure: this.conexionFailure,
+	                timeout: this.timeout,
+	                scope: this
+	            });
+			} else {
+				//Abre la interfaz de registro documentos
+				this.abrirFormularioDocumentos(tipo,record,readOnly,_plantilla,_autoriz);
+			}
+			
+	},
+		
+	
+   showDoc:  function() {
+        this.abrirFormulario('edit', this.sm.getSelected(), true);
+   },
+
+	abrirFormularioDocumentos: function(tipo,record,readOnly,plantilla,autoriz){
+		var me = this;
+
+		/*plantillaProrrateo: [{id_centro_costo: 97, desc_cc:'11500000 -  Amortización Inmovilizado sujeto remuner German Rocha 911   2017', factor: 0.60}, 
+				                    {id_centro_costo:98 , desc_cc:'P112 - 97, xxxx ',factor: 0.40}] //07/12/2017 RAC , se adciona parametro de plantilla para prorrateo de gastos */
+
+		me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 'Formulario de rendicion', {
 				modal : true,
 				width : '95%',
 				height : '95%'
 			}, {
-				data : {
+				data: {
 					objPadre : me,
 					tipoDoc : me.tipoDoc,
 					tipo_form : tipo,
@@ -834,14 +877,12 @@ header("content-type: text/javascript; charset=UTF-8");
 					readOnly: readOnly
 				},
 				id_moneda_defecto : me.maestro.id_moneda,
-				bsubmit: !readOnly
-			}, this.idContenedor, 'FormRendicionCD');
-	},
-		
-	
-   showDoc:  function() {
-        this.abrirFormulario('edit', this.sm.getSelected(), true);
-   }
+				bsubmit: !readOnly,
+				autorizacion: autoriz,
+				plantillaProrrateo: plantilla
+			}, this.idContenedor, 'FormRendicionCD'
+		);
+	}
 		
 })
 </script>

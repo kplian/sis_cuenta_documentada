@@ -20,7 +20,7 @@ Phx.vista.CdDeposito = {
 	tablaOrigen: 'cd.tcuenta_doc',
 	idOrigen: 'id_cuenta_doc',
 	idOrigenValor : '',
-	
+	bnew: true,
 	ActSave: '../../sis_cuenta_documentada/control/RendicionDet/insertarCdDeposito',
 	ActDel: '../../sis_cuenta_documentada/control/RendicionDet/eliminarCdDeposito',
 	ActList: '../../sis_tesoreria/control/ProcesoCaja/listarCajaDeposito',
@@ -36,7 +36,8 @@ Phx.vista.CdDeposito = {
 		else{
 			 this.bloquearMenus();
 		}
-        
+        //Seteo del baseparams de la cuenta bancaria
+        Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{fondo_devolucion_retencion: 'si'});
    },
    
    onReloadPage:function(m){

@@ -36,8 +36,10 @@ class MODCategoria extends MODbase{
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
 		$this->captura('desc_moneda','varchar');
-		
-		
+		$this->captura('id_destino','int4');
+		$this->captura('desc_destino','varchar');
+		$this->captura('monto_sp','numeric');
+		$this->captura('monto_hotel','numeric');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -60,6 +62,9 @@ class MODCategoria extends MODbase{
 		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('id_tipo_categoria','id_tipo_categoria','int4');
+		$this->setParametro('id_destino','id_destino','int4');
+		$this->setParametro('monto_sp','monto_sp','numeric');
+		$this->setParametro('monto_hotel','monto_hotel','numeric');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -83,6 +88,9 @@ class MODCategoria extends MODbase{
 		$this->setParametro('monto','monto','numeric');
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('id_tipo_categoria','id_tipo_categoria','int4');
+		$this->setParametro('id_destino','id_destino','int4');
+		$this->setParametro('monto_sp','monto_sp','numeric');
+		$this->setParametro('monto_hotel','monto_hotel','numeric');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -62,11 +62,16 @@ BEGIN
                             cat.fecha_mod,
                             usu1.cuenta as usr_reg,
                             usu2.cuenta as usr_mod,
-                            mon.codigo as desc_moneda	
+                            mon.codigo as desc_moneda,
+                            cat.id_destino,
+                            dest.nombre,
+                            cat.monto_sp,
+                            cat.monto_hotel
                         from cd.tcategoria cat
                         inner join param.tmoneda mon on mon.id_moneda = cat.id_moneda
                         inner join segu.tusuario usu1 on usu1.id_usuario = cat.id_usuario_reg
                         left join segu.tusuario usu2 on usu2.id_usuario = cat.id_usuario_mod
+                        left join cd.tdestino dest on dest.id_destino = cat.id_destino
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -95,6 +100,7 @@ BEGIN
                          inner join param.tmoneda mon on mon.id_moneda = cat.id_moneda
                          inner join segu.tusuario usu1 on usu1.id_usuario = cat.id_usuario_reg
                          left join segu.tusuario usu2 on usu2.id_usuario = cat.id_usuario_mod
+                         left join cd.tdestino dest on dest.id_destino = cat.id_destino
 				         where ';
 			
 			--Definicion de la respuesta		    

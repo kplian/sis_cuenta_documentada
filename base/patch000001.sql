@@ -300,3 +300,246 @@ ALTER TABLE cd.tcuenta_doc
 
 /***********************************F-SCP-CD-GSS-1-14/06/2017****************************************/
 
+/***********************************I-SCP-CD-RCM-1-04/09/2017****************************************/
+create table cd.tdestino(
+  id_destino serial,
+  codigo varchar(30),
+  nombre varchar(100),
+  descripcion varchar(1000),
+  tipo varchar(15), --nacional, internacional
+  CONSTRAINT pk_tdestino__id_destino PRIMARY KEY(id_destino)
+) inherits (pxp.tbase)
+without oids;
+
+create table cd.tescala_viatico(
+  id_escala_viatico serial,
+  codigo varchar(30),
+  desde date,
+  hasta date,
+  observaciones varchar(1000),
+  CONSTRAINT pk_tdestino__id_escala_viatico PRIMARY KEY(id_escala_viatico)
+) inherits (pxp.tbase)
+without oids;
+
+ALTER TABLE cd.ttipo_categoria
+  ADD COLUMN id_escala_viatico INTEGER;
+
+COMMENT ON COLUMN cd.ttipo_categoria.id_escala_viatico
+IS 'ID de la escala de viático';
+
+ALTER TABLE cd.tcategoria
+  ADD COLUMN id_destino INTEGER;
+
+COMMENT ON COLUMN cd.tcategoria.id_destino
+IS 'Destino para la Escala de viáticos';
+
+COMMENT ON COLUMN cd.tcategoria.monto
+IS 'En el caso de Viáticos, este monto corresponde al monto de viático con pernocte';
+
+ALTER TABLE cd.tcategoria
+  ADD COLUMN monto_sp numeric(18,2);
+
+COMMENT ON COLUMN cd.tcategoria.monto_sp
+IS 'Monto viático Sin Pernocte';
+
+ALTER TABLE cd.tcategoria
+  ADD COLUMN monto_hotel numeric(18,2);
+
+COMMENT ON COLUMN cd.tcategoria.monto_hotel
+IS 'Monto permitido para el pago de Hotel';
+
+COMMENT ON COLUMN cd.tdestino.tipo
+IS 'Nacional o Internacional (nacional, internacional)';
+
+create table cd.tcuenta_doc_det(
+  id_cuenta_doc_det serial,
+  id_cuenta_doc integer,
+  id_centro_costo integer,
+  id_partida integer,
+  id_concepto_ingas integer,
+  id_moneda integer,
+  id_moneda_mb integer,
+  monto_mo numeric(18,2),
+  monto_mb numeric(18,2),
+  CONSTRAINT pk_tcuenta_doc_det__id_cuenta_doc_det PRIMARY KEY(id_cuenta_doc_det)
+) inherits (pxp.tbase)
+without oids;
+
+COMMENT ON COLUMN cd.tcuenta_doc_det.id_moneda_mb
+IS 'Id de la moneda base';
+
+create table cd.tcuenta_doc_itinerario(
+  id_cuenta_doc_itinerario serial,
+  id_cuenta_doc integer,
+  id_destino integer,
+  cantidad_dias integer,
+  fecha_desde date,
+  fecha_hasta date,
+  CONSTRAINT pk_tcuenta_doc_itinerario__id_cuenta_doc_itinerario PRIMARY KEY(id_cuenta_doc_itinerario)
+) inherits (pxp.tbase)
+without oids;
+/***********************************F-SCP-CD-RCM-1-04/09/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-05/09/2017****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN fecha_salida DATE;
+
+COMMENT ON COLUMN cd.tcuenta_doc.fecha_salida
+IS 'Fecha de salida del viaje para Solicitud de Viáticos';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN fecha_llegada DATE;
+
+COMMENT ON COLUMN cd.tcuenta_doc.fecha_llegada
+IS 'Fecha de llegada del viaje para Solicitud de Viáticos';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN tipo_viaje varchar(20);
+
+COMMENT ON COLUMN cd.tcuenta_doc.tipo_viaje
+IS 'Tipo de viaje (nacional, internacional) para Solicitud de Viáticos';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN medio_transporte varchar(20);
+
+COMMENT ON COLUMN cd.tcuenta_doc.medio_transporte
+IS 'Medio de transporte (aereo, terrestre) del viaje para Solicitud de Viáticos';
+
+ALTER TABLE cd.tcuenta_doc
+  ALTER COLUMN importe DROP NOT NULL;
+/***********************************F-SCP-CD-RCM-1-05/09/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-06/09/2017****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN cobertura VARCHAR(20);
+
+COMMENT ON COLUMN cd.tcuenta_doc.cobertura
+IS 'Porcentaje de cobertura para aplicación al viático';
+/***********************************F-SCP-CD-RCM-1-06/09/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-13/09/2017****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN hora_salida TIME(0) WITHOUT TIME ZONE;
+
+COMMENT ON COLUMN cd.tcuenta_doc.hora_salida
+IS 'Viáticos: hora real en la que partió en el viaje';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN hora_llegada TIME(0) WITHOUT TIME ZONE;
+
+COMMENT ON COLUMN cd.tcuenta_doc.hora_llegada
+IS 'Viáticos: hora real en la que llego del viaje';
+
+create table cd.tcuenta_doc_calculo (
+  id_cuenta_doc_calculo serial,
+  id_cuenta_doc integer not null,
+  numero integer,
+  destino varchar(50),
+  dias_saldo_ant integer,
+  dias_destino integer,
+  cobertura_sol numeric(18,2),
+  cobertura_hotel_sol numeric(18,2),
+  dias_total_viaje integer,
+  dias_aplicacion_regla integer,
+  hora_salida time(0) WITHOUT TIME ZONE,
+  hora_llegada time(0) WITHOUT TIME ZONE,
+  escala_viatico numeric(18,2),
+  escala_hotel numeric(18,2),
+  regla_cobertura_dias_acum numeric(18,2),
+  regla_cobertura_hora_salida numeric(18,2),
+  regla_cobertura_hora_llegada numeric(18,2),
+  regla_cobertura_total_dias numeric(18,2),
+  cobertura_aplicada numeric(18,2),
+  cobertura_aplicada_hotel numeric(18,2),
+  constraint pk_tcuenta_doc_calculo__id_cuenta_doc_calculo PRIMARY KEY(id_cuenta_doc_calculo)
+) inherits (pxp.tbase)
+with (oids = false);
+/***********************************F-SCP-CD-RCM-1-13/09/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-15/11/2017****************************************/
+ALTER TABLE cd.tdestino
+  ADD COLUMN id_escala INTEGER;
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_escala INTEGER;  
+ALTER TABLE cd.tescala
+  ADD COLUMN tipo VARCHAR(15);
+COMMENT ON COLUMN cd.tescala.tipo
+IS 'Tipo de cuenta documentada: ''viatico'',''fondo_avance''';  
+
+create table cd.tescala_regla (
+  id_escala_regla serial,
+  id_escala integer not null,
+  id_unidad_medida integer,
+  id_concepto_ingas integer,
+  codigo varchar(30),
+  nombre varchar(50),
+  valor numeric(18,2),
+  constraint pk_tescala_regla__id_escala_regla PRIMARY KEY(id_escala_regla)
+) inherits (pxp.tbase)
+with (oids = false);
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_centro_costo INTEGER;
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_centro_costo
+IS 'Aplicable para viáticos para asociar al concepto de gasto por viático';
+/***********************************F-SCP-CD-RCM-1-15/11/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-22/11/2017****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_solicitud_efectivo INTEGER;
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_plantilla INTEGER;
+/***********************************F-SCP-CD-RCM-1-22/11/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-04/12/2017****************************************/
+ALTER TABLE cd.trendicion_det
+  ADD COLUMN generado varchar(15) DEFAULT 'no';
+
+COMMENT ON COLUMN cd.trendicion_det.generado
+IS 'Bandera (''si'',''no'') que marca al documento generado automáticamente';
+
+create table cd.tcuenta_doc_prorrateo (
+  id_cuenta_doc_prorrateo serial,
+  id_cuenta_doc integer not null,
+  id_centro_costo integer not null,
+  prorrateo numeric(18,2) not null,
+  constraint pk_tcuenta_doc_prorrateo__id_cuenta_doc_prorrateo PRIMARY KEY(id_cuenta_doc_prorrateo)
+) inherits (pxp.tbase)
+with (oids = false);
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_solicitud_efectivo
+IS 'Solicitud efectivo para entrega del monto de solicitud y para la devolución de saldos (a favor o en contra)';
+/***********************************F-SCP-CD-RCM-1-04/12/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-13/12/2017****************************************/
+ALTER TABLE cd.tdeposito_cd
+  ADD COLUMN id_solicitud_efectivo INTEGER;
+
+COMMENT ON COLUMN cd.tdeposito_cd.id_solicitud_efectivo
+IS 'Id del recibo de caja para devolución generado. Puede ser de Ingreso o Egreso';
+/***********************************F-SCP-CD-RCM-1-13/12/2017****************************************/
+
+/***********************************I-SCP-CD-RCM-1-14/12/2017****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN dev_tipo varchar(15);
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN dev_a_favor_de varchar(15);  
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN dev_nombre_cheque varchar(100);  
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_caja_dev integer;  
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN dev_saldo numeric(18,2);
+
+COMMENT ON COLUMN cd.tcuenta_doc.dev_tipo
+IS 'Tipo de la devolucion/reposicion. tipo in (''deposito'',''cheque'',''caja'')';  
+COMMENT ON COLUMN cd.tcuenta_doc.dev_a_favor_de
+IS 'Devolucion/reposicion a favor de (''empresa'',''funcionario'')';  
+COMMENT ON COLUMN cd.tcuenta_doc.dev_nombre_cheque
+IS 'Devolucion/reposicion nombre para emitir cheque, cuando dev_tipo es cheque';  
+COMMENT ON COLUMN cd.tcuenta_doc.id_caja_dev
+IS 'Devolucion/reposicion ID de la caja para generar la solicitud de efectivo, cuando dev_tipo es caja';  
+COMMENT ON COLUMN cd.tcuenta_doc.dev_saldo
+IS 'Devolucion/reposicion saldo total de la cuenta documentada';  
+/***********************************F-SCP-CD-RCM-1-14/12/2017****************************************/

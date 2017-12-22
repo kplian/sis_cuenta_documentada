@@ -70,7 +70,45 @@ Phx.vista.Categoria=Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:true
 		},
-		
+		{
+            config:{
+                name: 'id_destino',
+                fieldLabel: '*Destino',
+                allowBlank: true,
+                emptyText : 'Seleccione un Destino ...',
+                store: new Ext.data.JsonStore({
+                    url:'../../sis_cuenta_documentada/control/Destino/listarDestino',
+                    id : 'id_destino',
+                    root: 'datos',
+                    sortInfo:{field: 'nombre',direction: 'DESC'},
+                    totalProperty: 'total',
+                    fields: ['id_destino','codigo','nombre','descripcion'],
+                    remoteSort: true,
+                    baseParams:{par_filtro:'codigo#nombre#descripcion'}
+               }),
+               valueField: 'id_destino',
+               displayField: 'nombre',
+               gdisplayField: 'desc_destino',
+               hiddenName: 'id_destino',
+               forceSelection: true,
+               typeAhead: false,
+               triggerAction: 'all',
+               listWidth: 350,
+               lazyRender: true,
+               mode: 'remote',
+               pageSize: 10,
+               queryDelay: 1000,
+               anchor: '80%',
+               minChars: 2,
+               tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>Código:</b> {codigo}</p><p><b>Nombre:</b> {nombre}</p><p><b>Descripción:</b> {descripcion}</p></div></tpl>',
+               hidden: true,
+               gwidth: 250
+            },
+            type:'ComboBox',
+            id_grupo:1,
+            form:true,
+            grid:false
+        },
 		{
             config:{
                 name:'id_moneda',
@@ -90,8 +128,8 @@ Phx.vista.Categoria=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto',
-				fieldLabel: 'monto',
-				allowBlank: true,
+				fieldLabel: 'Monto',
+				allowBlank: false,
 				anchor: '80%',
 				gwidth: 100,
 				maxLength:1179650
@@ -232,7 +270,11 @@ Phx.vista.Categoria=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
-		{name:'usr_mod', type: 'string'},'desc_moneda'
+		{name:'usr_mod', type: 'string'},'desc_moneda',
+		{name:'id_destino', type:'numeric'},
+		{name:'desc_destino', type:'string'},
+		{name:'monto_sp', type:'numeric'},
+		{name:'monto_hotel', type:'numeric'}
 		
 	],
 	sortInfo:{

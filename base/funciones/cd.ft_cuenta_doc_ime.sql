@@ -16,9 +16,9 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:
- AUTOR:
- FECHA:
+ DESCRIPCION: MODIFICACIONES PARA EL CASO DE VIATICOS
+ AUTOR: RCM
+ FECHA: 05/09/2017
 ***************************************************************************/
 
 DECLARE
@@ -86,6 +86,18 @@ DECLARE
     v_fecha_fin						date;
     v_id_periodo					integer;
     v_periodo						integer;
+    v_codigo_tipo_cuenta_doc        varchar;
+    v_resp1                         varchar;
+    v_id_escala                     integer;
+    v_total                         bigint;
+    v_id_plantilla                  integer;
+    v_id_solicitud_efectivo         integer;
+    v_id_cheque                     integer;
+    v_mensaje                       varchar;
+    v_solo_una_rendicion_mes        varchar;
+    v_sol_efect                     varchar;
+    v_id_concepto_ingas             integer;
+    v_total_prorrateo               numeric;
 
 BEGIN
 
@@ -103,10 +115,21 @@ BEGIN
 
         begin
 
-             v_codigo_proceso_macro = pxp.f_get_variable_global('cd_codigo_macro_fondo_avance');
+            --Obtención del proceso macro en función del tipo de cuenta documentada
+            select codigo
+            into v_codigo_tipo_cuenta_doc
+            from cd.ttipo_cuenta_doc
+            where id_tipo_cuenta_doc = v_parametros.id_tipo_cuenta_doc;
 
-             --  si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
+            if v_codigo_tipo_cuenta_doc = 'SOLFONAVA' then
+                v_codigo_proceso_macro = pxp.f_get_variable_global('cd_codigo_macro_fondo_avance');
+            elsif v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+                v_codigo_proceso_macro = pxp.f_get_variable_global('cd_codigo_macro_viatico');
+            else
+                raise exception 'Tipo de Cuenta no válida para el inicio del proceso de WF';
+            end if;
 
+            --Si el funcionario que solicita es un gerente .... es el mimso encargado de aprobar
              IF exists(select 1 from orga.tuo_funcionario uof
                        inner join orga.tuo uo on uo.id_uo = uof.id_uo and uo.estado_reg = 'activo'
                        inner join orga.tnivel_organizacional no on no.id_nivel_organizacional = uo.id_nivel_organizacional and no.numero_nivel in (1)
@@ -186,7 +209,7 @@ BEGIN
                    v_codigo_tipo_proceso,
                    v_parametros.id_funcionario,
                    v_parametros.id_depto,
-                   'Solicitu de efectivo por fondo en avance',
+                   'Solicitud de efectivo por fondo en avance',
                    '' );
 
 
@@ -198,6 +221,19 @@ BEGIN
               v_id_tipo_cuenta_doc
             from cd.ttipo_cuenta_doc tcd
             where tcd.codigo = 'SOLFONAVA'; */
+
+            --Obtiene la Escala vigente
+            if v_codigo_tipo_cuenta_doc = 'SOLFONAVA' then
+                v_id_escala = cd.f_get_escala('fondo_avance',v_parametros.fecha);
+            elsif v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+                v_id_escala = cd.f_get_escala('viatico',v_parametros.fecha);
+            end if;
+
+            --Verifica si existe plantilla para la rendicion
+            if  pxp.f_existe_parametro(p_tabla,'id_plantilla') then
+                v_id_plantilla = v_parametros.id_plantilla;
+            end if;
+
 
             --Sentencia de la insercion
         	insert into cd.tcuenta_doc(
@@ -224,7 +260,16 @@ BEGIN
                 id_funcionario_gerente,
                 importe,
                 id_funcionario_cuenta_bancaria,
-                id_gestion
+                id_gestion,
+                fecha_salida,
+                fecha_llegada,
+                tipo_viaje,
+                medio_transporte,
+                cobertura,
+                id_escala,
+                id_centro_costo,
+                id_caja,
+                id_plantilla
           	) values(
                 v_parametros.id_tipo_cuenta_doc,
                 v_id_proceso_wf,
@@ -249,9 +294,17 @@ BEGIN
                 va_id_funcionario_gerente[1],
                 v_parametros.importe,
                 v_parametros.id_funcionario_cuenta_bancaria,
-                v_id_gestion
-
-			)RETURNING id_cuenta_doc into v_id_cuenta_doc;
+                v_id_gestion,
+                v_parametros.fecha_salida,
+                v_parametros.fecha_llegada,
+                v_parametros.tipo_viaje,
+                v_parametros.medio_transporte,
+                v_parametros.cobertura,
+                v_id_escala,
+                v_parametros.id_centro_costo,
+                v_parametros.id_caja,
+                v_id_plantilla
+			) RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             -------------------------------------
             -- Evalua el limite de solicitudes
@@ -428,6 +481,22 @@ BEGIN
              where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
              limit 1 offset 0;
 
+             --Obtención del tipo de cuenta documentada
+            select codigo
+            into v_codigo_tipo_cuenta_doc
+            from cd.ttipo_cuenta_doc
+            where id_tipo_cuenta_doc = v_parametros.id_tipo_cuenta_doc;
+
+             --Obtiene la Escala vigente
+            if v_codigo_tipo_cuenta_doc = 'SOLFONAVA' then
+                v_id_escala = cd.f_get_escala('fondo_avance',v_parametros.fecha);
+            elsif v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+                v_id_escala = cd.f_get_escala('viatico',v_parametros.fecha);
+            end if;
+
+      if  pxp.f_existe_parametro(p_tabla,'id_plantilla') then
+          v_id_plantilla = v_parametros.id_plantilla;
+      end if;
 
 			--Sentencia de la modificacion
 			update cd.tcuenta_doc set
@@ -446,8 +515,20 @@ BEGIN
                 id_funcionario_cuenta_bancaria =  v_parametros.id_funcionario_cuenta_bancaria,
                 id_funcionario_gerente =  va_id_funcionario_gerente[1],
                 id_uo = v_id_uo,
-                id_gestion = v_id_gestion
-            where id_cuenta_doc=v_parametros.id_cuenta_doc;
+                id_gestion = v_id_gestion,
+                fecha_salida = v_parametros.fecha_salida,
+                fecha_llegada = v_parametros.fecha_llegada,
+                tipo_viaje = v_parametros.tipo_viaje,
+                medio_transporte = v_parametros.medio_transporte,
+                cobertura = v_parametros.cobertura,
+                id_escala = v_id_escala,
+                id_centro_costo = v_parametros.id_centro_costo,
+                id_caja = v_parametros.id_caja,
+                id_plantilla = v_id_plantilla
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            --Cálculo del viático
+            v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada modificado(a)');
@@ -537,7 +618,7 @@ BEGIN
           -- recupera datos del estado
 
            select
-            ew.id_tipo_estado ,
+            ew.id_tipo_estado,
             te.codigo
            into
             v_id_tipo_estado,
@@ -571,10 +652,61 @@ BEGIN
                 SET id_funcionario_aprobador = v_parametros.id_funcionario_wf
                 WHERE id_cuenta_doc=v_parametros.id_cuenta_doc;
 
+                --RCM 26/10/2017: Verificación de Viático
+                select tcdo.codigo
+                into v_codigo_tipo_cuenta_doc
+                from cd.tcuenta_doc cdo
+                inner join cd.ttipo_cuenta_doc tcdo
+                on tcdo.id_tipo_cuenta_doc = cdo.id_tipo_cuenta_doc
+                where cdo.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+                if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+                    --Debe tener registrado el Itinerario
+                    if not exists(select 1 from cd.tcuenta_doc_itinerario
+                                where id_cuenta_doc = v_parametros.id_cuenta_doc) then
+                        raise exception 'Debe registrar el Itinerario del viaje.';
+                    end if;
+                    
+                    --Verificación del prorrateo
+                    select sum(prorrateo)
+                    into v_total_prorrateo
+                    from cd.tcuenta_doc_prorrateo
+                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+                    if v_total_prorrateo > 1 then
+                        raise exception 'El prorrateo supera a 1 (prorrateo = %). Corrija y vuelva a interntarlo',v_total_prorrateo;
+                    elsif v_total_prorrateo < 1 then
+                        raise exception 'El prorrateo es inferior a 1 (prorrateo = %). Corrija y vuelva a intentarlo',v_total_prorrateo;
+                    end if;
+
+                    --Verifica que tenga registrado al menos el concepto de gasto de viático
+                    select escr.id_concepto_ingas
+                    into v_id_concepto_ingas
+                    from cd.tcuenta_doc cd
+                    left join cd.tescala_regla escr
+                    on escr.id_escala = cd.id_escala
+                    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+                    and escr.codigo = 'CONGAS_VIA';
+
+                    --Si no existe en la escala despliega el error
+                    if v_id_concepto_ingas is null then
+                        raise exception 'No se encuenta definido el Concepto de Gasto para la escala de la solicitud. Comuníquese con el Administrador';
+                    end if;
+
+                    --Verifica que tenga registrado al menos el concepto de gasto de viático
+                    if not exists(select 1 from cd.tcuenta_doc_det
+                                where id_cuenta_doc = v_parametros.id_cuenta_doc
+                                and id_concepto_ingas = v_id_concepto_ingas) then
+                        raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                    end if;
+
+
+                end if;
+
            END IF;
 
            ---------------------------------------
-           -- REGISTA EL SIGUIENTE ESTADO DEL WF.
+           -- REGISTRA EL SIGUIENTE ESTADO DEL WF
            ---------------------------------------
 
 
@@ -859,8 +991,10 @@ BEGIN
 
         begin
 
-            -- recuperar datos de la solicitud
+            --Obtiene variable global para permitir o no rendiciones múltiples en un mes
+            v_solo_una_rendicion_mes = pxp.f_get_variable_global('cd_solo_una_rendicion_mes');
 
+            --Recuperar datos de la solicitud
             select
               c.id_estado_wf,
               c.id_proceso_wf,
@@ -874,7 +1008,8 @@ BEGIN
               c.id_funcionario_gerente,
               c.nro_tramite,
               c.id_gestion,
-              c.importe
+              c.importe,
+              c.id_escala
             into
               v_registros_cd
             from cd.tcuenta_doc c
@@ -955,11 +1090,14 @@ BEGIN
                 FROM cd.tcuenta_doc cd
                 INNER JOIN param.tperiodo per on per.id_periodo=cd.id_periodo
                 WHERE cd.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk
-                AND cd.id_periodo=v_parametros.id_periodo;
+                AND cd.id_periodo=v_parametros.id_periodo
+                AND cd.estado_reg = 'activo';
 
-                IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
-                	raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
-                END IF;
+                if v_solo_una_rendicion_mes = 'si' then
+                    IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
+                    	raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
+                    END IF;
+                end if;
 
                --contamos la cantidad rendciones para la misma solicitud
 
@@ -974,6 +1112,25 @@ BEGIN
 
 
                v_num_rend = COALESCE(v_num_rend,0) + 1;
+
+
+                --Obtencion del depto de conta
+                v_id_depto_conta = v_registros_cd.id_depto_conta;
+                if v_registros_cd.id_depto_conta is null then
+                    select dede.id_depto_destino
+                    into v_id_depto_conta
+                    from param.tdepto_depto dede
+                    inner join param.tdepto ddes on ddes.id_depto = dede.id_depto_destino
+                    inner join segu.tsubsistema sdes on sdes.id_subsistema = ddes.id_subsistema
+                    where dede.id_depto_origen = v_registros_cd.id_depto
+                    and sdes.codigo = 'CONTA';
+                end if;
+
+                --Verifica si existe plantilla para la rendicion
+                if  pxp.f_existe_parametro(p_tabla,'id_plantilla') then
+                    v_id_plantilla = v_parametros.id_plantilla;
+                end if;
+
 
                --Sentencia de la insercion
                 insert into cd.tcuenta_doc(
@@ -1000,14 +1157,21 @@ BEGIN
                     motivo,
                     nro_correspondencia,
                     num_rendicion,
-                    id_periodo
+                    id_periodo,
+                    fecha_salida,
+                    hora_salida,
+                    fecha_llegada,
+                    hora_llegada,
+                    cobertura,
+                    id_escala,
+                    id_plantilla
                 ) values(
                     v_id_tipo_cuenta_doc,
                     v_id_proceso_wf,
                     v_registros_cd.id_uo,
                     v_registros_cd.id_funcionario,
                     v_registros_cd.id_depto,
-                    v_registros_cd.id_depto_conta,
+                    v_id_depto_conta,
                     v_registros_cd.id_depto_lb,
                     v_registros_cd.nro_tramite,
                     v_parametros.fecha,
@@ -1025,10 +1189,24 @@ BEGIN
     				v_parametros.motivo,
                     v_parametros.nro_correspondencia,
                     'R'||v_num_rend::varchar,
-                    v_parametros.id_periodo
+                    v_parametros.id_periodo,
+                    v_parametros.fecha_salida,
+                    v_parametros.hora_salida::time,
+                    v_parametros.fecha_llegada,
+                    v_parametros.hora_llegada::time,
+                    v_parametros.cobertura,
+                    v_registros_cd.id_escala,
+                    v_id_plantilla
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
-
+            --Replica el prorrateo de la solicitud (usado en viaticos)
+            insert into cd.tcuenta_doc_prorrateo(
+            id_usuario_reg,fecha_reg,id_cuenta_doc,id_centro_costo,prorrateo
+            )
+            select
+            p_id_usuario, now(), v_id_cuenta_doc, id_centro_costo, prorrateo
+            from cd.tcuenta_doc_prorrateo cp
+            where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
 
              -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
@@ -1055,6 +1233,9 @@ BEGIN
 	elsif(p_transaccion='CD_CDOCREN_MOD')then
 
 		begin
+
+            --Obtiene variable global para permitir o no rendiciones múltiples en un mes
+            v_solo_una_rendicion_mes = pxp.f_get_variable_global('cd_solo_una_rendicion_mes');
 
              select
                 per.id_gestion
@@ -1090,10 +1271,12 @@ BEGIN
               c.nro_tramite,
               c.id_gestion,
               c.importe,
-              cdr.estado as estado_cdr
+              cdr.estado as estado_cdr,
+              tcdoc.codigo as codigo_tipo_cuenta_doc
             into
               v_registros_cd
             from cd.tcuenta_doc c
+            inner join cd.ttipo_cuenta_doc tcdoc on tcdoc.id_tipo_cuenta_doc = c.id_tipo_cuenta_doc
             inner join cd.tcuenta_doc cdr on   cdr.id_cuenta_doc_fk = c.id_cuenta_doc
             where cdr.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
@@ -1120,25 +1303,43 @@ BEGIN
             END IF;*/
 
             SELECT per.fecha_ini, per.fecha_fin into v_fecha_ini, v_fecha_fin
-                FROM cd.tcuenta_doc cd
-                INNER JOIN param.tperiodo per on per.id_periodo=cd.id_periodo
-                WHERE cd.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk
-                AND cd.id_periodo=v_parametros.id_periodo
-                AND cd.id_cuenta_doc!=v_parametros.id_cuenta_doc;
+            FROM cd.tcuenta_doc cd
+            INNER JOIN param.tperiodo per on per.id_periodo=cd.id_periodo
+            WHERE cd.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk
+            AND cd.id_periodo=v_parametros.id_periodo
+            AND cd.id_cuenta_doc!=v_parametros.id_cuenta_doc
+            AND cd.estado_reg = 'activo';
 
+            if v_solo_una_rendicion_mes = 'si' then
                 IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
                 	raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
                 END IF;
+            end if;
 
+            --Verifica si existe plantilla para la rendicion
+            if  pxp.f_existe_parametro(p_tabla,'id_plantilla') then
+                v_id_plantilla = v_parametros.id_plantilla;
+            end if;
 
 			--Sentencia de la modificacion
 			update cd.tcuenta_doc set
-
                 motivo = v_parametros.motivo,
                 fecha = v_parametros.fecha,
                 nro_correspondencia = v_parametros.nro_correspondencia,
-                id_periodo = v_parametros.id_periodo
+                id_periodo = v_parametros.id_periodo,
+                fecha_salida = v_parametros.fecha_salida,
+                hora_salida = v_parametros.hora_salida::time,
+                fecha_llegada = v_parametros.fecha_llegada,
+                hora_llegada = v_parametros.hora_llegada::time,
+                cobertura = v_parametros.cobertura,
+                id_plantilla = v_id_plantilla
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
+
+            --Cálculo del viático
+            if v_registros_cd.codigo_tipo_cuenta_doc in ('SOLVIA','RVI') then
+                v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc,'rendicion');
+            end if;
+            
 
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada rendición  modificado(a)');
@@ -1390,10 +1591,254 @@ BEGIN
 
 		end;
 
+    /*********************************
+    #TRANSACCION:  'CD_RENREGDOC_VAL'
+    #DESCRIPCION:   Valida si se registro o no documentos en la rendicion
+    #AUTOR:         RCM
+    #FECHA:         01-12-2017
+    ***********************************/
+
+    elsif(p_transaccion='CD_RENREGDOC_VAL')then
+
+        begin
+
+            --Cuenta la cantidad de documentos registrados en la rendicion
+            select count(1)
+            into v_total
+            from cd.trendicion_det rd
+            where rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Recuento de los documentos de rendicion realizado');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'total_docs',v_total::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+    /*********************************
+    #TRANSACCION:  'CD_RENREGITI_VAL'
+    #DESCRIPCION:   Valida si el viatico tiene registrado el itinerario
+    #AUTOR:         RCM
+    #FECHA:         01-12-2017
+    ***********************************/
+
+    elsif(p_transaccion='CD_RENREGITI_VAL')then
+
+        begin
+            --Obtencion del tipo de cuenta doc del registro enviado
+            select tcd.codigo
+            into v_codigo_tipo_cuenta_doc
+            from cd.tcuenta_doc cdoc
+            inner join cd.ttipo_cuenta_doc tcd
+            on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
+            where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            --Si es viatico verifica si se registro el Itinerario
+            if v_codigo_tipo_cuenta_doc in ('SOLVIA','RVI') then
+                select count(1)
+                into v_total
+                from cd.tcuenta_doc_itinerario it
+                where it.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            else
+                v_total = 1;
+            end if;
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Verificacion de registro de Itinerario realizado');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'total_itinerario',v_total::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+    /*********************************
+    #TRANSACCION:  'CD_CDTOT_VAL'
+    #DESCRIPCION:   Devuelve los totales y saldo de la cuenta documentada
+    #AUTOR:         RCM
+    #FECHA:         11-12-2017
+    ***********************************/
+
+    elsif(p_transaccion='CD_CDRETOT_VAL')then
+
+        begin
+            
+            select * into v_registros_cd from cd.f_get_saldo_totales_cuenta_doc(v_parametros.id_cuenta_doc);
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Verificacion de registro de Itinerario realizado');
+            v_resp = pxp.f_agrega_clave(v_resp,'total_solicitado',v_registros_cd.o_total_solicitado::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'total_rendido',v_registros_cd.o_total_rendido::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'saldo',v_registros_cd.o_saldo::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'a_favor_de',v_registros_cd.o_a_favor_de::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'por_caja',v_registros_cd.o_por_caja::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_registros_cd.o_tipo::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+    /*********************************
+    #TRANSACCION:  'CD_CDDEVOL_GEN'
+    #DESCRIPCION:   Genera recibo de caja o cheque para la devolución de saldos
+    #AUTOR:         RCM
+    #FECHA:         12-12-2017
+    ***********************************/
+
+    elsif(p_transaccion='CD_CDDEVOL_GEN')then
+
+        begin
+
+            --Verifica existencia de la cuenta documentada
+            if not exists(select 1 from cd.tcuenta_doc
+                        where id_cuenta_doc = v_parametros.id_cuenta_doc) then
+                raise exception 'Cuenta documentada inexistente';
+            end if;
+
+            --Verifica el tipo de devolución
+            if v_parametros.dev_tipo not in ('deposito','cheque','caja') then
+                raise exception 'Forma de devolución no identificada';
+            end if;
+
+            --Recuperar datos de la solicitud
+            select
+              c.id_estado_wf,
+              c.id_proceso_wf,
+              c.estado,
+              c.id_funcionario,
+              c.id_depto,
+              c.id_depto_conta,
+              c.id_depto_lb,
+              c.id_moneda,
+              c.id_uo,
+              c.id_funcionario_gerente,
+              c.nro_tramite,
+              c.id_gestion,
+              c.importe,
+              c.id_escala,
+              cd.dev_tipo
+            into
+              v_registros_cd
+            from cd.tcuenta_doc cd
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = cd.id_cuenta_doc_fk
+            where cd.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            --Verifica si ya previamente se habría generado la devolución
+            if coalesce(v_registros_cd.dev_tipo,'') <> '' then
+                raise exception 'La devolución ya fue generada anteriormente';
+            end if;
+
+            --Obtiene los datos del saldo
+            select * into v_registros_proc
+            from cd.f_get_saldo_totales_cuenta_doc(v_parametros.id_cuenta_doc);
+
+            --Actualiza cuenta doc guardando los datos de la devolución
+            update cd.tcuenta_doc set
+            dev_tipo            = v_parametros.dev_tipo,
+            dev_a_favor_de      = v_parametros.dev_a_favor_de,
+            dev_nombre_cheque   = v_parametros.dev_nombre_cheque,
+            id_caja_dev         = v_parametros.id_caja_dev,
+            dev_saldo           = v_parametros.dev_saldo,
+            id_cuenta_bancaria  = v_parametros.id_cuenta_bancaria,
+            importe_total_rendido = v_registros_proc.o_total_dev,
+            id_depto_lb           = v_parametros.id_depto_lb
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
 
+            --Lógica para creación de la forma de devolución
+            if v_parametros.dev_a_favor_de = 'empresa' then
 
-     else
+                if v_parametros.dev_tipo = 'caja' then
+                    --Genera la solicitud de efectivo para la reposición a la empresa
+                    select
+                    v_parametros.id_caja_dev as id_caja,
+                    v_parametros.dev_saldo as monto,
+                    v_registros_cd.id_funcionario as id_funcionario,
+                    'ingreso' as tipo_solicitud,
+                    now() as fecha,
+                    'Reposición de fondos por cuenta documentada a la empresa' as motivo,
+                    null::integer as id_solicitud_efectivo_fk
+                    into v_registros;
+
+                    --Generacion de la solicitud de efectivo
+                    v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
+                    v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
+
+                    --Actualiza al cuenta documentada con la solicitud de efectivo creada
+                    update cd.tcuenta_doc set
+                    id_solicitud_efectivo = v_id_solicitud_efectivo
+                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+                    --Obtiene el nro_tramite de la solicitud de efectivo
+                    select nro_tramite
+                    into v_sol_efect
+                    from tes.tsolicitud_efectivo
+                    where id_solicitud_efectivo = v_id_solicitud_efectivo;
+
+                    v_mensaje = 'Recibo de caja de ingreso generado para la devolucion a la empresa número: '||v_sol_efect;
+
+                elsif v_parametros.dev_tipo = 'deposito' then
+                    v_mensaje = 'Debe registrar el(los) depósito(s) que el solicitante realice para poder cerrar la cuenta documentada.';
+                end if;
+
+            elsif v_parametros.dev_a_favor_de = 'funcionario' then
+
+                if v_parametros.dev_tipo = 'caja' then
+                    --Genera la solicitud de efectivo para la devolución al funcionario
+                    select
+                    v_parametros.id_caja_dev as id_caja,
+                    v_parametros.dev_saldo as monto,
+                    v_registros_cd.id_funcionario as id_funcionario,
+                    'solicitud' as tipo_solicitud,
+                    now() as fecha,
+                    'Devolución de fondos por cuenta documentada al funcionario' as motivo,
+                    null::integer as id_solicitud_efectivo_fk
+                    into v_registros;
+
+                    --Generacion de la solicitud de efectivo
+                    v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
+                    v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
+
+                    --Actualiza al cuenta documentada con la solicitud de efectivo creada
+                    update cd.tcuenta_doc set
+                    id_solicitud_efectivo = v_id_solicitud_efectivo
+                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+                    --Obtiene el nro_tramite de la solicitud de efectivo
+                    select nro_tramite
+                    into v_sol_efect
+                    from tes.tsolicitud_efectivo
+                    where id_solicitud_efectivo = v_id_solicitud_efectivo;
+
+                    v_mensaje = 'Recibo de caja de ingreso generado para la reposicion al funcionario número: '||v_sol_efect;
+
+                else
+                    --Se generará el cheque al momento de validar el comprobante
+                    v_mensaje = 'El cheque se generará cuando el comprobante contable sea validado.';
+                end if;
+
+            else
+                raise exception 'No se puede determinar a favor de quien es el saldo de la cuenta documentada';
+            end if;
+            
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Devolución/Reposición procesada correctamente. '||v_mensaje);
+            v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_parametros.dev_tipo);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_id_solicitud_efectivo::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'sol_efect',v_sol_efect);
+            v_resp = pxp.f_agrega_clave(v_resp,'respuesta','Devolución/Reposición procesada correctamente. '||v_mensaje);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+    else
 
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 

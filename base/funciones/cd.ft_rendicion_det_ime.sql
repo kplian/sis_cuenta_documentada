@@ -63,7 +63,7 @@ BEGIN
         begin
 
 
-             v_tope  = pxp.f_get_variable_global('cd_monto_factura_maximo')::numeric;
+             /*v_tope  = pxp.f_get_variable_global('cd_monto_factura_maximo')::numeric;
 
               select
                 c.importe,
@@ -156,7 +156,17 @@ BEGIN
             v_resp = pxp.f_agrega_clave(v_resp,'id_rendicion_det',v_id_rendicion_det::varchar);
 
             --Devuelve la respuesta
-            return v_resp;
+            return v_resp;*/
+
+            --RCM: 05/12/2017 se mueve el código de INS a función independiente
+            v_resp = cd.f_insertar_rendicion_det (
+                      p_id_usuario,
+                      v_parametros.id_cuenta_doc,
+                      hstore(v_parametros)
+                    );
+
+            --Respuesta
+            return v_resp;            
 
 		end;
 

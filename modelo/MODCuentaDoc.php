@@ -26,6 +26,7 @@ class MODCuentaDoc extends MODbase{
 		
 		$this->captura('id_cuenta_doc','INTEGER');
 		$this->captura('dias_para_rendir','INTEGER');
+		$this->captura('max_fecha_rendicion','DATE');
 		
 		$this->captura('id_tipo_cuenta_doc','INTEGER');
 		$this->captura('id_proceso_wf','INTEGER');
@@ -69,11 +70,25 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('sw_max_doc_rend','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
 		$this->captura('importe_total_rendido','numeric');	
-		
-		
-		
-		
-		
+		$this->captura('fecha_salida','DATE');
+		$this->captura('fecha_llegada','DATE');
+		$this->captura('tipo_viaje','VARCHAR');
+		$this->captura('medio_transporte','VARCHAR');
+		$this->captura('codigo_tipo_cuenta_doc','VARCHAR');
+		$this->captura('cobertura','VARCHAR');
+		$this->captura('id_escala','integer');
+		$this->captura('desc_escala','VARCHAR');
+		$this->captura('id_centro_costo','integer');
+		$this->captura('descripcion_tcc','VARCHAR');
+		$this->captura('desc_caja','VARCHAR');
+		$this->captura('id_solicitud_efectivo','integer');
+		$this->captura('dev_tipo','VARCHAR');
+		$this->captura('dev_a_favor_de','VARCHAR');
+		$this->captura('dev_nombre_cheque','VARCHAR');
+		$this->captura('id_caja_dev','integer');
+		$this->captura('dev_saldo','numeric');
+		$this->captura('desc_sol_efectivo','varchar');
+        $this->captura('dev_caja','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -141,6 +156,17 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('importe_total_rendido','numeric');	
 		$this->captura('id_periodo','integer');
 	    $this->captura('periodo','varchar');
+
+	    $this->captura('fecha_salida','DATE');
+		$this->captura('fecha_llegada','DATE');
+		$this->captura('tipo_viaje','VARCHAR');
+		$this->captura('medio_transporte','VARCHAR');
+		$this->captura('codigo_tipo_cuenta_doc','VARCHAR');
+		$this->captura('cobertura','VARCHAR');
+		$this->captura('hora_salida','varchar');
+		$this->captura('hora_llegada','varchar');
+		$this->captura('id_plantilla','integer');
+		$this->captura('desc_plantilla','VARCHAR');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -177,6 +203,13 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_estado_wf','id_estado_wf','int4');
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_funcionario_cuenta_bancaria','id_funcionario_cuenta_bancaria','int4');
+		$this->setParametro('fecha_salida','fecha_salida','date');
+		$this->setParametro('fecha_llegada','fecha_llegada','date');
+		$this->setParametro('tipo_viaje','tipo_viaje','varchar');
+		$this->setParametro('medio_transporte','medio_transporte','varchar');
+		$this->setParametro('cobertura','cobertura','varchar');
+		$this->setParametro('id_centro_costo','id_centro_costo','integer');
+
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -217,6 +250,13 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_estado_wf','id_estado_wf','int4');
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_funcionario_cuenta_bancaria','id_funcionario_cuenta_bancaria','int4');
+		$this->setParametro('fecha_salida','fecha_salida','date');
+		$this->setParametro('fecha_llegada','fecha_llegada','date');
+		$this->setParametro('tipo_viaje','tipo_viaje','varchar');
+		$this->setParametro('medio_transporte','medio_transporte','varchar');
+		$this->setParametro('cobertura','cobertura','varchar');
+		$this->setParametro('id_centro_costo','id_centro_costo','integer');
+
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -272,9 +312,14 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_periodo','id_periodo','int4');
 		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
-		
-		
+		$this->setParametro('fecha_salida','fecha_salida','date');
+		$this->setParametro('hora_salida','hora_salida','time');
+		$this->setParametro('fecha_llegada','fecha_llegada','date');
+		$this->setParametro('hora_llegada','hora_llegada','time');
+		$this->setParametro('cobertura','cobertura','varchar');
+				
 		$this->setParametro('id_cuenta_doc_fk','id_cuenta_doc_fk','integer');
+		$this->setParametro('id_plantilla','id_plantilla','integer');
 		
 		
 		//Ejecuta la instruccion
@@ -301,6 +346,12 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_periodo','id_periodo','int4');
 		$this->setParametro('nro_correspondencia','nro_correspondencia','varchar');
+		$this->setParametro('fecha_salida','fecha_salida','date');
+		$this->setParametro('hora_salida','hora_salida','time');
+		$this->setParametro('fecha_llegada','fecha_llegada','date');
+		$this->setParametro('hora_llegada','hora_llegada','time');
+		$this->setParametro('cobertura','cobertura','varchar');
+		$this->setParametro('id_plantilla','id_plantilla','integer');
 		
 
 		//Ejecuta la instruccion
@@ -819,6 +870,100 @@ class MODCuentaDoc extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function cuentaDocumentosRendicion(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='cd.ft_cuenta_doc_ime';
+        $this->transaccion='CD_RENREGDOC_VAL';
+        $this->tipo_procedimiento='IME';    
+
+        //Define los parametros para la funcion
+        $this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');		
+
+		//Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
+    function cuentaItinerarioRendicion(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='cd.ft_cuenta_doc_ime';
+        $this->transaccion='CD_RENREGITI_VAL';
+        $this->tipo_procedimiento='IME';    
+
+        //Define los parametros para la funcion
+        $this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');		
+        
+		//Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
+    function obtenerSaldoCuentaDoc(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='cd.ft_cuenta_doc_ime';
+        $this->transaccion='CD_CDRETOT_VAL';
+        $this->tipo_procedimiento='IME';    
+
+        //Define los parametros para la funcion
+        $this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');		
+        
+		//Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
+    function generarDevolucionCuentaDoc(){
+        //Definicion de variables para ejecucion del procedimiento
+        $this->procedimiento='cd.ft_cuenta_doc_ime';
+        $this->transaccion='CD_CDDEVOL_GEN';
+        $this->tipo_procedimiento='IME';    
+
+        //Define los parametros para la funcion
+        $this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+        $this->setParametro('dev_tipo','dev_tipo','varchar');
+        $this->setParametro('dev_a_favor_de','dev_a_favor_de','varchar');
+        $this->setParametro('dev_nombre_cheque','dev_nombre_cheque','varchar');
+        $this->setParametro('id_caja_dev','id_caja_dev','int4');
+        $this->setParametro('dev_saldo','dev_saldo','numeric');
+        $this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
+        $this->setParametro('total_dev','total_dev','numeric');
+        $this->setParametro('id_depto_lb','id_depto_lb','int4');
+        
+		//Ejecuta la instruccion
+        $this->armarConsulta();
+        $this->ejecutarConsulta();
+
+        //Devuelve la respuesta
+        return $this->respuesta;
+    }
+
+    function listarDepositoCuentaDoc(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_CDOCDEP_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+		
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+		$this->captura('total_deposito','numeric');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

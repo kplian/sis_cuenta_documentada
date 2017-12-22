@@ -58,7 +58,8 @@ BEGIN
 						tca.id_usuario_mod,
 						tca.fecha_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
+						usu2.cuenta as usr_mod,
+						tca.id_escala
 						from cd.ttipo_categoria tca
 						inner join segu.tusuario usu1 on usu1.id_usuario = tca.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = tca.id_usuario_mod

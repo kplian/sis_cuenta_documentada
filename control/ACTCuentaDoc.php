@@ -525,10 +525,44 @@ class ACTCuentaDoc extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 	
-	
-	
-				
-	
-	
+	function cuentaDocumentosRendicion(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->cuentaDocumentosRendicion($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}	
+
+	function cuentaItinerarioRendicion(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->cuentaItinerarioRendicion($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}	
+
+	function obtenerSaldoCuentaDoc(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->obtenerSaldoCuentaDoc($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function generarDevolucionCuentaDoc(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->generarDevolucionCuentaDoc($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function listarDepositoCuentaDoc(){
+		$this->objParam->defecto('ordenacion','id_cuenta_doc');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarDepositoCuentaDoc');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			$this->res=$this->objFunc->listarDepositoCuentaDoc($this->objParam);
+		}
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
 }
 ?>

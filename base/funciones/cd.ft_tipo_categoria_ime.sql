@@ -58,7 +58,8 @@ BEGIN
 			fecha_reg,
 			usuario_ai,
 			id_usuario_mod,
-			fecha_mod
+			fecha_mod,
+			id_escala
           	) values(
 			v_parametros.nombre,
 			'activo',
@@ -68,10 +69,8 @@ BEGIN
 			now(),
 			v_parametros._nombre_usuario_ai,
 			null,
-			null
-							
-			
-			
+			null,
+			v_parametros.id_escala
 			)RETURNING id_tipo_categoria into v_id_tipo_categoria;
 			
 			--Definicion de la respuesta
@@ -100,7 +99,8 @@ BEGIN
 			id_usuario_mod = p_id_usuario,
 			fecha_mod = now(),
 			id_usuario_ai = v_parametros._id_usuario_ai,
-			usuario_ai = v_parametros._nombre_usuario_ai
+			usuario_ai = v_parametros._nombre_usuario_ai,
+			id_escala = v_parametros.id_escala
 			where id_tipo_categoria=v_parametros.id_tipo_categoria;
                
 			--Definicion de la respuesta

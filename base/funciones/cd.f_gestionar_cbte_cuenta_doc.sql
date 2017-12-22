@@ -55,6 +55,7 @@ DECLARE
      v_registros_cv					record;
      v_total_rendido				numeric;
      v_importe_solicitado			numeric;
+     v_rec_saldo                    record;
     
 BEGIN
 
@@ -168,14 +169,18 @@ BEGIN
             IF v_registros.sw_solicitud = 'no' and v_registros.id_cuenta_doc_fk is not null  THEN
             
                   -- sumamos todas las rendiciones que estan contabilizadas
-                  select
+                  /*select
                     sum(c.importe)
                   into 
                     v_total_rendido
                   from cd.tcuenta_doc c
                   where  c.id_cuenta_doc_fk = v_registros.id_cuenta_doc_fk
-                       and c.estado = 'rendido' and c.estado_reg = 'activo';
-                       
+                       and c.estado = 'rendido' and c.estado_reg = 'activo';*/
+
+                    select * into v_rec_saldo
+                    from cd.f_get_saldo_totales_cuenta_doc(v_registros.id_cuenta_doc);
+                    
+                    v_total_rendido = v_rec_saldo.o_total_rendido;
                        
                   select 
                      c.importe,
@@ -227,7 +232,8 @@ BEGIN
                   
                   
                   
-                  IF  v_total_rendido >= v_registros_cv.importe   THEN
+                  --IF  v_total_rendido >= v_registros_cv.importe   THEN
+                  if v_rec_saldo.o_saldo = 0 then
                   
                         
                         /************************************

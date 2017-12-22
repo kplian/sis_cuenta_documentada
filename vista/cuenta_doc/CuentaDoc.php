@@ -90,6 +90,28 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			form:true 
 		},
 		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'codigo_tipo_cuenta_doc'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			config: {
+				name: 'id_escala',
+				fieldLabel: 'Escala',
+				renderer: function(value,p,record){
+					return String.format('{0}',record.data.desc_escala);
+				}
+			},
+			type: 'TextField',
+			grid: true,
+			form: false
+		},
+		{
 			config:{
 				name: 'nro_tramite',
 				fieldLabel: 'Nro Trámite',
@@ -114,14 +136,79 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				grid:true,
 				form:false
 		},
-		
+		{
+			config:{
+				name:'id_tipo_cuenta_doc',
+				fieldLabel:'Tipo Solicitud',
+				allowBlank:false,
+				emptyText:'Tipo...',
+				typeAhead: true,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode: 'local',
+				valueField: 'estilo',
+				gwidth: 120,
+				anchor: '100%',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_cuenta_documentada/control/TipoCuentaDoc/listarTipoCuentaDoc',
+					id: 'id_tipo_cuenta_doc',
+					root: 'datos',
+					sortInfo:{
+						field: 'nombre',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_tipo_cuenta_doc','nombre','codigo','descripcion'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams:{par_filtro:'nombre', sw_solicitud: 'si'
+					}
+				}),
+				valueField: 'id_tipo_cuenta_doc',
+				displayField: 'nombre',
+				gdisplayField: 'tipo_cuenta_doc',
+				hiddenName: 'codigo',
+				forceSelection:true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode:'remote',
+				pageSize:10,
+				queryDelay:1000,
+				listWidth:300,
+				resizable:true,
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['nombre']);
+				}
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			//filters:{pfiltro:'ren.tipo',type:'string'},
+			grid:false,
+			form:true
+		},
+		{
+			config:{
+				name: 'fecha',
+				fieldLabel: 'Fecha Solicitud',
+				allowBlank: false,
+				gwidth: 100,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+			type:'DateField',
+			filters: { pfiltro:'cdoc.fecha', type:'date' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
 		{
 			config:{
 				name: 'motivo',
 				qtip: 'Explique el objetivo del fondo solicitado',
 				fieldLabel: 'Motivo',
 				allowBlank: false,
-				anchor: '80%',
+				anchor: '100%',
 				gwidth: 200,
 				maxLength:500
 			},
@@ -163,10 +250,10 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'dias_para_rendir',
-				fieldLabel: 'Lim Rend.',
+				fieldLabel: 'Días Rend.',
 				allowBlank: false,
 				anchor: '80%',
-				gwidth: 100,
+				gwidth: 70,
 				maxLength:150,
                 renderer: function (value, p, record){
                 	if(record.data.estado != 'finalizado' && record.data.estado != 'rendido'){
@@ -194,6 +281,20 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'max_fecha_rendicion',
+				fieldLabel: 'Límite Rend.',
+				allowBlank: false,
+				gwidth: 80,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
+			},
+			type:'DateField',
+			id_grupo:1,
+			grid:true,
+			form:false
+		},
+		{
+			config:{
 				name: 'tipo_cuenta_doc',
 				fieldLabel: 'Tipo',
 				allowBlank: false,
@@ -206,22 +307,6 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
-		},
-		{
-			config:{
-				name: 'fecha',
-				fieldLabel: 'Fecha',
-				allowBlank: false,
-				anchor: '80%',
-				gwidth: 100,
-				format: 'd/m/Y', 
-				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''}
-			},
-				type:'DateField',
-				filters: { pfiltro:'cdoc.fecha', type:'date' },
-				id_grupo:1,
-				grid:true,
-				form:true
 		},
 		{
 			config:{
@@ -262,22 +347,22 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
        		    name:'id_funcionario',
        		    hiddenName: 'Solicitante',
    				origen:'FUNCIONARIOCAR',
-   				fieldLabel:'Funcionario',
+   				fieldLabel:'Solicitante',
    				allowBlank:false,
                 gwidth:200,
+                anchor: '100%',
    				valueField: 'id_funcionario',
    			    gdisplayField: 'desc_funcionario',
    			    baseParams: { es_combo_solicitud : 'si' },
       			renderer:function(value, p, record){return String.format('{0}', record.data['desc_funcionario']);}
        	     },
    			type:'ComboRec',//ComboRec
-   			
    			id_grupo:0,
    			filters:{pfiltro:'fun.desc_funcionario1',type:'string'},
    			bottom_filter:true,
    		    grid:true,
    			form:true
-		 },
+		},
 		{
    			config:{
    				name: 'id_depto',
@@ -286,6 +371,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	   			origen: 'DEPTO',
 	   			allowBlank: false,
 	   			fieldLabel: 'Depto',
+	   			anchor: '100%',
 	   			gdisplayField: 'desc_depto',//dibuja el campo extra de la consulta al hacer un inner join con orra tabla
 	   			width: 250,
    			    gwidth: 180,
@@ -326,62 +412,12 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			form: true
 		},*/
 		{
-			config:{
-				name:'id_tipo_cuenta_doc',
-				fieldLabel:'Tipo Fondo Avance',
-				allowBlank:false,
-				emptyText:'Tipo...',
-				typeAhead: true,
-				triggerAction: 'all',
-				lazyRender:true,
-				mode: 'local',
-				valueField: 'estilo',
-				gwidth: 120,
-
-				store: new Ext.data.JsonStore({
-					url: '../../sis_cuenta_documentada/control/TipoCuentaDoc/listarTipoCuentaDoc',
-					id: 'id_tipo_cuenta_doc',
-					root: 'datos',
-					sortInfo:{
-						field: 'nombre',
-						direction: 'ASC'
-					},
-					totalProperty: 'total',
-					fields: ['id_tipo_cuenta_doc','nombre','codigo','descripcion'],
-					// turn on remote sorting
-					remoteSort: true,
-					baseParams:{par_filtro:'nombre', sw_solicitud: 'si'
-					}
-				}),
-				valueField: 'id_tipo_cuenta_doc',
-				displayField: 'nombre',
-				hiddenName: 'codigo',
-				forceSelection:true,
-				typeAhead: false,
-				triggerAction: 'all',
-				lazyRender:true,
-				mode:'remote',
-				pageSize:10,
-				queryDelay:1000,
-				listWidth:300,
-				resizable:true,
-				anchor:'80%',
-				renderer : function(value, p, record) {
-					return String.format('{0}', record.data['nombre']);
-				}
-			},
-			type:'ComboBox',
-			id_grupo:1,
-			//filters:{pfiltro:'ren.tipo',type:'string'},
-			grid:false,
-			form:true
-		},
-		{
             config:{
                 name: 'id_moneda',
                 origen: 'MONEDA',
                 allowBlank: false,
                 fieldLabel: 'Moneda',
+                anchor: '100%',
                 gdisplayField: 'desc_moneda',//mapea al store del grid
                 gwidth: 50,
                 baseParams: { 'filtrar_base': 'si' },
@@ -403,7 +439,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 allowDecimals: true,
                 allowNegative:false,
                 decimalPrecision:2,
-                anchor: '80%',
+                anchor: '100%',
                 gwidth: 200,
                 maxLength:1245186
             },
@@ -413,12 +449,30 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
             grid:true,
             form:true
         },
+       {
+            config:{
+                name: 'id_centro_costo',
+                origen: 'CENTROCOSTO',
+                allowBlank: true,
+                fieldLabel: 'Centro de Costo',
+                gdisplayField: 'descripcion_tcc',//mapea al store del grid
+                gwidth: 50,
+                url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXUsuaio',
+                renderer: function (value, p, record){return String.format('{0}', record.data['descripcion_tcc']);},
+                baseParams:{filtrar:'grupo_ep'},
+                hidden: true
+             },
+            type: 'ComboRec',
+            id_grupo: 1,
+            filters: { pfiltro:'cc.descripcion_tcc',type:'string'},
+            grid: true,
+            form: true
+        },
         {
             config: {
                 name: 'tipo_pago',
                 fieldLabel: 'Forma de Pago',
                 allowBlank: false,
-                anchor: '70%',
                 gwidth: 150,
                 maxLength: 50,
                 typeAhead: true,
@@ -428,6 +482,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 forceSelection: true,
 				valueField: 'variable',
                 displayField: 'valor',
+                anchor: '100%',
                 store:new Ext.data.ArrayStore({
                             fields :['variable','valor'],
                             data :  [['cheque','cheque'],['transferencia','transferencia']]})
@@ -446,7 +501,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				name: 'nombre_cheque',
 				fieldLabel: 'Nombre Cheque',
 				allowBlank: true,
-				anchor: '80%',
+				anchor: '100%',
 				gwidth: 100,
 				maxLength:300
 			},
@@ -457,6 +512,51 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				form:true
 		
 		},
+		{
+			config: {
+				name: 'id_caja',
+				fieldLabel: 'Caja',
+				allowBlank: true,
+				emptyText: 'Elija una opción...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_tesoreria/control/Caja/listarCaja',
+					id: 'id_caja',
+					root: 'datos',
+					sortInfo: {
+						field: 'codigo',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
+					remoteSort: true,
+					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'cajaAbierto', con_detalle:'no'}
+				}),
+				valueField: 'id_caja',
+				displayField: 'codigo',
+				gdisplayField: 'desc_caja',
+				hiddenName: 'id_caja',
+				forceSelection: true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 15,
+				queryDelay: 1000,
+				anchor: '100%',
+				gwidth: 100,
+				minChars: 2,
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['codigo']);
+				},
+				hidden: true
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {pfiltro: 'movtip.codigo',type: 'string'},
+			grid: true,
+			form: true
+		},			
 		{
 			config:{
 				name: 'fecha_entrega',
@@ -505,8 +605,6 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				grid:false,
 				form:false
 		},
-		
-		
 		{
 			config:{
 				name: 'estado_reg',
@@ -613,18 +711,194 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:false
+		},
+		{
+			config: {
+				name: 'fecha_salida',
+				fieldLabel: 'Fecha Salida',
+				allowBlank: false,
+				gwidth: 100,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''},
+				hidden: true
+			},
+			type:'DateField',
+			filters: { pfiltro:'cdoc.fecha_salida', type:'date' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config: {
+				name: 'hora_salida',
+				fieldLabel: 'Hora Salida (HH:mm)',
+				allowBlank: false,
+				gwidth: 100,
+				regex: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+				regexText: 'Hora inválida. Debe estar en formato HH:mm (0 - 24)',
+				maskRe: /\d|:/i,
+				maxLength: 5,
+				hidden: true
+			},
+			type:'TextField',
+			filters: { pfiltro:'cdoc.hora_salida', type:'string' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config: {
+				name: 'fecha_llegada',
+				fieldLabel: 'Fecha Llegada',
+				allowBlank: false,
+				gwidth: 100,
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''},
+				hidden: true			},
+			type:'DateField',
+			filters: { pfiltro:'cdoc.fecha_llegada', type:'date' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config: {
+				name: 'hora_llegada',
+				fieldLabel: 'Hora Llegada (HH:mm)',
+				allowBlank: false,
+				gwidth: 100,
+				regex: /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
+				regexText: 'Hora inválida',
+				maskRe: /\d|:/i,
+				maxLength: 5,
+				hidden: true
+			},
+			type:'TextField',
+			filters: { pfiltro:'cdoc.hora_salida', type:'string' },
+			id_grupo:1,
+			grid:true,
+			form:true
+		},
+		{
+			config: {
+				name: 'tipo_viaje',
+				fieldLabel: 'Tipo de Viaje',
+				tinit: false,
+				allowBlank: true,
+				origen: 'CATALOGO',
+				gdisplayField: 'tipo_viaje',
+				hiddenName: 'tipo_viaje',
+				gwidth: 100,
+				anchor: '100%',
+				baseParams:{
+					cod_subsistema:'CD',
+					catalogo_tipo:'tdestino__tipo'
+				},
+				valueField: 'codigo',
+				hidden: true
+			},
+			type: 'ComboRec',
+			id_grupo: 1,
+			filters:{pfiltro:'cdoc.tipo_viaje',type:'string'},
+			grid: true,
+			form: true
+		},
+		{
+			config: {
+				name: 'medio_transporte',
+				fieldLabel: 'Medio de Transporte',
+				tinit: false,
+				allowBlank: true,
+				origen: 'CATALOGO',
+				gdisplayField: 'tipo_viaje',
+				hiddenName: 'tipo_viaje',
+				gwidth: 100,
+				anchor: '100%',
+				baseParams:{
+					cod_subsistema:'CD',
+					catalogo_tipo:'tcuenta_doc__medio_transporte'
+				},
+				valueField: 'codigo',
+				hidden: true
+			},
+			type: 'ComboRec',
+			id_grupo: 1,
+			filters:{pfiltro:'cdoc.medio_transporte',type:'string'},
+			grid: true,
+			form: true
+		},
+		{
+			config: {
+				name: 'cobertura',
+				fieldLabel: 'Cobertura',
+				anchor: '100%',
+				tinit: false,
+				allowBlank: false,
+				origen: 'CATALOGO',
+				gdisplayField: 'cobertura',
+				hiddenName: 'cobertura',
+				gwidth: 55,
+				baseParams:{
+					cod_subsistema:'CD',
+					catalogo_tipo:'tcuenta_doc__cobertura'
+				},
+				valueField: 'codigo',
+				hidden: true
+			},
+			type: 'ComboRec',
+			id_grupo: 0,
+			filters:{pfiltro:'cdoc.cobertura',type:'string'},
+			grid: true,
+			form: true
+		},
+		{
+			config:{
+				name: 'id_plantilla',
+				fieldLabel: 'Tipo Documento Viatico',
+				allowBlank: true,
+				emptyText:'Elija un opcion...',
+				store:new Ext.data.JsonStore({
+					url: '../../sis_parametros/control/Plantilla/listarPlantilla',
+					id: 'id_plantilla',
+					root:'datos',
+					sortInfo:{
+						field:'id_plantilla',
+						direction:'ASC'
+					},
+					totalProperty:'total',
+					baseParams: {filtrar: 'viatico'},
+					fields: [ 'id_plantilla','desc_plantilla'],
+					remoteSort: true
+				}),
+				valueField: 'id_plantilla',
+				hiddenValue: 'id_plantilla',
+				displayField: 'desc_plantilla',
+				listWidth:'280',
+				forceSelection:true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender:true,
+				mode:'remote',
+				pageSize:20,
+				queryDelay:500,
+				anchor: '80%',
+				minChars:2,
+				renderer: function (value, p, record){return String.format('{0}', record.data['desc_plantilla']);}
+		   	},
+			type:'ComboBox',
+			form:false,
+			grid:false
 		}
-		
 	],
 	
 	rowExpander: new Ext.ux.grid.RowExpander({
-	        tpl : new Ext.Template(
-	            '<br>',
-	            
-	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs WF:&nbsp;&nbsp;</b> {obs}</p>',
-	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Creado por:&nbsp;&nbsp;</b> {usr_reg}</p>',
-	            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Estado Registro:&nbsp;&nbsp;</b> {estado_reg}</p><br>'
-	        )
+        tpl: new Ext.Template(
+            '<br>',
+            
+            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Obs WF:&nbsp;&nbsp;</b> {obs}</p>',
+            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Creado por:&nbsp;&nbsp;</b> {usr_reg}</p>',
+            '<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>Estado Registro:&nbsp;&nbsp;</b> {estado_reg}</p><br>'
+        )
     }),
     
     arrayDefaultColumHidden:['usr_reg','usr_mod','estado_reg','fecha_reg'],
@@ -665,8 +939,27 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},'importe','obs','nro_correspondencia','importe_total_rendido',
 		'id_funcionario_cuenta_bancaria','sw_solicitud','importe_depositos', 'id_periodo', 'periodo',
 		'desc_funcionario_cuenta_bancaria','tipo_cuenta_doc','importe_retenciones',
-		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos','dias_para_rendir'
-	
+		'desc_funcionario','desc_moneda','desc_depto','id_depto_conta','id_depto_lb','importe_documentos','dias_para_rendir',
+		{name: 'fecha_salida', type: 'date'},
+		{name: 'fecha_llegada', type: 'date'},
+		{name: 'tipo_viaje', type: 'string'},
+		{name: 'medio_transporte', type: 'string'},
+		{name: 'codigo_tipo_cuenta_doc', type: 'string'},
+		{name: 'cobertura', type: 'string'},'hora_salida','hora_llegada',
+		{name: 'desc_escala', type: 'string'},
+		{name: 'max_fecha_rendicion', type: 'date',dateFormat:'Y-m-d'},
+		{name: 'id_escala', type: 'numeric'},
+		{name: 'id_centro_costo', type: 'numeric'},
+		{name: 'descripcion_tcc', type: 'string'},
+		{name: 'desc_caja', type: 'string'},
+		{name: 'id_plantilla', type: 'numeric'},
+		{name: 'desc_plantilla', type: 'string'},
+		{name: 'dev_tipo', type: 'string'},
+		{name: 'dev_a_favor_de', type: 'string'},
+		{name: 'dev_nombre_cheque', type: 'string'},
+		{name: 'id_caja_dev', type: 'numeric'},
+		{name: 'dev_saldo', type: 'numeric'},
+		{name: 'dev_caja', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_cuenta_doc',
@@ -770,161 +1063,169 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
      	var me = this,
      	    configExtra = [],
      		obsValorInicial;
-     	   if(rec.data.estado == 'vbtesoreria' &&  rec.data.sw_solicitud == 'si' ){
-		      configExtra = [
-		      				{     
-								config:{
-									name:'id_depto_lb',
-									origen:'DEPTO',
-									fieldLabel: 'Departamento Libro Bancos',
-									url: '../../sis_parametros/control/Depto/listarDepto',
-									emptyText : 'Departamento Libro Bancos...',
-									allowBlank:false,
-									anchor: '80%',
-									baseParams: { tipo_filtro: 'DEPTO_UO', estado:'activo', codigo_subsistema:'TES', modulo:'LB', id_depto_origen: rec.data.id_depto}
-								},   
-								type:'ComboRec',
+
+     	this.eventosExtra = function(obj){};
+     	   	
+     	   	if(rec.data.estado == 'vbtesoreria' &&  rec.data.sw_solicitud == 'si' ){
+
+     	   		if(rec.data.tipo_pago!='caja'){
+     	   			configExtra = [
+			      				{     
+									config:{
+										name:'id_depto_lb',
+										origen:'DEPTO',
+										fieldLabel: 'Departamento Libro Bancos',
+										url: '../../sis_parametros/control/Depto/listarDepto',
+										emptyText : 'Departamento Libro Bancos...',
+										allowBlank:false,
+										anchor: '80%',
+										baseParams: { tipo_filtro: 'DEPTO_UO', estado:'activo', codigo_subsistema:'TES', modulo:'LB', id_depto_origen: rec.data.id_depto}
+									},   
+									type:'ComboRec',
+									form:true
+								},
+								{
+									config:{
+										name: 'id_cuenta_bancaria',
+										fieldLabel: 'Cuenta Bancaria',
+										allowBlank: false,
+										emptyText:'Elija una Cuenta...',
+										store:new Ext.data.JsonStore(
+											{
+											url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
+											id: 'id_cuenta_bancaria',
+											root:'datos',
+											sortInfo:{
+												field:'id_cuenta_bancaria',
+												direction:'ASC'
+											},
+											totalProperty:'total',
+											baseParams: {'tipo_interfaz':me.tipo_interfaz},
+											fields: [ 'id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
+											remoteSort: true }),
+										tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
+										valueField: 'id_cuenta_bancaria',
+										hiddenValue: 'id_cuenta_bancaria',
+										displayField: 'nro_cuenta',
+										disabled : true,
+										listWidth:'280',
+										forceSelection:true,
+										typeAhead: false,
+										triggerAction: 'all',
+										lazyRender:true,
+										mode:'remote',
+										pageSize:20,
+										queryDelay:500,
+										anchor: '80%',
+										minChars:2
+								   },
+								type:'ComboBox',
 								form:true
 							},
 							{
+					            config:{
+					                name: 'id_cuenta_bancaria_mov',
+					                fieldLabel: 'Depósito',
+					                allowBlank: true,
+					                emptyText : 'Depósito...',
+					                store: new Ext.data.JsonStore({
+					                    url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
+					                    id : 'id_cuenta_bancaria_mov',
+					                    root: 'datos',
+					                    sortInfo:{field: 'fecha',direction: 'DESC'},
+					                    totalProperty: 'total',
+					                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
+					                    remoteSort: true,
+					                    baseParams:{par_filtro:'detalle#observaciones#fecha',fecha: rec.data.fecha}
+					               }),
+					               valueField: 'id_libro_bancos',
+					               displayField: 'importe_deposito',
+					               hiddenName: 'id_cuenta_bancaria_mov',
+					               forceSelection:true,
+					               disabled : true,
+					               typeAhead: false,
+					               triggerAction: 'all',
+					               listWidth:350,
+					               lazyRender:true,
+					               mode:'remote',
+					               pageSize:10,
+					               queryDelay:1000,
+					               anchor: '80%',
+					               minChars:2,
+					               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Saldo:<strong>{saldo}</strong></p></div></tpl>'
+					            },
+					            type:'ComboBox',
+					            id_grupo:1,
+					            form:true
+					        },
+							{     
 								config:{
-									name: 'id_cuenta_bancaria',
-									fieldLabel: 'Cuenta Bancaria',
-									allowBlank: false,
-									emptyText:'Elija una Cuenta...',
-									store:new Ext.data.JsonStore(
-										{
-										url: '../../sis_tesoreria/control/CuentaBancaria/listarCuentaBancariaUsuario',
-										id: 'id_cuenta_bancaria',
-										root:'datos',
-										sortInfo:{
-											field:'id_cuenta_bancaria',
-											direction:'ASC'
-										},
-										totalProperty:'total',
-										baseParams: {'tipo_interfaz':me.tipo_interfaz},
-										fields: [ 'id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
-										remoteSort: true }),
-									tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
-									valueField: 'id_cuenta_bancaria',
-									hiddenValue: 'id_cuenta_bancaria',
-									displayField: 'nro_cuenta',
-									disabled : true,
-									listWidth:'280',
-									forceSelection:true,
-									typeAhead: false,
-									triggerAction: 'all',
-									lazyRender:true,
-									mode:'remote',
-									pageSize:20,
-									queryDelay:500,
-									anchor: '80%',
-									minChars:2
-							   },
-							type:'ComboBox',
-							form:true
-						},
-						{
-				            config:{
-				                name: 'id_cuenta_bancaria_mov',
-				                fieldLabel: 'Depósito',
-				                allowBlank: true,
-				                emptyText : 'Depósito...',
-				                store: new Ext.data.JsonStore({
-				                    url:'../../sis_tesoreria/control/TsLibroBancos/listarTsLibroBancosDepositosConSaldo',
-				                    id : 'id_cuenta_bancaria_mov',
-				                    root: 'datos',
-				                    sortInfo:{field: 'fecha',direction: 'DESC'},
-				                    totalProperty: 'total',
-				                    fields: ['id_libro_bancos','id_cuenta_bancaria','fecha','detalle','observaciones','importe_deposito','saldo'],
-				                    remoteSort: true,
-				                    baseParams:{par_filtro:'detalle#observaciones#fecha',fecha: rec.data.fecha}
-				               }),
-				               valueField: 'id_libro_bancos',
-				               displayField: 'importe_deposito',
-				               hiddenName: 'id_cuenta_bancaria_mov',
-				               forceSelection:true,
-				               disabled : true,
-				               typeAhead: false,
-				               triggerAction: 'all',
-				               listWidth:350,
-				               lazyRender:true,
-				               mode:'remote',
-				               pageSize:10,
-				               queryDelay:1000,
-				               anchor: '80%',
-				               minChars:2,
-				               tpl: '<tpl for="."><div class="x-combo-list-item"><p>{detalle}</p><p>Fecha:<strong>{fecha}</strong></p><p>Importe:<strong>{importe_deposito}</strong></p><p>Saldo:<strong>{saldo}</strong></p></div></tpl>'
-				            },
-				            type:'ComboBox',
-				            id_grupo:1,
-				            form:true
-				        },
-						{     
-							config:{
-									name:'id_depto_conta',
-									origen:'DEPTO',
-									fieldLabel: 'Departamento Contabilidad',
-									url: '../../sis_parametros/control/Depto/listarDepto',
-									emptyText : 'Departamento Libro Bancos...',
-									allowBlank:false,
-									disabled : true,
-									anchor: '80%'
-							  },
-							type:'ComboRec',
-							form:true
-						}
+										name:'id_depto_conta',
+										origen:'DEPTO',
+										fieldLabel: 'Departamento Contabilidad',
+										url: '../../sis_parametros/control/Depto/listarDepto',
+										emptyText : 'Departamento Libro Bancos...',
+										allowBlank:false,
+										disabled : true,
+										anchor: '80%'
+								  },
+								type:'ComboRec',
+								form:true
+							}
 					];
-						
-			this.eventosExtra = function(obj){
-    							obj.Cmp.id_depto_lb.on('select',function(data,rec,ind){
-    								
-    								        this.Cmp.id_cuenta_bancaria.enable();
-    								        this.Cmp.id_depto_conta.enable();
-    								        this.Cmp.id_cuenta_bancaria.reset();
-								    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', 'permiso':'fondos_avance', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
-								    		this.Cmp.id_cuenta_bancaria.modificado = true;
-								    		
-								    		
-								    		
-								    		this.Cmp.id_depto_conta.reset();
-								    		this.Cmp.id_depto_conta.store.baseParams = {tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'CONTA',id_depto_origen: obj.Cmp.id_depto_lb.getValue()};	
-								    		this.Cmp.id_depto_conta.modificado = true;
-								    		this.Cmp.id_cuenta_bancaria_mov.reset();
-								    		
-								    		
-								    		
-								    }, obj);	
-								    	
-								 
-								 //Evento para filtrar los depósitos a partir de la cuenta bancaria
-						        obj.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
-						        	//si es de una regional nacional
-								    this.Cmp.id_cuenta_bancaria_mov.reset();
-						            this.Cmp.id_cuenta_bancaria_mov.modificado=true;
-						            Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
-						            
-						            //si es de una regional nacional
-						        	if(rec.data.centro == 'no'){
-						        		this.Cmp.id_cuenta_bancaria_mov.enable();
-						        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = false;
-						        	}
-						        	else{
-						        		this.Cmp.id_cuenta_bancaria_mov.disable();
-						        		this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
-						        	}
-						            
-						            
-						            
-						            
-						        },obj);   	
-								    			
-						};
-	     }
+
+					this.eventosExtra = function(obj){
+						obj.Cmp.id_depto_lb.on('select',function(data,rec,ind){
+							
+					        this.Cmp.id_cuenta_bancaria.enable();
+					        this.Cmp.id_depto_conta.enable();
+					        this.Cmp.id_cuenta_bancaria.reset();
+				    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', 'permiso':'fondos_avance', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
+				    		this.Cmp.id_cuenta_bancaria.modificado = true;
+				    		
+				    		
+				    		
+				    		this.Cmp.id_depto_conta.reset();
+				    		this.Cmp.id_depto_conta.store.baseParams = {tipo_filtro:'DEPTO_UO',estado:'activo',codigo_subsistema:'CONTA',id_depto_origen: obj.Cmp.id_depto_lb.getValue()};	
+				    		this.Cmp.id_depto_conta.modificado = true;
+				    		this.Cmp.id_cuenta_bancaria_mov.reset();
+						    		
+						    		
+						    		
+						    }, obj);	
+						    	
+						 
+						 //Evento para filtrar los depósitos a partir de la cuenta bancaria
+						obj.Cmp.id_cuenta_bancaria.on('select',function(data,rec,ind){
+							//si es de una regional nacional
+						    this.Cmp.id_cuenta_bancaria_mov.reset();
+						    this.Cmp.id_cuenta_bancaria_mov.modificado=true;
+						    Ext.apply(this.Cmp.id_cuenta_bancaria_mov.store.baseParams,{id_cuenta_bancaria: rec.id});
+						    
+						    //si es de una regional nacional
+							if(rec.data.centro == 'no'){
+								this.Cmp.id_cuenta_bancaria_mov.enable();
+								this.Cmp.id_cuenta_bancaria_mov.allowBlank = false;
+							}
+							else{
+								this.Cmp.id_cuenta_bancaria_mov.disable();
+								this.Cmp.id_cuenta_bancaria_mov.allowBlank = true;
+							}
+						    
+						    
+						    
+						    
+						},obj);   	
+						    			
+					};
+
+     	   		} 
+				
+			}
 	     
 	     
      	
-     	this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
+     		this.objWizard = Phx.CP.loadWindows('../../../sis_workflow/vista/estado_wf/FormEstadoWf.php',
                                 'Estado de Wf',
                                 {
                                     modal: true,

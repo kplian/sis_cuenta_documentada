@@ -61,7 +61,10 @@ BEGIN
 			fecha_reg,
 			id_usuario_reg,
 			id_usuario_mod,
-			fecha_mod
+			fecha_mod,
+			id_destino,
+			monto_sp,
+			monto_hotel
           	) values(
 			v_parametros.nombre,
 			v_parametros.id_moneda,
@@ -74,10 +77,10 @@ BEGIN
 			now(),
 			p_id_usuario,
 			null,
-			null
-							
-			
-			
+			null,
+			v_parametros.id_destino,
+			v_parametros.monto_sp,
+			v_parametros.monto_hotel
 			)RETURNING id_categoria into v_id_categoria;
 			
 			--Definicion de la respuesta
@@ -109,7 +112,10 @@ BEGIN
 			id_usuario_mod = p_id_usuario,
 			fecha_mod = now(),
 			id_usuario_ai = v_parametros._id_usuario_ai,
-			usuario_ai = v_parametros._nombre_usuario_ai
+			usuario_ai = v_parametros._nombre_usuario_ai,
+			id_destino = v_parametros.id_destino,
+			monto_sp = v_parametros.monto_sp,
+			monto_hotel = v_parametros.monto_hotel
 			where id_categoria=v_parametros.id_categoria;
                
 			--Definicion de la respuesta

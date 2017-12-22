@@ -545,4 +545,43 @@ select pxp.f_insert_testructura_gui ('REPFA', 'CD');
 
 
 
+/***********************************I-DAT-RCM-CD-0-04/09/2017*****************************************/
+select pxp.f_insert_tgui ('Destinos', 'Destinos para cálculo de viáticos', 'VIAT', 'si', 5, 'sis_cuenta_documentada/vista/destino/Destino.php', 3, '', 'Destino', 'CD');
+select pxp.f_insert_tgui ('Escala de Viáticos', 'Escala de viáticos', 'EVIAT', 'si', 4, 'sis_cuenta_documentada/vista/escala_viatico/EscalaViatico.php', 3, '', 'EscalaViatico', 'CD');
+select pxp.f_insert_testructura_gui ('VIAT', 'CBCONF');
+select pxp.f_insert_testructura_gui ('EVIAT', 'CBCONF');
 
+select pxp.f_insert_tgui ('Tipo de categoría', 'tipo de categoría', 'TIPCAT', 'si', 2, 'sis_cuenta_documentada/vista/tipo_categoria/TipoCategoriaMain.php', 3, '', 'TipoCategoriaMain', 'CD');
+
+select pxp.f_add_catalog('CD','tdestino__tipo','Nacional','nacional','');
+select pxp.f_add_catalog('CD','tdestino__tipo','Internacional','internacional','');
+
+/***********************************F-DAT-RCM-CD-0-04/09/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-05/09/2017*****************************************/
+select pxp.f_add_catalog('CD','tcuenta_doc__medio_transporte','Aéreo','aereo','');
+select pxp.f_add_catalog('CD','tcuenta_doc__medio_transporte','Terrestre','terrestre','');
+
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion") VALUES (E'cd_codigo_macro_viatico', E'VI', E'Código de proceso marcro para Viáticos');  
+/***********************************F-DAT-RCM-CD-0-05/09/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-06/09/2017*****************************************/
+select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 100%) Hospedaje y Alimentación cubierto por el Solicitante','viatico_100','');
+select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 70%) Hospedaje cubierto por la empresa o patrocinador','viatico_70','');
+select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 25%) Hospedaje y Alimentación cubiertos por la empresa o patrocinador','viatico_25','');
+/***********************************F-DAT-RCM-CD-0-06/09/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-15/11/2017*****************************************/
+select pxp.f_add_catalog('CD','tescala__tipo','Viático','viatico','');
+select pxp.f_add_catalog('CD','tescala__tipo','Fondo en Avance','fondo_avance','');
+/***********************************F-DAT-RCM-CD-0-15/11/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-24/11/2017*****************************************/
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'cd_importe_maximo_cajas', E'2000', E'Importe máximo en Cuenta documentada para desembolsar con recibo de caja');
+/***********************************F-DAT-RCM-CD-0-24/11/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-14/12/2017*****************************************/
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES (E'cd_solo_una_rendicion_mes', E'no', E'Habilita o no más de una rendición de cuenta documentada al mes');
+/***********************************F-DAT-RCM-CD-0-14/12/2017*****************************************/

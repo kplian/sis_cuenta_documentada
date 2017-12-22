@@ -17,7 +17,7 @@ Phx.vista.TipoCategoria=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.TipoCategoria.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}})
+		//this.load({params:{start:0, limit:this.tam_pag}})
 	},
 			
 	Atributos:[
@@ -27,6 +27,15 @@ Phx.vista.TipoCategoria=Ext.extend(Phx.gridInterfaz,{
 					labelSeparator:'',
 					inputType:'hidden',
 					name: 'id_tipo_categoria'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_escala_viatico'
 			},
 			type:'Field',
 			form:true 
@@ -188,15 +197,8 @@ Phx.vista.TipoCategoria=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
+		{name:'id_escala_viatico', type: 'numeric'}
 		
-	],
-	tabeast:[
-		  {
-    		  url:'../../../sis_cuenta_documentada/vista/categoria/Categoria.php',
-    		  title:'Categorías', 
-    		  width:'60%',
-    		  cls:'Categoria'
-		  }
 	],
 	sortInfo:{
 		field: 'id_tipo_categoria',
