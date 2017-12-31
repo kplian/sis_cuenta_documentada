@@ -1,4 +1,4 @@
-/***********************************I-DEP-RAC-CD-0-17/05/2016*****************************************/
+I-DEP-RAC-CD-0-17/05/2016*****************************************/
 CREATE OR REPLACE VIEW cd.vcuenta_doc(
     id_cuenta_doc,
     id_funcionario,
@@ -899,14 +899,424 @@ AS
   /***********************************F-DEP-RAC-CD-0-18/12/2017*****************************************/         
         
  
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
+/***********************************I-DEP-RCM-CD-0-26/12/2017*****************************************/         
+create or replace view cd.vrendicion_sigema
+  as
+select
+cd.id_cuenta_doc,
+cd.fecha as fecha_rendicion,
+cc.codigo_tcc as centro_costo,
+cd.nro_tramite,
+cd.tipo_sol_sigema,
+cd.id_sigema,
+sum(dco.precio_total_final) as importe
+from cd.tcuenta_doc cd
+inner join cd.ttipo_cuenta_doc tcd
+on tcd.id_tipo_cuenta_doc = cd.id_tipo_cuenta_doc
+inner join cd.trendicion_det rde
+on rde.id_cuenta_doc_rendicion = cd.id_cuenta_doc
+inner join conta.tdoc_compra_venta cv
+on cv.id_doc_compra_venta = rde.id_doc_compra_venta
+inner join conta.tdoc_concepto dco
+on dco.id_doc_compra_venta = cv.id_doc_compra_venta
+inner join param.vcentro_costo cc
+on cc.id_centro_costo = dco.id_centro_costo
+where tcd.sw_solicitud = 'no'
+and cd.estado = 'rendido'
+group by cd.id_cuenta_doc,cd.fecha,cc.codigo_tcc,cd.nro_tramite,cd.tipo_sol_sigema,cd.id_sigema;
+
+CREATE OR REPLACE VIEW cd.vsigema_mihv AS
+ SELECT DISTINCT 
+ idsolicitudplan,
+ convert_from(nrosolicitud, 'LATIN1'::name)::varchar as nrosolicitud,
+ convert_from(gestion, 'LATIN1'::name)::varchar as gestion,
+ tipoactividadfinanciera,
+ idactividadfinanciera,
+ convert_from(codigo, 'LATIN1'::name)::varchar as codigo,
+ convert_from(descripcion, 'LATIN1'::name)::varchar as descripcion,
+ porcentajeasignado,
+ convert_from(tipo, 'LATIN1'::name)::varchar as tipo
+ from cd.sigema_mihv;
+
+/***********************************I-DEP-RCM-CD-0-26/12/2017*****************************************/         
+
+/***********************************I-DEP-RCM-CD-0-27/12/2017*****************************************/
+
+  create or replace view cd.vcuenta_doc_calculo
+    as
+  select cdocca.id_cuenta_doc_calculo,
+  cdocca.numero,
+  cdocca.destino,
+  cdocca.dias_saldo_ant,
+  cdocca.dias_destino,
+  cdocca.cobertura_sol,
+  cdocca.cobertura_hotel_sol,
+  cdocca.dias_total_viaje,
+  cdocca.dias_aplicacion_regla,
+  cdocca.hora_salida,
+  cdocca.hora_llegada,
+  cdocca.escala_viatico,
+  cdocca.escala_hotel,
+  cdocca.regla_cobertura_dias_acum,
+  cdocca.regla_cobertura_hora_salida,
+  cdocca.regla_cobertura_hora_llegada,
+  cdocca.regla_cobertura_total_dias,
+  cdocca.cobertura_aplicada,
+  cdocca.cobertura_aplicada_hotel,
+  cdocca.estado_reg,
+  cdocca.id_cuenta_doc,
+  cdocca.id_usuario_ai,
+  cdocca.usuario_ai,
+  cdocca.fecha_reg,
+  cdocca.id_usuario_reg,
+  cdocca.fecha_mod,
+  cdocca.id_usuario_mod,
+  cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico as parcial_viatico,
+  (cdocca.dias_destino - 1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel as parcial_hotel,
+  (cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) + ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel) as total_viatico
+  from cd.tcuenta_doc_calculo cdocca;
+  
+/***********************************F-DEP-RCM-CD-0-27/12/2017*****************************************/
+
+/***********************************I-DEP-RCM-CD-0-02/01/2018*****************************************/
+
+  create or replace view cd.vcuenta_doc_calculo
+    as
+  select cdocca.id_cuenta_doc_calculo,
+  cdocca.numero,
+  cdocca.destino,
+  cdocca.dias_saldo_ant,
+  cdocca.dias_destino,
+  cdocca.cobertura_sol,
+  cdocca.cobertura_hotel_sol,
+  cdocca.dias_total_viaje,
+  cdocca.dias_aplicacion_regla,
+  cdocca.hora_salida,
+  cdocca.hora_llegada,
+  cdocca.escala_viatico,
+  cdocca.escala_hotel,
+  cdocca.regla_cobertura_dias_acum,
+  cdocca.regla_cobertura_hora_salida,
+  cdocca.regla_cobertura_hora_llegada,
+  cdocca.regla_cobertura_total_dias,
+  cdocca.cobertura_aplicada,
+  cdocca.cobertura_aplicada_hotel,
+  cdocca.estado_reg,
+  cdocca.id_cuenta_doc,
+  cdocca.id_usuario_ai,
+  cdocca.usuario_ai,
+  cdocca.fecha_reg,
+  cdocca.id_usuario_reg,
+  cdocca.fecha_mod,
+  cdocca.id_usuario_mod,
+  cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico as parcial_viatico,
+  (coalesce(cdocca.dias_hotel,cdocca.dias_destino - 1)) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel as parcial_hotel,
+  (cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) + (coalesce(cdocca.dias_hotel,cdocca.dias_destino - 1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel) as total_viatico
+  from cd.tcuenta_doc_calculo cdocca;
+  
+/***********************************F-DEP-RCM-CD-0-02/01/2018*****************************************/
+
+/***********************************I-DEP-RCM-CD-0-03/01/2018*****************************************/
+DROP VIEW cd.vrendicion_sigema;
+
+create or replace view cd.vrendicion_sigema
+  as
+select
+cd.id_cuenta_doc as id_rendicion,
+cdsol.fecha as fecha_solicitud,
+cd.fecha as fecha_rendicion,
+cc.codigo_tcc as centro_costo,
+cd.nro_tramite,
+cdsol.tipo_sol_sigema,
+cdsol.id_sigema,
+extract('year' from cdsol.fecha)::integer as gestion,
+cd.estado,
+sum(dco.precio_total_final) as importe
+from cd.tcuenta_doc cd
+inner join cd.ttipo_cuenta_doc tcd
+on tcd.id_tipo_cuenta_doc = cd.id_tipo_cuenta_doc
+inner join cd.trendicion_det rde
+on rde.id_cuenta_doc_rendicion = cd.id_cuenta_doc
+inner join conta.tdoc_compra_venta cv
+on cv.id_doc_compra_venta = rde.id_doc_compra_venta
+inner join conta.tdoc_concepto dco
+on dco.id_doc_compra_venta = cv.id_doc_compra_venta
+inner join param.vcentro_costo cc
+on cc.id_centro_costo = dco.id_centro_costo
+inner join cd.tcuenta_doc cdsol
+on cdsol.id_cuenta_doc = cd.id_cuenta_doc_fk
+where tcd.sw_solicitud = 'no'
+and coalesce(cdsol.tipo_sol_sigema,'')<>''
+group by cd.id_cuenta_doc,cd.fecha,cc.codigo_tcc,cd.nro_tramite,cdsol.tipo_sol_sigema,cdsol.id_sigema,
+cdsol.fecha,cd.estado,extract('year' from cdsol.fecha);
+/***********************************F-DEP-RCM-CD-0-03/01/2018*****************************************/
+
+
+
+/***********************************I-DEP-RAC-CD-0-05/01/2018*****************************************/
+
+
+CREATE OR REPLACE VIEW cd.vpago_simple_cbte(
+    id_pago_simple,
+    id_moneda,
+    id_depto_conta,
+    id_depto_lb,
+    id_cuenta_bancaria,
+    total_liquido_pagado,
+    total_documentos,
+    desc_proveedor,
+    id_funcionario,
+    id_proveedor,
+    id_proceso_wf,
+    id_estado_wf,
+    nro_tramite,
+    obs,
+    id_periodo,
+    id_gestion,
+    id_int_comprobante,
+    id_int_comprobante_pago,
+    fecha)
+AS
+  SELECT ps.id_pago_simple,
+         ps.id_moneda,
+         ps.id_depto_conta,
+         ps.id_depto_lb,
+         ps.id_cuenta_bancaria,
+         (
+           SELECT f_get_saldo_totales_pago_simple.o_liquido_pagado
+           FROM cd.f_get_saldo_totales_pago_simple(ps.id_pago_simple)
+             f_get_saldo_totales_pago_simple(p_monto, o_total_documentos,
+             o_liquido_pagado)
+         ) AS total_liquido_pagado,
+         (
+           SELECT f_get_saldo_totales_pago_simple.o_total_documentos
+           FROM cd.f_get_saldo_totales_pago_simple(ps.id_pago_simple)
+             f_get_saldo_totales_pago_simple(p_monto, o_total_documentos,
+             o_liquido_pagado)
+         ) AS total_documentos,
+         pro.desc_proveedor,
+         ps.id_funcionario,
+         ps.id_proveedor,
+         ps.id_proceso_wf,
+         ps.id_estado_wf,
+         ps.nro_tramite,
+         ps.obs,
+         per.id_periodo,
+         per.id_gestion,
+         ps.id_int_comprobante,
+         ps.id_int_comprobante_pago,
+         ps.fecha
+  FROM cd.tpago_simple ps
+       JOIN param.vproveedor pro ON pro.id_proveedor = ps.id_proveedor
+       JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <= per.fecha_fin;
+         
+
+
+CREATE OR REPLACE VIEW cd.vps_doc_compra_venta_det(
+    id_pago_simple_det,
+    id_pago_simple,
+    id_funcionario,
+    id_moneda,
+    id_int_comprobante,
+    id_plantilla,
+    importe_doc,
+    importe_excento,
+    importe_total_excento,
+    importe_descuento,
+    importe_descuento_ley,
+    importe_ice,
+    importe_it,
+    importe_iva,
+    importe_pago_liquido,
+    nro_documento,
+    nro_dui,
+    nro_autorizacion,
+    razon_social,
+    revisado,
+    manual,
+    obs,
+    nit,
+    fecha,
+    codigo_control,
+    sw_contabilizar,
+    tipo,
+    id_doc_compra_venta,
+    id_concepto_ingas,
+    id_centro_costo,
+    id_orden_trabajo,
+    precio_total,
+    id_doc_concepto,
+    desc_ingas,
+    descripcion,
+    importe_neto,
+    importe_anticipo,
+    importe_pendiente,
+    importe_retgar,
+    precio_total_final,
+    porc_monto_excento_var)
+AS
+  SELECT psd.id_pago_simple_det,
+         psd.id_pago_simple,
+         dcv.id_funcionario,
+         dcv.id_moneda,
+         dcv.id_int_comprobante,
+         dcv.id_plantilla,
+         dcv.importe_doc,
+         dcv.importe_excento,
+         COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0
+           ::numeric) AS importe_total_excento,
+         dcv.importe_descuento,
+         dcv.importe_descuento_ley,
+         dcv.importe_ice,
+         dcv.importe_it,
+         dcv.importe_iva,
+         dcv.importe_pago_liquido,
+         dcv.nro_documento,
+         dcv.nro_dui,
+         dcv.nro_autorizacion,
+         dcv.razon_social,
+         dcv.revisado,
+         dcv.manual,
+         dcv.obs,
+         dcv.nit,
+         dcv.fecha,
+         dcv.codigo_control,
+         dcv.sw_contabilizar,
+         dcv.tipo,
+         dcv.id_doc_compra_venta,
+         dco.id_concepto_ingas,
+         dco.id_centro_costo,
+         dco.id_orden_trabajo,
+         dco.precio_total,
+         dco.id_doc_concepto,
+         cig.desc_ingas,
+         (((((dcv.razon_social::text || ' - '::text) || cig.desc_ingas::text) ||
+           ' ( '::text) || dco.descripcion) || ' ) Nro Doc: '::text) || COALESCE
+           (dcv.nro_documento)::text AS descripcion,
+         dcv.importe_neto,
+         dcv.importe_anticipo,
+         dcv.importe_pendiente,
+         dcv.importe_retgar,
+         dco.precio_total_final,
+         (COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice,
+           0::numeric)) / dcv.importe_neto AS porc_monto_excento_var
+  FROM cd.tpago_simple_det psd
+       JOIN conta.tdoc_compra_venta dcv ON psd.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       JOIN param.tplantilla plt ON plt.id_plantilla = dcv.id_plantilla
+       JOIN conta.tdoc_concepto dco ON dco.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         dco.id_concepto_ingas
+  WHERE btrim(upper(plt.desc_plantilla::text)) <> btrim(upper(
+    'PASAJES (Prestamos Funcionario)'::text));
+
+
+
+
+CREATE OR REPLACE VIEW cd.vps_doc_compra_venta_det_prestamos(
+    id_pago_simple_det,
+    id_pago_simple,
+    id_funcionario,
+    id_moneda,
+    id_int_comprobante,
+    id_plantilla,
+    importe_doc,
+    importe_excento,
+    importe_total_excento,
+    importe_descuento,
+    importe_descuento_ley,
+    importe_ice,
+    importe_it,
+    importe_iva,
+    importe_pago_liquido,
+    nro_documento,
+    nro_dui,
+    nro_autorizacion,
+    razon_social,
+    revisado,
+    manual,
+    obs,
+    nit,
+    fecha,
+    codigo_control,
+    sw_contabilizar,
+    tipo,
+    id_doc_compra_venta,
+    id_concepto_ingas,
+    id_centro_costo,
+    id_orden_trabajo,
+    precio_total,
+    id_doc_concepto,
+    desc_ingas,
+    descripcion,
+    importe_neto,
+    importe_anticipo,
+    importe_pendiente,
+    importe_retgar,
+    precio_total_final,
+    porc_monto_excento_var)
+AS
+  SELECT psd.id_pago_simple_det,
+         psd.id_pago_simple,
+         dcv.id_funcionario,
+         dcv.id_moneda,
+         dcv.id_int_comprobante,
+         dcv.id_plantilla,
+         dcv.importe_doc,
+         dcv.importe_excento,
+         COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice, 0
+           ::numeric) AS importe_total_excento,
+         dcv.importe_descuento,
+         dcv.importe_descuento_ley,
+         dcv.importe_ice,
+         dcv.importe_it,
+         dcv.importe_iva,
+         dcv.importe_pago_liquido,
+         dcv.nro_documento,
+         dcv.nro_dui,
+         dcv.nro_autorizacion,
+         dcv.razon_social,
+         dcv.revisado,
+         dcv.manual,
+         dcv.obs,
+         dcv.nit,
+         dcv.fecha,
+         dcv.codigo_control,
+         dcv.sw_contabilizar,
+         dcv.tipo,
+         dcv.id_doc_compra_venta,
+         dco.id_concepto_ingas,
+         dco.id_centro_costo,
+         dco.id_orden_trabajo,
+         dco.precio_total,
+         dco.id_doc_concepto,
+         cig.desc_ingas,
+         (((((dcv.razon_social::text || ' - '::text) || cig.desc_ingas::text) ||
+           ' ( '::text) || dco.descripcion) || ' ) Nro Doc: '::text) || COALESCE
+           (dcv.nro_documento)::text AS descripcion,
+         dcv.importe_neto,
+         dcv.importe_anticipo,
+         dcv.importe_pendiente,
+         dcv.importe_retgar,
+         dco.precio_total_final,
+         (COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice,
+           0::numeric)) / dcv.importe_neto AS porc_monto_excento_var
+  FROM cd.tpago_simple_det psd
+       JOIN conta.tdoc_compra_venta dcv ON psd.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       JOIN param.tplantilla plt ON plt.id_plantilla = dcv.id_plantilla
+       JOIN conta.tdoc_concepto dco ON dco.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       JOIN param.tconcepto_ingas cig ON cig.id_concepto_ingas =
+         dco.id_concepto_ingas
+  WHERE btrim(upper(plt.desc_plantilla::text)) = btrim(upper(
+    'PASAJES (Prestamos Funcionario)'::text));
+
+
+
+/***********************************F-DEP-RAC-CD-0-05/01/2018*****************************************/
+
+
+
+

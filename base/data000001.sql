@@ -567,8 +567,7 @@ INSERT INTO pxp.variable_global ("variable", "valor", "descripcion") VALUES (E'c
 
 /***********************************I-DAT-RCM-CD-0-06/09/2017*****************************************/
 select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 100%) Hospedaje y Alimentación cubierto por el Solicitante','viatico_100','');
-select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 70%) Hospedaje cubierto por la empresa o patrocinador','viatico_70','');
-select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 25%) Hospedaje y Alimentación cubiertos por la empresa o patrocinador','viatico_25','');
+select pxp.f_add_catalog('CD','tcuenta_doc__cobertura','(Viático 70% y 100%) Hospedaje cubierto por la empresa o patrocinador','viatico_70','');
 /***********************************F-DAT-RCM-CD-0-06/09/2017*****************************************/
 
 /***********************************I-DAT-RCM-CD-0-15/11/2017*****************************************/
@@ -585,3 +584,10 @@ VALUES (E'cd_importe_maximo_cajas', E'2000', E'Importe máximo en Cuenta documen
 INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
 VALUES (E'cd_solo_una_rendicion_mes', E'no', E'Habilita o no más de una rendición de cuenta documentada al mes');
 /***********************************F-DAT-RCM-CD-0-14/12/2017*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-06/01/2018*****************************************/
+select pxp.f_insert_tgui ('VoBo Pagos', 'Visto bueno de Pagos', 'PGSVOBO', 'si', 3, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleVb.php', 3, '', 'PagoSimpleVb', 'CD');
+select pxp.f_insert_testructura_gui ('PGSVOBO', 'PAGSIM');
+select pxp.f_insert_tgui ('Tipo de Pago', 'Tipo de Pago Simple', 'PGSTIPPA', 'si', 0, 'sis_cuenta_documentada/vista/tipo_pago_simple/TipoPagoSimple.php', 3, '', 'TipoPagoSimple', 'CD');
+select pxp.f_insert_testructura_gui ('PGSTIPPA', 'PAGSIM');
+/***********************************F-DAT-RCM-CD-0-06/01/2018*****************************************/

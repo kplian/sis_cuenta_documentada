@@ -47,6 +47,8 @@ class MODCuentaDocDet extends MODbase{
 		$this->captura('descripcion_tcc','varchar');
 		$this->captura('desc_ingas','varchar');
 		$this->captura('desc_partida','text');
+		$this->captura('desc_cc','text');
+		$this->captura('gestion','integer');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

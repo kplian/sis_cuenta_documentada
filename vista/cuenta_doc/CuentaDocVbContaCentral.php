@@ -110,7 +110,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.addButton('btnSaldo', {
                 grupo : [0,1,2,3],
                 text : 'Devolucion/Reposicion',
-                iconCls : 'bprint',
+                iconCls : 'bgear',
                 disabled : true,
                 handler : this.onButtonSaldo,
                 tooltip : '<b>Devolucion/Reposicion para cierre de la cuenta documentada</b>'
@@ -222,6 +222,15 @@ Phx.vista.CuentaDocVbContaCentral = {
 	   ],
     onButtonSaldo: function(){
         var rec=this.sm.getSelected();
+
+        //Seteo baseparams de caja y cuenta bancaria
+        Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
+        Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
+        this.cmbCaja.setValue('');
+        this.cmbCaja.modificado = true;
+        this.cmbCuentaBancaria.setValue('');
+        this.cmbCuentaBancaria.modificado = true;
+
         Phx.CP.loadingShow();
         Ext.Ajax.request({
             url:'../../sis_cuenta_documentada/control/CuentaDoc/obtenerSaldoCuentaDoc',
@@ -335,7 +344,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 totalProperty: 'total',
                 fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
                 remoteSort: true,
-                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'cajaAbierto', con_detalle:'no'}
+                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
             }),
             valueField: 'id_caja',
             displayField: 'codigo',
@@ -547,7 +556,6 @@ Phx.vista.CuentaDocVbContaCentral = {
 
     abrirVentana: function(){
         var rec=this.sm.getSelected();
-        console.log('xxxxx',rec)
 
         this.cmbFormaDev.setValue('');
         this.txtNombreCheque.setValue('');
@@ -627,7 +635,6 @@ Phx.vista.CuentaDocVbContaCentral = {
             success: function(resp){
                 Phx.CP.loadingHide();
                 var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
-
                 //Si ya se definió la forma de devolución, hace las validaciones correspondientes antes de abrir el wizard
                 if(reg.datos.dev_tipo){
                     if(reg.datos.dev_tipo=='caja'||reg.datos.dev_tipo=='cheque'){
@@ -639,6 +646,8 @@ Phx.vista.CuentaDocVbContaCentral = {
                     } else {
                         Ext.MessageBox.alert('Alerta','Tipo de devolucion no valida ('+reg.datos.dev_tipo+')');
                     }
+                } else {
+                    this.mostrarWizard(rec);
                 }
             },
             failure: function(resp) {
@@ -659,8 +668,9 @@ Phx.vista.CuentaDocVbContaCentral = {
             success: function(resp){
                 Phx.CP.loadingHide();
                 var response = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).datos[0];
-
-                if(response.total_deposito>=obj.saldo){
+                console.log('resp',response);
+                console.log(response.total_deposito,obj.saldo_parcial,response.total_deposito>=obj.saldo_parcial);
+                if(1*response.total_deposito>=1*obj.saldo_parcial){
                     this.mostrarWizard(rec);
                 } else {
                     var faltante = obj.saldo,

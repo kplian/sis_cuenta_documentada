@@ -48,27 +48,27 @@ Phx.vista.CuentaDocRen = {
 	bexcelGroups : [0, 1, 2, 3],
 		
 	constructor: function(config) {
-	   var me = this;
-	   this.maestro = config;
+	   	var me = this;
+	   	this.maestro = config;
 		
-	   this.Atributos[this.getIndAtributo('id_cuenta_doc_fk')].form = true;
-	   this.Atributos[this.getIndAtributo('id_funcionario')].form = false;
-	   this.Atributos[this.getIndAtributo('id_depto')].form = false; 
-	   this.Atributos[this.getIndAtributo('id_moneda')].form = false;
+	   	this.Atributos[this.getIndAtributo('id_cuenta_doc_fk')].form = true;
+	   	this.Atributos[this.getIndAtributo('id_funcionario')].form = false;
+	   	this.Atributos[this.getIndAtributo('id_depto')].form = false; 
+	   	this.Atributos[this.getIndAtributo('id_moneda')].form = false;
 		this.Atributos[this.getIndAtributo('id_tipo_cuenta_doc')].form = false;
-	   this.Atributos[this.getIndAtributo('tipo_pago')].form = false; 
-	   this.Atributos[this.getIndAtributo('id_funcionario_cuenta_bancaria')].form = false; 
-	   this.Atributos[this.getIndAtributo('nombre_cheque')].form = false; 
-	   this.Atributos[this.getIndAtributo('importe')].config.qtip = 'Monto a rendir entre facturas y depositos';
-	   this.Atributos[this.getIndAtributo('nro_correspondencia')].form = true;
-	   this.Atributos[this.getIndAtributo('nro_correspondencia')].grid = true;
-	   this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
-	   this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
-	   this.Atributos[this.getIndAtributo('importe')].form = false;
+	   	this.Atributos[this.getIndAtributo('tipo_pago')].form = false; 
+	   	this.Atributos[this.getIndAtributo('id_funcionario_cuenta_bancaria')].form = false; 
+	   	this.Atributos[this.getIndAtributo('nombre_cheque')].form = false; 
+	   	this.Atributos[this.getIndAtributo('importe')].config.qtip = 'Monto a rendir entre facturas y depositos';
+	   	this.Atributos[this.getIndAtributo('nro_correspondencia')].form = true;
+	   	this.Atributos[this.getIndAtributo('nro_correspondencia')].grid = true;
+	   	this.Atributos[this.getIndAtributo('motivo')].config.qtip = 'Motivo de rendición';
+	   	this.Atributos[this.getIndAtributo('motivo')].config.fieldLabel = 'Motivo';
+	   	this.Atributos[this.getIndAtributo('importe')].form = false;
 		this.Atributos[this.getIndAtributo('id_periodo')].form = true;
 		this.Atributos[this.getIndAtributo('id_periodo')].grid = true;
 
-	   this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+	   	this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
 				    saldo = me.roundTwo(saldo);
 				    
@@ -101,7 +101,7 @@ Phx.vista.CuentaDocRen = {
 					}	
 
 			};
-			console.log('aaaaa',this.maestro);
+
 			if(this.maestro.codigo_tipo_cuenta_doc=='SOLVIA'){
 				this.Atributos[this.getIndAtributo('id_plantilla')].grid = true;
 				this.Atributos[this.getIndAtributo('id_plantilla')].form = true;
@@ -128,12 +128,19 @@ Phx.vista.CuentaDocRen = {
        this.finCons = true;
 
        	//Desactiva tab Itinerarios si no es rendición de viáticos
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-4').setDisabled(true);
+
 		if(config.codigo_tipo_cuenta_doc=='SOLVIA'){
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
 		}
 		//Oculta/Muestra componentes
 		this.ocultarMostrarComp(config.codigo_tipo_cuenta_doc,true);
+
    }, 
   
    getParametrosFiltro : function() {
@@ -184,45 +191,54 @@ Phx.vista.CuentaDocRen = {
    },
 
 	iniciarEventos:function(){
-		this.Cmp.fecha.on('change', function (calendar, newValue, oldValue) {
-			//this.Cmp.id_periodo.reset();
-			this.Cmp.id_periodo.setDisabled(false);
-			this.Cmp.id_periodo.store.baseParams.id_gestion = this.getGestion(new Date());
-			this.Cmp.id_periodo.modificado = true;
-
+		console.log('EL COMBO DE FECHA',this.Cmp.fecha.getValue());
+		this.Cmp.fecha.on('select', function (calendar, newValue, oldValue) {
+			var fecha = new Date(newValue);
+			this.setGestionPeriodo(fecha);
 		}, this);
+
 	},
 
+	setGestionPeriodo: function(x){
+		if(Ext.isDate(x)){
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_parametros/control/Gestion/obtenerGestionByFecha',
+				params:{fecha: x},
+				success:this.successGestion,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});	
+		} else {
+			Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: -1});
+			this.Cmp.id_periodo.setDisabled(false);
+			this.Cmp.id_periodo.modificado = true;
+			this.Cmp.id_periodo.setValue('');	
+		}
+	},
 	onButtonEdit:function(){
 		Phx.vista.CuentaDocRen.superclass.onButtonEdit.call(this);
 		this.Cmp.fecha.fireEvent('change');
 	},
 
-	getGestion:function(x){
-		if(Ext.isDate(x)){
-			Phx.CP.loadingShow();
-			Ext.Ajax.request({
-				url:'../../sis_parametros/control/Gestion/obtenerGestionByFecha',
-				params:{fecha:x},
-				success:this.successGestion,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});
-		} else{
-			alert('Error al obtener gestión: fecha inválida')
-		}
-	},
-
 	successGestion: function(resp){
 		Phx.CP.loadingHide();
+		console.log('si entra antes');
 		var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
 		if(!reg.ROOT.error){
 			var id_gestion = reg.ROOT.datos.id_gestion;
 			//Setea los stores de partida, cuenta, etc. con la gestion obtenida
-			Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: id_gestion})
+			Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: id_gestion});
+			this.Cmp.id_periodo.setDisabled(false);
+			this.Cmp.id_periodo.modificado = true;
+			this.Cmp.id_periodo.setValue('');
 
-		} else{
+		} else {
+			Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: -1});
+			this.Cmp.id_periodo.setDisabled(false);
+			this.Cmp.id_periodo.modificado = true;
+			this.Cmp.id_periodo.setValue('');
 			alert('Error al obtener la gestión. Cierre y vuelva a intentarlo')
 		}
 	},
@@ -259,6 +275,24 @@ Phx.vista.CuentaDocRen = {
    },
    
 	tabsouth: [
+		{
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
+            title: 'Prorrateo',
+            height: '40%',
+            cls: 'CuentaDocProrrateo'
+        },
+        {
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_itinerario/CuentaDocItinerario.php',
+            title: 'Itinerario',
+            height: '40%',
+            cls: 'CuentaDocItinerario'
+        },
+        {
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_calculo/CuentaDocCalculo.php',
+            title: 'Cálculo de Viáticos',
+            height: '40%',
+            cls: 'CuentaDocCalculo'
+        }, 
 	    {
 	         url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
 	         title:'Facturas', 
@@ -270,25 +304,7 @@ Phx.vista.CuentaDocRen = {
 			title:'Depositos',
 			height:'50%',
 			cls:'CdDeposito'
-		},
-		{
-            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_itinerario/CuentaDocItinerario.php',
-            title: 'Itinerario',
-            height: '40%',
-            cls: 'CuentaDocItinerario'
-        },
-        {
-            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_calculo/CuentaDocCalculo.php',
-            title: 'Cálculo de Viáticos',
-            height: '40%',
-            cls: 'CuentaDocCalculo'
-        }, {
-            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
-            title: 'Prorrateo',
-            height: '40%',
-            cls: 'CuentaDocProrrateo'
-        }
-
+		}
 	],
 	ocultarMostrarComp: function(codigoPadre,limpiar=false){
 		//Oculta los componentes del viático por defecto
@@ -376,6 +392,13 @@ Phx.vista.CuentaDocRen = {
 			});	
 
 		}
-     }
+     },
+     onButtonNew:function(){
+        Phx.vista.CuentaDoc.superclass.onButtonNew.call(this);
+        Ext.apply(this.Cmp.id_periodo.store.baseParams,{id_gestion: -1});
+		this.Cmp.id_periodo.setDisabled(false);
+		this.Cmp.id_periodo.modificado = true;
+		this.Cmp.id_periodo.setValue('');
+    }
 };
 </script>

@@ -53,12 +53,12 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
             config:{
                 name: 'id_moneda',
                 origen: 'MONEDA',
-                allowBlank: false,
+                allowBlank: true,
                 fieldLabel: 'Moneda',
                 anchor: '100%',
                 gdisplayField: 'moneda',//mapea al store del grid
                 gwidth: 100,
-                baseParams: { 'filtrar_base': 'si' },
+                //baseParams: { 'filtrar_base': 'si' },
                 renderer: function (value, p, record){return String.format('{0}', record.data['moneda']);}
              },
             type: 'ComboRec',
@@ -112,7 +112,7 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:false
 		},
-		{
+		/*{
             config:{
                 name: 'id_centro_costo',
                 fieldLabel: 'Centro Costo',
@@ -154,6 +154,24 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
             id_grupo:1,
             grid:true,
             form:true
+        },*/
+        {
+            config:{
+                name: 'id_centro_costo',
+                origen: 'CENTROCOSTO',
+                allowBlank: true,
+                fieldLabel: 'Centro de Costo',
+                gdisplayField: 'desc_cc',//mapea al store del grid
+                gwidth: 150,
+                url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXUsuaio',
+                renderer: function (value, p, record){return String.format('{0}', record.data['desc_cc']);},
+                baseParams:{filtrar:'grupo_ep'}
+             },
+            type: 'ComboRec',
+            id_grupo: 1,
+            filters: { pfiltro:'cc.descripcion_tcc',type:'string'},
+            grid: true,
+            form: true
         },
 		{
             config:{
@@ -194,7 +212,7 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
 				qtip:'Si el concepto de gasto que necesita no existe por favor  comuniquese con el área de presupuestos para solicitar la creación.',
 				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{desc_ingas}</b></p><strong>{tipo}</strong><p>PARTIDA: {desc_partida} - ({desc_gestion})</p></div></tpl>',
 				renderer:function(value, p, record){
-					return String.format('{0} <br/><b>{1} - ({2}) </b>', record.data['desc_ingas'],  record.data['desc_partida'], record.data['desc_gestion']);
+					return String.format('{0} <br/><b>{1} - ({2}) </b>', record.data['desc_ingas'],  record.data['desc_partida'], record.data['gestion']);
 				}
             },
             type:'ComboBox',
@@ -341,7 +359,9 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
 		{name:'moneda_mb', type: 'string'},
 		{name:'descripcion_tcc', type: 'string'},
 		{name:'desc_ingas', type: 'string'},
-		{name:'desc_partida', type: 'string'}
+		{name:'desc_partida', type: 'string'},
+		{name:'desc_cc', type: 'string'},
+		{name:'gestion', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'id_cuenta_doc_det',
@@ -379,6 +399,41 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
 
         this.Cmp.id_concepto_ingas.store.baseParams = bp;
         this.Cmp.id_concepto_ingas.modificado=true;
+
+        //Filtro de gestion para el centro de costo
+        var time = new Date(this.maestro.fecha);
+
+        Ext.Ajax.request({
+            url:'../../sis_parametros/control/Gestion/obtenerGestionByFecha',
+            params: {fecha: this.maestro.fecha},
+            success: function(resp){
+            	var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
+        		Ext.apply(this.Cmp.id_centro_costo.store.baseParams,{id_gestion: reg.datos.id_gestion});
+				this.Cmp.id_centro_costo.modificado=true;
+				this.Cmp.id_centro_costo.setValue('');
+            },
+            failure: function(resp) {
+                 Phx.CP.conexionFailure(resp);
+            },
+            timeout: function() {
+                Phx.CP.config_ini.timeout();
+            },
+            scope:this
+        });
+
+        this.Cmp.id_moneda.hide();
+        //Carga la moneda de la solicitud y bloquea el combo
+
+        var rec1 = new Ext.data.Record({id_moneda: this.maestro.id_moneda, moneda: this.maestro.desc_moneda },this.maestro.id_moneda);
+        
+        console.log('rec',rec1)
+        this.Cmp.id_moneda.store.add(rec1);
+        this.Cmp.id_moneda.store.commitChanges();
+        //this.Cmp.id_moneda.modificado = true;	
+        this.Cmp.id_moneda.setValue(2);
+        console.log('aaa',this.Cmp.id_moneda.store)
+
+
 
         //Habilitar/deshabilitar botones nuevo, edit, delete para los detalles. Habilita en estado borrador, en otro caso oculta
 		this.getBoton('new').show();

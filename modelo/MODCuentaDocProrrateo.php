@@ -18,6 +18,9 @@ class MODCuentaDocProrrateo extends MODbase{
 		$this->procedimiento='cd.ft_cuenta_doc_prorrateo_sel';
 		$this->transaccion='CD_CDPRO_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		//captura parametros adicionales para el count
+		$this->capturaCount('total_prorrateo','numeric');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_cuenta_doc_prorrateo','int4');

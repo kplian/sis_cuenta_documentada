@@ -32,7 +32,7 @@ Phx.vista.TipoCategoriaViatico = {
    
     east: {
 		url: '../../../sis_cuenta_documentada/vista/categoria/CategoriaViatico.php',
-		title: 'viáticos',
+		title: 'Escala por Categoría',
 		width: '60%',
 		cls: 'CategoriaViatico'
 	},

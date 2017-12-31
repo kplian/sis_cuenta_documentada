@@ -80,7 +80,9 @@ BEGIN
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_cuenta_doc_prorrateo)
+			v_consulta:='select
+						count(id_cuenta_doc_prorrateo),
+						coalesce(sum(cdpro.prorrateo),0)::numeric as total_prorrateo
 					    from cd.tcuenta_doc_prorrateo cdpro
 					    inner join segu.tusuario usu1 on usu1.id_usuario = cdpro.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdpro.id_usuario_mod

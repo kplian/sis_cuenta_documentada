@@ -70,12 +70,18 @@ BEGIN
 						cdocca.id_usuario_mod,
 						usu1.cuenta as usr_reg,
 						usu2.cuenta as usr_mod,
-						cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico as parcial_viatico,
-						(cdocca.dias_destino - 1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel as parcial_hotel,
-						(cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) + ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel) as total_viatico
-						from cd.tcuenta_doc_calculo cdocca
+						cdocca.parcial_viatico,
+						cdocca.parcial_hotel,
+						cdocca.total_viatico,
+						cdocca.dias_hotel,
+						mon.codigo as desc_moneda
+						from cd.vcuenta_doc_calculo cdocca
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdocca.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdocca.id_usuario_mod
+						inner join cd.tcuenta_doc cdoc
+						on cdoc.id_cuenta_doc = cdocca.id_cuenta_doc
+						inner join param.tmoneda mon
+						on mon.id_moneda = cdoc.id_moneda
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -98,10 +104,18 @@ BEGIN
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_cuenta_doc_calculo)
-					    from cd.tcuenta_doc_calculo cdocca
+			v_consulta:='select
+						count(id_cuenta_doc_calculo),
+						coalesce(sum(cdocca.total_viatico),0)::numeric as total_viatico,
+						coalesce(sum(cdocca.parcial_viatico),0)::numeric as parcial_viatico,
+						coalesce(sum(cdocca.parcial_hotel),0)::numeric as parcial_hotel
+					    from cd.vcuenta_doc_calculo cdocca
 					    inner join segu.tusuario usu1 on usu1.id_usuario = cdocca.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdocca.id_usuario_mod
+						inner join cd.tcuenta_doc cdoc
+						on cdoc.id_cuenta_doc = cdocca.id_cuenta_doc
+						inner join param.tmoneda mon
+						on mon.id_moneda = cdoc.id_moneda
 					    where ';
 			
 			--Definicion de la respuesta		    

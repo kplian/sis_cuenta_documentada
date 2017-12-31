@@ -30,7 +30,7 @@ BEGIN
     
 
     --Obtener el total de los conceptos de gasto registrados
-    select o_total into v_total from cd.f_get_total_cuenta_doc_sol(p_id_cuenta_doc);
+    select o_total into v_total from cd.f_get_total_cuenta_doc_sol(p_id_cuenta_doc,'no');
 
     --Actualizacion de la cuenta documentada
     update cd.tcuenta_doc set

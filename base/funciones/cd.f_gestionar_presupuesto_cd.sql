@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.f_gestionar_presupuesto_cd (
   p_id_cuenta_doc integer,
   p_id_usuario integer,
@@ -9,13 +7,13 @@ CREATE OR REPLACE FUNCTION cd.f_gestionar_presupuesto_cd (
 RETURNS boolean AS
 $body$
 /**************************************************************************
- SISTEMA:		Sistema de Cuenta Documentada
+ SISTEMA:       Sistema de Cuenta Documentada
  FUNCION:       cd.f_gestionar_presupuesto_cd(p_id_solicitud_compra integer, p_id_usuario integer, p_operacion varchar)
                 
  DESCRIPCION:   Esta funcion gestion el presupeusto para las cuentas documentadas
- AUTOR: 		Rensi Arteaga Copari
- FECHA:	        22-06-2016
- COMENTARIOS:	
+ AUTOR:         Rensi Arteaga Copari
+ FECHA:         22-06-2016
+ COMENTARIOS:   
 
  ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
@@ -34,17 +32,17 @@ DECLARE
     va_id_partida               integer[];
     va_momento                  integer[];
     va_monto                    numeric[];
-    va_id_moneda    			integer[];
-    va_id_partida_ejecucion 	integer[];
-    va_columna_relacion     	varchar[];
-    va_fk_llave             	integer[];
+    va_id_moneda                integer[];
+    va_id_partida_ejecucion     integer[];
+    va_columna_relacion         varchar[];
+    va_fk_llave                 integer[];
     v_id_partida                integer;
     v_i                         integer;
     v_cont                      integer;
     va_id_doc_concepto          integer[];
-    v_id_moneda_base		  	integer;
-    va_resp_ges              	numeric[];
-    va_fecha                	date[];
+    v_id_moneda_base            integer;
+    va_resp_ges                 numeric[];
+    va_fecha                    date[];
     v_monto_a_revertir          numeric;
     v_total_adjudicado          numeric;
     v_aux                       numeric;
@@ -53,16 +51,16 @@ DECLARE
     v_ejecutado                 numeric;
     v_men_presu                 varchar;
     v_monto_a_revertir_mb       numeric;
-    v_ano_1 					integer;
-    v_ano_2 					integer;
-    v_reg_sol					record;
+    v_ano_1                     integer;
+    v_ano_2                     integer;
+    v_reg_sol                   record;
     va_num_tramite              varchar[];
     v_mensage_error             varchar;
     v_sw_error                  boolean;
     v_resp_pre                  varchar;  
     v_rendicion                 record;
     v_rendicion_det             record;
-    v_id_presupuesto			integer;
+    v_id_presupuesto            integer;
     v_pre_verificar_categoria   varchar;
   
 BEGIN
@@ -130,7 +128,7 @@ BEGIN
                     --Determinar partida a comprometer: armamos los array para enviar a presupuestos        
                     va_id_presupuesto[v_i] = v_rendicion_det.id_centro_costo;
                     va_id_partida[v_i] = v_rendicion_det.id_partida; 
-                    va_momento[v_i]	= 1; --el momento 1 es el comprometido
+                    va_momento[v_i] = 1; --el momento 1 es el comprometido
                     va_monto[v_i]  = v_rendicion_det.precio_total_final; --RAC Cambio por moneda de la solicitud , v_registros.precio_ga_mb;
                     va_id_moneda[v_i]  = v_reg_sol.id_moneda;        --  RAC Cambio por moneda de la solicitud , v_id_moneda_base;
                     va_columna_relacion[v_i]= 'id_doc_concepto';
@@ -210,6 +208,8 @@ BEGIN
                             inner join pre.tpartida par on par.id_partida = dc.id_partida
                             where r.id_cuenta_doc_rendicion =  p_id_cuenta_doc
                             and dc.estado_reg = 'activo' ) loop
+                            
+                        
                      
             --Si no es partida de flujo
             if v_registros.sw_movimiento != 'flujo'  then
@@ -218,6 +218,8 @@ BEGIN
                 if(v_registros.id_partida_ejecucion is null) then
                     raise exception 'El presupuesto del detalle con el identificador (%) no se encuentra comprometido',v_registros.id_doc_concepto;
                 end if;
+                
+               -- raise exception 'entr aal revertir.. %',p_id_cuenta_doc;
                              
                 --Inicialiación de variables             
                 v_comprometido=0;
@@ -228,9 +230,18 @@ BEGIN
                 coalesce(ps_comprometido,0), coalesce(ps_ejecutado,0)  
                 into v_comprometido, v_ejecutado
                 FROM pre.f_verificar_com_eje_pag(v_registros.id_partida_ejecucion, v_reg_sol.id_moneda);   --  RAC,  v_id_moneda_base);
+                
+                
+                --raise exception 'entr aal revertir.. % . %',v_registros.id_partida_ejecucion, v_reg_sol.id_moneda; 
 
                 --Definición de monto a revertir
-                v_monto_a_revertir = coalesce(v_comprometido,0) - coalesce(v_ejecutado,0);  
+                
+                --TODO  Analizar mejor el codigo comentado
+                --RAC 04/01/2018 comentado por que al no considerar partidas intentava revertido dos veces lo  mismo
+               -- v_monto_a_revertir = coalesce(v_comprometido,0) - coalesce(v_ejecutado,0); 
+                
+                  v_monto_a_revertir = v_registros.precio_total_final;
+               --FIN TODO
 
                 --Armamos los array para enviar a presupuestos          
                 if v_monto_a_revertir != 0 then
@@ -240,7 +251,7 @@ BEGIN
                     --Parámetros para la reversión
                     va_id_presupuesto[v_i] = v_registros.id_centro_costo;
                     va_id_partida[v_i]= v_registros.id_partida;
-                    va_momento[v_i]	= 2; --el momento 2 con signo positivo es revertir
+                    va_momento[v_i] = 2; --el momento 2 con signo positivo es revertir
                     va_monto[v_i]  = (v_monto_a_revertir)*-1;  -- considera la posibilidad de que a este item se le aya revertido algun monto
                     va_id_moneda[v_i]  = v_reg_sol.id_moneda; -- RAC,  v_id_moneda_base;
                     va_id_partida_ejecucion[v_i]= v_registros.id_partida_ejecucion;
@@ -276,8 +287,8 @@ BEGIN
         --Llamada a la funcion de para reversion del presupuesto
         if v_i > 0 then
             va_resp_ges = pre.f_gestionar_presupuesto(p_id_usuario,
-            										 NULL, --tipo cambio
-          											 va_id_presupuesto, 
+                                                     NULL, --tipo cambio
+                                                     va_id_presupuesto, 
                                                      va_id_partida, 
                                                      va_id_moneda, 
                                                      va_monto, 
@@ -449,7 +460,7 @@ BEGIN
                             inner join pre.ttipo_presupuesto tp on p.tipo_pres = tp.codigo
                             inner join pre.tpartida par on par.id_partida = cdocd.id_partida
                             where cdocd.id_cuenta_doc = p_id_cuenta_doc) loop
-             
+                        
                 --Validación de partida de flujo
                 if v_rendicion.sw_movimiento = 'flujo' then
                     if v_rendicion.movimiento != 'administrativo' then
@@ -486,7 +497,7 @@ BEGIN
                 end if;
 
         end loop;
-           
+
         --Si el contador es mayor a cero
         if v_i>0 then
             --Llamada a la funcion de compromiso
@@ -635,14 +646,14 @@ BEGIN
     return true;
 
 EXCEPTION
-					
-	WHEN OTHERS THEN
+                    
+    WHEN OTHERS THEN
 
-		v_resp='';
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-		raise exception '%',v_resp;
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

@@ -101,7 +101,6 @@ BEGIN
 	  inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
       left join param.tdepto dpc on dpc.id_depto = pc.id_depto_conta
 	  left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
-      
       where  pc.id_int_comprobante = p_id_int_comprobante; 
     
     
@@ -110,7 +109,7 @@ BEGIN
      IF  v_registros.id_cuenta_doc is NULL  THEN
         raise exception 'El comprobante no esta relacionado con ninguna cuenta documentada';
      END IF;
-    
+   
      
     
     --------------------------------------------------------
@@ -139,9 +138,15 @@ BEGIN
               IF va_codigo_estado[1] is  null THEN
                  raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %', v_registros.estado;           
               END IF;
-              
-              -- estado siguiente
-              v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
+
+            --Obtencion del saldo de la cuenta documentada si es rendicion
+            if v_registros.id_cuenta_doc_fk is not null then
+                select * into v_rec_saldo
+                from cd.f_get_saldo_totales_cuenta_doc(v_registros.id_cuenta_doc);
+            end if;
+
+            -- estado siguiente
+            v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
                                                              v_registros.id_funcionario, 
                                                              v_registros.id_estado_wf, 
                                                              v_registros.id_proceso_wf,
@@ -150,15 +155,14 @@ BEGIN
                                                              p_usuario_ai, -- usuario_ai
                                                              v_registros.id_depto_conta,
                                                              'Comprobante validado');
-              -- actualiza estado del proceso
-            
-              update cd.tcuenta_doc pc  set 
-                           id_estado_wf =  v_id_estado_actual,
-                           estado = va_codigo_estado[1],
-                           id_usuario_mod=p_id_usuario,
-                           fecha_mod=now(),
-                           id_usuario_ai = p_id_usuario_ai,
-                           usuario_ai = p_usuario_ai
+            --Actualiza estado del proceso
+            update cd.tcuenta_doc pc  set 
+            id_estado_wf =  v_id_estado_actual,
+            estado = va_codigo_estado[1],
+            id_usuario_mod = p_id_usuario,
+            fecha_mod = now(),
+            id_usuario_ai = p_id_usuario_ai,
+            usuario_ai = p_usuario_ai
             where pc.id_cuenta_doc  = v_registros.id_cuenta_doc; 
             
             --------------------------------------------------
@@ -177,8 +181,7 @@ BEGIN
                   where  c.id_cuenta_doc_fk = v_registros.id_cuenta_doc_fk
                        and c.estado = 'rendido' and c.estado_reg = 'activo';*/
 
-                    select * into v_rec_saldo
-                    from cd.f_get_saldo_totales_cuenta_doc(v_registros.id_cuenta_doc);
+                    
                     
                     v_total_rendido = v_rec_saldo.o_total_rendido;
                        
@@ -233,7 +236,8 @@ BEGIN
                   
                   
                   --IF  v_total_rendido >= v_registros_cv.importe   THEN
-                  if v_rec_saldo.o_saldo = 0 then
+                  --if v_rec_saldo.o_saldo = 0 then
+                  if (v_rec_saldo.o_a_favor_de='funcionario' and v_rec_saldo.o_saldo = 0) or (v_rec_saldo.o_a_favor_de='empresa' and v_rec_saldo.o_saldo >= 0) then
                   
                         
                         /************************************
@@ -254,15 +258,15 @@ BEGIN
                         
                         
                         IF va_codigo_estado[2] is not null THEN              
-                           raise exception 'El proceso de WF esta mal parametrizado,  solo admite un estado siguiente para el estado: %', v_registros.estado;
+                           raise exception 'El proceso de WF esta mal parametrizado, solo admite un estado siguiente para el estado: %', v_registros.estado;
                         END IF;
                         
                         IF va_codigo_estado[1] is  null THEN
-                           raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente,  para el estado: %', v_registros.estado;           
+                           raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente para el estado: %', v_registros.estado;           
                         END IF;
                         
                         -- estado siguiente
-                        v_id_estado_actual =  wf.f_registra_estado_wf(va_id_tipo_estado[1], 
+                        v_id_estado_actual = wf.f_registra_estado_wf(va_id_tipo_estado[1], 
                                                                        v_registros.id_funcionario, 
                                                                        v_registros_cv.id_estado_wf, 
                                                                        v_registros_cv.id_proceso_wf,
@@ -271,16 +275,16 @@ BEGIN
                                                                        p_usuario_ai, -- usuario_ai
                                                                        v_registros_cv.id_depto_conta,
                                                                        'Comprobante validado');
-                        -- actualiza estado del proceso
-                      
+                        --Actualiza estado del proceso
                         update cd.tcuenta_doc pc  set 
-                                     id_estado_wf =  v_id_estado_actual,
-                                     estado = va_codigo_estado[1],
-                                     id_usuario_mod=p_id_usuario,
-                                     fecha_mod=now(),
-                                     id_usuario_ai = p_id_usuario_ai,
-                                     usuario_ai = p_usuario_ai
+                        id_estado_wf =  v_id_estado_actual,
+                        estado = va_codigo_estado[1],
+                        id_usuario_mod = p_id_usuario,
+                        fecha_mod = now(),
+                        id_usuario_ai = p_id_usuario_ai,
+                        usuario_ai = p_usuario_ai
                         where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
+
                   END IF;
             END IF;
             

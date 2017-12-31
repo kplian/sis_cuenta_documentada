@@ -89,6 +89,10 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('dev_saldo','numeric');
 		$this->captura('desc_sol_efectivo','varchar');
         $this->captura('dev_caja','varchar');
+        $this->captura('tipo_sol_sigema','VARCHAR');
+		$this->captura('id_sigema','integer');
+		$this->captura('tipo_contrato','VARCHAR');
+		$this->captura('cantidad_personas','integer');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -209,7 +213,8 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('medio_transporte','medio_transporte','varchar');
 		$this->setParametro('cobertura','cobertura','varchar');
 		$this->setParametro('id_centro_costo','id_centro_costo','integer');
-
+		$this->setParametro('tipo_contrato','tipo_contrato','VARCHAR');
+		$this->setParametro('cantidad_personas','cantidad_personas','integer');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -256,7 +261,8 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('medio_transporte','medio_transporte','varchar');
 		$this->setParametro('cobertura','cobertura','varchar');
 		$this->setParametro('id_centro_costo','id_centro_costo','integer');
-
+		$this->setParametro('tipo_contrato','tipo_contrato','VARCHAR');
+		$this->setParametro('cantidad_personas','cantidad_personas','integer');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -451,8 +457,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setCount(false);	
 		
 		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');
-		
-		
+			
 		$this->captura('id_cuenta_doc','INTEGER');
 		$this->captura('id_tipo_cuenta_doc','INTEGER');
 		$this->captura('id_proceso_wf','INTEGER');
@@ -504,21 +509,67 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('num_memo','VARCHAR');
 		$this->captura('num_rendicion','VARCHAR');
 		$this->captura('nro_cheque','integer');		
-		$this->captura('importe_solicitado','numeric');		
-		
-		
-		
-		
-		
-		
+		$this->captura('importe_solicitado','numeric');				
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
-
-   function recuperarRendicionFacturas(){
+	// listado de prorateo segun id_proceso_wf
+	function recuperarDatosProrrateo(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_DATPRO_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');	
+		$this->captura('descripcion_tcc','varchar');
+		$this->captura('prorrateo','numeric');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	// listado de prorateo segun id_proceso_wf
+	function recuperarDatosItinerario(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_DATITI_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');	
+		$this->captura('cantidad_dias','int4');
+		$this->captura('desc_destino','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	// listado de prorateo segun id_proceso_wf
+	function recuperarDatosPresupuesto(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_DATPRE_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+	
+		$this->setParametro('id_proceso_wf','id_proceso_wf','int4');	
+		$this->captura('monto_mo','numeric');
+		$this->captura('moneda','varchar');
+		$this->captura('desc_ingas','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	//
+	function recuperarRendicionFacturas(){
 		//Definicion de variables para ejecucion del procedimientp
 		$this->procedimiento='cd.ft_cuenta_doc_sel';
 		$this->transaccion='CD_REPRENDET_SEL';
@@ -964,6 +1015,65 @@ class MODCuentaDoc extends MODbase{
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarElementoSigema(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_CDSIGEMAID_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->captura('tipo_sol_sigema','varchar');
+		$this->captura('id_sigema','integer');
+		$this->captura('nro_solicitud','varchar');
+		$this->captura('gestion','varchar');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function guardarSIGEMA(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_cuenta_doc_ime';
+		$this->transaccion='CD_CDSIGEMA_INS';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+		$this->setParametro('tipo_sol_sigema','tipo_sol_sigema','varchar');
+		$this->setParametro('id_sigema','id_sigema','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarDatosCDSIGEMA(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_CDSIGEMADAT_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);	
+
+		//Define los parametros para la funcion
+		$this->setParametro('id_cuenta_doc','id_cuenta_doc','int4');
+		
+		$this->captura('id_cuenta_doc','INTEGER');
+		$this->captura('tipo_sol_sigema','VARCHAR');
+		$this->captura('id_sigema','INTEGER');
+		$this->captura('nro_solicitud','VARCHAR');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

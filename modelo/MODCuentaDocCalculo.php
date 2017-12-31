@@ -18,6 +18,11 @@ class MODCuentaDocCalculo extends MODbase{
 		$this->procedimiento='cd.ft_cuenta_doc_calculo_sel';
 		$this->transaccion='CD_CDOCCA_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		//captura parametros adicionales para el count
+		$this->capturaCount('total_viatico','numeric');
+		$this->capturaCount('parcial_viatico','numeric');
+		$this->capturaCount('parcial_hotel','numeric');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_cuenta_doc_calculo','int4');
@@ -52,6 +57,8 @@ class MODCuentaDocCalculo extends MODbase{
 		$this->captura('parcial_viatico','numeric');
 		$this->captura('parcial_hotel','numeric');
 		$this->captura('total_viatico','numeric');
+		$this->captura('dias_hotel','int4');
+		$this->captura('desc_moneda','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

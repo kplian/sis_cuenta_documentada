@@ -63,7 +63,9 @@ BEGIN
 						mon1.moneda as moneda_mb,
 						cc.descripcion_tcc,
 						cing.desc_ingas,
-						par.codigo || '' - '' || par.nombre_partida as desc_partida
+						par.codigo || '' - '' || par.nombre_partida as desc_partida,
+						cc.codigo_cc as desc_cc,
+						ges.gestion
 						from cd.tcuenta_doc_det cdet
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdet.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdet.id_usuario_mod
@@ -72,6 +74,7 @@ BEGIN
 						inner join param.vcentro_costo cc on cc.id_centro_costo = cdet.id_centro_costo
 						inner join param.tconcepto_ingas cing on cing.id_concepto_ingas = cdet.id_concepto_ingas
 						inner join pre.tpartida par on par.id_partida = cdet.id_partida
+						inner join param.tgestion ges on ges.id_gestion = par.id_gestion
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -105,6 +108,7 @@ BEGIN
 						inner join param.vcentro_costo cc on cc.id_centro_costo = cdet.id_centro_costo
 						inner join param.tconcepto_ingas cing on cing.id_concepto_ingas = cdet.id_concepto_ingas
 						inner join pre.tpartida par on par.id_partida = cdet.id_partida
+						inner join param.tgestion ges on ges.id_gestion = par.id_gestion
 					    where ';
 			
 			--Definicion de la respuesta		    

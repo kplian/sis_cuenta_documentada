@@ -35,6 +35,9 @@ DECLARE
 	v_codigo_tipo_cuenta_doc varchar;
 	v_id_concepto_ingas		integer;
 	v_id_concepto_ingas1	integer;
+	v_resp1 				varchar;
+	v_id_cuenta_doc 		integer;
+	v_id_moneda				integer;
 			    
 BEGIN
 
@@ -56,41 +59,48 @@ BEGIN
         begin
 
         	--Obtención de datos de la solicitud
-		    select codigo
-		    into v_codigo_tipo_cuenta_doc
+		    select codigo, fecha, id_moneda
+		    into v_codigo_tipo_cuenta_doc, v_fecha, v_id_moneda
 		    from cd.tcuenta_doc cdoc
 		    inner join  cd.ttipo_cuenta_doc tcdoc
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
 		    --Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
-			if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+			/*if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
 				select escr.id_concepto_ingas
 				into v_id_concepto_ingas
 			    from cd.tcuenta_doc cd
 			    left join cd.tescala_regla escr
 			    on escr.id_escala = cd.id_escala
 			    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-			    and escr.codigo = 'CONGAS_VIA';
+			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
 			end if;    
 
         	--Si es viático, verifica que no se esté registrando el concepto de gasto de viáticos
         	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_parametros.id_concepto_ingas = v_id_concepto_ingas then
         		raise exception 'El Concepto de gasto de Viáticos, no puede registrarse manualmente. El sistema lo calculará automáticamente después de registrar el Itinerario.';
+        	end if;*/
+
+        	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
+        	if exists (select 1
+					    from cd.tcuenta_doc cd
+					    left join cd.tescala_regla escr
+					    on escr.id_escala = cd.id_escala
+					    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+					    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
+
+        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede registrarse manualmente. El sistema lo calculará automáticamente después de registrar el Itinerario.';
+
         	end if;
 
         	--Obtiene la moneda base
         	v_id_moneda_base  = param.f_get_moneda_base();
 
-        	--Obtiene la fecha de la solicitud
-        	select fecha
-        	into v_fecha
-        	from cd.tcuenta_doc
-        	where id_cuenta_doc = v_parametros.id_cuenta_doc;
-
         	--Convierte el importe en moneda original a moneda base
-        	v_importe = param.f_convertir_moneda(v_id_moneda_base, --moneda origen para conversion
-												v_parametros.id_moneda,   --moneda a la que sera convertido
+        	v_importe = param.f_convertir_moneda(v_id_moneda, --moneda origen para conversion
+												v_id_moneda_base,   --moneda a la que sera convertido
 												v_parametros.monto_mo, --este monto siempre estara en moenda base
 												v_fecha, 
 												'O',-- tipo oficial, venta, compra 
@@ -136,10 +146,13 @@ BEGIN
 			p_id_usuario,
 			null,
 			null,
-			v_parametros.id_moneda,	
+			v_id_moneda,	
 			v_id_moneda_base
 			
 			)RETURNING id_cuenta_doc_det into v_id_cuenta_doc_det;
+
+			--Actualizacion del importe total en la cabecera
+			v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_parametros.id_cuenta_doc);
 			
 			--Definicion de la respuesta
 			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Presupuesto almacenado(a) con exito (id_cuenta_doc_det'||v_id_cuenta_doc_det||')'); 
@@ -162,14 +175,14 @@ BEGIN
 		begin
 
 			--Obtención de datos de la solicitud
-		    select codigo
-		    into v_codigo_tipo_cuenta_doc
+		    select codigo, fecha, id_moneda
+		    into v_codigo_tipo_cuenta_doc, v_fecha, v_id_moneda
 		    from cd.tcuenta_doc cdoc
 		    inner join  cd.ttipo_cuenta_doc tcdoc
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-		    --Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
+		    /*--Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
 			if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
 				select escr.id_concepto_ingas
 				into v_id_concepto_ingas
@@ -177,26 +190,33 @@ BEGIN
 			    left join cd.tescala_regla escr
 			    on escr.id_escala = cd.id_escala
 			    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-			    and escr.codigo = 'CONGAS_VIA';
+			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
 			end if;    
 
 			--Si es viático, verifica que no se esté modificando el concepto de gasto de viáticos
         	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_parametros.id_concepto_ingas = v_id_concepto_ingas then
         		raise exception 'El Concepto de gasto de Viáticos, no puede modificarse manualmente. El sistema lo actualizará el total por cada cambio en el itinerario.';
+        	end if;*/
+
+        	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
+        	if exists (select 1
+					    from cd.tcuenta_doc cd
+					    left join cd.tescala_regla escr
+					    on escr.id_escala = cd.id_escala
+					    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+					    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
+
+        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede modificarse manualmente. El sistema lo actualizará el total por cada cambio en el itinerario.';
+
         	end if;
 
 			--Obtiene la moneda base
         	v_id_moneda_base  = param.f_get_moneda_base();
 
-        	--Obtiene la fecha de la solicitud
-        	select fecha
-        	into v_fecha
-        	from cd.tcuenta_doc
-        	where id_cuenta_doc = v_parametros.id_cuenta_doc;
-
         	--Convierte el importe en moneda original a moneda base
-        	v_importe = param.f_convertir_moneda(v_id_moneda_base, --moneda origen para conversion
-												v_parametros.id_moneda,   --moneda a la que sera convertido
+        	v_importe = param.f_convertir_moneda(v_id_moneda, --moneda origen para conversion
+												v_id_moneda_base,   --moneda a la que sera convertido
 												v_parametros.monto_mo, --este monto siempre estara en moenda base
 												v_fecha, 
 												'O',-- tipo oficial, venta, compra 
@@ -222,9 +242,12 @@ BEGIN
 			id_usuario_mod = p_id_usuario,
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai,
-			id_moneda = v_parametros.id_moneda,
+			id_moneda = v_id_moneda,
 			id_moneda_mb = v_id_moneda_base
 			where id_cuenta_doc_det=v_parametros.id_cuenta_doc_det;
+
+			--Actualizacion del importe total en la cabecera
+			v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_parametros.id_cuenta_doc);
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Presupuesto modificado(a)'); 
@@ -247,8 +270,8 @@ BEGIN
 		begin
 
 			--Obtención de datos de la solicitud
-		    select codigo
-		    into v_codigo_tipo_cuenta_doc
+		    select codigo, cdoc.id_cuenta_doc
+		    into v_codigo_tipo_cuenta_doc, v_id_cuenta_doc
 		    from cd.tcuenta_doc_det cdocd
 		    inner join cd.tcuenta_doc cdoc
 		    on cdoc.id_cuenta_doc = cdocd.id_cuenta_doc
@@ -256,7 +279,7 @@ BEGIN
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det;
 
-		    --Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
+		    /*--Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
 			if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
 				select escr.id_concepto_ingas, cdocd.id_concepto_ingas
 				into v_id_concepto_ingas, v_id_concepto_ingas1
@@ -266,17 +289,34 @@ BEGIN
 			    left join cd.tescala_regla escr
 			    on escr.id_escala = cd.id_escala
 			    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det
-			    and escr.codigo = 'CONGAS_VIA';
+			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
 			end if;    
 
 			--Si es viático, verifica que no se esté eliminando el concepto de gasto de viáticos
         	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_id_concepto_ingas1 = v_id_concepto_ingas then
         		raise exception 'El Concepto de gasto de Viáticos, no puede eliminarse manualmente.';
+        	end if;*/
+
+        	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
+        	if exists (select 1 from  cd.tcuenta_doc_det cdocd
+				    	inner join cd.tcuenta_doc cd
+				    	on cd.id_cuenta_doc = cdocd.id_cuenta_doc
+					    left join cd.tescala_regla escr
+					    on escr.id_escala = cd.id_escala
+					    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det
+					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+					    and escr.id_concepto_ingas = cdocd.id_concepto_ingas) then
+
+        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede eliminarse manualmente.';
+
         	end if;
 
 			--Sentencia de la eliminacion
 			delete from cd.tcuenta_doc_det
             where id_cuenta_doc_det=v_parametros.id_cuenta_doc_det;
+
+            --Actualizacion del importe total en la cabecera
+			v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_id_cuenta_doc);
                
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Presupuesto eliminado(a)'); 

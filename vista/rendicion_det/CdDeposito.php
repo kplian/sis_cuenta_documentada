@@ -47,9 +47,11 @@ Phx.vista.CdDeposito = {
 		this.idOrigenValor = me.maestro[me.idOrigen];
 		this.store.baseParams={tabla : me.tablaOrigen,columna_pk: me.idOrigen,columna_pk_valor : me.maestro[me.idOrigen]};
 		this.load({params : {start : 0,limit : me.tam_pag}});
-		
-		
-	
+
+		//Setea el baseparams de la cuenta bancaria en función de la moneda de la cuenta documentada
+		Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams,{id_moneda: this.maestro.id_moneda});
+		this.Cmp.id_cuenta_bancaria.setValue('');
+		this.Cmp.id_cuenta_bancaria.modificado = true;
 	},
    
     liberaMenu:function(){

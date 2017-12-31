@@ -45,7 +45,7 @@ BEGIN
     --Obtención de datos de la cuenta documentada
     select
     cd.id_cuenta_doc, cd.id_moneda, cd.importe, tcd.codigo as tipo_cuenta_doc, cd.estado,
-    cd.fecha_entrega
+    cd.fecha
     into v_rec_cd
     from cd.tcuenta_doc cd
     inner join cd.ttipo_cuenta_doc tcd
@@ -68,7 +68,7 @@ BEGIN
         v_importe_total = param.f_convertir_moneda(v_rec_cd.id_moneda, --moneda origen para conversion
                                                     v_id_moneda_base,   --moneda a la que sera convertido
                                                     v_rec_cd.importe, --monto a convertir
-                                                    v_rec_cd.fecha_entrega, 
+                                                    v_rec_cd.fecha, 
                                                     'O',-- tipo oficial, venta, compra 
                                                     NULL);--defecto dos decimales  
     end if;

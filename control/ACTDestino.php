@@ -17,6 +17,10 @@ class ACTDestino extends ACTbase{
 			$this->objParam->addFiltro("dest.id_escala = ".$this->objParam->getParametro('id_escala'));
 		}
 
+		if($this->objParam->getParametro('tipo_viaje')!=''){
+			$this->objParam->addFiltro("dest.tipo = ''".$this->objParam->getParametro('tipo_viaje')."''");	
+		}
+
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODDestino','listarDestino');

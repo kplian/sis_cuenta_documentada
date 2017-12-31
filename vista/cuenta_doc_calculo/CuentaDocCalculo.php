@@ -64,6 +64,21 @@ Phx.vista.CuentaDocCalculo=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'desc_moneda',
+				fieldLabel: 'Moneda',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:4
+			},
+				type:'TextField',
+				filters:{pfiltro:'mon.codigo',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
 				name: 'destino',
 				fieldLabel: 'Destino',
 				allowBlank: true,
@@ -103,6 +118,21 @@ Phx.vista.CuentaDocCalculo=Ext.extend(Phx.gridInterfaz,{
 			},
 				type:'NumberField',
 				filters:{pfiltro:'cdocca.dias_destino',type:'numeric'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
+				name: 'dias_hotel',
+				fieldLabel: '#Días Hotel',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 70,
+				maxLength:4
+			},
+				type:'NumberField',
+				filters:{pfiltro:'cdocca.dias_hotel',type:'numeric'},
 				id_grupo:1,
 				grid:true,
 				form:true
@@ -505,10 +535,12 @@ Phx.vista.CuentaDocCalculo=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		{name:'parcial_viatico', type: 'numeric'},
 		{name:'parcial_hotel', type: 'numeric'},
-		{name:'total_viatico', type: 'numeric'}
+		{name:'total_viatico', type: 'numeric'},
+		{name:'dias_hotel', type: 'numeric'},
+		{name:'desc_moneda', type: 'string'}
 	],
 	sortInfo:{
-		field: 'id_cuenta_doc_calculo',
+		field: 'numero',
 		direction: 'ASC'
 	},
 	bdel:true,

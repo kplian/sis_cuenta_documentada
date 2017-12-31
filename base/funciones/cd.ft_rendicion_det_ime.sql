@@ -1,7 +1,7 @@
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION cd.ft_rendicion_det_ime (
-  p_administrador integer,
+    p_administrador integer,
   p_id_usuario integer,
   p_tabla varchar,
   p_transaccion varchar
@@ -269,9 +269,9 @@ BEGIN
                 raise exception 'no puede elimianr documentos que  esten en borrador o visto bueno rendición';
             END IF;
 
-            IF v_cd_comprometer_presupuesto = 'si' THEN
+            /*IF v_cd_comprometer_presupuesto = 'si' THEN
                 raise exception 'Solo puede eliminar  en estado borrador por que los documentos se encuentran comprometidos';
-            END IF;
+            END IF;*/
 
 
             --validar si el periodo de conta esta cerrado o abierto

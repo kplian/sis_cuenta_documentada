@@ -143,7 +143,7 @@ BEGIN
             and c.id_funcionario = v_reg_cuenta_doc.id_funcionario;
 
             --Si está en el limite de solicitudes
-            if v_contador >= v_regla_max_sol then
+            if v_contador > v_regla_max_sol then
                  
                 --Verificación si tiene autorización para continuar
                 select b.id_bloqueo_cd, b.estado

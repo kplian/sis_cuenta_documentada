@@ -69,7 +69,14 @@ Phx.vista.CuentaDocSol = {
 				return String.format('<font>Solicitado: {0}</font>', value);
 			}
 		};
-		
+
+		//Habilita el campo de tipo de contrato
+		this.Atributos[this.getIndAtributo('tipo_contrato')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('tipo_contrato')].config.allowBlank=false;
+
+		this.Atributos[this.getIndAtributo('cantidad_personas')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('cantidad_personas')].config.allowBlank=false;
+
 		Phx.vista.CuentaDocSol.superclass.constructor.call(this, config);
 		this.bloquearOrdenamientoGrid();
 		this.iniciarEventos();
@@ -108,7 +115,16 @@ Phx.vista.CuentaDocSol = {
 			disabled: false,
 			handler: this.onBtnRepRenCon,
 			tooltip: '<b>Reporte de rendición consolidada</b>'
-	    });			
+	    });
+
+	    this.addButton('btnSIGEMA', {
+			grupo: [0,1,2,3],
+			text: 'SIGEMA',
+			iconCls: 'bballot',
+			disabled: true,
+			handler: this.onBtnSIGEMA,
+			tooltip: '<b>Integracion con sistema SIGEMA</b>'
+	    });
 
 		this.init();
 		this.load({
@@ -122,6 +138,7 @@ Phx.vista.CuentaDocSol = {
 		this.finCons = true;
 
 		//Se desactiva el tab de Itinerario por defecto
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
 
@@ -131,13 +148,19 @@ Phx.vista.CuentaDocSol = {
 			Ext.apply(this.Cmp.id_centro_costo.store.baseParams,{fecha: time.format("d/m/Y")});
 			this.Cmp.id_centro_costo.modificado=true;
 		},this);
+
+		//Mostrar los combos de integracion con el SIGEMA
+		//this.mostrarCompSigema('GMAN');
+		this.crearVentanaSigema();
 	},
 	EnableSelect: function(){
 		Phx.vista.CuentaDocSol.superclass.EnableSelect.call(this);
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
 		var data = this.getSelectedData();
 		if(data.codigo_tipo_cuenta_doc=='SOLVIA'){
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
 		}
@@ -169,9 +192,11 @@ Phx.vista.CuentaDocSol = {
 		if (data.estado == 'borrador') {
 			this.getBoton('ant_estado').disable();
 			this.getBoton('sig_estado').enable();
+			this.getBoton('btnSIGEMA').enable();
 		} else {
 			this.getBoton('ant_estado').disable();
 			this.getBoton('sig_estado').disable();
+			this.getBoton('btnSIGEMA').disable();
 		}
 
 		if (data.estado == 'contabiizado') {
@@ -252,7 +277,7 @@ Phx.vista.CuentaDocSol = {
 		}, this);
 
 		this.Cmp.id_tipo_cuenta_doc.on('select', function(combo, rec, index) {
-			if (rec.data.codigo == 'SOLFONCHAR') {
+			/*if (rec.data.codigo == 'SOLFONCHAR') {
 				this.Cmp.id_moneda.store.baseParams.filtrar_base = 'no';
 				this.Cmp.id_moneda.store.baseParams.id_moneda = 2;
 			} else{
@@ -260,13 +285,12 @@ Phx.vista.CuentaDocSol = {
 				this.Cmp.id_moneda.store.baseParams.id_moneda = '';
 			}
 			this.Cmp.id_moneda.modificado = true;
-			this.Cmp.id_moneda.reset();
+			this.Cmp.id_moneda.reset();*/
 			//Ocultar/mostrar componentes en función del tipo de cuenta documentada
 			this.ocultarMostrarComp(rec.data.codigo,true);
 		}, this);
 
 		this.Cmp.tipo_pago.on('select', function(combo, rec, index) {
-			console.log('record', rec.data.variable);
 			if (rec.data.variable == 'cheque') {
 				this.mostrarComponente(this.Cmp.nombre_cheque);
 				this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
@@ -305,6 +329,13 @@ Phx.vista.CuentaDocSol = {
 
 			}
 		}, this);
+
+		//Evento tipo solicitud de sigema
+		/*this.Cmp.tipo_sol_sigema.on('select',function(combo, rec, index){
+			Ext.apply(this.Cmp.id_sigema.store.baseParams,{tipo_sol_sigema: rec.data.tipo_sol_sigema});
+			this.Cmp.id_sigema.modificado = true;
+			this.Cmp.id_sigema.setValue('');
+		},this)*/
 
 	},
 	onButtonNew: function() {
@@ -412,6 +443,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.cobertura.allowBlank = true;
 		this.Cmp.id_centro_costo.allowBlank = true;
 
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
 
@@ -442,15 +474,16 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.cobertura.allowBlank = false;
 			this.Cmp.id_centro_costo.allowBlank = true;
 
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
 		}
 	},
 	tabsouth: [{
-            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_det/CuentaDocDet.php',
-            title: 'Presupuesto',
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
+            title: 'Prorrateo',
             height: '40%',
-            cls: 'CuentaDocDet'
+            cls: 'CuentaDocProrrateo'
         }, {
             url: '../../../sis_cuenta_documentada/vista/cuenta_doc_itinerario/CuentaDocItinerario.php',
             title: 'Itinerario',
@@ -461,12 +494,207 @@ Phx.vista.CuentaDocSol = {
             title: 'Cálculo de Viáticos',
             height: '40%',
             cls: 'CuentaDocCalculo'
-        }, {
-            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
-            title: 'Prorrateo',
+        },{
+            url: '../../../sis_cuenta_documentada/vista/cuenta_doc_det/CuentaDocDet.php',
+            title: 'Presupuesto',
             height: '40%',
-            cls: 'CuentaDocProrrateo'
+            cls: 'CuentaDocDet'
+        } 
+    ],
+    mostrarCompSigema: function(codigoGerencia){
+    	this.Cmp.tipo_sol_sigema.setVisible(false);
+    	this.Cmp.id_sigema.setVisible(false);
+
+    	this.Cmp.tipo_sol_sigema.allowBlank = true;
+    	this.Cmp.id_sigema.allowBlank = true;
+
+    	if(codigoGerencia=='GMAN') {
+    		this.Cmp.tipo_sol_sigema.setVisible(true);
+	    	this.Cmp.id_sigema.setVisible(true);
+
+	    	this.Cmp.tipo_sol_sigema.allowBlank = false;
+	    	//this.Cmp.id_sigema.allowBlank = false;
+    	}
+    },
+    crearVentanaSigema: function(){
+
+    	this.cmbTipoSolSigema = new Ext.form.ComboBox({
+	        name: 'tipo_sol_sigema',
+	        fieldLabel: 'Tipo Solicitud SIGEMA',
+	        allowBlank: false,
+	        typeAhead: false,
+	        triggerAction: 'all',
+	        lazyRender: true,
+	        mode: 'local',
+	        forceSelection: true,
+			valueField: 'variable',
+	        displayField: 'valor',
+	        anchor: '100%',
+	        store: new Ext.data.ArrayStore({
+	            fields:['variable','valor'],
+				data:  [['orden_trabajo','orden_trabajo'], ['sol_admin','sol_admin'], ['sol_man_mihv','sol_man_mihv'], ['sol_man_event','sol_man_event']]
+			})
+        });
+
+        this.cmbIdSigema = new Ext.form.ComboBox({
+			name: 'id_sigema',
+			fieldLabel: 'Elemento SIGEMA',
+			allowBlank: false,
+			emptyText: 'Elija una opción...',
+			store: new Ext.data.JsonStore({
+				url: '../../sis_cuenta_documentada/control/CuentaDoc/listarElementoSigema',
+				id: 'id_sigema',
+				root: 'datos',
+				sortInfo: {
+					field: 'nro_solicitud',
+					direction: 'ASC'
+				},
+				totalProperty: 'total',
+				fields: ['id_sigema', 'tipo_sol_sigema', 'nro_solicitud','gestion'],
+				remoteSort: true,
+				baseParams: {par_filtro: 'sigra.nro_solicitud'}
+			}),
+			valueField: 'id_sigema',
+			displayField: 'nro_solicitud',
+			gdisplayField: 'desc_sigema',
+			hiddenName: 'id_sigema',
+			forceSelection: true,
+			typeAhead: false,
+			triggerAction: 'all',
+			lazyRender: true,
+			mode: 'remote',
+			pageSize: 15,
+			queryDelay: 1000,
+			anchor: '100%',
+			gwidth: 100,
+			minChars: 2,
+			renderer : function(value, p, record) {
+				return String.format('{0}', record.data['desc_sigema']);
+			}
+		});
+
+		//Formulario
+        this.frmDatos = new Ext.form.FormPanel({
+            layout: 'form',
+            items: [
+                this.cmbTipoSolSigema,this.cmbIdSigema
+            ],
+            padding: this.paddingForm,
+            bodyStyle: this.bodyStyleForm,
+            border: this.borderForm,
+            frame: this.frameForm, 
+            autoScroll: false,
+            autoDestroy: true,
+            autoScroll: true,
+            region: 'center'
+        });
+
+        //Window
+        this.winDatos = new Ext.Window({
+            width: 450,
+            height: 200,
+            modal: true,
+            closeAction: 'hide',
+            labelAlign: 'top',
+            title: 'Integracion SIGEMA',
+            bodyStyle: 'padding:5px',
+            layout: 'border',
+            items: [this.frmDatos],
+            buttons: [{
+                text: 'Guardar',
+                handler: function() {
+                    this.guardarSIGEMA();
+                },
+                scope: this
+            }, {
+                	text: 'Cerrar',
+                	handler: function() {
+                    	this.winDatos.hide();
+                	},
+                	scope: this
+                }
+			]
+        });
+
+        //Eventos
+        this.cmbTipoSolSigema.on('select',function(cmp,val){
+        	Ext.apply(this.cmbIdSigema.store.baseParams,{tipo_sol_sigema: val.data.valor});
+        	this.cmbIdSigema.setValue('');
+        	this.cmbIdSigema.modificado=true;
+        },this);
+    },
+
+    guardarSIGEMA: function(){
+    	var rec=this.sm.getSelected();
+        var obj = {
+            id_cuenta_doc: rec.data.id_cuenta_doc,
+            tipo_sol_sigema: this.cmbTipoSolSigema.getValue(),
+            id_sigema: this.cmbIdSigema.getValue()
+        };
+
+        if(!this.frmDatos.getForm().isValid()){
+            return;
         }
-    ]
+
+        Phx.CP.loadingShow();
+        Ext.Ajax.request({
+            url: '../../sis_cuenta_documentada/control/CuentaDoc/guardarSIGEMA',
+            params: obj,
+            success: function(resp){
+                var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
+                this.reload();
+                this.winDatos.hide();
+                Phx.CP.loadingHide();
+            },
+            failure: function(resp) {
+                Phx.CP.conexionFailure(resp);
+            },
+            timeout: function() {
+                Phx.CP.config_ini.timeout();
+            },
+            scope:this
+        });
+
+    },
+    onBtnSIGEMA: function(){
+    	var rec = this.sm.getSelected(),
+    		time = new Date(rec.data.fecha);
+    	Phx.CP.loadingShow();
+
+    	console.log(rec.data,time)
+    	//Setea el store del combo de Sigema
+    	Ext.apply(this.cmbIdSigema.store.baseParams,{gestion: time.getFullYear()});
+
+    	Ext.Ajax.request({
+			url:'../../sis_cuenta_documentada/control/CuentaDoc/listarDatosCDSIGEMA',
+			params:{
+				id_cuenta_doc: rec.data.id_cuenta_doc
+			},
+			success: function(resp){
+				Phx.CP.loadingHide();
+				var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
+				var data = reg.datos;
+
+				if(reg.datos[0]){
+					//Carga los valores del registro seleccionado
+			        this.cmbTipoSolSigema.setValue(reg.datos[0].tipo_sol_sigema);
+
+			        var rec1 = new Ext.data.Record({id_sigema: reg.datos[0].id_sigema, nro_solicitud: reg.datos[0].nro_solicitud },reg.datos[0].id_sigema);
+			        this.cmbIdSigema.store.add(rec1);
+			        this.cmbIdSigema.store.commitChanges();
+			        this.cmbIdSigema.modificado = true;	
+			        this.cmbIdSigema.setValue(reg.datos[0].id_sigema);
+				}
+
+		    	this.winDatos.show();
+
+			},
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope:this
+		});		
+    	
+    }
+    
 }; 
 </script>

@@ -54,7 +54,7 @@ Phx.vista.CuentaDocProrrateo=Ext.extend(Phx.gridInterfaz,{
                 allowBlank: true,
                 fieldLabel: 'Centro de Costo',
                 gdisplayField: 'desc_cc',//mapea al store del grid
-                gwidth: 50,
+                gwidth: 150,
                 url: '../../sis_parametros/control/CentroCosto/listarCentroCostoFiltradoXUsuaio',
                 renderer: function (value, p, record){return String.format('{0}', record.data['desc_cc']);},
                 baseParams:{filtrar:'grupo_ep'}
@@ -233,6 +233,18 @@ Phx.vista.CuentaDocProrrateo=Ext.extend(Phx.gridInterfaz,{
                 limit: 50
             }
         });
+
+        //Habilitar/deshabilitar botones nuevo, edit, delete para los detalles. Habilita en estado borrador, en otro caso oculta
+		this.getBoton('new').show();
+		this.getBoton('edit').show();
+		this.getBoton('del').show();
+		this.getBoton('save').show();
+		if(this.maestro.estado!='borrador'){
+			this.getBoton('new').hide();
+			this.getBoton('edit').hide();
+			this.getBoton('del').hide();
+			this.getBoton('save').hide();
+		}
 
         //Seteo del base params para el centro de costo
         var time = new Date(this.maestro.fecha);

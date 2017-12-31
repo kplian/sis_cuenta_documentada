@@ -364,6 +364,102 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
    			form:true
 		},
 		{
+		    config: {
+		        name: 'tipo_contrato',
+		        fieldLabel: 'Tipo Contrato Solicitante',
+		        allowBlank: true,
+		        gwidth: 150,
+		        maxLength: 50,
+		        typeAhead: true,
+		        triggerAction: 'all',
+		        lazyRender: true,
+		        mode: 'local',
+		        forceSelection: true,
+				valueField: 'variable',
+		        displayField: 'valor',
+		        anchor: '100%',
+		        store: new Ext.data.ArrayStore({
+		            fields:['variable','valor'],
+					data:  [['planta_obra_determinada','planta_obra_determinada'], ['servicio','servicio']]
+				}),
+				hidden: true
+		    },
+		    type: 'ComboBox',
+		    id_grupo: 1,
+		    grid: true,
+		    form: true
+		},
+		/*{
+            config: {
+                name: 'tipo_sol_sigema',
+                fieldLabel: 'Tipo Solicitud SIGEMA',
+                allowBlank: true,
+                gwidth: 150,
+                maxLength: 50,
+                typeAhead: true,
+                triggerAction: 'all',
+                lazyRender: true,
+                mode: 'local',
+                forceSelection: true,
+				valueField: 'variable',
+                displayField: 'valor',
+                anchor: '100%',
+                store: new Ext.data.ArrayStore({
+                    fields:['variable','valor'],
+        			data:  [['orden_trabajo','orden_trabajo'], ['sol_admin','sol_admin'], ['sol_man_mihv','sol_man_mihv'], ['sol_man_event','sol_man_event']]
+        		}),
+        		hidden: true
+            },
+            type: 'ComboBox',
+            id_grupo: 1,
+            grid: true,
+            form: true
+        },
+        {
+			config: {
+				name: 'id_sigema',
+				fieldLabel: 'Elemento SIGEMA',
+				allowBlank: true,
+				emptyText: 'Elija una opción...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_cuenta_documentada/control/CuentaDocumentada/listarElementoSigema',
+					id: 'id_sigema',
+					root: 'datos',
+					sortInfo: {
+						field: 'codigo',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_sigema', 'tipo_sol_sigema', 'nombre'],
+					remoteSort: true,
+					baseParams: {par_filtro: 'sigpr.nombre'}
+				}),
+				valueField: 'id_sigema',
+				displayField: 'nombre',
+				gdisplayField: 'desc_sigema',
+				hiddenName: 'id_sigema',
+				forceSelection: true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 15,
+				queryDelay: 1000,
+				anchor: '100%',
+				gwidth: 100,
+				minChars: 2,
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['desc_sigema']);
+				},
+				hidden: true
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {pfiltro: 'sigpr.nombre',type: 'string'},
+			grid: true,
+			form: true
+		},*/			
+		{
    			config:{
    				name: 'id_depto',
    				hiddenName: 'Depto',
@@ -420,7 +516,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 anchor: '100%',
                 gdisplayField: 'desc_moneda',//mapea al store del grid
                 gwidth: 50,
-                baseParams: { 'filtrar_base': 'si' },
+                //baseParams: { 'filtrar_base': 'si' },
                 renderer: function (value, p, record){return String.format('{0}', record.data['desc_moneda']);}
              },
             type: 'ComboRec',
@@ -529,7 +625,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 					totalProperty: 'total',
 					fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
 					remoteSort: true,
-					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'cajaAbierto', con_detalle:'no'}
+					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
 				}),
 				valueField: 'id_caja',
 				displayField: 'codigo',
@@ -556,7 +652,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			filters: {pfiltro: 'movtip.codigo',type: 'string'},
 			grid: true,
 			form: true
-		},			
+		},
 		{
 			config:{
 				name: 'fecha_entrega',
@@ -888,6 +984,24 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			type:'ComboBox',
 			form:false,
 			grid:false
+		},
+		{
+			config:{
+				name: 'cantidad_personas',
+				fieldLabel: 'Cantidad Personas',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:150,
+				hidden: true,
+				maxValue: 100
+			},
+			type:'NumberField',
+			filters:{pfiltro:'cdoc.cantidad_personas',type:'string'},
+			id_grupo:1,
+			bottom_filter:true,
+			grid:true,
+			form:true
 		}
 	],
 	
@@ -959,7 +1073,9 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name: 'dev_nombre_cheque', type: 'string'},
 		{name: 'id_caja_dev', type: 'numeric'},
 		{name: 'dev_saldo', type: 'numeric'},
-		{name: 'dev_caja', type: 'string'}
+		{name: 'dev_caja', type: 'string'},
+		{name: 'tipo_contrato', type: 'string'},
+		{name: 'cantidad_personas', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'id_cuenta_doc',
@@ -1100,7 +1216,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 												direction:'ASC'
 											},
 											totalProperty:'total',
-											baseParams: {'tipo_interfaz':me.tipo_interfaz},
+											baseParams: {'tipo_interfaz':me.tipo_interfaz, id_moneda: rec.data.id_moneda},
 											fields: [ 'id_cuenta_bancaria','nro_cuenta','nombre_institucion','codigo_moneda','centro','denominacion'],
 											remoteSort: true }),
 										tpl:'<tpl for="."><div class="x-combo-list-item"><p><b>{nro_cuenta}</b></p><p>Moneda: {codigo_moneda}, {nombre_institucion}</p><p>{denominacion}, Centro: {centro}</p></div></tpl>',
@@ -1180,7 +1296,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 					        this.Cmp.id_cuenta_bancaria.enable();
 					        this.Cmp.id_depto_conta.enable();
 					        this.Cmp.id_cuenta_bancaria.reset();
-				    		this.Cmp.id_cuenta_bancaria.store.baseParams = {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', 'permiso':'fondos_avance', id_depto_lb : obj.Cmp.id_depto_lb.getValue()};
+				    		Ext.apply(this.Cmp.id_cuenta_bancaria.store.baseParams, {'tipo_interfaz':me.tipo_interfaz, par_filtro :'nro_cuenta', 'permiso':'fondos_avance', id_depto_lb : obj.Cmp.id_depto_lb.getValue()});
 				    		this.Cmp.id_cuenta_bancaria.modificado = true;
 				    		
 				    		
@@ -1326,7 +1442,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	            items: [{
 	                id:'b-gantti-' + this.idContenedor,
 	                text: 'Gantt Imagen',
-	                tooltip: '<b>Mues un reporte gantt en formato de imagen</b>',
+	                tooltip: '<b>Muestra un reporte gantt en formato de imagen</b>',
 	                handler:this.diagramGantt,
 	                scope: this
 	            }, {
@@ -1356,7 +1472,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
         )
     },
     
-    onOpenObs:function() {
+    onOpenObs: function() {
             var rec=this.sm.getSelected();            
             var data = {
             	id_proceso_wf: rec.data.id_proceso_wf,
@@ -1374,25 +1490,28 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                     this.idContenedor,
                     'Obs');
     },		
-	onBtnRepSol : function() {
-			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
-				Phx.CP.loadingShow();
-				Ext.Ajax.request({
-					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteSolicitudFondos',
-					params : {
-						'id_proceso_wf' : data.id_proceso_wf
-					},
-					success : this.successExport,
-					failure : this.conexionFailure,
-					timeout : this.timeout,
-					scope : this
-				});
-			}
+	onBtnRepSol: function() {
+		var rec = this.sm.getSelected();
+		var data = rec.data;
+		console.log(data);
+		if (data) {
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteSolicitudFondos',
+				params : {
+					'id_proceso_wf' : data.id_proceso_wf,
+					'id_cuenta_doc': data.id_cuenta_doc,
+					'tipo':data.tipo_cuenta_doc
+				},
+				success : this.successExport,
+				failure : this.conexionFailure,
+				timeout : this.timeout,
+				scope : this
+			});
+		}
 	},
 	
-	onBtnRepRenCon : function() {
+	onBtnRepRenCon: function() {
 			var rec = this.sm.getSelected();
 			var data = rec.data;
 			if (data) {

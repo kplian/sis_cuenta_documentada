@@ -22,9 +22,19 @@ class ACTCuentaDocItinerario extends ACTbase{
 			$this->res = $this->objReporte->generarReporteListado('MODCuentaDocItinerario','listarCuentaDocItinerario');
 		} else{
 			$this->objFunc=$this->create('MODCuentaDocItinerario');
-			
 			$this->res=$this->objFunc->listarCuentaDocItinerario($this->objParam);
 		}
+
+		//Se agrega fila del total al final del store
+		$temp = Array();
+		$temp['desc_destino'] = 'TOTAL';
+		$temp['cantidad_dias'] = $this->res->extraData['total_dias'];
+		$temp['tipo_reg'] = 'summary';
+		$temp['id_cuenta_doc_itinerario'] = 0;
+		$this->res->total++;
+		$this->res->addLastRecDatos($temp);
+
+		//Respuesta
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 				

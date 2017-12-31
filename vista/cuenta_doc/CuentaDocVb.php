@@ -110,8 +110,8 @@ Phx.vista.CuentaDocVb = {
       this.getBoton('diagrama_gantt').enable();
       this.getBoton('btnObs').enable();
       this.getBoton('chkpresupuesto').enable(); 
-      
-      if(this.sw_solicitud == 'si'){
+
+      if(data.sw_solicitud == 'si'){
         this.getBoton('onBtnRepSol').enable(); 
       }
       else{

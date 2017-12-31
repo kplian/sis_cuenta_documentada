@@ -10,7 +10,7 @@
 class ACTCuentaDocCalculo extends ACTbase{    
 			
 	function listarCuentaDocCalculo(){
-		$this->objParam->defecto('ordenacion','id_cuenta_doc_calculo');
+		$this->objParam->defecto('ordenacion','numero');
 		$this->objParam->defecto('dir_ordenacion','asc');
 
 		if($this->objParam->getParametro('id_cuenta_doc')!=''){
@@ -25,6 +25,20 @@ class ACTCuentaDocCalculo extends ACTbase{
 			
 			$this->res=$this->objFunc->listarCuentaDocCalculo($this->objParam);
 		}
+
+		//Se agrega fila del total al final del store
+		$temp = Array();
+		$temp['numero'] = 'TOTAL VIATICO';
+		$temp['desc_moneda'] = $this->res->extraData['total_viatico'];
+		$temp['total_viatico'] = $this->res->extraData['total_viatico'];
+		$temp['parcial_viatico'] = $this->res->extraData['parcial_viatico'];
+		$temp['parcial_hotel'] = $this->res->extraData['parcial_hotel'];
+		$temp['tipo_reg'] = 'summary';
+		$temp['id_cuenta_doc_calculo'] = 0;
+		$this->res->total++;
+		$this->res->addLastRecDatos($temp);
+
+		//Respuesta
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 				

@@ -33,6 +33,7 @@ DECLARE
     v_id_gestion                    integer;
     v_id_concepto_ingas             integer;
     v_id_doc_compra_venta           integer;
+    v_id_doc_compra_venta_ant       integer;
     v_fun                           record;
     v_id_depto_conta                integer;
     v_id_tipo_doc_compra_venta      integer;
@@ -44,6 +45,7 @@ DECLARE
     v_iva                           numeric;
     v_it                            numeric;
     v_ice                           numeric;
+    v_cod_concepto_ingas            varchar;
 
 BEGIN
     
@@ -56,8 +58,8 @@ BEGIN
     --Obtiene datos de la cuenta documentada
     select tcdoc.codigo as codigo_tipo_cuenta_doc, cdoc.id_cuenta_doc,
     cdoc.id_plantilla, pla.desc_plantilla, cdoc.estado,
-    cdoc.fecha_entrega, cdoc.nro_tramite, cdoc.id_funcionario, cdoc.id_depto,
-    cdoc.id_moneda, cdoc.id_plantilla
+    cdoc.fecha, cdoc.nro_tramite, cdoc.id_funcionario, cdoc.id_depto,
+    cdoc.id_moneda, cdoc.id_plantilla, cdoc.tipo_contrato
     into v_rec
     from cd.tcuenta_doc cdoc
     inner join cd.ttipo_cuenta_doc tcdoc
@@ -75,6 +77,14 @@ BEGIN
         raise exception 'La rendición de viático debe estar en estado borrador';
     end if;
 
+    if v_rec.tipo_contrato = 'planta_obra_determinada' then
+        v_cod_concepto_ingas = 'CONGAS_VIA_PLA';
+    elsif v_rec.tipo_contrato='servicio' then
+        v_cod_concepto_ingas = 'CONGAS_VIA_SER';
+    else
+        raise exception 'No se ha definido el Tipo de contrato del solicitante';
+    end if;
+
     --Obtención del concepto de gasto del viático
     select escr.id_concepto_ingas, cig.desc_ingas
     into v_id_concepto_ingas, v_desc_ingas
@@ -84,7 +94,7 @@ BEGIN
     inner join param.tconcepto_ingas cig
     on cig.id_concepto_ingas = escr.id_concepto_ingas
     where cd.id_cuenta_doc = p_id_cuenta_doc
-    and escr.codigo = 'CONGAS_VIA';
+    and escr.codigo = v_cod_concepto_ingas;
 
     if v_id_concepto_ingas is null then
         raise exception 'No se encuentra al concepto de gasto de viáticos.';
@@ -94,23 +104,34 @@ BEGIN
     select id_gestion
     into v_id_gestion
     from param.tgestion
-    where gestion = extract('year' from v_rec.fecha_entrega);
+    where gestion = extract('year' from v_rec.fecha);
 
     --------------------------------------------------
     --(2) REGISTRO DEL DOCUMENTO DE RENDICIÓN DE VIÁTICO
     --------------------------------------------------
     --Obtener el total que corresponde al itinerario realizado
     select
-    sum((cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) +
-    ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel))
+    sum((cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) /*+ ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel)*/)
     into v_total_viatico
     from cd.tcuenta_doc_calculo cdocca
     where cdocca.id_cuenta_doc = p_id_cuenta_doc;
+
+    --Obtiene el ID del documento del viatico generado
+    select id_doc_compra_venta
+    into v_id_doc_compra_venta_ant
+    from cd.trendicion_det
+    where id_cuenta_doc_rendicion = p_id_cuenta_doc
+    and generado = 'si';
 
     --Eliminación del documento de viático generado anteriormente si existe
     delete from cd.trendicion_det
     where id_cuenta_doc_rendicion = p_id_cuenta_doc
     and generado = 'si';
+
+    delete from conta.tdoc_concepto
+    where id_doc_compra_venta = v_id_doc_compra_venta_ant;
+
+    delete from conta.tdoc_compra_venta where id_doc_compra_venta = v_id_doc_compra_venta_ant;
 
     if coalesce(v_total_viatico,0) <= 0 then
         return 'hecho';
@@ -196,8 +217,8 @@ BEGIN
     'no' as movil,-- = (p_hstore->'movil')::varchar; --'no',--'movil',
     'compra' as tipo, -- (p_hstore->'tipo')::varchar; --'venta',--'tipo',
     0 as importe_excento, -- (p_hstore->'importe_excento')::numeric; --coalesce(null as venta.excento::varchar,'0'),--'importe_excento',
-    v_rec.fecha_entrega as fecha, -- (p_hstore->'fecha')::date; --to_char(null as venta.fecha,'DD/MM/YYYY'),--'fecha',
-    v_rec.nro_tramite as nro_documento, --v_rec.nro_tramite as nro_documento, -- (p_hstore->'nro_documento')::varchar; --COALESCE(null as venta.nro_factura,'0')::varchar,--'nro_documento',
+    v_rec.fecha as fecha, -- (p_hstore->'fecha')::date; --to_char(null as venta.fecha,'DD/MM/YYYY'),--'fecha',
+    v_rec.nro_tramite||'-'||p_id_cuenta_doc::varchar as nro_documento, --v_rec.nro_tramite as nro_documento, -- (p_hstore->'nro_documento')::varchar; --COALESCE(null as venta.nro_factura,'0')::varchar,--'nro_documento',
     v_fun.ci as nit, -- (p_hstore->'nit')::varchar; --coalesce(null as venta.nit,''),--'nit',
     0 as importe_ice, -- (p_hstore->'importe_ice')::numeric; --null as venta.total_venta_msuc::varchar,--'importe_ice',
     '' as nro_autorizacion, -- (p_hstore->'nro_autorizacion')::varchar; --coalesce(null as venta.nroaut,''); --'nro_autorizacion',
@@ -276,7 +297,7 @@ BEGIN
     v_total_viatico * cp.prorrateo,    -- precio_total_final
     (select ps_id_partida
     from conta.f_get_config_relacion_contable('CUECOMP', v_id_gestion, v_id_concepto_ingas, cp.id_centro_costo,
-    'No se encontró relación contable para Viáticos. <br> Mensaje: ')) as id_partida
+    'No se encontró relación contable para Viáticos. <br> Mensaje: ',v_rec.id_moneda)) as id_partida
     from cd.tcuenta_doc_prorrateo cp
     where cp.id_cuenta_doc = p_id_cuenta_doc;
 

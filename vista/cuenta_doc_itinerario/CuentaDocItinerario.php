@@ -285,7 +285,10 @@ Phx.vista.CuentaDocItinerario=Ext.extend(Phx.gridInterfaz,{
         this.Atributos[1].valorInicial = this.maestro.id_cuenta_doc;
 
         //Filtro para el combo de destino por id_escala
-        Ext.apply(this.Cmp.id_destino.store.baseParams, {id_escala: this.maestro.id_escala});
+        Ext.apply(this.Cmp.id_destino.store.baseParams, {
+        	id_escala: this.maestro.id_escala,
+        	tipo_viaje: this.maestro.tipo_viaje
+        });
         this.Cmp.id_destino.modificado = true;
 
         //Filtro para los datos

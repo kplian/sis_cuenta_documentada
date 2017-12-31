@@ -13,7 +13,7 @@ Phx.vista.CategoriaViatico = {
     bsave:false,    
     require:'../../../sis_cuenta_documentada/vista/categoria/Categoria.php',
     requireclase:'Phx.vista.Categoria',
-    title:'Viáticos',
+    title:'Escala por Categoría',
     
     constructor: function(config) {
         this.agregarCampos();
@@ -80,11 +80,12 @@ Phx.vista.CategoriaViatico = {
                 form:true
         });
 
-        this.Atributos[6].config.fieldLabel = 'Con Pernocte';
-        this.Atributos[2].grid = false;
-        this.Atributos[3].grid = true;
-        this.Atributos[4].config.gwidth = 150;
-        this.Atributos[4].grid = true;
+        this.Atributos[this.getIndAtributo('monto')].config.fieldLabel = 'Con Pernocte'; //6
+        this.Atributos[this.getIndAtributo('codigo')].grid = false; //2
+        this.Atributos[this.getIndAtributo('nombre')].grid = true; //3
+        this.Atributos[this.getIndAtributo('id_destino')].config.gwidth = 150; //4
+        this.Atributos[this.getIndAtributo('id_destino')].grid = true; //4
+        this.Atributos[this.getIndAtributo('id_destino')].config.hidden = false; //4
     }
     
 };

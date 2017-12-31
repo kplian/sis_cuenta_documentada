@@ -543,3 +543,84 @@ IS 'Devolucion/reposicion ID de la caja para generar la solicitud de efectivo, c
 COMMENT ON COLUMN cd.tcuenta_doc.dev_saldo
 IS 'Devolucion/reposicion saldo total de la cuenta documentada';  
 /***********************************F-SCP-CD-RCM-1-14/12/2017****************************************/
+
+/***********************************F-SCP-CD-RCM-1-02/01/2018****************************************/
+ALTER TABLE cd.tcuenta_doc_calculo
+  ALTER COLUMN destino TYPE VARCHAR(200) COLLATE pg_catalog."default";
+/***********************************F-SCP-CD-RCM-1-02/01/2018****************************************/  
+
+/***********************************I-SCP-CD-RCM-1-05/01/2018****************************************/  
+alter table cd.tcuenta_doc
+add column tipo_contrato varchar(30);
+
+CREATE TABLE cd.tpago_simple
+(
+    id_pago_simple SERIAL NOT NULL,
+    id_depto_conta integer,
+    nro_tramite character varying(100) COLLATE pg_catalog."default",
+    fecha date,
+    id_funcionario integer,
+    estado character varying(30) COLLATE pg_catalog."default",
+    id_estado_wf integer,
+    id_proceso_wf integer,
+    obs character varying(500) COLLATE pg_catalog."default",
+    id_cuenta_bancaria integer,
+    id_depto_lb integer,
+    id_proveedor integer,
+    id_moneda integer,
+    CONSTRAINT tpago_simple_pkey PRIMARY KEY (id_pago_simple)
+)
+    INHERITS (pxp.tbase)
+WITH (
+    OIDS = FALSE
+);
+
+CREATE TABLE cd.tpago_simple_det
+(
+    id_pago_simple_det serial NOT NULL,
+    id_pago_simple integer NOT NULL,
+    id_doc_compra_venta integer,
+    CONSTRAINT tpago_simple_det_pkey PRIMARY KEY (id_pago_simple_det)
+)
+    INHERITS (pxp.tbase)
+WITH (
+    OIDS = FALSE
+);
+
+alter table cd.tpago_simple
+add column id_int_comprobante integer;
+
+alter table cd.tpago_simple
+add column id_int_comprobante_pago integer;
+
+CREATE TABLE cd.ttipo_pago_simple (
+    id_tipo_pago_simple serial NOT NULL,
+    codigo varchar(30),
+    nombre varchar(150),
+    plantilla_cbte varchar(50),
+    plantilla_cbte_1 varchar(50),
+    CONSTRAINT ttipo_pago_simple_pkey PRIMARY KEY (id_tipo_pago_simple)
+)
+    INHERITS (pxp.tbase)
+WITH (
+    OIDS = FALSE
+);
+
+alter table cd.tpago_simple
+add column id_tipo_pago_simple integer;
+
+alter table cd.tpago_simple
+add column id_funcionario_pago integer;
+
+/***********************************F-SCP-CD-RCM-1-05/01/2018****************************************/  
+
+/***********************************I-SCP-CD-RCM-1-09/01/2018****************************************/  
+ALTER TABLE cd.tescala_regla
+  ALTER COLUMN nombre TYPE VARCHAR(200) COLLATE pg_catalog."default";
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN cantidad_personas INTEGER DEFAULT 1 NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc.cantidad_personas
+IS 'Cantidad de personas que formaran parte del viaje';  
+/***********************************F-SCP-CD-RCM-1-09/01/2018****************************************/    

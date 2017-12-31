@@ -43,6 +43,7 @@ DECLARE
     v_ids               varchar;
     v_rec               record;
     v_id_cuenta_doc     integer;
+    v_gestion           varchar;
           
 BEGIN
 
@@ -133,7 +134,7 @@ BEGIN
             END IF;
            
            
-            IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
+            IF v_parametros.tipo_interfaz in ('CuentaDocReg','CuentaDocSol') THEN
 
                 IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
@@ -183,9 +184,9 @@ BEGIN
                                        
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-            v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
+                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
-                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
+                        v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
@@ -207,8 +208,7 @@ BEGIN
                v_strg_cd = 'cdoc.id_cuenta_doc';
                v_strg_obs = 'ew.obs'; 
            END IF;
-           
-          
+
            
             
         --Sentencia de la consulta
@@ -275,7 +275,11 @@ BEGIN
                 cdoc.id_caja_dev,
                 cdoc.dev_saldo,
                 se.nro_tramite as desc_sol_efectivo,
-                cajdev.codigo as dev_caja
+                cajdev.codigo as dev_caja,
+                cdoc.tipo_sol_sigema,
+                cdoc.id_sigema,
+                cdoc.tipo_contrato,
+                cdoc.cantidad_personas
                 from cd.tcuenta_doc cdoc
                 inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                 inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -292,6 +296,7 @@ BEGIN
                 left join tes.tcaja caj on caj.id_caja = cdoc.id_caja
                 left join tes.tsolicitud_efectivo se on se.id_solicitud_efectivo = cdoc.id_solicitud_efectivo
                 left join tes.tcaja cajdev on cajdev.id_caja = cdoc.id_caja_dev
+--                left join cd.vsigema_gral sigra on sigra.tipo_sol_sigema = cdoc.tipo_sol_sigema and sigra.id_sigema = cdoc.id_sigema--
                 where cdoc.estado_reg = ''activo'' and '||v_filtro;
       
       --Definicion de la respuesta
@@ -421,6 +426,7 @@ BEGIN
             left join tes.tcaja caj on caj.id_caja = cdoc.id_caja
             left join tes.tsolicitud_efectivo se on se.id_solicitud_efectivo = cdoc.id_solicitud_efectivo
             left join tes.tcaja cajdev on cajdev.id_caja = cdoc.id_caja_dev
+           -- left join cd.vsigema_gral sigra on sigra.tipo_sol_sigema = cdoc.tipo_sol_sigema and sigra.id_sigema = cdoc.id_sigema
             where  cdoc.estado_reg = ''activo'' and '||v_filtro;
       
       --Definicion de la respuesta        
@@ -882,8 +888,7 @@ BEGIN
 
   elsif(p_transaccion='CD_REPCDOC_SEL')then
             
-      begin
-   
+      begin       
            --recupera el gerente financiero ...
           v_gaf = orga.f_obtener_gerente_x_codigo_uo('gerente_financiero', now()::Date);
           
@@ -966,10 +971,69 @@ BEGIN
       
             return v_consulta;
             
-    end;    
+    end;
+    
+  /*********************************    
+    #TRANSACCION:  'CD_DATPRO_SEL'
+    #DESCRIPCION: recupera datos de prorrateo
+    #AUTOR:   manuel guerra 
+    #FECHA:   27-12-2017 16:41:21
+    ***********************************/ 
+  elsif(p_transaccion='CD_DATPRO_SEL')then            
+      begin
+        --Sentencia de la consulta
+        v_consulta:='SELECT cc.descripcion_tcc,c.prorrateo
+                    FROM cd.tcuenta_doc_prorrateo c
+                    join param.vcentro_costo cc on cc.id_centro_costo = c.id_centro_costo
+                    WHERE c.id_cuenta_doc IN(SELECT a.id_cuenta_doc
+                                            FROM cd.tcuenta_doc a
+                                            WHERE a.id_proceso_wf = '||v_parametros.id_proceso_wf || ')';
+        --Devuelve la respuesta
+        return v_consulta;            
+    end;     
+    
+    /*********************************    
+    #TRANSACCION:  'CD_DATITI_SEL'
+    #DESCRIPCION: recupera datos de itinerario
+    #AUTOR:   manuel guerra 
+    #FECHA:   27-12-2017 16:41:21
+    ***********************************/ 
+    elsif(p_transaccion='CD_DATITI_SEL')then            
+        begin
+        --Sentencia de la consulta
+        v_consulta:=' SELECT sum(c.cantidad_dias)::INTEGER,(dest.codigo::VARCHAR || '' - '' || dest.nombre::VARCHAR)::VARCHAR as desc_destino
+                      FROM cd.tcuenta_doc_itinerario c
+                      JOIN cd.tdestino dest on dest.id_destino = c.id_destino
+                      join cd.tcuenta_doc a on a.id_cuenta_doc=c.id_cuenta_doc
+                      WHERE a.id_proceso_wf = '||v_parametros.id_proceso_wf || '
+                      group by 2';
+        --Devuelve la respuesta
+        return v_consulta;            
+    end;     
+    /*********************************    
+    #TRANSACCION:  'CD_DATPRE_SEL'
+    #DESCRIPCION: recupera datos de presupuesto
+    #AUTOR:   manuel guerra 
+    #FECHA:   27-12-2017 16:41:21
+    ***********************************/ 
+    elsif(p_transaccion='CD_DATPRE_SEL')then            
+        begin
+        --Sentencia de la consulta
+        v_consulta:='SELECT sum(c.monto_mo),max(m.moneda)::varchar,cing.desc_ingas
+                    FROM cd.tcuenta_doc_det c
+                    JOIN param.tmoneda m ON m.id_moneda=c.id_moneda
+                    JOIN param.tconcepto_ingas cing on cing.id_concepto_ingas = c.id_concepto_ingas
+                    JOIN cd.tcuenta_doc a on c.id_cuenta_doc = a.id_cuenta_doc
+                    WHERE a.id_proceso_wf = '||v_parametros.id_proceso_wf || '
+                    group by 3';
+        --Devuelve la respuesta
+        return v_consulta;            
+    end; 
+
+      
   /*********************************    
   #TRANSACCION:  'CD_REPRENDET_SEL'
-  #DESCRIPCION: recupera las facturas de la rendicion
+  #DESCRIPCION: Cabecera de reporte de solicitud de fondos
   #AUTOR:   admin 
   #FECHA:   17-05-2016 18:01:48
   ***********************************/
@@ -1185,7 +1249,8 @@ BEGIN
                                                                       cc.id_gestion, 
                                                                       cig.id_concepto_ingas, 
                                                                       cc.id_centro_costo,  
-                                                                      ''No se encontro relación contable para el conceto de gasto: ''||cig.desc_ingas||''. <br> Mensaje: '') rel
+                                                                      ''No se encontro relación contable para el conceto de gasto: ''||cig.desc_ingas||''. <br> Mensaje: '',
+                                                                      c.id_moneda) rel
                                                                       inner join pre.tpartida par on par.id_partida = rel.ps_id_partida )::varchar as partida,
                           ren.id_int_comprobante
                           from cd.trendicion_det rd
@@ -1220,10 +1285,12 @@ BEGIN
             v_consulta := 'select cp.codigo_categoria,
                                (
                                  SELECT par.codigo || '' - '' || par.nombre_partida
-                                 FROM conta.f_get_config_relacion_contable(''CUECOMP'', cc.id_gestion,
-                                   cig.id_concepto_ingas, cc.id_centro_costo, ''No se encontro relación
-                                   contable para el conceto de gasto: '' || cig.desc_ingas || '' . < br
-                                   > Mensaje: '') rel
+                                 FROM conta.f_get_config_relacion_contable(''CUECOMP'',
+                                                                            cc.id_gestion,
+                                                                            cig.id_concepto_ingas,
+                                                                            cc.id_centro_costo,
+                                                                            ''No se encontro relación contable para el conceto de gasto: '' || cig.desc_ingas || '' . <br> Mensaje: '',
+                                                                            c.id_moneda) rel
                                       inner join pre.tpartida par on par.id_partida = rel.ps_id_partida
                                )::varchar as partida ,
                                sum(dc.precio_total_final) as importe
@@ -1277,10 +1344,101 @@ BEGIN
             return v_consulta;
             
         end; 
+
+    /*********************************    
+    #TRANSACCION:  'CD_CDSIGEMAID_SEL'
+    #DESCRIPCION:   Listado del ID de Sigema
+    #AUTOR:         RCM
+    #FECHA:         29/12/2017
+    ***********************************/
+    elsif(p_transaccion='CD_CDSIGEMAID_SEL')then
+            
+        begin
+
+            --Sentencia de la consulta
+            v_consulta = 'with sigema as (select * from cd.vsigema_gral)
+                        select 
+                        distinct tipo_sol_sigema, id_sigema,nro_solicitud,gestion
+                        from sigema sigra
+                        where ';
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+            
+            --Salida
+            return v_consulta;
+            
+        end; 
+
+
+  /*********************************    
+  #TRANSACCION:  'CD_CDSIGEMAID_CONT'
+  #DESCRIPCION:   Conteo listado SIGEMA
+  #AUTOR:         RCM
+  #FECHA:         29-12-2017
+  ***********************************/
+  elsif(p_transaccion='CD_CDSIGEMAID_CONT')then
+
+    begin
+            
+        --Sentencia de la consulta de conteo de registros
+        v_consulta:='select count (1) from
+                    (with sigema as (select * from cd.vsigema_gral)
+                    select 
+                        distinct tipo_sol_sigema, id_sigema,nro_solicitud,gestion
+                        from sigema sigra
+                        where ';
+        --Definicion de la respuesta
+        v_consulta:=v_consulta||v_parametros.filtro||') as f';
+
+        --Devuelve la respuesta
+        return v_consulta;
+
+    end;
+
+    /*********************************    
+    #TRANSACCION:  'CD_CDSIGEMADAT_SEL'
+    #DESCRIPCION:   Listado de los datos del sigema guardados en la cuenta doc
+    #AUTOR:         RCM
+    #FECHA:         29/12/2017
+    ***********************************/
+    elsif(p_transaccion='CD_CDSIGEMADAT_SEL')then
+            
+        begin
+
+            if v_parametros.id_cuenta_doc is null then
+              raise exception 'Id de la cuenta documentada no puede ser nulo';
+            end if;
+
+            --Obtiene la gestion en base a la fecha de la cuenta documentada
+            select extract(year from fecha)
+            into v_gestion
+            from cd.tcuenta_doc
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            if v_gestion is null then
+              raise exception 'La gestion no puede ser nula';
+            end if;
+
+            --Sentencia de la consulta
+            v_consulta = 'with sigema as (select * from cd.vsigema_gral)
+                        select distinct cd.id_cuenta_doc, cd.tipo_sol_sigema, cd.id_sigema, sigra.nro_solicitud
+                        from cd.tcuenta_doc cd
+                        left join sigema sigra
+                        on sigra.tipo_sol_sigema = cd.tipo_sol_sigema
+                        and sigra.id_sigema = cd.id_sigema
+                        and sigra.gestion::integer = '||v_gestion::integer||'
+                        where cd.id_cuenta_doc = ' || v_parametros.id_cuenta_doc;
+
+            --Salida
+            return v_consulta;
+            
+        end; 
     
-    else
+  else
         raise exception 'Transaccion inexistente';
-    end if;
+  end if;
           
 EXCEPTION
           

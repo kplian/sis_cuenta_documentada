@@ -30,6 +30,8 @@ DECLARE
 	v_resp1		            varchar;
 	v_id_cuenta_doc 		integer;
 	v_rec 					record;
+	v_temp					interval;
+	v_total_dias 			numeric;
 			    
 BEGIN
 
@@ -90,11 +92,21 @@ BEGIN
 			null
 			) RETURNING id_cuenta_doc_itinerario into v_id_cuenta_doc_itinerario;
 
-			--Cálculo del viático
-			v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
+			--Actualizar la fecha del la solicitud en funcion de los dias del itinerario registrado
+			select coalesce(sum(cantidad_dias),0)
+			into v_total_dias
+			from cd.tcuenta_doc_itinerario
+			where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+			v_temp = v_total_dias::varchar||' days';
+			update cd.tcuenta_doc set
+			fecha_llegada = (fecha_salida::date + v_temp)::date
+			where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
 			--Solo para los casos que no sean Rendiciones
 			if v_rec.codigo_tipo_cuenta_doc = 'SOLVIA' then
+				--Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 				--Registro del total de Viático con su conepto de gasto, excepto cuando es una rendicion
 				v_resp1 = cd.f_viatico_registrar_concepto_gasto(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 				
@@ -102,6 +114,8 @@ BEGIN
 				v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_parametros.id_cuenta_doc);
 
 			elsif v_rec.codigo_tipo_cuenta_doc = 'RVI' then
+				--Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc,'rendicion');
 				--Generación automática de documento de rendición de viático
 				v_resp1 = cd.f_viatico_registrar_doc_rendicion(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 
@@ -153,11 +167,23 @@ BEGIN
 			usuario_ai = v_parametros._nombre_usuario_ai
 			where id_cuenta_doc_itinerario=v_parametros.id_cuenta_doc_itinerario;
 
-			--Cálculo del viático
-			v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
+			--Actualizar la fecha del la solicitud en funcion de los dias del itinerario registrado
+			select coalesce(sum(cantidad_dias),0)
+			into v_total_dias
+			from cd.tcuenta_doc_itinerario
+			where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+			v_temp = v_total_dias::varchar||' days';
+			update cd.tcuenta_doc set
+			fecha_llegada = (fecha_salida::date + v_temp)::date
+			where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
 
 			--Solo para los casos que no sean Rendiciones
 			if v_rec.codigo_tipo_cuenta_doc = 'SOLVIA' then
+				--Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
+
 				--Registro del total de Viático con su conepto de gasto, excepto cuando es una rendicion
 				v_resp1 = cd.f_viatico_registrar_concepto_gasto(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 				
@@ -165,6 +191,9 @@ BEGIN
 				v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_parametros.id_cuenta_doc);
 
 			elsif v_rec.codigo_tipo_cuenta_doc = 'RVI' then
+				--Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc,'rendicion');
+
 				--Generación automática de documento de rendición de viático
 				v_resp1 = cd.f_viatico_registrar_doc_rendicion(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc);
 
@@ -209,11 +238,23 @@ BEGIN
 			delete from cd.tcuenta_doc_itinerario
             where id_cuenta_doc_itinerario=v_parametros.id_cuenta_doc_itinerario;
 
-            --Cálculo del viático
-			v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc);
+            --Actualizar la fecha del la solicitud en funcion de los dias del itinerario registrado
+			select coalesce(sum(cantidad_dias),0)
+			into v_total_dias
+			from cd.tcuenta_doc_itinerario
+			where id_cuenta_doc = v_id_cuenta_doc;
+
+			v_temp = v_total_dias::varchar||' days';
+			update cd.tcuenta_doc set
+			fecha_llegada = (fecha_salida::date + v_temp)::date
+			where id_cuenta_doc = v_id_cuenta_doc;
+
 
 			--Solo para los casos que no sean Rendiciones
 			if v_rec.codigo_tipo_cuenta_doc = 'SOLVIA' then
+	            --Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc);
+
 				--Registro del total de Viático con su conepto de gasto, excepto cuando es una rendicion
 				v_resp1 = cd.f_viatico_registrar_concepto_gasto(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc);
 				
@@ -221,6 +262,9 @@ BEGIN
 				v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_id_cuenta_doc);
 
 			elsif v_rec.codigo_tipo_cuenta_doc = 'RVI' then
+				--Cálculo del viático
+				v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc,'rendicion');
+
 				--Generación automática de documento de rendición de viático
 				v_resp1 = cd.f_viatico_registrar_doc_rendicion(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc);
 

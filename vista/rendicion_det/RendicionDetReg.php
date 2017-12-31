@@ -20,6 +20,16 @@ Phx.vista.RendicionDetReg = {
 	
 	constructor: function(config) {
 	   Phx.vista.RendicionDetReg.superclass.constructor.call(this,config);
+
+		this.grid.getTopToolbar().disable();
+		this.grid.getBottomToolbar().disable();
+
+		var dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData()
+		if(dataPadre){
+			this.onEnablePanel(this, dataPadre);
+		} else {
+			this.bloquearMenus();
+		}
     },
     
     preparaMenu:function(n){

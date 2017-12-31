@@ -84,7 +84,8 @@ BEGIN
 
 		begin
 			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_cuenta_doc_itinerario)
+			v_consulta:='select count(id_cuenta_doc_itinerario),
+						coalesce(sum(cdite.cantidad_dias),0)::integer as total_dias
 					    from cd.tcuenta_doc_itinerario cdite
 					    inner join segu.tusuario usu1 on usu1.id_usuario = cdite.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdite.id_usuario_mod

@@ -7,7 +7,10 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 require_once(dirname(__FILE__).'/../reportes/RSolicitudCD.php');
+
 require_once(dirname(__FILE__).'/../reportes/RRendicionCD.php');
+require_once(dirname(__FILE__).'/../reportes/RRendicionCD_Fondo.php');
+
 require_once(dirname(__FILE__).'/../reportes/RCuentaDoc.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionConXls.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoAsignacion.php');
@@ -174,24 +177,62 @@ class ACTCuentaDoc extends ACTbase{
         $this->res->imprimirRespuesta($this->res->generarJson());
     }
    
-   function recuperarSolicitudFondos(){
-    	
+	function recuperarSolicitudFondos(){	
 		$this->objFunc = $this->create('MODCuentaDoc');
 		$cbteHeader = $this->objFunc->reporteCabeceraCuentaDoc($this->objParam);
 		if($cbteHeader->getTipo() == 'EXITO'){				
 			return $cbteHeader;
 		}
-        else{
-		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
 			exit;
-		}              
-		
-    }
-	
-   function reporteSolicitudFondos(){
-			
+		}
+	}
+	//
+	function recuperarDatosProrrateo(){	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarDatosProrrateo($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+	}
+	//
+	function recuperarDatosItinerario(){	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarDatosItinerario($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+	}
+	//
+	function recuperarDatosPresupuesto(){	
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->recuperarDatosPresupuesto($this->objParam);
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		}
+		else{
+			$cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		}
+	}
+	//
+	function reporteSolicitudFondos(){
+		//$id=$this->objParam->getParametro('id_cuenta_doc');			
 		$nombreArchivo = uniqid(md5(session_id()).'Egresos') . '.pdf'; 
-		$dataSource = $this->recuperarSolicitudFondos();	
+		
+		$dataSource = $this->recuperarSolicitudFondos();			
+		$dataProrrateo = $this->recuperarDatosProrrateo();
+		$dataItinerario = $this->recuperarDatosItinerario();
+		$dataPresupuesto = $this->recuperarDatosPresupuesto();		
 		
 		//parametros basicos
 		$tamano = 'LETTER';
@@ -201,10 +242,15 @@ class ACTCuentaDoc extends ACTbase{
 		$this->objParam->addParametro('titulo_archivo',$titulo);        
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		//Instancia la clase de pdf
-		
-		$reporte = new RSolicitudCD($this->objParam); 
-		
-		$reporte->datosHeader($dataSource->getDatos(),  $dataSource->extraData);
+		$v=$this->objParam->getParametro('tipo');
+
+		if(strpos($v,'Viáticos') === false){
+			$reporte = new RSolicitudCD_Fondo($this->objParam); 			
+		}else{
+			$reporte = new RSolicitudCD($this->objParam); 
+		}
+				
+		$reporte->datosHeader($dataSource->getDatos(), $dataProrrateo->getDatos(), $dataItinerario->getDatos(),$dataPresupuesto->getDatos());
 		$reporte->generarReporte();
 		$reporte->output($reporte->url_archivo,'F');
 		
@@ -561,6 +607,51 @@ class ACTCuentaDoc extends ACTbase{
 			$this->res=$this->objFunc->listarDepositoCuentaDoc($this->objParam);
 		}
 		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function listarElementoSigema(){
+		$this->objParam->defecto('ordenacion','id_cuenta_doc');
+		$this->objParam->defecto('dir_ordenacion','asc');
+		
+		if($this->objParam->getParametro('gestion')!=''){
+             $this->objParam->addFiltro("sigra.gestion=''".$this->objParam->getParametro('gestion')."''");
+        }
+
+        if($this->objParam->getParametro('tipo_sol_sigema')!=''){
+             $this->objParam->addFiltro("sigra.tipo_sol_sigema = ''".$this->objParam->getParametro('tipo_sol_sigema')."''");
+        }
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarElementoSigema');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarElementoSigema($this->objParam);
+		}
+		
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function listarDatosCDSIGEMA(){
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarDatosCDSIGEMA');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarDatosCDSIGEMA($this->objParam);
+		}
+		
+		
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function guardarSIGEMA(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->guardarSIGEMA($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 

@@ -18,6 +18,9 @@ class MODCuentaDocItinerario extends MODbase{
 		$this->procedimiento='cd.ft_cuenta_doc_itinerario_sel';
 		$this->transaccion='CD_CDITE_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		//captura parametros adicionales para el count
+		$this->capturaCount('total_dias','integer');
 				
 		//Definicion de la lista del resultado del query
 		$this->captura('id_cuenta_doc_itinerario','int4');

@@ -8,7 +8,8 @@
       out o_por_caja varchar,
       out o_tipo varchar,
       out o_total_dev numeric,
-      out o_total_rep numeric
+      out o_total_rep numeric,
+      out o_saldo_parcial numeric
     )
     RETURNS record AS
     $body$
@@ -210,6 +211,7 @@
         o_tipo = v_rec_cd.dev_tipo;
         o_total_dev = v_total_dev;
         o_total_rep = v_total_rep;
+        o_saldo_parcial = v_saldo_parcial;
 
 
     EXCEPTION
