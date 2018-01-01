@@ -74,7 +74,8 @@ BEGIN
 						cdocca.parcial_hotel,
 						cdocca.total_viatico,
 						cdocca.dias_hotel,
-						mon.codigo as desc_moneda
+						mon.codigo as desc_moneda,
+						cdocca.cantidad_personas
 						from cd.vcuenta_doc_calculo cdocca
 						inner join segu.tusuario usu1 on usu1.id_usuario = cdocca.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = cdocca.id_usuario_mod

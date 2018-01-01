@@ -614,7 +614,7 @@ add column id_funcionario_pago integer;
 
 /***********************************F-SCP-CD-RCM-1-05/01/2018****************************************/  
 
-/***********************************I-SCP-CD-RCM-1-09/01/2018****************************************/  
+/***********************************I-SCP-CD-RCM-1-09/01/2018****************************************/
 ALTER TABLE cd.tescala_regla
   ALTER COLUMN nombre TYPE VARCHAR(200) COLLATE pg_catalog."default";
 
@@ -623,4 +623,18 @@ ALTER TABLE cd.tcuenta_doc
 
 COMMENT ON COLUMN cd.tcuenta_doc.cantidad_personas
 IS 'Cantidad de personas que formaran parte del viaje';  
-/***********************************F-SCP-CD-RCM-1-09/01/2018****************************************/    
+/***********************************F-SCP-CD-RCM-1-09/01/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-10/01/2018****************************************/
+ALTER TABLE cd.ttipo_pago_simple
+  ADD COLUMN flujo_wf VARCHAR(50);
+
+COMMENT ON COLUMN cd.ttipo_pago_simple.flujo_wf
+IS 'Código del workflow por tipo de pago simple';
+
+ALTER TABLE cd.tcuenta_doc_calculo
+  ADD COLUMN cantidad_personas INTEGER DEFAULT 1 NOT NULL;
+
+COMMENT ON COLUMN cd.tcuenta_doc_calculo.cantidad_personas
+IS 'Cantidad de personas que formarán del viaje';
+/***********************************F-SCP-CD-RCM-1-10/01/2018****************************************/

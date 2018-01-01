@@ -349,6 +349,19 @@ Phx.vista.CuentaDocCalculo=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'cantidad_personas',
+				fieldLabel: 'Cantidad Personas',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100
+			},
+				type:'NumberField',
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
 				name: 'parcial_viatico',
 				fieldLabel: 'Parcial Viático',
 				allowBlank: true,
@@ -537,7 +550,8 @@ Phx.vista.CuentaDocCalculo=Ext.extend(Phx.gridInterfaz,{
 		{name:'parcial_hotel', type: 'numeric'},
 		{name:'total_viatico', type: 'numeric'},
 		{name:'dias_hotel', type: 'numeric'},
-		{name:'desc_moneda', type: 'string'}
+		{name:'desc_moneda', type: 'string'},
+		{name:'cantidad_personas', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'numero',

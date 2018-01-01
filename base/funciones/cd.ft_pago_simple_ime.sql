@@ -56,6 +56,9 @@ DECLARE
     v_id_depto_lb			integer;
     v_id_moneda				integer;
     v_id_depto_conta		integer;
+    v_permitir				boolean;
+    v_fac_imp				integer;
+    v_fac_imp_ant			integer;
 			    
 BEGIN
 
@@ -531,12 +534,31 @@ BEGIN
 
         begin
 
-        	--Agrega documentos solo si el pago esta en estado borrador
-			if not exists(select 1 from cd.tpago_simple ps
-							where ps.id_pago_simple = v_parametros.id_pago_simple
-							and ps.estado = 'borrador') then
-				raise exception 'No pueden agregarse documentos porque el Pago no esta en Borrador';
+        	--Obtenemos datos basicos
+			select
+			c.id_pago_simple,
+			c.id_tipo_pago_simple,
+			c.estado,
+			tps.codigo as codigo_tipo_pago_simple
+			into
+			v_registros_proc
+			from cd.tpago_simple c
+			inner join cd.ttipo_pago_simple tps on  tps.id_tipo_pago_simple = c.id_tipo_pago_simple
+			where c.id_pago_simple = v_parametros.id_pago_simple;
 
+
+        	--Validación para permitir o no la importación de facturas
+        	v_permitir = false;
+        	if v_registros_proc.estado = 'borrador' and v_registros_proc.codigo_tipo_pago_simple <> 'PAG_DEV' then
+        		--Obliga la importación de facturas
+        		v_permitir = true;
+        	elsif v_registros_proc.estado = 'rendicion' and v_registros_proc.codigo_tipo_pago_simple = 'PAG_DEV' then
+        		--Obliga la importación de facturas
+        		v_permitir = true;
+        	end if;
+
+			if not v_permitir then
+				raise exception 'No está permitido agregar documentos en esta fase';
 			end if;
 
         	if coalesce(v_parametros.id_pago_simple,0) = 0 then
@@ -569,6 +591,12 @@ BEGIN
 
         	end if;
 
+        	--Cuenta las facturas antes de la importación para luego poder determinar solamente las últimas que se agregaron
+        	select coalesce(count(1),0) into v_fac_imp_ant
+		    from cd.tpago_simple_det
+		    where id_pago_simple = v_parametros.id_pago_simple;
+
+        	--Consulta para la importación de las facturas
         	v_sql = 'insert into cd.tpago_simple_det(
 		        	id_usuario_reg,fecha_reg,estado_reg,id_pago_simple,id_doc_compra_venta
 		        	)
@@ -591,7 +619,13 @@ BEGIN
 	    								from cd.tpago_simple_det
 	    								where id_pago_simple = v_parametros.id_pago_simple);
 
-		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se agregaron las facturas/recibos');
+		    --Cuenta la cantidad de facturas importadas
+		    select coalesce(count(1),0) into v_fac_imp
+		    from cd.tpago_simple_det
+		    where id_pago_simple = v_parametros.id_pago_simple;
+
+		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas agregadas');
+		    v_resp = pxp.f_agrega_clave(v_resp,'tot_fact',(v_fac_imp - v_fac_imp_ant)::varchar);
 
           	--Devuelve la respuesta
             return v_resp;

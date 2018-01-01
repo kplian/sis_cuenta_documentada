@@ -67,7 +67,7 @@ BEGIN
     --VALIDACIONES
     ----------------
 	--Obtención de datos de la solicitud y cobertura seleccionada
-    select id_cuenta_doc, fecha_salida, id_funcionario, fecha_llegada, hora_salida, hora_llegada,id_escala,
+    select id_cuenta_doc, fecha_salida, id_funcionario, fecha_llegada, hora_salida, hora_llegada,id_escala,cantidad_personas,
     case cobertura
         when 'viatico_100' then 1
         when 'viatico_70' then 0.7
@@ -86,6 +86,7 @@ BEGIN
     if v_rec_cd.id_cuenta_doc is null then
     	raise exception 'Viático inexistente';
     end if;
+
     --Verificación de existencia de la cobertura
     if v_rec_cd.cobertura is null then
         raise exception 'Cobertura no registrada';
@@ -408,7 +409,7 @@ BEGIN
             dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
             escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
             regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
-            dias_hotel
+            dias_hotel                      ,cantidad_personas
             ) values (
             p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
             p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont                         ,v_rec_escala.destino,
@@ -416,7 +417,7 @@ BEGIN
             v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
             v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,v_regla_cobertura_hora_salida  ,v_regla_cobertura_hora_llegada,
             v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
-            v_dias_hotel
+            v_dias_hotel                    ,v_rec_cd.cantidad_personas
             );
         end if;
 

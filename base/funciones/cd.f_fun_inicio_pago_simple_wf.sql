@@ -54,9 +54,12 @@ BEGIN
     c.id_pago_simple,
     c.estado,
     c.id_estado_wf,
-    c.id_funcionario
+    c.id_funcionario,
+    tc.codigo as codigo_tipo_pago_simple
     into v_rec
     from cd.tpago_simple c
+    inner join cd.ttipo_pago_simple tc
+    on tc.id_tipo_pago_simple = c.id_tipo_pago_simple
     where c.id_proceso_wf = p_id_proceso_wf;
       
     --Actualización del estado de la solicitud
@@ -81,12 +84,24 @@ BEGIN
 
     elsif p_estado_anterior = 'borrador' then
 
-        --Verifica que tenga facturas/recibos registrados
-        if not exists(select 1 from cd.tpago_simple_det
-                    where id_pago_simple = v_rec.id_pago_simple) then
-            raise exception 'Debe agregar al menos un documento para procesar el pago';
+        --Verifica que tenga facturas/recibos registrados cuando sea pagado Primero devengado y luego pago
+        if v_rec.codigo_tipo_pago_simple <> 'PAG_DEV' then
+            if not exists(select 1 from cd.tpago_simple_det
+                        where id_pago_simple = v_rec.id_pago_simple) then
+                raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para procesar el pago.';
+            end if;
         end if;
+
+    elsif p_estado_anterior = 'rendicion' then
       
+        --Verifica que tenga facturas/recibos registrados para asociar al comprobante diario (caso Pago - Devengado)
+        if v_rec.codigo_tipo_pago_simple = 'PAG_DEV' then
+            if not exists(select 1 from cd.tpago_simple_det
+                        where id_pago_simple = v_rec.id_pago_simple) then
+                raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para generar el comprobante diario';
+            end if;
+        end if;
+
     end if;
 
     ------------------------------------

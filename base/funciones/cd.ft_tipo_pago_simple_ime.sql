@@ -54,7 +54,8 @@ BEGIN
 			id_usuario_ai,
 			usuario_ai,
 			id_usuario_mod,
-			fecha_mod
+			fecha_mod,
+			flujo_wf
           	) values(
 			'activo',
 			v_parametros.codigo,
@@ -66,10 +67,8 @@ BEGIN
 			v_parametros._id_usuario_ai,
 			v_parametros._nombre_usuario_ai,
 			null,
-			null
-							
-			
-			
+			null,
+			v_parametros.flujo_wf
 			)RETURNING id_tipo_pago_simple into v_id_tipo_pago_simple;
 			
 			--Definicion de la respuesta
@@ -100,7 +99,8 @@ BEGIN
 			id_usuario_mod = p_id_usuario,
 			fecha_mod = now(),
 			id_usuario_ai = v_parametros._id_usuario_ai,
-			usuario_ai = v_parametros._nombre_usuario_ai
+			usuario_ai = v_parametros._nombre_usuario_ai,
+			flujo_wf = v_parametros.flujo_wf
 			where id_tipo_pago_simple=v_parametros.id_tipo_pago_simple;
                
 			--Definicion de la respuesta

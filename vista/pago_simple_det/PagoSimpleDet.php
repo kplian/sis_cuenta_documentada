@@ -12,9 +12,9 @@ header("content-type: text/javascript; charset=UTF-8");
 <script>
 Phx.vista.PagoSimpleDet = {
     
-	require: '../../../sis_contabilidad/vista/doc_compra_venta/DocCompraVenta.php',
+	require: '../../../sis_cuenta_documentada/vista/pago_simple/DocCompraPS.php',
     ActList:'../../sis_cuenta_documentada/control/PagoSimpleDet/listarPagoSimpleDet',
-	requireclase: 'Phx.vista.DocCompraVenta',
+	requireclase: 'Phx.vista.DocCompraPS',
 	title: 'Documentos',
 	nombreVista: 'PagoSimpleDet',
 	tipoDoc: 'compra',
@@ -87,7 +87,8 @@ Phx.vista.PagoSimpleDet = {
     	Phx.vista.DocCompraVenta.superclass.preparaMenu.call(this,tb)
     },
     bnew: false,
-    bedit: false,
+    bedit: true,
+    bsave: false,
     ActDel:'../../sis_cuenta_documentada/control/PagoSimpleDet/eliminarPagoSimpleDet',
     id_store:'id_pago_simple_det',
 	fields: [
@@ -135,7 +136,6 @@ Phx.vista.PagoSimpleDet = {
 		'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
 		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario'
 	]
-	
 	
 };
 

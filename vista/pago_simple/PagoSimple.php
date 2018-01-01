@@ -17,8 +17,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
     	//llama al constructor de la clase padre
 		Phx.vista.PagoSimple.superclass.constructor.call(this,config);
 		this.init();
-		this.load({params:{start:0, limit:this.tam_pag}});
-
+		
 		//Adicion de botones en la barra de herramientas
 		this.addButton('ant_estado',{ argument: {estado: 'anterior'},text:'Atras',iconCls: 'batras',disabled:true,handler:this.antEstado,tooltip: '<b>Pasar al Anterior Estado</b>'});
         this.addButton('sig_estado',{ text:'Siguiente', iconCls: 'badelante', disabled: true, handler: this.sigEstado, tooltip: '<b>Pasar al Siguiente Estado</b>'});
@@ -58,6 +57,9 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			estado: 'borrador',
 			tipo_interfaz: this.nombreVista
 		});
+
+		this.load({params:{start:0, limit:this.tam_pag}});
+
 	},
 			
 	Atributos:[
@@ -150,7 +152,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				typeAhead: true,
 				lazyRender:true,
 				mode: 'remote',
-				gwidth: 120,
+				gwidth: 180,
 				anchor: '100%',
 				store: new Ext.data.JsonStore({
 					url: '../../sis_cuenta_documentada/control/TipoPagoSimple/listarTipoPagoSimple',
@@ -186,7 +188,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			type:'ComboBox',
 			id_grupo:1,
 			filters:{pfiltro:'tipasi.codigo#tipasi.nombre',type:'string'},
-			grid:false,
+			grid:true,
 			form:true
 		},
 		{
@@ -463,7 +465,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_funcionario_pago', type: 'numeric'},
 		{name:'id_tipo_pago_simple', type: 'numeric'},
 		{name:'desc_funcionario_pago', type: 'string'},
-		{name:'desc_tipo_pago_simple', type: 'string'}
+		{name:'desc_tipo_pago_simple', type: 'string'},
+		{name:'codigo_tipo_pago_simple', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_pago_simple',
@@ -674,11 +677,20 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('ant_estado').enable();
 			this.getBoton('sig_estado').enable();
 		}
+
+		//Lógica para habilitar o no los documentos (facturas/recibos)
+		this.getBoton('btnAgregarDoc').disable();
+		if(data.estado=='borrador'&&data.codigo_tipo_pago_simple!='PAG_DEV'){
+			this.getBoton('btnAgregarDoc').enable();
+		} else if(data.estado=='rendicion'&&data.codigo_tipo_pago_simple=='PAG_DEV'){
+			this.getBoton('btnAgregarDoc').enable();
+		}
+
+		//Habilita el resto de los botones
         this.getBoton('diagrama_gantt').enable();
         this.getBoton('btnObs').enable();
         this.getBoton('btnChequeoDocumentosWf').enable();
-        this.getBoton('btnAgregarDoc').enable();
-
+        
 		return tb
 	},
 
@@ -922,7 +934,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
                 this.reload();
                 this.winDatos.hide();
                 Phx.CP.loadingHide();
-                Ext.MessageBox.alert('Hecho','Documentos agregados');
+                console.log('sssss',reg)
+                Ext.MessageBox.alert('Importación finalizada','Cantidad de documentos agregados: '+reg.datos.tot_fact);
             },
             failure: function(resp) {
                 Phx.CP.conexionFailure(resp);
@@ -950,7 +963,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
     		this.Cmp.id_funcionario_pago.setValue('');
     		this.Cmp.id_funcionario_pago.selectedIndex=-1;
 
-    		if(record.data&&record.data.codigo=='PAG_PRO'){
+    		if(record.data&&(record.data.codigo=='PAG_PRO'||record.data.codigo=='PAG_DEV')){
     			this.Cmp.id_proveedor.setDisabled(false);
     			this.Cmp.id_proveedor.allowBlank=false;
     		} else if(record.data&&record.data.codigo=='PAG_FUN'){

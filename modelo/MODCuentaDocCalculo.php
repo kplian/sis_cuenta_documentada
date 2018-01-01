@@ -59,6 +59,7 @@ class MODCuentaDocCalculo extends MODbase{
 		$this->captura('total_viatico','numeric');
 		$this->captura('dias_hotel','int4');
 		$this->captura('desc_moneda','varchar');
+		$this->captura('cantidad_personas','int4');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

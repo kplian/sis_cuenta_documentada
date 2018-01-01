@@ -57,6 +57,7 @@ class MODPagoSimple extends MODbase{
 		$this->captura('id_funcionario_pago','integer');
 		$this->captura('desc_funcionario_pago','text');
 		$this->captura('desc_tipo_pago_simple','text');
+		$this->captura('codigo_tipo_pago_simple','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();

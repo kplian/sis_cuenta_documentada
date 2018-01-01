@@ -71,13 +71,29 @@ Phx.vista.PagoSimpleVb = {
 
         if(this.historico == 'no'){
          
-            if(data.estado=='borrador'||data.estado=='pendiente'||data.estado=='pendiente_pago'||data.estado=='finalizado'){
+            /*if(data.estado=='borrador'||data.estado=='pendiente'||data.estado=='pendiente_pago'||data.estado=='finalizado'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
             } else if(data.estado=='vbtesoreria'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').enable();
-            } 
+            } */
+
+
+
+            this.getBoton('ant_estado').enable();
+            this.getBoton('sig_estado').enable();
+
+
+
+            //Lógica para habilitar o no los documentos (facturas/recibos)
+            this.getBoton('btnAgregarDoc').disable();
+            if(data.estado=='borrador'&&data.codigo_tipo_pago_simple!='PAG_DEV'){
+                this.getBoton('btnAgregarDoc').enable();
+            } else if(data.estado=='rendicion'&&data.codigo_tipo_pago_simple=='PAG_DEV'){
+                this.getBoton('btnAgregarDoc').enable();
+            }
+            
          
         } else{
             this.desBotoneshistorico();

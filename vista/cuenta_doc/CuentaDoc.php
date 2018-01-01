@@ -994,7 +994,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				gwidth: 100,
 				maxLength:150,
 				hidden: true,
-				maxValue: 100
+				maxValue: 100,
+				minValue:1
 			},
 			type:'NumberField',
 			filters:{pfiltro:'cdoc.cantidad_personas',type:'string'},

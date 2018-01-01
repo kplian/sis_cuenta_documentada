@@ -112,6 +112,24 @@ BEGIN
                v_strg_obs = 'ew.obs'; 
            	end if;*/
 
+           	--Filtros
+           	v_filtro='';
+
+           	if v_parametros.tipo_interfaz in ('PagoSol') then
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            elsif v_parametros.tipo_interfaz in ('PagoSimpleVb') then
+                v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            end if;
+
     		--Sentencia de la consulta
 			v_consulta:='select
 						pagsim.id_pago_simple,
@@ -145,7 +163,8 @@ BEGIN
 						pagsim.id_tipo_pago_simple,
 						pagsim.id_funcionario_pago,
 						fun1.desc_funcionario1 as desc_funcionario_pago,
-						tps.codigo || '' - '' || tps.nombre as desc_tipo_pago_simple
+						tps.codigo || '' - '' || tps.nombre as desc_tipo_pago_simple,
+						tps.codigo as codigo_tipo_pago_simple
 						from cd.tpago_simple pagsim
 						inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
@@ -159,6 +178,8 @@ BEGIN
 						inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
 						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
 				        where  ';
+
+			v_consulta = v_consulta || v_filtro;
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -178,6 +199,24 @@ BEGIN
 	ELSIF(p_transaccion='CD_DETPAG_SEL')then
      				
     	begin
+
+    		v_filtro='';
+    		if v_parametros.tipo_interfaz in ('PagoSol') then
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            elsif v_parametros.tipo_interfaz in ('PagoSimpleVb') then
+                v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            end if;
+
+
     		--Sentencia de la consulta
 			v_consulta:='SELECT 
                           cv.id_doc_compra_venta::INTEGER,
@@ -196,6 +235,8 @@ BEGIN
                           join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                           join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
 				        where  ';
+
+			v_consulta = v_consulta || v_filtro;				        
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;

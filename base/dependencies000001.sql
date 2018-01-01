@@ -1,4 +1,4 @@
-I-DEP-RAC-CD-0-17/05/2016*****************************************/
+/***********************************I-DEP-RAC-CD-0-17/05/2016*****************************************/
 CREATE OR REPLACE VIEW cd.vcuenta_doc(
     id_cuenta_doc,
     id_funcionario,
@@ -1318,5 +1318,69 @@ AS
 /***********************************F-DEP-RAC-CD-0-05/01/2018*****************************************/
 
 
+/***********************************I-DEP-RAC-CD-0-10/01/2018*****************************************/
 
+CREATE OR REPLACE VIEW cd.vpago_simple (
+    id_usuario_reg,
+    id_usuario_mod,
+    fecha_reg,
+    fecha_mod,
+    estado_reg,
+    id_usuario_ai,
+    usuario_ai,
+    id_pago_simple,
+    id_depto_conta,
+    nro_tramite,
+    fecha,
+    id_funcionario,
+    estado,
+    id_estado_wf,
+    id_proceso_wf,
+    obs,
+    id_cuenta_bancaria,
+    id_depto_lb,
+    id_proveedor,
+    id_moneda,
+    id_int_comprobante,
+    id_int_comprobante_pago,
+    id_tipo_pago_simple,
+    id_funcionario_pago,
+    codigo,
+    flujo_wf,
+    desc_tipo_pago_simple,
+    plantilla_cbte,
+    plantilla_cbte_1)
+AS
+SELECT ps.id_usuario_reg,
+    ps.id_usuario_mod,
+    ps.fecha_reg,
+    ps.fecha_mod,
+    ps.estado_reg,
+    ps.id_usuario_ai,
+    ps.usuario_ai,
+    ps.id_pago_simple,
+    ps.id_depto_conta,
+    ps.nro_tramite,
+    ps.fecha,
+    ps.id_funcionario,
+    ps.estado,
+    ps.id_estado_wf,
+    ps.id_proceso_wf,
+    ps.obs,
+    ps.id_cuenta_bancaria,
+    ps.id_depto_lb,
+    ps.id_proveedor,
+    ps.id_moneda,
+    ps.id_int_comprobante,
+    ps.id_int_comprobante_pago,
+    ps.id_tipo_pago_simple,
+    ps.id_funcionario_pago,
+    tps.codigo,
+    tps.flujo_wf,
+    tps.nombre AS desc_tipo_pago_simple,
+    tps.plantilla_cbte,
+    tps.plantilla_cbte_1
+FROM cd.tpago_simple ps
+     JOIN cd.ttipo_pago_simple tps ON tps.id_tipo_pago_simple = ps.id_tipo_pago_simple;
 
+/***********************************F-DEP-RAC-CD-0-10/01/2018*****************************************/     

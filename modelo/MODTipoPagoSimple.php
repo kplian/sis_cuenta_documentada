@@ -34,6 +34,7 @@ class MODTipoPagoSimple extends MODbase{
 		$this->captura('fecha_mod','timestamp');
 		$this->captura('usr_reg','varchar');
 		$this->captura('usr_mod','varchar');
+		$this->captura('flujo_wf','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -55,6 +56,7 @@ class MODTipoPagoSimple extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('plantilla_cbte','plantilla_cbte','varchar');
 		$this->setParametro('plantilla_cbte_1','plantilla_cbte_1','varchar');
+		$this->setParametro('flujo_wf','flujo_wf','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -77,6 +79,7 @@ class MODTipoPagoSimple extends MODbase{
 		$this->setParametro('nombre','nombre','varchar');
 		$this->setParametro('plantilla_cbte','plantilla_cbte','varchar');
 		$this->setParametro('plantilla_cbte_1','plantilla_cbte_1','varchar');
+		$this->setParametro('flujo_wf','flujo_wf','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

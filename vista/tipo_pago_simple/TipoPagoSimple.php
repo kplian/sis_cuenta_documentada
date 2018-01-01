@@ -93,6 +93,21 @@ Phx.vista.TipoPagoSimple=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'flujo_wf',
+				fieldLabel: 'Código Flujo WF',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:30
+			},
+				type:'TextField',
+				filters:{pfiltro:'tipasi.flujo_wf',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+		{
+			config:{
 				name: 'estado_reg',
 				fieldLabel: 'Estado Reg.',
 				allowBlank: true,
@@ -220,7 +235,7 @@ Phx.vista.TipoPagoSimple=Ext.extend(Phx.gridInterfaz,{
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usr_reg', type: 'string'},
 		{name:'usr_mod', type: 'string'},
-		
+		{name:'flujo_wf', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_tipo_pago_simple',
