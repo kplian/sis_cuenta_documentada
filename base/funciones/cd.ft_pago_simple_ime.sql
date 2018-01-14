@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_pago_simple_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION cd.ft_pago_simple_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_pago_simple_ime
@@ -59,6 +62,8 @@ DECLARE
     v_permitir				boolean;
     v_fac_imp				integer;
     v_fac_imp_ant			integer;
+    v_obligacion_pago		record;
+    v_pago_simple			record;
 			    
 BEGIN
 
@@ -75,12 +80,8 @@ BEGIN
 	if(p_transaccion='CD_PAGSIM_INS')then
 					
         begin
-
-        	---------------------------
-        	--Inicio del tramite de WF
-        	---------------------------
         	--Obtener id del proceso macro
-        	v_codigo_proceso_macro = 'CD_PAGSIM';
+            v_codigo_proceso_macro = 'CD_PAGSIM';
             select
             pm.id_proceso_macro
             into
@@ -88,52 +89,87 @@ BEGIN
             from wf.tproceso_macro pm
             where pm.codigo = v_codigo_proceso_macro;
 
-			if v_id_proceso_macro is NULL THEN
-				raise exception 'El proceso macro de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;
-			END IF;
+            if v_id_proceso_macro is NULL THEN
+                raise exception 'El proceso macro de codigo % no esta configurado en el sistema WF',v_codigo_proceso_macro;
+            END IF;
 
-			--Obtener el codigo del tipo_proceso
-			select tp.codigo
-			into v_codigo_tipo_proceso
-			from wf.ttipo_proceso tp
-			where tp.id_proceso_macro = v_id_proceso_macro
-			and tp.estado_reg = 'activo' and tp.inicio = 'si';
+            --Obtener el codigo del tipo_proceso
+            select tp.codigo
+            into v_codigo_tipo_proceso
+            from wf.ttipo_proceso tp
+            where tp.id_proceso_macro = v_id_proceso_macro
+            and tp.estado_reg = 'activo' and tp.inicio = 'si';
 
-			if v_codigo_tipo_proceso is NULL THEN
-				raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
-			end if;
+            if v_codigo_tipo_proceso is NULL THEN
+                raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
+            end if;
+            
+            --jrr: si se genera a partir de una obligacion de pago 
+			if (v_parametros.id_obligacion_pago is not null) then
+            	--obtener datos op
+            	select * into v_obligacion_pago
+                from tes.tobligacion_pago op
+                where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
+                
+                 -- disparar creacion de procesos seleccionados
+                      
+                SELECT
+                         ps_id_proceso_wf,
+                         ps_id_estado_wf,
+                         ps_codigo_estado
+                   into
+                         v_id_proceso_wf,
+                         v_id_estado_wf,
+                         v_codigo_estado
+                FROM wf.f_registra_proceso_disparado_wf(
+                         p_id_usuario,
+                         v_parametros._id_usuario_ai,
+                         v_parametros._nombre_usuario_ai,
+                         v_obligacion_pago.id_estado_wf, 
+                         v_parametros.id_funcionario, 
+                         v_parametros.id_depto_conta,
+                         'Solicitud de Pago simple obligacion de pago',
+                         v_codigo_tipo_proceso,    
+                         v_codigo_tipo_proceso);
+                --el num tramite es el mismo
+                v_num_tramite = v_obligacion_pago.num_tramite;
+            else
+                ---------------------------
+                --Inicio del tramite de WF
+                ---------------------------              
 
-			--Obtencion de la gestion
-			select
-			per.id_gestion
-			into
-			v_id_gestion
-			from param.tperiodo per
-			where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
-			limit 1 offset 0;
+                --Obtencion de la gestion
+                select
+                per.id_gestion
+                into
+                v_id_gestion
+                from param.tperiodo per
+                where per.fecha_ini <= v_parametros.fecha and per.fecha_fin >= v_parametros.fecha
+                limit 1 offset 0;
 
 
-			--Inicio del tramite en el sistema de WF
-			select
-			   ps_num_tramite ,
-			   ps_id_proceso_wf ,
-			   ps_id_estado_wf ,
-			   ps_codigo_estado
-			into
-			   v_num_tramite,
-			   v_id_proceso_wf,
-			   v_id_estado_wf,
-			   v_codigo_estado
-			from wf.f_inicia_tramite(
-			   p_id_usuario,
-			   v_parametros._id_usuario_ai,
-			   v_parametros._nombre_usuario_ai,
-			   v_id_gestion,
-			   v_codigo_tipo_proceso,
-			   v_parametros.id_funcionario,
-			   v_parametros.id_depto_conta,
-			   'Solicitud de Pago simple',
-			   '' );
+                --Inicio del tramite en el sistema de WF
+                select
+                   ps_num_tramite ,
+                   ps_id_proceso_wf ,
+                   ps_id_estado_wf ,
+                   ps_codigo_estado
+                into
+                   v_num_tramite,
+                   v_id_proceso_wf,
+                   v_id_estado_wf,
+                   v_codigo_estado
+                from wf.f_inicia_tramite(
+                   p_id_usuario,
+                   v_parametros._id_usuario_ai,
+                   v_parametros._nombre_usuario_ai,
+                   v_id_gestion,
+                   v_codigo_tipo_proceso,
+                   v_parametros.id_funcionario,
+                   v_parametros.id_depto_conta,
+                   'Solicitud de Pago simple',
+                   '' );
+            end if;			
 
         	--Sentencia de la insercion
         	insert into cd.tpago_simple(
@@ -157,7 +193,9 @@ BEGIN
 			id_proveedor,
 			id_moneda,
 			id_tipo_pago_simple,
-			id_funcionario_pago
+			id_funcionario_pago,			
+			importe,
+			id_obligacion_pago
           	) values(
 			'activo',
 			v_parametros.id_depto_conta,
@@ -179,7 +217,9 @@ BEGIN
 			v_parametros.id_proveedor,
 			v_parametros.id_moneda,
 			v_parametros.id_tipo_pago_simple,
-			v_parametros.id_funcionario_pago
+			v_parametros.id_funcionario_pago,			
+			v_parametros.importe,
+			v_parametros.id_obligacion_pago
 			) RETURNING id_pago_simple into v_id_pago_simple;
 			
 			--Definicion de la respuesta
@@ -201,6 +241,15 @@ BEGIN
 	elsif(p_transaccion='CD_PAGSIM_MOD')then
 
 		begin
+        
+        	select * into v_pago_simple
+            from cd.tpago_simple
+            where id_pago_simple = v_parametros.id_pago_simple;
+            
+            if (v_pago_simple.estado != 'borrador') then
+            	raise exception 'No se puede modificar un pago que no esta en estado borrador. Envie el pago a estado borrador para poder modificarlo';
+            end if;
+			
 			--Sentencia de la modificacion
 			update cd.tpago_simple set
 			id_depto_conta = v_parametros.id_depto_conta,
@@ -216,7 +265,9 @@ BEGIN
 			id_moneda = v_parametros.id_moneda,
 			id_proveedor = v_parametros.id_proveedor,
 			id_tipo_pago_simple = v_parametros.id_tipo_pago_simple,
-			id_funcionario_pago = v_parametros.id_funcionario_pago
+			id_funcionario_pago = v_parametros.id_funcionario_pago,			
+			importe = v_parametros.importe,
+			id_obligacion_pago = v_parametros.id_obligacion_pago
 			where id_pago_simple=v_parametros.id_pago_simple;
                
 			--Definicion de la respuesta
@@ -238,6 +289,13 @@ BEGIN
 	elsif(p_transaccion='CD_PAGSIM_ELI')then
 
 		begin
+        	select * into v_pago_simple
+            from cd.tpago_simple
+            where id_pago_simple = v_parametros.id_pago_simple;
+            
+            if (v_pago_simple.estado != 'borrador') then
+            	raise exception 'No se puede eliminar un pago que no esta en estado borrador. Envie el pago a estado borrador para poder eliminarlo';
+            end if;
 			--Sentencia de la eliminacion
 			delete from cd.tpago_simple
             where id_pago_simple=v_parametros.id_pago_simple;
@@ -533,6 +591,14 @@ BEGIN
   	elseif(p_transaccion='CD_PSAGRDOC_IME')then
 
         begin
+        
+        	select * into v_pago_simple
+            from cd.tpago_simple
+            where id_pago_simple = v_parametros.id_pago_simple;
+            
+            if (v_pago_simple.estado not in ( 'borrador', 'rendicion')) then
+            	raise exception 'No se puede modificar un pago que no esta en estado borrador o rendicion. Envie el pago a dichos estados para poder modificarlo';
+            end if;
 
         	--Obtenemos datos basicos
 			select
@@ -624,6 +690,18 @@ BEGIN
 		    from cd.tpago_simple_det
 		    where id_pago_simple = v_parametros.id_pago_simple;
 
+		    --Se actualiza el campo importe de la cabecera
+            if v_registros_proc.codigo_tipo_pago_simple <> 'PAG_DEV' then
+                update cd.tpago_simple set
+                importe = (
+                       SELECT f_get_saldo_totales_pago_simple.o_liquido_pagado
+                       FROM cd.f_get_saldo_totales_pago_simple(v_parametros.id_pago_simple)
+                         f_get_saldo_totales_pago_simple(p_monto, o_total_documentos,
+                         o_liquido_pagado)
+                     )
+                where id_pago_simple = v_parametros.id_pago_simple;
+            end if;
+
 		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas agregadas');
 		    v_resp = pxp.f_agrega_clave(v_resp,'tot_fact',(v_fac_imp - v_fac_imp_ant)::varchar);
 
@@ -648,7 +726,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_pago_simple_ime"(integer, integer, character varying, character varying) OWNER TO postgres;

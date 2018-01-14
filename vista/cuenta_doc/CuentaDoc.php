@@ -1003,6 +1003,29 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			bottom_filter:true,
 			grid:true,
 			form:true
+		},
+		{
+			config: {
+				name: 'tipo_rendicion',
+				fieldLabel: 'Tipo Rendición',
+				anchor: '100%',
+				tinit: false,
+				allowBlank: false,
+				origen: 'CATALOGO',
+				gdisplayField: 'tipo_rendicion',
+				hiddenName: 'tipo_rendicion',
+				gwidth: 55,
+				baseParams:{
+					cod_subsistema:'CD',
+					catalogo_tipo:'tcuenta_doc__tipo_rendicion'
+				},
+				valueField: 'codigo'
+			},
+			type: 'ComboRec',
+			id_grupo: 0,
+			filters:{pfiltro:'cdoc.tipo_rendicion',type:'string'},
+			grid: false,
+			form: false
 		}
 	],
 	
@@ -1076,7 +1099,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name: 'dev_saldo', type: 'numeric'},
 		{name: 'dev_caja', type: 'string'},
 		{name: 'tipo_contrato', type: 'string'},
-		{name: 'cantidad_personas', type: 'numeric'}
+		{name: 'cantidad_personas', type: 'numeric'},
+		{name: 'tipo_rendicion', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_cuenta_doc',

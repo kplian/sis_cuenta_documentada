@@ -638,3 +638,38 @@ ALTER TABLE cd.tcuenta_doc_calculo
 COMMENT ON COLUMN cd.tcuenta_doc_calculo.cantidad_personas
 IS 'Cantidad de personas que formarán del viaje';
 /***********************************F-SCP-CD-RCM-1-10/01/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-11/01/2018****************************************/
+ALTER TABLE cd.tpago_simple
+  ADD COLUMN nro_tramite_asociado varchar(150);
+
+COMMENT ON COLUMN cd.tpago_simple.nro_tramite_asociado
+IS 'Número del trámite asociado al pago a realizar, puede ser del proceso de compra';
+/***********************************F-SCP-CD-RCM-1-11/01/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-12/01/2018****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN tipo_rendicion varchar(15);
+
+COMMENT ON COLUMN cd.tcuenta_doc.tipo_rendicion
+IS 'Define si la rendición es parcial o final';
+
+ALTER TABLE cd.tpago_simple
+  ADD COLUMN id_obligacion_pago INTEGER;
+
+COMMENT ON COLUMN cd.tpago_simple.id_obligacion_pago
+IS 'ID de la obligacion de pago para relizar el prorrateo por partida en el comprobante diario';
+/***********************************F-SCP-CD-RCM-1-12/01/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-14/01/2018****************************************/
+CREATE TABLE cd.tpago_simple_pro (
+  id_pago_simple_pro SERIAL NOT NULL,
+  id_pago_simple integer,
+  id_concepto_ingas integer,
+  id_centro_costo integer,
+  id_partida integer,
+  factor numeric(18,2),
+  PRIMARY KEY(id_pago_simple_pro)
+) INHERITS (pxp.tbase);
+
+/***********************************F-SCP-CD-RCM-1-14/01/2018****************************************/

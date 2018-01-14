@@ -67,6 +67,9 @@ Phx.vista.CuentaDocRen = {
 	   	this.Atributos[this.getIndAtributo('importe')].form = false;
 		this.Atributos[this.getIndAtributo('id_periodo')].form = true;
 		this.Atributos[this.getIndAtributo('id_periodo')].grid = true;
+		this.Atributos[this.getIndAtributo('tipo_rendicion')].form = true; 
+		this.Atributos[this.getIndAtributo('tipo_rendicion')].grid = true; 
+		this.Atributos[this.getIndAtributo('tipo_rendicion')].config.allowBlank = false; 
 
 	   	this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);

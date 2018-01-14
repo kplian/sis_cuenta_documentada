@@ -591,3 +591,8 @@ select pxp.f_insert_testructura_gui ('PGSVOBO', 'PAGSIM');
 select pxp.f_insert_tgui ('Tipo de Pago', 'Tipo de Pago Simple', 'PGSTIPPA', 'si', 0, 'sis_cuenta_documentada/vista/tipo_pago_simple/TipoPagoSimple.php', 3, '', 'TipoPagoSimple', 'CD');
 select pxp.f_insert_testructura_gui ('PGSTIPPA', 'PAGSIM');
 /***********************************F-DAT-RCM-CD-0-06/01/2018*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-12/01/2018*****************************************/
+select pxp.f_add_catalog('CD','tcuenta_doc__tipo_rendicion','Parcial','parcial','');
+select pxp.f_add_catalog('CD','tcuenta_doc__tipo_rendicion','Final','final','');
+/***********************************F-DAT-RCM-CD-0-12/01/2018*****************************************/

@@ -432,6 +432,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.importe.show();
 		this.Cmp.cobertura.hide();
 		this.Cmp.id_centro_costo.hide();
+		this.Cmp.cantidad_personas.hide();
 
 		this.Cmp.fecha_salida.allowBlank = true;
 		this.Cmp.hora_salida.allowBlank = true;
@@ -442,6 +443,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.importe.allowBlank = false;
 		this.Cmp.cobertura.allowBlank = true;
 		this.Cmp.id_centro_costo.allowBlank = true;
+		this.Cmp.cantidad_personas.allowBlank = true;
 
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
@@ -465,6 +467,7 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.importe.hide();
 			this.Cmp.cobertura.show();
 			this.Cmp.id_centro_costo.hide();
+			this.Cmp.cantidad_personas.show();
 
 			this.Cmp.fecha_salida.allowBlank = false;
 			this.Cmp.fecha_llegada.allowBlank = false;
@@ -473,6 +476,7 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.importe.allowBlank = true;
 			this.Cmp.cobertura.allowBlank = false;
 			this.Cmp.id_centro_costo.allowBlank = true;
+			this.Cmp.cantidad_personas.allowBlank = false;
 
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);

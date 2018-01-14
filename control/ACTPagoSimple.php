@@ -13,6 +13,7 @@ class ACTPagoSimple extends ACTbase{
 		$this->objParam->defecto('ordenacion','id_pago_simple');
 
 		$this->objParam->defecto('dir_ordenacion','asc');
+		$this->objParam->addParametro('id_funcionario_usu',$_SESSION["ss_id_funcionario"]); 
 		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
 			$this->objReporte = new Reporte($this->objParam,$this);
 			$this->res = $this->objReporte->generarReporteListado('MODPagoSimple','listarPagoSimple');

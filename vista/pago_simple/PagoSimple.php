@@ -52,6 +52,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         this.crearVentanaDevolucion();
 
         this.iniciarEventos();
+        //Esconde los campos para el pago-devengado        
+        this.Cmp.importe.setVisible(false);
 
         Ext.apply(this.store.baseParams, {
 			estado: 'borrador',
@@ -59,6 +61,9 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		});
 
 		this.load({params:{start:0, limit:this.tam_pag}});
+
+		//Deshabilita el tab de prorrateo por defecto
+		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 
 	},
 			
@@ -251,6 +256,21 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             form: true
         },
         {
+			config:{
+				name: 'importe',
+				fieldLabel: 'Importe a Pagar',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 160,
+				maxLength:100
+			},
+				type:'NumberField',
+				filters:{pfiltro:'pagsim.importe',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:true
+		},
+        {
             config:{
                 name: 'id_proveedor',
                 origen: 'PROVEEDOR',
@@ -318,6 +338,53 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				id_grupo:1,
 				grid:true,
 				form:true
+		},
+		{
+			config:{
+				name:'id_obligacion_pago',
+				fieldLabel:'Obligacion de Pago',
+				allowBlank: true,
+				emptyText:'Seleccione un registro ...',
+				typeAhead: false,
+				lazyRender:true,
+				mode: 'remote',
+				gwidth: 180,
+				anchor: '100%',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_tesoreria/control/ObligacionPago/listarObligacionPago',
+					id: 'id_obligacion_pago',
+					root: 'datos',
+					sortInfo:{
+						field: 'num_tramite',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_obligacion_pago','num_tramite','fecha','obs','tipo_obligacion','total_pago','tipo_solicitud','desc_funcionario1'],
+					// turn on remote sorting
+					remoteSort: true,
+					baseParams:{par_filtro:'op.num_tramite', sw_solicitud: 'si',tipo_interfaz: 'obligacionPagoTes', pago_simple : 'si' }
+				}),
+				valueField: 'id_obligacion_pago',
+				displayField: 'num_tramite',
+				gdisplayField: 'desc_obligacion_pago',
+				hiddenName: 'id_obligacion_pago',
+				forceSelection: true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode:'remote',
+				pageSize: 10,
+				queryDelay: 1000,
+				resizable: true,
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['desc_obligacion_pago']);
+				}
+			},
+			type:'ComboBox',
+			id_grupo:1,
+			filters:{pfiltro:'op.num_tramite',type:'string'},
+			grid:true,
+			form:true
 		},
 		{
 			config:{
@@ -466,7 +533,10 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		{name:'id_tipo_pago_simple', type: 'numeric'},
 		{name:'desc_funcionario_pago', type: 'string'},
 		{name:'desc_tipo_pago_simple', type: 'string'},
-		{name:'codigo_tipo_pago_simple', type: 'string'}
+		{name:'codigo_tipo_pago_simple', type: 'string'},		
+		{name:'importe', type: 'numeric'},
+		{name:'id_obligacion_pago', type: 'numeric'},
+		{name:'desc_obligacion_pago', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_pago_simple',
@@ -690,6 +760,12 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         this.getBoton('diagrama_gantt').enable();
         this.getBoton('btnObs').enable();
         this.getBoton('btnChequeoDocumentosWf').enable();
+
+        //Habilita/deshabilita los tabs
+        this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
+        if(data.codigo_tipo_pago_simple=='ADU_GEST_ANT'){
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
+		}
         
 		return tb
 	},
@@ -793,12 +869,17 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         resp.argument.wizard.panel.destroy()
         this.reload();
     },
-    south: {
+    tabsouth: [{
 		url: '../../../sis_cuenta_documentada/vista/pago_simple_det/PagoSimpleDet.php',
         title: 'Facturas/Recibos',
         height: '40%',
         cls: 'PagoSimpleDet'
-    },
+    }, {
+		url: '../../../sis_cuenta_documentada/vista/pago_simple_pro/PagoSimplePro.php',
+        title: 'Prorrateo mannual',
+        height: '40%',
+        cls: 'PagoSimplePro'
+    }],
     crearVentanaDevolucion: function(){
     	this.cmbUsuario = new Ext.form.ComboBox({
             name: 'id_usuario',
@@ -934,7 +1015,6 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
                 this.reload();
                 this.winDatos.hide();
                 Phx.CP.loadingHide();
-                console.log('sssss',reg)
                 Ext.MessageBox.alert('Importación finalizada','Cantidad de documentos agregados: '+reg.datos.tot_fact);
             },
             failure: function(resp) {
@@ -953,24 +1033,62 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
     },
     iniciarEventos: function(){
     	this.Cmp.id_tipo_pago_simple.on('select',function(combo,record,index){
-    		this.Cmp.id_proveedor.setDisabled(true);
-    		this.Cmp.id_proveedor.allowBlank=true;
-    		this.Cmp.id_proveedor.setValue('');
-    		this.Cmp.id_proveedor.selectedIndex=-1;
-
-    		this.Cmp.id_funcionario_pago.setDisabled(true);
-    		this.Cmp.id_funcionario_pago.allowBlank=true;
-    		this.Cmp.id_funcionario_pago.setValue('');
-    		this.Cmp.id_funcionario_pago.selectedIndex=-1;
-
-    		if(record.data&&(record.data.codigo=='PAG_PRO'||record.data.codigo=='PAG_DEV')){
-    			this.Cmp.id_proveedor.setDisabled(false);
-    			this.Cmp.id_proveedor.allowBlank=false;
-    		} else if(record.data&&record.data.codigo=='PAG_FUN'){
-    			this.Cmp.id_funcionario_pago.setDisabled(false);
-    			this.Cmp.id_funcionario_pago.allowBlank=false;
-    		}
+    		this.manejoComponentes(record.data.codigo, 'si');
     	},this);
+    },
+    manejoComponentes : function (codigo,reset) {
+    	if (reset == 'si') {
+	    	this.Cmp.id_proveedor.setDisabled(true);
+			this.Cmp.id_proveedor.allowBlank=true;
+			this.Cmp.id_proveedor.setValue('');
+			this.Cmp.id_proveedor.selectedIndex=-1;
+		
+			this.Cmp.id_funcionario_pago.setDisabled(true);
+			this.Cmp.id_funcionario_pago.allowBlank=true;
+			this.Cmp.id_funcionario_pago.setValue('');
+			this.Cmp.id_funcionario_pago.selectedIndex=-1;
+		
+			this.Cmp.importe.setVisible(false);
+			this.Cmp.importe.allowBlank=true;
+		
+			this.Cmp.id_obligacion_pago.hide();
+			this.Cmp.id_obligacion_pago.allowBlank=true;
+			this.Cmp.id_obligacion_pago.setValue('');
+		}
+	
+		if(codigo == 'PAG_PRO' || codigo == 'SOLO_PAG'){
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false;
+			if(codigo == 'SOLO_PAG'){
+				this.Cmp.importe.setVisible(true);
+			     this.Cmp.importe.allowBlank=false;
+			}
+			
+		} else if(codigo == 'PAG_FUN'){
+			this.Cmp.id_funcionario_pago.setDisabled(false);
+			this.Cmp.id_funcionario_pago.allowBlank=false;
+		} else if(codigo == 'PAG_DEV'){
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false;    			
+			this.Cmp.importe.setVisible(true);
+			this.Cmp.importe.allowBlank=false;
+			this.Cmp.id_obligacion_pago.show();
+			this.Cmp.id_obligacion_pago.allowBlank=false;
+		} else if(codigo == 'ADU_GEST_ANT'){
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false;    			
+			this.Cmp.importe.setVisible(true);
+			this.Cmp.importe.allowBlank=false;
+			this.Cmp.id_obligacion_pago.hide();
+			this.Cmp.id_obligacion_pago.allowBlank=true;
+			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
+		}
+    },
+    onButtonEdit: function(){
+    	var rec=this.sm.getSelected();
+    	Phx.vista.PagoSimple.superclass.onButtonEdit.call(this);  
+    	this.manejoComponentes(rec.data.codigo_tipo_pago_simple,'no');  	
+    	
     }
 
 })

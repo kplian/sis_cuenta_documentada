@@ -9,7 +9,8 @@
       out o_tipo varchar,
       out o_total_dev numeric,
       out o_total_rep numeric,
-      out o_saldo_parcial numeric
+      out o_saldo_parcial numeric,
+      out o_tipo_rendicion varchar
     )
     RETURNS record AS
     $body$
@@ -67,7 +68,8 @@
         select
         cd.id_cuenta_doc, cd.id_moneda, cd.importe, tcd.codigo as tipo_cuenta_doc, cd.estado,
         cd.fecha_entrega, cd.id_cuenta_doc_fk, tcd.sw_solicitud, cd.id_cuenta_doc_fk,
-        cd.dev_tipo, cd.dev_a_favor_de, cd.dev_nombre_cheque, cd.id_caja_dev, cd.dev_saldo
+        cd.dev_tipo, cd.dev_a_favor_de, cd.dev_nombre_cheque, cd.id_caja_dev, cd.dev_saldo,
+        cd.tipo_rendicion
         into v_rec_cd
         from cd.tcuenta_doc cd
         inner join cd.ttipo_cuenta_doc tcd
@@ -212,6 +214,7 @@
         o_total_dev = v_total_dev;
         o_total_rep = v_total_rep;
         o_saldo_parcial = v_saldo_parcial;
+        o_tipo_rendicion = coalesce(v_rec_cd.tipo_rendicion,'parcial');
 
 
     EXCEPTION

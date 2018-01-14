@@ -371,7 +371,7 @@ BEGIN
                 v_parametros.id_caja,
                 v_id_plantilla,
                 v_parametros.tipo_contrato,
-                v_parametros.cantidad_personas
+                coalesce(v_parametros.cantidad_personas,1)
             ) RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             --Inserta documentos en estado borrador si estan configurados
@@ -557,7 +557,7 @@ BEGIN
                 id_caja = v_parametros.id_caja,
                 id_plantilla = v_id_plantilla,
                 tipo_contrato = v_parametros.tipo_contrato,
-                cantidad_personas = v_parametros.cantidad_personas
+                cantidad_personas = coalesce(v_parametros.cantidad_personas,1)
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
             --Cálculo del viático
@@ -1257,7 +1257,8 @@ BEGIN
                     id_escala,
                     id_plantilla,
                     tipo_contrato,
-                    cantidad_personas
+                    cantidad_personas,
+                    tipo_rendicion
                 ) values(
                     v_id_tipo_cuenta_doc,
                     v_id_proceso_wf,
@@ -1291,7 +1292,8 @@ BEGIN
                     v_registros_cd.id_escala,
                     v_id_plantilla,
                     v_registros_cd.tipo_contrato,
-                    v_registros_cd.cantidad_personas
+                    v_registros_cd.cantidad_personas,
+                    v_parametros.tipo_rendicion
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             --Replica el prorrateo de la solicitud (usado en viaticos)
@@ -1443,7 +1445,8 @@ BEGIN
                 fecha_llegada = v_parametros.fecha_llegada,
                 hora_llegada = v_parametros.hora_llegada::time,
                 cobertura = v_parametros.cobertura,
-                id_plantilla = v_id_plantilla
+                id_plantilla = v_id_plantilla,
+                tipo_rendicion = v_parametros.tipo_rendicion
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
 
             --Cálculo del viático
@@ -1789,6 +1792,7 @@ BEGIN
             v_resp = pxp.f_agrega_clave(v_resp,'por_caja',v_registros_cd.o_por_caja::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_registros_cd.o_tipo::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'saldo_parcial',v_registros_cd.o_saldo_parcial::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'tipo_rendicion',v_registros_cd.o_tipo_rendicion::varchar);
 
             --Devuelve la respuesta
             return v_resp;
@@ -1810,11 +1814,6 @@ BEGIN
             if not exists(select 1 from cd.tcuenta_doc
                         where id_cuenta_doc = v_parametros.id_cuenta_doc) then
                 raise exception 'Cuenta documentada inexistente';
-            end if;
-
-            --Verifica el tipo de devolución
-            if v_parametros.dev_tipo not in ('deposito','cheque','caja') then
-                raise exception 'Forma de devolución no identificada';
             end if;
 
             --Recuperar datos de la solicitud
@@ -1840,6 +1839,11 @@ BEGIN
             inner join cd.tcuenta_doc c on c.id_cuenta_doc = cd.id_cuenta_doc_fk
             where cd.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
+             --Verifica el tipo de devolución
+            if v_parametros.dev_tipo not in ('deposito','cheque','caja') and v_parametros.dev_saldo > 0 then
+                raise exception 'Forma de devolución no identificada';
+            end if;
+
             --Verifica si ya previamente se habría generado la devolución
             if coalesce(v_registros_cd.dev_tipo,'') <> '' then
                 raise exception 'La devolución ya fue generada anteriormente';
@@ -1861,85 +1865,93 @@ BEGIN
             id_depto_lb           = v_parametros.id_depto_lb
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
+            --Verifica si el saldo es mayor a cero para generar el dpcumento en función del tipo de desembolso/reposición a realizar
+            if v_parametros.dev_saldo > 0 then
 
-            --Lógica para creación de la forma de devolución
-            if v_parametros.dev_a_favor_de = 'empresa' then
+                --Lógica para creación de la forma de devolución
+                if v_parametros.dev_a_favor_de = 'empresa' then
 
-                if v_parametros.dev_tipo = 'caja' then
-                    --Genera la solicitud de efectivo para la reposición a la empresa
-                    select
-                    v_parametros.id_caja_dev as id_caja,
-                    v_parametros.dev_saldo as monto,
-                    v_registros_cd.id_funcionario as id_funcionario,
-                    'ingreso' as tipo_solicitud,
-                    now() as fecha,
-                    'Reposición de fondos por cuenta documentada a la empresa' as motivo,
-                    null::integer as id_solicitud_efectivo_fk
-                    into v_registros;
+                    if v_parametros.dev_tipo = 'caja' then
+                        --Genera la solicitud de efectivo para la reposición a la empresa
+                        select
+                        v_parametros.id_caja_dev as id_caja,
+                        v_parametros.dev_saldo as monto,
+                        v_registros_cd.id_funcionario as id_funcionario,
+                        'ingreso' as tipo_solicitud,
+                        now() as fecha,
+                        'Reposición de fondos por cuenta documentada a la empresa' as motivo,
+                        null::integer as id_solicitud_efectivo_fk
+                        into v_registros;
 
-                    --Generacion de la solicitud de efectivo
-                    v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
-                    v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
+                        --Generacion de la solicitud de efectivo
+                        v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
+                        v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
 
-                    --Actualiza al cuenta documentada con la solicitud de efectivo creada
-                    update cd.tcuenta_doc set
-                    id_solicitud_efectivo = v_id_solicitud_efectivo
-                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+                        --Actualiza al cuenta documentada con la solicitud de efectivo creada
+                        update cd.tcuenta_doc set
+                        id_solicitud_efectivo = v_id_solicitud_efectivo
+                        where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-                    --Obtiene el nro_tramite de la solicitud de efectivo
-                    select nro_tramite
-                    into v_sol_efect
-                    from tes.tsolicitud_efectivo
-                    where id_solicitud_efectivo = v_id_solicitud_efectivo;
+                        --Obtiene el nro_tramite de la solicitud de efectivo
+                        select nro_tramite
+                        into v_sol_efect
+                        from tes.tsolicitud_efectivo
+                        where id_solicitud_efectivo = v_id_solicitud_efectivo;
 
-                    v_mensaje = 'Recibo de caja de ingreso generado para la devolucion a la empresa número: '||v_sol_efect;
+                        v_mensaje = 'Recibo de caja de ingreso generado para la devolucion a la empresa número: '||v_sol_efect;
 
-                elsif v_parametros.dev_tipo = 'deposito' then
-                    v_mensaje = 'Debe registrar el(los) depósito(s) que el solicitante realice para poder cerrar la cuenta documentada.';
-                end if;
+                    elsif v_parametros.dev_tipo = 'deposito' then
+                        v_mensaje = 'Debe registrar el(los) depósito(s) que el solicitante realice para poder cerrar la cuenta documentada.';
+                    end if;
 
-            elsif v_parametros.dev_a_favor_de = 'funcionario' then
+                elsif v_parametros.dev_a_favor_de = 'funcionario' then
 
-                if v_parametros.dev_tipo = 'caja' then
-                    --Genera la solicitud de efectivo para la devolución al funcionario
-                    select
-                    v_parametros.id_caja_dev as id_caja,
-                    v_parametros.dev_saldo as monto,
-                    v_registros_cd.id_funcionario as id_funcionario,
-                    'solicitud' as tipo_solicitud,
-                    now() as fecha,
-                    'Devolución de fondos por cuenta documentada al funcionario' as motivo,
-                    null::integer as id_solicitud_efectivo_fk
-                    into v_registros;
+                    if v_parametros.dev_tipo = 'caja' then
+                        --Genera la solicitud de efectivo para la devolución al funcionario
+                        select
+                        v_parametros.id_caja_dev as id_caja,
+                        v_parametros.dev_saldo as monto,
+                        v_registros_cd.id_funcionario as id_funcionario,
+                        'solicitud' as tipo_solicitud,
+                        now() as fecha,
+                        'Devolución de fondos por cuenta documentada al funcionario' as motivo,
+                        null::integer as id_solicitud_efectivo_fk
+                        into v_registros;
 
-                    --Generacion de la solicitud de efectivo
-                    v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
-                    v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
+                        --Generacion de la solicitud de efectivo
+                        v_resp = tes.f_inserta_solicitud_efectivo(0,p_id_usuario,hstore(v_registros),v_parametros.id_cuenta_doc);
+                        v_id_solicitud_efectivo = pxp.f_obtiene_clave_valor(v_resp,'id_solicitud_efectivo','','','valor')::integer;
 
-                    --Actualiza al cuenta documentada con la solicitud de efectivo creada
-                    update cd.tcuenta_doc set
-                    id_solicitud_efectivo = v_id_solicitud_efectivo
-                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+                        --Actualiza al cuenta documentada con la solicitud de efectivo creada
+                        update cd.tcuenta_doc set
+                        id_solicitud_efectivo = v_id_solicitud_efectivo
+                        where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-                    --Obtiene el nro_tramite de la solicitud de efectivo
-                    select nro_tramite
-                    into v_sol_efect
-                    from tes.tsolicitud_efectivo
-                    where id_solicitud_efectivo = v_id_solicitud_efectivo;
+                        --Obtiene el nro_tramite de la solicitud de efectivo
+                        select nro_tramite
+                        into v_sol_efect
+                        from tes.tsolicitud_efectivo
+                        where id_solicitud_efectivo = v_id_solicitud_efectivo;
 
-                    v_mensaje = 'Recibo de caja de ingreso generado para la reposicion al funcionario número: '||v_sol_efect;
+                        v_mensaje = 'Recibo de caja de ingreso generado para la reposicion al funcionario número: '||v_sol_efect;
+
+                    else
+                        --Se generará el cheque al momento de validar el comprobante
+                        v_mensaje = 'El cheque se generará cuando el comprobante contable sea validado.';
+                    end if;
+
+                    v_mensaje = 'Devolución/Reposición procesada correctamente. '||v_mensaje;
 
                 else
-                    --Se generará el cheque al momento de validar el comprobante
-                    v_mensaje = 'El cheque se generará cuando el comprobante contable sea validado.';
+                    raise exception 'No se puede determinar a favor de quien es el saldo de la cuenta documentada';
                 end if;
 
-            else
-                raise exception 'No se puede determinar a favor de quien es el saldo de la cuenta documentada';
+            else 
+                v_mensaje = 'Acción realizada';
             end if;
             
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Devolución/Reposición procesada correctamente. '||v_mensaje);
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje',v_mensaje);
             v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_parametros.dev_tipo);
             v_resp = pxp.f_agrega_clave(v_resp,'id_solicitud_efectivo',v_id_solicitud_efectivo::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'sol_efect',v_sol_efect);

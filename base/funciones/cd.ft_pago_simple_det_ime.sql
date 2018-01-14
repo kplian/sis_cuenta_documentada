@@ -143,8 +143,8 @@ BEGIN
 							inner join cd.tpago_simple ps
 							on ps.id_pago_simple = psd.id_pago_simple
 							where psd.id_pago_simple_det = v_parametros.id_pago_simple_det
-							and ps.estado = 'borrador') then
-				raise exception 'No puede quitarse el documento porque el Pago no esta en Borrador';
+							and ps.estado in ('borrador','rendicion')) then
+				raise exception 'No puede quitarse el documento porque el Pago no esta en Borrador o de Rendicion';
 
 			end if;
 

@@ -132,40 +132,45 @@ BEGIN
 
     		--Sentencia de la consulta
 			v_consulta:='select
-						pagsim.id_pago_simple,
-						pagsim.estado_reg,
-						pagsim.id_depto_conta,
-						pagsim.nro_tramite,
-						pagsim.fecha,
-						pagsim.id_funcionario,
-						pagsim.estado,
-						pagsim.id_estado_wf,
-						pagsim.id_proceso_wf,
-						pagsim.obs,
-						pagsim.id_cuenta_bancaria,
-						pagsim.id_depto_lb,
-						pagsim.id_usuario_reg,
-						pagsim.fecha_reg,
-						pagsim.id_usuario_ai,
-						pagsim.usuario_ai,
-						pagsim.id_usuario_mod,
-						pagsim.fecha_mod,
-						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod,
-						dep.codigo as desc_depto_conta,
-						fun.desc_funcionario1 as desc_funcionario,
-						(ins.nombre||'' - ''||cban.nro_cuenta)::varchar as desc_cuenta_bancaria,
-						deplb.codigo as desc_depto_lb,
-						pagsim.id_moneda,
-						pagsim.id_proveedor,
-						mon.codigo as desc_moneda,
-						pro.desc_proveedor,
-						pagsim.id_tipo_pago_simple,
-						pagsim.id_funcionario_pago,
-						fun1.desc_funcionario1 as desc_funcionario_pago,
-						tps.codigo || '' - '' || tps.nombre as desc_tipo_pago_simple,
-						tps.codigo as codigo_tipo_pago_simple
+                            pagsim.id_pago_simple,
+                            pagsim.estado_reg,
+                            pagsim.id_depto_conta,
+                            pagsim.nro_tramite,
+                            pagsim.fecha,
+                            pagsim.id_funcionario,
+                            pagsim.estado,
+                            pagsim.id_estado_wf,
+                            pagsim.id_proceso_wf,
+                            pagsim.obs,
+                            pagsim.id_cuenta_bancaria,
+                            pagsim.id_depto_lb,
+                            pagsim.id_usuario_reg,
+                            pagsim.fecha_reg,
+                            pagsim.id_usuario_ai,
+                            pagsim.usuario_ai,
+                            pagsim.id_usuario_mod,
+                            pagsim.fecha_mod,
+                            usu1.cuenta as usr_reg,
+                            usu2.cuenta as usr_mod,
+                            dep.codigo as desc_depto_conta,
+                            fun.desc_funcionario1 as desc_funcionario,
+                            (ins.nombre||'' - ''||cban.nro_cuenta)::varchar as desc_cuenta_bancaria,
+                            deplb.codigo as desc_depto_lb,
+                            pagsim.id_moneda,
+                            pagsim.id_proveedor,
+                            mon.codigo as desc_moneda,
+                            pro.desc_proveedor,
+                            pagsim.id_tipo_pago_simple,
+                            pagsim.id_funcionario_pago,
+                            fun1.desc_funcionario1 as desc_funcionario_pago,
+                            tps.codigo || '' - '' || tps.nombre as desc_tipo_pago_simple,
+                            tps.codigo as codigo_tipo_pago_simple,
+                            pagsim.nro_tramite_asociado,
+                            pagsim.importe,
+                            pagsim.id_obligacion_pago,
+                            op.num_tramite as desc_obligacion_pago
 						from cd.tpago_simple pagsim
+                        inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
 						inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
 						inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
@@ -177,6 +182,7 @@ BEGIN
 						left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
 						inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
 						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
+						left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
 				        where  ';
 
 			v_consulta = v_consulta || v_filtro;
@@ -232,6 +238,7 @@ BEGIN
                           ps.fecha::date fecha_pago_simple,
                           cv.sw_pgs::varchar sw_pgs 
                           FROM conta.tdoc_compra_venta cv 
+                          inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
                           join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                           join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
 				        where  ';
@@ -296,6 +303,7 @@ BEGIN
 						left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
 						inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
 						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
+						left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
 					    where ';
 			
 			--Definicion de la respuesta		    

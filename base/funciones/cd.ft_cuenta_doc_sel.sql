@@ -279,7 +279,8 @@ BEGIN
                 cdoc.tipo_sol_sigema,
                 cdoc.id_sigema,
                 cdoc.tipo_contrato,
-                cdoc.cantidad_personas
+                cdoc.cantidad_personas,
+                cdoc.tipo_rendicion
                 from cd.tcuenta_doc cdoc
                 inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                 inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -556,7 +557,9 @@ BEGIN
                             to_char(cdoc.hora_salida,''HH24:mm'')::varchar as hora_salida,
                             to_char(cdoc.hora_llegada,''HH24:mm'')::varchar as hora_llegada,
                             cdoc.id_plantilla,
-                            pla.desc_plantilla
+                            pla.desc_plantilla,
+                            cdoc.cantidad_personas,
+                            cdoc.tipo_rendicion
             from cd.tcuenta_doc cdoc
             inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
             inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc

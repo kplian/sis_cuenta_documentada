@@ -21,35 +21,35 @@ Descripcion  Esta funcion retrocede el estado de los planes de pago cuando los c
 
 DECLARE
   
-	v_nombre_funcion   		text;
-	v_resp					varchar;
-    v_registros 			record;
-    v_id_estado_actual  	integer;
-    va_id_tipo_estado 		integer[];
-    va_codigo_estado 		varchar[];
-    va_disparador    		varchar[];
-    va_regla         		varchar[]; 
-    va_prioridad     		integer[];
-    v_tipo_sol   			varchar;
-    v_nro_cuota 			numeric;
-    v_id_proceso_wf 		integer;
-    v_id_estado_wf 			integer;
-    v_id_plan_pago 			integer;
-    v_verficacion  			boolean;
-    v_verficacion2  		varchar[];
-    v_id_tipo_estado 		integer;
-    v_id_funcionario  		integer;
-    v_id_usuario_reg 		integer;
-    v_id_depto 				integer;
-    v_codigo_estado 		varchar;
-    v_id_estado_wf_ant  	integer;
-    v_rec_cbte_trans   		record;
-    v_reg_cbte   			record;
+    v_nombre_funcion        text;
+    v_resp                  varchar;
+    v_registros             record;
+    v_id_estado_actual      integer;
+    va_id_tipo_estado       integer[];
+    va_codigo_estado        varchar[];
+    va_disparador           varchar[];
+    va_regla                varchar[]; 
+    va_prioridad            integer[];
+    v_tipo_sol              varchar;
+    v_nro_cuota             numeric;
+    v_id_proceso_wf         integer;
+    v_id_estado_wf          integer;
+    v_id_plan_pago          integer;
+    v_verficacion           boolean;
+    v_verficacion2          varchar[];
+    v_id_tipo_estado        integer;
+    v_id_funcionario        integer;
+    v_id_usuario_reg        integer;
+    v_id_depto              integer;
+    v_codigo_estado         varchar;
+    v_id_estado_wf_ant      integer;
+    v_rec_cbte_trans        record;
+    v_reg_cbte              record;
     v_estado                varchar;
     
 BEGIN
 
-	v_nombre_funcion = 'cd.f_gestionar_cbte_pago_simple_eliminacion';
+    v_nombre_funcion = 'cd.f_gestionar_cbte_pago_simple_eliminacion';
 
     -- 1) Con el id_int_comprobante identificar el pago simple
     select 
@@ -57,12 +57,14 @@ BEGIN
     cc.id_estado_wf,
     cc.id_proceso_wf,
     cc.estado,
-    cc.id_int_comprobante
+    cc.id_int_comprobante,
+    tps.codigo as codigo_tipo_pago_simple
     into
     v_registros
     from cd.tpago_simple cc
+    inner join cd.ttipo_pago_simple tps on  tps.id_tipo_pago_simple = cc.id_tipo_pago_simple
     where cc.id_int_comprobante = p_id_int_comprobante; 
-    
+
     --2) Validar que exista el pago simple
     IF  v_registros.id_pago_simple is NULL THEN     
 
@@ -71,10 +73,12 @@ BEGIN
         cc.id_estado_wf,
         cc.id_proceso_wf,
         cc.estado,
-        cc.id_int_comprobante_pago as id_int_comprobante
+        cc.id_int_comprobante_pago as id_int_comprobante,
+        tps.codigo as codigo_tipo_pago_simple
         into
         v_registros
         from cd.tpago_simple cc
+        inner join cd.ttipo_pago_simple tps on  tps.id_tipo_pago_simple = cc.id_tipo_pago_simple
         where cc.id_int_comprobante_pago = p_id_int_comprobante; 
 
         IF  v_registros.id_pago_simple is NULL  THEN
@@ -95,24 +99,45 @@ BEGIN
        raise exception 'No puede eliminar comprobantes validados';
     END IF;
      
-    --Recupera estado anterior segun Log del WF
-    SELECT  
-    ps_id_tipo_estado,
-    ps_id_funcionario,
-    ps_id_usuario_reg,
-    ps_id_depto,
-    ps_codigo_estado,
-    ps_id_estado_wf_ant
-    into
-    v_id_tipo_estado,
-    v_id_funcionario,
-    v_id_usuario_reg,
-    v_id_depto,
-    v_codigo_estado,
-    v_id_estado_wf_ant 
-    FROM wf.f_obtener_estado_ant_log_wf(v_registros.id_estado_wf);
-        
-    --
+    if v_registros.codigo_tipo_pago_simple <> 'PAG_DEV' then
+    
+        --Recupera estado anterior segun Log del WF
+        SELECT  
+        ps_id_tipo_estado,
+        ps_id_funcionario,
+        ps_id_usuario_reg,
+        ps_id_depto,
+        ps_codigo_estado,
+        ps_id_estado_wf_ant
+        into
+        v_id_tipo_estado,
+        v_id_funcionario,
+        v_id_usuario_reg,
+        v_id_depto,
+        v_codigo_estado,
+        v_id_estado_wf_ant 
+        FROM wf.f_obtener_estado_ant_log_wf(v_registros.id_estado_wf);
+    
+    else
+    
+        v_id_tipo_estado = 667;
+        SELECT  
+        ps_id_funcionario,
+        ps_id_usuario_reg,
+        ps_id_depto,
+        ps_codigo_estado,
+        ps_id_estado_wf_ant
+        into
+        v_id_funcionario,
+        v_id_usuario_reg,
+        v_id_depto,
+        v_codigo_estado,
+        v_id_estado_wf_ant 
+        FROM wf.f_obtener_estado_segun_log_wf(v_registros.id_estado_wf,v_id_tipo_estado);
+    
+    end if;
+    
+
     select 
     ew.id_proceso_wf 
     into 
@@ -183,13 +208,13 @@ BEGIN
     return true;
 
 EXCEPTION
-					
-	WHEN OTHERS THEN
-		v_resp='';
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-		raise exception '%',v_resp;
+                    
+    WHEN OTHERS THEN
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

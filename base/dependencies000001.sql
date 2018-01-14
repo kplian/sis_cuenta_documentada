@@ -1384,3 +1384,123 @@ FROM cd.tpago_simple ps
      JOIN cd.ttipo_pago_simple tps ON tps.id_tipo_pago_simple = ps.id_tipo_pago_simple;
 
 /***********************************F-DEP-RAC-CD-0-10/01/2018*****************************************/     
+
+/***********************************I-DEP-RAC-CD-0-12/01/2018*****************************************/
+
+ CREATE OR REPLACE VIEW cd.vpago_simple_det_prorrateado
+AS
+  SELECT psd.id_pago_simple,
+         ps.id_moneda,
+         ps.id_depto_conta,
+         ps.id_depto_lb,
+         ps.id_cuenta_bancaria,
+         ps.id_funcionario,
+         ps.id_proveedor,
+         CASE COALESCE(ps.id_funcionario, 0)
+           WHEN 0 THEN pro.desc_proveedor::text
+           ELSE fun.desc_funcionario1
+         END AS desc_proveedor,
+         ps.id_proceso_wf,
+         ps.id_estado_wf,
+         ps.nro_tramite,
+         ps.obs,
+         psd.id_pago_simple_det,
+         dcv.id_doc_compra_venta,
+         dc.id_doc_concepto,
+         opd.id_obligacion_det,
+         op.id_obligacion_pago,
+         opd.id_partida,
+         opd.id_centro_costo,
+         opd.monto_pago_mb / op.total_pago AS factor,
+         dc.precio_total_final *(opd.monto_pago_mb / op.total_pago) AS
+           importe_pro,
+         ps.importe AS total_pagado,
+         dc.id_concepto_ingas,
+         dcv.id_plantilla,
+         dc.descripcion
+  FROM cd.tpago_simple ps
+       JOIN cd.tpago_simple_det psd ON psd.id_pago_simple = ps.id_pago_simple
+       JOIN conta.tdoc_compra_venta dcv ON dcv.id_doc_compra_venta =
+         psd.id_doc_compra_venta
+       JOIN conta.tdoc_concepto dc ON dc.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       LEFT JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
+         ps.id_obligacion_pago
+       LEFT JOIN tes.tobligacion_det opd ON opd.id_obligacion_pago =
+         op.id_obligacion_pago
+       LEFT JOIN param.vproveedor pro ON pro.id_proveedor = ps.id_proveedor
+       LEFT JOIN orga.vfuncionario fun ON fun.id_funcionario = ps.id_funcionario
+       JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <=
+         per.fecha_fin;
+
+
+CREATE OR REPLACE VIEW cd.vpago_simple_cbte_pago_pro 
+AS
+SELECT ps.id_pago_simple,
+    ps.id_moneda,
+    ps.id_depto_conta,
+    ps.id_depto_lb,
+    ps.id_cuenta_bancaria,
+    ps.importe AS total_liquido_pagado,
+    ps.importe AS total_documentos,
+    pro.desc_proveedor,
+    ps.id_funcionario,
+    ps.id_proveedor,
+    ps.id_proceso_wf,
+    ps.id_estado_wf,
+    ps.nro_tramite,
+    ps.obs,
+    per.id_periodo,
+    per.id_gestion,
+    ps.id_int_comprobante,
+    ps.id_int_comprobante_pago,
+    ps.fecha
+FROM cd.tpago_simple ps
+     JOIN param.vproveedor pro ON pro.id_proveedor = ps.id_proveedor
+     JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <= per.fecha_fin;         
+/***********************************F-DEP-RAC-CD-0-12/01/2018*****************************************/              
+
+/***********************************I-DEP-RAC-CD-0-14/01/2018*****************************************/
+CREATE OR REPLACE VIEW cd.vpago_simple_det_prorrateado_directo as
+  SELECT psd.id_pago_simple,
+         ps.id_moneda,
+         ps.id_depto_conta,
+         ps.id_depto_lb,
+         ps.id_cuenta_bancaria,
+         ps.id_funcionario,
+         ps.id_proveedor,
+         CASE COALESCE(ps.id_funcionario, 0)
+           WHEN 0 THEN pro.desc_proveedor::text
+           ELSE fun.desc_funcionario1
+         END AS desc_proveedor,
+         ps.id_proceso_wf,
+         ps.id_estado_wf,
+         ps.nro_tramite,
+         ps.obs,
+         psd.id_pago_simple_det,
+         dcv.id_doc_compra_venta,
+         dc.id_doc_concepto,
+         opd.id_pago_simple_pro,
+         opd.id_partida,
+         opd.id_centro_costo,
+         opd.factor,
+         dc.precio_total_final * opd.factor AS importe_pro,
+         ps.importe AS total_pagado,
+         dc.id_concepto_ingas,
+         dcv.id_plantilla,
+         dc.descripcion,
+         (COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice,
+           0::numeric)) / dcv.importe_neto AS porc_monto_excento_var
+  FROM cd.tpago_simple ps
+       JOIN cd.tpago_simple_det psd ON psd.id_pago_simple = ps.id_pago_simple
+       JOIN conta.tdoc_compra_venta dcv ON dcv.id_doc_compra_venta =
+         psd.id_doc_compra_venta
+       JOIN conta.tdoc_concepto dc ON dc.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       LEFT JOIN cd.tpago_simple_pro opd ON opd.id_pago_simple =
+         ps.id_pago_simple
+       LEFT JOIN param.vproveedor pro ON pro.id_proveedor = ps.id_proveedor
+       LEFT JOIN orga.vfuncionario fun ON fun.id_funcionario = ps.id_funcionario
+       JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <=
+         per.fecha_fin;
+/***********************************F-DEP-RAC-CD-0-14/01/2018*****************************************/

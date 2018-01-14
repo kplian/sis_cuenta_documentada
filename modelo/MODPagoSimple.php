@@ -58,6 +58,10 @@ class MODPagoSimple extends MODbase{
 		$this->captura('desc_funcionario_pago','text');
 		$this->captura('desc_tipo_pago_simple','text');
 		$this->captura('codigo_tipo_pago_simple','varchar');
+		$this->captura('nro_tramite_asociado','varchar');
+		$this->captura('importe','numeric');
+		$this->captura('id_obligacion_pago','integer');
+		$this->captura('desc_obligacion_pago','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -88,7 +92,9 @@ class MODPagoSimple extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_proveedor','id_proveedor','int4');
 		$this->setParametro('id_funcionario_pago','id_funcionario_pago','int4');
-		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');
+		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');		
+		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -120,7 +126,9 @@ class MODPagoSimple extends MODbase{
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_proveedor','id_proveedor','int4');
 		$this->setParametro('id_funcionario_pago','id_funcionario_pago','int4');
-		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');
+		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');		
+		$this->setParametro('importe','importe','numeric');
+		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

@@ -93,6 +93,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('id_sigema','integer');
 		$this->captura('tipo_contrato','VARCHAR');
 		$this->captura('cantidad_personas','integer');
+		$this->captura('tipo_rendicion','VARCHAR');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -171,6 +172,8 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('hora_llegada','varchar');
 		$this->captura('id_plantilla','integer');
 		$this->captura('desc_plantilla','VARCHAR');
+		$this->captura('cantidad_personas','integer');
+		$this->captura('tipo_rendicion','varchar');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -326,6 +329,8 @@ class MODCuentaDoc extends MODbase{
 				
 		$this->setParametro('id_cuenta_doc_fk','id_cuenta_doc_fk','integer');
 		$this->setParametro('id_plantilla','id_plantilla','integer');
+
+		$this->setParametro('tipo_rendicion','tipo_rendicion','varchar');
 		
 		
 		//Ejecuta la instruccion
@@ -358,6 +363,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('hora_llegada','hora_llegada','time');
 		$this->setParametro('cobertura','cobertura','varchar');
 		$this->setParametro('id_plantilla','id_plantilla','integer');
+		$this->setParametro('tipo_rendicion','tipo_rendicion','varchar');
 		
 
 		//Ejecuta la instruccion
