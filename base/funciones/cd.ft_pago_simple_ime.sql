@@ -615,16 +615,16 @@ BEGIN
 
         	--Validación para permitir o no la importación de facturas
         	v_permitir = false;
-        	if v_registros_proc.estado = 'borrador' and v_registros_proc.codigo_tipo_pago_simple <> 'PAG_DEV' then
+        	if v_registros_proc.estado = 'borrador' and v_registros_proc.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT') then
         		--Obliga la importación de facturas
         		v_permitir = true;
-        	elsif v_registros_proc.estado = 'rendicion' and v_registros_proc.codigo_tipo_pago_simple = 'PAG_DEV' then
+        	elsif v_registros_proc.estado = 'rendicion' and v_registros_proc.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT') then
         		--Obliga la importación de facturas
         		v_permitir = true;
         	end if;
 
 			if not v_permitir then
-				raise exception 'No está permitido agregar documentos en esta fase';
+				raise exception 'No está permitido agregar documentos en este estado';
 			end if;
 
         	if coalesce(v_parametros.id_pago_simple,0) = 0 then
@@ -691,7 +691,7 @@ BEGIN
 		    where id_pago_simple = v_parametros.id_pago_simple;
 
 		    --Se actualiza el campo importe de la cabecera
-            if v_registros_proc.codigo_tipo_pago_simple <> 'PAG_DEV' then
+            if v_registros_proc.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT') then
                 update cd.tpago_simple set
                 importe = (
                        SELECT f_get_saldo_totales_pago_simple.o_liquido_pagado
@@ -702,7 +702,7 @@ BEGIN
                 where id_pago_simple = v_parametros.id_pago_simple;
             end if;
 
-		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas agregadas');
+		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas/Documentos agregadas');
 		    v_resp = pxp.f_agrega_clave(v_resp,'tot_fact',(v_fac_imp - v_fac_imp_ant)::varchar);
 
           	--Devuelve la respuesta

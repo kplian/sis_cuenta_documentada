@@ -206,22 +206,6 @@ BEGIN
      				
     	begin
 
-    		v_filtro='';
-    		if v_parametros.tipo_interfaz in ('PagoSol') then
-
-                if p_administrador != 1  then
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
-                end if;
-
-            elsif v_parametros.tipo_interfaz in ('PagoSimpleVb') then
-                v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
-
-                if p_administrador != 1  then
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
-                end if;
-
-            end if;
-
 
     		--Sentencia de la consulta
 			v_consulta:='SELECT 
@@ -243,8 +227,7 @@ BEGIN
                           join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
 				        where  ';
 
-			v_consulta = v_consulta || v_filtro;				        
-			
+		
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
@@ -289,10 +272,29 @@ BEGIN
 	elsif(p_transaccion='CD_PAGSIM_CONT')then
 
 		begin
+
+			v_filtro='';
+    		if v_parametros.tipo_interfaz in ('PagoSol') then
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            elsif v_parametros.tipo_interfaz in ('PagoSimpleVb') then
+                v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
+
+                if p_administrador != 1  then
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                end if;
+
+            end if;
+
+
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_pago_simple)
 					    from cd.tpago_simple pagsim
-					    inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
+                        inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
+						inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
 						inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
 						inner join orga.vfuncionario fun on fun.id_funcionario = pagsim.id_funcionario
@@ -305,6 +307,8 @@ BEGIN
 						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
 						left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
 					    where ';
+
+			v_consulta = v_consulta || v_filtro;
 			
 			--Definicion de la respuesta		    
 			v_consulta:=v_consulta||v_parametros.filtro;

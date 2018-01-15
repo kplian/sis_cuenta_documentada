@@ -351,7 +351,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				gwidth: 180,
 				anchor: '100%',
 				store: new Ext.data.JsonStore({
-					url: '../../sis_tesoreria/control/ObligacionPago/listarObligacionPago',
+					url: '../../sis_tesoreria/control/ObligacionPago/listarObligacionPagoPS',
 					id: 'id_obligacion_pago',
 					root: 'datos',
 					sortInfo:{
@@ -362,7 +362,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 					fields: ['id_obligacion_pago','num_tramite','fecha','obs','tipo_obligacion','total_pago','tipo_solicitud','desc_funcionario1'],
 					// turn on remote sorting
 					remoteSort: true,
-					baseParams:{par_filtro:'op.num_tramite', sw_solicitud: 'si',tipo_interfaz: 'obligacionPagoTes', pago_simple : 'si' }
+					baseParams:{par_filtro:'op.num_tramite',  pago_simple : 'si' }
 				}),
 				valueField: 'id_obligacion_pago',
 				displayField: 'num_tramite',
@@ -750,9 +750,9 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 
 		//Lógica para habilitar o no los documentos (facturas/recibos)
 		this.getBoton('btnAgregarDoc').disable();
-		if(data.estado=='borrador'&&data.codigo_tipo_pago_simple!='PAG_DEV'){
+		if(data.estado=='borrador'&&(data.codigo_tipo_pago_simple!='PAG_DEV'&&data.codigo_tipo_pago_simple!='ADU_GEST_ANT')){
 			this.getBoton('btnAgregarDoc').enable();
-		} else if(data.estado=='rendicion'&&data.codigo_tipo_pago_simple=='PAG_DEV'){
+		} else if(data.estado=='rendicion'&&(data.codigo_tipo_pago_simple=='PAG_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT')){
 			this.getBoton('btnAgregarDoc').enable();
 		}
 

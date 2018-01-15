@@ -88,8 +88,8 @@ BEGIN
 
     elsif p_estado_anterior = 'borrador' then
 
-        --Verifica que tenga facturas/recibos registrados cuando sea pagado Primero devengado y luego pago
-        if v_rec.codigo_tipo_pago_simple not in ( 'PAG_DEV', 'SOLO_PAG') then
+        --Verifica que tenga facturas/recibos registrados cuando sea primero devengado y luego pago
+        if v_rec.codigo_tipo_pago_simple not in ( 'PAG_DEV', 'SOLO_PAG','ADU_GEST_ANT') then
             if not exists(select 1 from cd.tpago_simple_det
                         where id_pago_simple = v_rec.id_pago_simple) then
                 raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para procesar el pago.';
@@ -99,12 +99,20 @@ BEGIN
     elsif p_estado_anterior = 'rendicion' then
       
         --Verifica que tenga facturas/recibos registrados para asociar al comprobante diario (caso Pago - Devengado)
-        if v_rec.codigo_tipo_pago_simple = 'PAG_DEV' then
+        if v_rec.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT') then
             if not exists(select 1 from cd.tpago_simple_det
                         where id_pago_simple = v_rec.id_pago_simple) then
                 raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para generar el comprobante diario';
             end if;
         end if;
+
+        if v_rec.codigo_tipo_pago_simple IN ('ADU_GEST_ANT') then
+            if not exists(select 1 from cd.tpago_simple_pro
+                        where id_pago_simple = v_rec.id_pago_simple) then
+                raise exception 'Debe registrar el prorrateo para generar el comprobante diario';
+            end if;
+        end if;        
+
 
     end if;
 
@@ -116,7 +124,7 @@ BEGIN
         --Variable global para sincronización con ENDESIS
         v_sincronizar = pxp.f_get_variable_global('sincronizar');
 
-        if v_rec.codigo_tipo_pago_simple <> 'PAG_DEV' then
+        if v_rec.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT') then
             
             --Inicio de sincronización si corresponde
             if v_sincronizar = 'true' then
@@ -151,7 +159,7 @@ BEGIN
                 select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
             end if;
 
-        else
+        elsif v_rec.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT') then
 
             --Inicio de sincronización si corresponde
             if v_sincronizar = 'true' then
@@ -194,7 +202,7 @@ BEGIN
         --Variable global para sincronización con ENDESIS
         v_sincronizar = pxp.f_get_variable_global('sincronizar');
 
-        if v_rec.codigo_tipo_pago_simple <> 'PAG_DEV' then
+        if v_rec.codigo_tipo_pago_simple NOT IN  ('PAG_DEV','ADU_GEST_ANT') then
             
             --Inicio de sincronización si corresponde
             if v_sincronizar = 'true' then
@@ -220,7 +228,7 @@ BEGIN
                 select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
             end if;
 
-        else
+        elsif v_rec.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT') then
         
             --Inicio de sincronización si corresponde
             if v_sincronizar = 'true' then
