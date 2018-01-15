@@ -94,6 +94,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('tipo_contrato','VARCHAR');
 		$this->captura('cantidad_personas','integer');
 		$this->captura('tipo_rendicion','VARCHAR');
+		$this->captura('aplicar_regla_15','VARCHAR');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -174,6 +175,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_plantilla','VARCHAR');
 		$this->captura('cantidad_personas','integer');
 		$this->captura('tipo_rendicion','varchar');
+		$this->captura('aplicar_regla_15','VARCHAR');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -218,6 +220,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_centro_costo','id_centro_costo','integer');
 		$this->setParametro('tipo_contrato','tipo_contrato','VARCHAR');
 		$this->setParametro('cantidad_personas','cantidad_personas','integer');
+		$this->setParametro('aplicar_regla_15','aplicar_regla_15','VARCHAR');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -266,6 +269,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('id_centro_costo','id_centro_costo','integer');
 		$this->setParametro('tipo_contrato','tipo_contrato','VARCHAR');
 		$this->setParametro('cantidad_personas','cantidad_personas','integer');
+		$this->setParametro('aplicar_regla_15','aplicar_regla_15','VARCHAR');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -364,7 +368,7 @@ class MODCuentaDoc extends MODbase{
 		$this->setParametro('cobertura','cobertura','varchar');
 		$this->setParametro('id_plantilla','id_plantilla','integer');
 		$this->setParametro('tipo_rendicion','tipo_rendicion','varchar');
-		
+		$this->setParametro('aplicar_regla_15','aplicar_regla_15','VARCHAR');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

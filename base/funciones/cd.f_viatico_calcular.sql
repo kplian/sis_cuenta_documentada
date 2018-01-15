@@ -12,22 +12,22 @@ CREATE OR REPLACE FUNCTION cd.f_viatico_calcular (
 RETURNS record AS
 $body$
 /**************************************************************************
- SISTEMA:		Cuenta Documenta
- FUNCION: 		cd.f_viatico_calcular
+ SISTEMA:       Cuenta Documenta
+ FUNCION:       cd.f_viatico_calcular
  DESCRIPCION:   Calcula el importe de los viáticos
- AUTOR: 		RCM
- FECHA:	        05-09-2017 17:54:29
- COMENTARIOS:	
+ AUTOR:         RCM
+ FECHA:         05-09-2017 17:54:29
+ COMENTARIOS:   
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 
- DESCRIPCION:	
- AUTOR:			
- FECHA:		
+ DESCRIPCION:   
+ AUTOR:         
+ FECHA:     
 ***************************************************************************/
 DECLARE
 
-	v_resp                              varchar;
+    v_resp                              varchar;
     v_nombre_funcion                    text;
     v_viatico                           NUMERIC;
     v_hotel                             NUMERIC;
@@ -59,15 +59,17 @@ DECLARE
     v_mensaje                           varchar;
     v_dias_hotel                        integer=0;
     v_aplico_regla_rend_llegada         boolean = false;
+    v_cob_aux                           numeric;
 
 BEGIN
 
-	v_nombre_funcion = 'cd.f_viatico_calcular';
+    v_nombre_funcion = 'cd.f_viatico_calcular';
+
     ----------------
     --VALIDACIONES
     ----------------
-	--Obtención de datos de la solicitud y cobertura seleccionada
-    select id_cuenta_doc, fecha_salida, id_funcionario, fecha_llegada, hora_salida, hora_llegada,id_escala,cantidad_personas,
+    --Obtención de datos de la solicitud y cobertura seleccionada
+    select id_cuenta_doc, fecha_salida, id_funcionario, fecha_llegada, hora_salida, hora_llegada,id_escala,cantidad_personas,aplicar_regla_15,
     case cobertura
         when 'viatico_100' then 1
         when 'viatico_70' then 0.7
@@ -84,7 +86,7 @@ BEGIN
     
     --Verificación de existencia del viático
     if v_rec_cd.id_cuenta_doc is null then
-    	raise exception 'Viático inexistente';
+        raise exception 'Viático inexistente';
     end if;
 
     --Verificación de existencia de la cobertura
@@ -162,7 +164,6 @@ BEGIN
     v_hotel = 0;
     v_total_viatico = 0;
 
-    
     --Días acumulados para aplicación de reglas
     v_saldo_inicial_dias = coalesce(v_saldo_inicial_dias,0);
     --v_saldo_inicial_dias = 10;
@@ -220,18 +221,18 @@ BEGIN
             if v_cont = 1 then
                 --Cobertura hotel
                 v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
-
+                
                 if v_rec_cd.hora_salida::time between '00:00:00'::time and '10:00:00'::time then
-                    v_cobertura_aplicada = 1;
-                    v_regla_cobertura_hora_salida = v_cobertura_aplicada;
+                    v_cobertura_aplicada = 1 * v_rec_cd.cobertura; --se aumenta * v_rec_cd.cobertura
+                    v_regla_cobertura_hora_salida = 1;
                 elsif v_rec_cd.hora_salida::time between '10:01:00'::time and '18:00:00'::time then
-                    v_cobertura_aplicada = 0.66;
-                    v_regla_cobertura_hora_salida = v_cobertura_aplicada;
+                    v_cobertura_aplicada = 0.66 * v_rec_cd.cobertura; --se aumenta * v_rec_cd.cobertura
+                    v_regla_cobertura_hora_salida = 0.66;
                 else
-                    v_cobertura_aplicada = 0.45;
-                    v_regla_cobertura_hora_salida = v_cobertura_aplicada;
+                    v_cobertura_aplicada = 0.45 * v_rec_cd.cobertura; --se aumenta * v_rec_cd.cobertura
+                    v_regla_cobertura_hora_salida = 0.45;
                 end if;
-
+                
                 v_hora_salida = v_rec_cd.hora_salida;
 
                 --Cálculo del viático por el primer día
@@ -257,9 +258,9 @@ BEGIN
                 v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
                 1
                 );
-
+                
                 v_saldo_ant_dias = v_saldo_ant_dias + 1;
-
+                
                 --Incrementa el contador
                 v_cont = v_cont + 1;
                 --Descuenta 1 día a la cantidad de días por destino
@@ -274,13 +275,13 @@ BEGIN
 
         --Regla 3: para rendiciones -> aplicar regla de horarios de llegada
         if p_tipo = 'rendicion' and v_cobertura_aplicada = 0 then
-
+            
             if v_control_dias = v_dias_total_viaje then
                 --Bandera para controlar si se aplico regla de llegadaen rendicion, para posteriormente no restarle un dia de hotel
                 v_aplico_regla_rend_llegada = true;
                 --Cobertura hotel
                 v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
-
+                
                 if v_rec_cd.hora_llegada::time between '00:00:00'::time and '09:00:00'::time then
                     v_cobertura_aplicada = 0.45;
                     v_regla_cobertura_hora_llegada = v_cobertura_aplicada;
@@ -298,6 +299,12 @@ BEGIN
                 v_total_viatico = v_total_viatico + (v_rec_escala.monto * 1 * v_cobertura_aplicada) + (v_rec_escala.monto_hotel * 1 * v_cobertura_aplicada_hotel);
                 v_viatico = v_viatico + (v_rec_escala.monto * 1 * v_cobertura_aplicada);
                 v_hotel = v_hotel + (v_rec_escala.monto_hotel * 1 * v_cobertura_aplicada_hotel);
+                
+                --Para el último día si la cobertura era 70% se coloca en 1 la cobertura solicitada
+                v_cob_aux = v_rec_cd.cobertura;
+                if v_rec_cd.cobertura = 0.7 then
+                    v_cob_aux = 1;
+                end if;
 
                 --Registro del cálculo del último día del viaje
                 insert into cd.tcuenta_doc_calculo(
@@ -311,9 +318,9 @@ BEGIN
                 ) values (
                 p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
                 p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont + 1                     ,v_rec_escala.destino,
-                v_saldo_inicial_dias+ v_dias_total_viaje - 1          ,1                              ,v_rec_cd.cobertura             ,v_dias_total_viaje,
+                v_saldo_inicial_dias+ v_dias_total_viaje - 1          ,1        ,v_cob_aux                      ,v_dias_total_viaje,
                 v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
-                v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,v_regla_cobertura_hora_salida  ,v_regla_cobertura_hora_llegada,
+                v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,0                              ,v_regla_cobertura_hora_llegada,
                 v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
                 0
                 );
@@ -330,7 +337,7 @@ BEGIN
         end if;
 
         --Regla 4: días consecutivos acumulados -> si supera los 15 días consecutivos aplica el 50%
-        if v_dias_aplicacion_regla > 15 and v_cobertura_aplicada = 0 then
+        if v_dias_aplicacion_regla > 15 and v_cobertura_aplicada = 0 and coalesce(v_rec_cd.aplicar_regla_15,'si')='si' then
             --Cobertura hotel
             v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
             
@@ -385,15 +392,64 @@ BEGIN
             --Cobertura Hotel
             v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
         end if;
-
+        
         ---------------------------------
         --(3) Cálculo del TOTAL VIÁTICO
         ---------------------------------
+        
         --Rduce un dia de hotel en el ultimo destino registrado
+        /*v_dias_hotel = v_dias_destino;
+        if v_control_dias = v_dias_total_viaje and not v_aplico_regla_rend_llegada then
+            ias_hotel = v_dias_destino - 1;
+        end if;*/
+
         v_dias_hotel = v_dias_destino;
         if v_control_dias = v_dias_total_viaje and not v_aplico_regla_rend_llegada then
+
+            --Para el último día si la cobertura era 70% se coloca en 1 la cobertura solicitada
+            v_cob_aux = v_rec_cd.cobertura;
+            if v_rec_cd.cobertura = 0.7 then
+                v_cob_aux = 1;
+            end if;
+
+            --Registro del cálculo del último día del viaje
+            v_total_viatico = v_total_viatico + (v_rec_escala.monto * 1 * v_cob_aux) + (v_rec_escala.monto_hotel * 0 * v_cobertura_aplicada_hotel);
+            v_viatico = v_viatico + (v_rec_escala.monto * 1 * v_cob_aux);
+            v_hotel = v_hotel + (v_rec_escala.monto_hotel * 0 * v_cobertura_aplicada_hotel);
+            
+            
+
+            --Registro del cálculo del último día del viaje
+            insert into cd.tcuenta_doc_calculo(
+            id_usuario_reg                  ,fecha_reg                      ,estado_reg                     ,id_usuario_ai,
+            usuario_ai                      ,id_cuenta_doc                  ,numero                         ,destino,
+            dias_saldo_ant                  ,dias_destino                   ,cobertura_sol                  ,dias_total_viaje,
+            dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
+            escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
+            regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
+            dias_hotel
+            ) values (
+            p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
+            p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont + 1                     ,v_rec_escala.destino,
+            v_saldo_inicial_dias+ v_dias_total_viaje - 1          ,1        ,v_rec_cd.cobertura             ,v_dias_total_viaje,
+            v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
+            v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,0                              ,v_regla_cobertura_hora_llegada,
+            v_regla_cobertura_total_dias    ,v_cob_aux           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
+            0
+            );
+
+            --Descuenta 1 día a la cantidad de días por destino
             v_dias_hotel = v_dias_destino - 1;
+            v_dias_aplicacion_regla = v_dias_aplicacion_regla - 1;
+            v_dias_destino = v_dias_destino - 1 ;
+            v_hora_llegada = null::time;
+            v_cobertura_aplicada = 0;
+            v_regla_cobertura_hora_llegada = 0;
+
+
+
         end if;
+
         v_viatico = v_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada);
         v_hotel = v_hotel + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
         v_total_viatico = v_total_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada) + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
@@ -430,13 +486,13 @@ BEGIN
     o_total_viatico = v_total_viatico;
 
 EXCEPTION
-				
-	WHEN OTHERS THEN
-		v_resp='';
-		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-		raise exception '%',v_resp;
+                
+    WHEN OTHERS THEN
+        v_resp='';
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+        v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+        v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+        raise exception '%',v_resp;
         
 END;
 $body$

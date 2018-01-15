@@ -280,7 +280,8 @@ BEGIN
                 cdoc.id_sigema,
                 cdoc.tipo_contrato,
                 cdoc.cantidad_personas,
-                cdoc.tipo_rendicion
+                cdoc.tipo_rendicion,
+                cdoc.aplicar_regla_15
                 from cd.tcuenta_doc cdoc
                 inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
                 inner join param.tmoneda mon on mon.id_moneda = cdoc.id_moneda
@@ -559,7 +560,8 @@ BEGIN
                             cdoc.id_plantilla,
                             pla.desc_plantilla,
                             cdoc.cantidad_personas,
-                            cdoc.tipo_rendicion
+                            cdoc.tipo_rendicion,
+                            cdoc.aplicar_regla_15
             from cd.tcuenta_doc cdoc
             inner join cd.tcuenta_doc cdo on cdo.id_cuenta_doc = cdoc.id_cuenta_doc_fk
             inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc

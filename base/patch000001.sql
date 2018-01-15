@@ -673,3 +673,20 @@ CREATE TABLE cd.tpago_simple_pro (
 ) INHERITS (pxp.tbase);
 
 /***********************************F-SCP-CD-RCM-1-14/01/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-15/01/2018****************************************/
+ALTER TABLE cd.tcuenta_doc_calculo
+  ALTER COLUMN cobertura_aplicada TYPE NUMERIC(18,4);
+
+ALTER TABLE cd.tcuenta_doc_calculo
+  ALTER COLUMN cobertura_aplicada_hotel TYPE NUMERIC(18,4);
+
+ALTER TABLE cd.tcuenta_doc_calculo
+  ALTER COLUMN cobertura_hotel_sol TYPE NUMERIC(18,4);
+
+ALTER TABLE cd.tcuenta_doc_calculo
+  ALTER COLUMN cobertura_sol TYPE NUMERIC(18,4);      
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN aplicar_regla_15 VARCHAR(2) DEFAULT 'si' NOT NULL;   
+/***********************************F-SCP-CD-RCM-1-15/01/2018****************************************/  

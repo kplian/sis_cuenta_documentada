@@ -59,7 +59,7 @@ BEGIN
     select tcdoc.codigo as codigo_tipo_cuenta_doc, cdoc.id_cuenta_doc,
     cdoc.id_plantilla, pla.desc_plantilla, cdoc.estado,
     cdoc.fecha, cdoc.nro_tramite, cdoc.id_funcionario, cdoc.id_depto,
-    cdoc.id_moneda, cdoc.id_plantilla, cdoc.tipo_contrato
+    cdoc.id_moneda, cdoc.id_plantilla, cdoc.tipo_contrato, cdoc.cantidad_personas
     into v_rec
     from cd.tcuenta_doc cdoc
     inner join cd.ttipo_cuenta_doc tcdoc
@@ -75,6 +75,11 @@ BEGIN
     --Verifica que la rendición del viático esté en estado borrador
     if v_rec.estado <> 'borrador' then
         raise exception 'La rendición de viático debe estar en estado borrador';
+    end if;
+
+    --Si la solicitud es para varias personas entonces no genera el documento de rendición, y debe hacerse manualmente
+    if coalesce(v_rec.cantidad_personas,0) > 1 then
+        return 'hecho';
     end if;
 
     if v_rec.tipo_contrato = 'planta_obra_determinada' then

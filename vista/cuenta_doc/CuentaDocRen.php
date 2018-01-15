@@ -71,6 +71,12 @@ Phx.vista.CuentaDocRen = {
 		this.Atributos[this.getIndAtributo('tipo_rendicion')].grid = true; 
 		this.Atributos[this.getIndAtributo('tipo_rendicion')].config.allowBlank = false; 
 
+		this.Atributos[this.getIndAtributo('cantidad_personas')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('cantidad_personas')].config.allowBlank=false;
+
+		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.allowBlank=false;
+
 	   	this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
 				    saldo = me.roundTwo(saldo);
@@ -273,8 +279,8 @@ Phx.vista.CuentaDocRen = {
    },
    
    onButtonNew : function() {   
-			Phx.vista.CuentaDocRen.superclass.onButtonNew.call(this);
-			this.Cmp.motivo.setValue(this.motivo);
+		Phx.vista.CuentaDocRen.superclass.onButtonNew.call(this);
+		this.Cmp.motivo.setValue(this.motivo);
    },
    
 	tabsouth: [
@@ -316,12 +322,16 @@ Phx.vista.CuentaDocRen = {
 		this.Cmp.fecha_llegada.hide();
 		this.Cmp.hora_llegada.hide();
 		this.Cmp.cobertura.hide();
+		this.Cmp.cantidad_personas.hide();
+		this.Cmp.aplicar_regla_15.hide();
 
 		this.Cmp.fecha_salida.allowBlank = true;
 		this.Cmp.hora_salida.allowBlank = true;
 		this.Cmp.fecha_llegada.allowBlank = true;
 		this.Cmp.hora_llegada.allowBlank = true;
 		this.Cmp.cobertura.allowBlank = true;
+		this.Cmp.cantidad_personas.allowBlank = true;
+		this.Cmp.aplicar_regla_15.allowBlank = true;
 
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
 
@@ -339,12 +349,16 @@ Phx.vista.CuentaDocRen = {
 			this.Cmp.fecha_llegada.show();
 			this.Cmp.hora_llegada.show();
 			this.Cmp.cobertura.show();
+			this.Cmp.cantidad_personas.show();
+			this.Cmp.aplicar_regla_15.show();
 
 			this.Cmp.fecha_salida.allowBlank = false;
 			this.Cmp.hora_salida.allowBlank = false;
 			this.Cmp.fecha_llegada.allowBlank = false;
 			this.Cmp.hora_llegada.allowBlank = false;
 			this.Cmp.cobertura.allowBlank = false;
+			this.Cmp.cantidad_personas.allowBlank = false;
+			this.Cmp.aplicar_regla_15.allowBlank = false;
 
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
 		}

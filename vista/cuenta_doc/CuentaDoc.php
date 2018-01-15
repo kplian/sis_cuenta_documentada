@@ -1026,7 +1026,33 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			filters:{pfiltro:'cdoc.tipo_rendicion',type:'string'},
 			grid: false,
 			form: false
-		}
+		},
+		{
+		    config: {
+		        name: 'aplicar_regla_15',
+		        fieldLabel: 'Aplicar Regla de 15 Días',
+		        allowBlank: true,
+		        gwidth: 150,
+		        maxLength: 50,
+		        typeAhead: true,
+		        triggerAction: 'all',
+		        lazyRender: true,
+		        mode: 'local',
+		        forceSelection: true,
+				valueField: 'variable',
+		        displayField: 'valor',
+		        anchor: '100%',
+		        store: new Ext.data.ArrayStore({
+		            fields:['variable','valor'],
+					data:  [['si','si'], ['no','no']]
+				}),
+				hidden: true
+		    },
+		    type: 'ComboBox',
+		    id_grupo: 1,
+		    grid: true,
+		    form: true
+		},
 	],
 	
 	rowExpander: new Ext.ux.grid.RowExpander({
@@ -1100,7 +1126,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{name: 'dev_caja', type: 'string'},
 		{name: 'tipo_contrato', type: 'string'},
 		{name: 'cantidad_personas', type: 'numeric'},
-		{name: 'tipo_rendicion', type: 'string'}
+		{name: 'tipo_rendicion', type: 'string'},
+		{name: 'aplicar_regla_15', type: 'string'}
 	],
 	sortInfo:{
 		field: 'id_cuenta_doc',

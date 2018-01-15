@@ -335,7 +335,8 @@ BEGIN
                 id_caja,
                 id_plantilla,
                 tipo_contrato,
-                cantidad_personas
+                cantidad_personas,
+                aplicar_regla_15
             ) values(
                 v_parametros.id_tipo_cuenta_doc,
                 v_id_proceso_wf,
@@ -371,7 +372,8 @@ BEGIN
                 v_parametros.id_caja,
                 v_id_plantilla,
                 v_parametros.tipo_contrato,
-                coalesce(v_parametros.cantidad_personas,1)
+                coalesce(v_parametros.cantidad_personas,1),
+                coalesce(v_parametros.aplicar_regla_15,'si')
             ) RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             --Inserta documentos en estado borrador si estan configurados
@@ -557,7 +559,8 @@ BEGIN
                 id_caja = v_parametros.id_caja,
                 id_plantilla = v_id_plantilla,
                 tipo_contrato = v_parametros.tipo_contrato,
-                cantidad_personas = coalesce(v_parametros.cantidad_personas,1)
+                cantidad_personas = coalesce(v_parametros.cantidad_personas,1),
+                aplicar_regla_15 = coalesce(v_parametros.aplicar_regla_15,'si')
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
             --Cálculo del viático
@@ -1091,7 +1094,8 @@ BEGIN
               c.importe,
               c.id_escala,
               c.tipo_contrato,
-              c.cantidad_personas
+              c.cantidad_personas,
+              c.aplicar_regla_15
             into
               v_registros_cd
             from cd.tcuenta_doc c
@@ -1258,7 +1262,8 @@ BEGIN
                     id_plantilla,
                     tipo_contrato,
                     cantidad_personas,
-                    tipo_rendicion
+                    tipo_rendicion,
+                    aplicar_regla_15
                 ) values(
                     v_id_tipo_cuenta_doc,
                     v_id_proceso_wf,
@@ -1293,7 +1298,8 @@ BEGIN
                     v_id_plantilla,
                     v_registros_cd.tipo_contrato,
                     v_registros_cd.cantidad_personas,
-                    v_parametros.tipo_rendicion
+                    v_parametros.tipo_rendicion,
+                    v_registros_cd.aplicar_regla_15
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             --Replica el prorrateo de la solicitud (usado en viaticos)
@@ -1446,7 +1452,8 @@ BEGIN
                 hora_llegada = v_parametros.hora_llegada::time,
                 cobertura = v_parametros.cobertura,
                 id_plantilla = v_id_plantilla,
-                tipo_rendicion = v_parametros.tipo_rendicion
+                tipo_rendicion = v_parametros.tipo_rendicion,
+                aplicar_regla_15 = coalesce(v_parametros.aplicar_regla_15,'si')
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
 
             --Cálculo del viático

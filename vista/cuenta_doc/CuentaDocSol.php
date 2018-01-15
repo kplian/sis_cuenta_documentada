@@ -77,6 +77,9 @@ Phx.vista.CuentaDocSol = {
 		this.Atributos[this.getIndAtributo('cantidad_personas')].config.hidden=false;
 		this.Atributos[this.getIndAtributo('cantidad_personas')].config.allowBlank=false;
 
+		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.allowBlank=false;
+
 		Phx.vista.CuentaDocSol.superclass.constructor.call(this, config);
 		this.bloquearOrdenamientoGrid();
 		this.iniciarEventos();
@@ -152,6 +155,10 @@ Phx.vista.CuentaDocSol = {
 		//Mostrar los combos de integracion con el SIGEMA
 		//this.mostrarCompSigema('GMAN');
 		this.crearVentanaSigema();
+
+		//Oculta bandera de la regla 15
+		this.Cmp.aplicar_regla_15.hide();
+		this.Cmp.cantidad_personas.hide();
 	},
 	EnableSelect: function(){
 		Phx.vista.CuentaDocSol.superclass.EnableSelect.call(this);
@@ -433,6 +440,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.cobertura.hide();
 		this.Cmp.id_centro_costo.hide();
 		this.Cmp.cantidad_personas.hide();
+		this.Cmp.aplicar_regla_15.hide();
 
 		this.Cmp.fecha_salida.allowBlank = true;
 		this.Cmp.hora_salida.allowBlank = true;
@@ -444,6 +452,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.cobertura.allowBlank = true;
 		this.Cmp.id_centro_costo.allowBlank = true;
 		this.Cmp.cantidad_personas.allowBlank = true;
+		this.Cmp.aplicar_regla_15.allowBlank = true;
 
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
@@ -468,6 +477,7 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.cobertura.show();
 			this.Cmp.id_centro_costo.hide();
 			this.Cmp.cantidad_personas.show();
+			this.Cmp.aplicar_regla_15.show();
 
 			this.Cmp.fecha_salida.allowBlank = false;
 			this.Cmp.fecha_llegada.allowBlank = false;
@@ -477,6 +487,7 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.cobertura.allowBlank = false;
 			this.Cmp.id_centro_costo.allowBlank = true;
 			this.Cmp.cantidad_personas.allowBlank = false;
+			this.Cmp.aplicar_regla_15.allowBlank = false;
 
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
