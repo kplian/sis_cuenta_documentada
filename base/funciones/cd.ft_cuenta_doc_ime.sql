@@ -1995,10 +1995,13 @@ BEGIN
                 select 1
                 from sigema sigra
                 left join param.vcentro_costo cc
-                on cc.codigo_tcc = 'X_'||sigra.codigo_cc
+                on cc.codigo_tcc = sigra.codigo_cc
                 and cc.gestion = sigra.gestion::integer
                 where sigra.id_sigema = v_parametros.id_sigema
                 and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema) then
+
+              raise exception 'No se encuentra el Centro de Costo asociado';
+
             end if;
 
             --Replica el prorrateo de las vistas del SIGEMA
@@ -2008,7 +2011,7 @@ BEGIN
             select p_id_usuario,now(),'activo',v_parametros.id_cuenta_doc,cc.id_centro_costo,sigra.porcentajeasignado/100
             from sigema sigra
             left join param.vcentro_costo cc
-            on cc.codigo_tcc = 'X_'||sigra.codigo_cc
+            on cc.codigo_tcc = sigra.codigo_cc
             and cc.gestion = sigra.gestion::integer
             where sigra.id_sigema = v_parametros.id_sigema
             and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema;

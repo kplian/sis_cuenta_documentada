@@ -101,42 +101,90 @@ BEGIN
             on cp.id_concepto_ingas = conig.id_concepto_ingas
             where conig.id_concepto_ingas = v_parametros.id_concepto_ingas;
 
+            --Verifica si se usa el prorrateo o no
+            if v_parametros.usar_prorrateo = 'no' then
 
-        	--Sentencia de la insercion
-        	insert into cd.tcuenta_doc_det(
-			id_cuenta_doc,
-			monto_mb,
-			id_centro_costo,
-			id_concepto_ingas,
-			id_partida,
-			monto_mo,
-			estado_reg,
-			id_usuario_ai,
-			usuario_ai,
-			fecha_reg,
-			id_usuario_reg,
-			fecha_mod,
-			id_usuario_mod,
-			id_moneda,
-			id_moneda_mb
-          	) values(
-			v_parametros.id_cuenta_doc,
-			v_importe,
-			v_parametros.id_centro_costo,
-			v_parametros.id_concepto_ingas,
-			v_id_partida,
-			v_parametros.monto_mo,
-			'activo',
-			v_parametros._id_usuario_ai,
-			v_parametros._nombre_usuario_ai,
-			now(),
-			p_id_usuario,
-			null,
-			null,
-			v_id_moneda,	
-			v_id_moneda_base
-			
-			)RETURNING id_cuenta_doc_det into v_id_cuenta_doc_det;
+            	--Sentencia de la insercion
+	        	insert into cd.tcuenta_doc_det(
+				id_cuenta_doc,
+				monto_mb,
+				id_centro_costo,
+				id_concepto_ingas,
+				id_partida,
+				monto_mo,
+				estado_reg,
+				id_usuario_ai,
+				usuario_ai,
+				fecha_reg,
+				id_usuario_reg,
+				fecha_mod,
+				id_usuario_mod,
+				id_moneda,
+				id_moneda_mb
+	          	) values(
+				v_parametros.id_cuenta_doc,
+				v_importe,
+				v_parametros.id_centro_costo,
+				v_parametros.id_concepto_ingas,
+				v_id_partida,
+				v_parametros.monto_mo,
+				'activo',
+				v_parametros._id_usuario_ai,
+				v_parametros._nombre_usuario_ai,
+				now(),
+				p_id_usuario,
+				null,
+				null,
+				v_id_moneda,	
+				v_id_moneda_base
+				
+				)RETURNING id_cuenta_doc_det into v_id_cuenta_doc_det;
+
+            else
+
+            	if not exists(select 1
+				          	from cd.tcuenta_doc_prorrateo
+				          	where id_cuenta_doc = v_parametros.id_cuenta_doc) then
+            		raise exception 'Debe registrar el prorrateo previamente, o de lo contrario definir el centro de costo directamente';
+            	end if;
+
+            	insert into cd.tcuenta_doc_det(
+				id_cuenta_doc,
+				monto_mb,
+				id_centro_costo,
+				id_concepto_ingas,
+				id_partida,
+				monto_mo,
+				estado_reg,
+				id_usuario_ai,
+				usuario_ai,
+				fecha_reg,
+				id_usuario_reg,
+				fecha_mod,
+				id_usuario_mod,
+				id_moneda,
+				id_moneda_mb
+	          	)
+	          	select
+	          	v_parametros.id_cuenta_doc,
+				v_importe * cdpro.prorrateo,
+				cdpro.id_centro_costo,
+				v_parametros.id_concepto_ingas,
+				v_id_partida,
+				v_parametros.monto_mo * cdpro.prorrateo,
+				'activo',
+				v_parametros._id_usuario_ai,
+				v_parametros._nombre_usuario_ai,
+				now(),
+				p_id_usuario,
+				null,
+				null,
+				v_id_moneda,	
+				v_id_moneda_base
+	          	from cd.tcuenta_doc_prorrateo cdpro
+	          	where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            end if;
 
 			--Actualizacion del importe total en la cabecera
 			v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_parametros.id_cuenta_doc);
