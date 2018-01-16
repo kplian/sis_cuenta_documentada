@@ -73,6 +73,7 @@ class MODCuentaDocDet extends MODbase{
 		$this->setParametro('estado_reg','estado_reg','varchar');
 		$this->setParametro('id_moneda','id_moneda','int4');
 		$this->setParametro('id_moneda_mb','id_moneda_mb','int4');
+		$this->setParametro('usar_prorrateo','usar_prorrateo','varchar');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();

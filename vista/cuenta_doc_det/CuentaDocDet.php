@@ -26,6 +26,8 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
         } else {
            this.bloquearMenus();
         }
+
+        this.iniciarEventos();
 	},
 			
 	Atributos:[
@@ -67,6 +69,32 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
             grid: true,
             form: true
         },
+        {
+		    config: {
+		        name: 'usar_prorrateo',
+		        fieldLabel: 'Usar Prorrateo',
+		        allowBlank: false,
+		        gwidth: 150,
+		        maxLength: 50,
+		        typeAhead: false,
+		        triggerAction: 'all',
+		        lazyRender: true,
+		        mode: 'local',
+		        forceSelection: true,
+				valueField: 'variable',
+		        displayField: 'valor',
+		        anchor: '100%',
+		        store: new Ext.data.ArrayStore({
+		            fields:['variable','valor'],
+					data:  [['si','si'], ['no','no']]
+				}),
+				value: 'si'
+		    },
+		    type: 'ComboBox',
+		    id_grupo: 1,
+		    grid: true,
+		    form: true
+		},
         {
 			config:{
 				name: 'monto_mo',
@@ -446,7 +474,37 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
 			this.getBoton('del').hide();
 			this.getBoton('save').hide();
 		}
-    }
+    },
+    iniciarEventos: function(){
+    	this.Cmp.usar_prorrateo.on('select',function(data,rec,ind){
+        	this.Cmp.id_centro_costo.setDisabled(true);
+        	this.Cmp.id_centro_costo.allowBlank=true;
+        	this.Cmp.id_centro_costo.setValue('');
+
+    		if(rec.data.valor=='no'){
+		        this.Cmp.id_centro_costo.setDisabled(false);
+		        this.Cmp.id_centro_costo.allowBlank=false;
+    		}
+    		//this.Cmp.id_centro_costo
+    	},this);
+    },
+
+    onButtonNew:function(){
+        Phx.vista.CuentaDocDet.superclass.onButtonNew.call(this);
+        this.Cmp.usar_prorrateo.show();
+        this.Cmp.usar_prorrateo.setValue('si');
+        this.Cmp.id_centro_costo.setDisabled(true);
+        this.Cmp.id_centro_costo.allowBlank=true;
+    },
+
+	onButtonEdit:function(){
+        Phx.vista.CuentaDocDet.superclass.onButtonEdit.call(this);
+        this.Cmp.usar_prorrateo.hide();
+        this.Cmp.usar_prorrateo.allowBlank = true;
+        this.Cmp.id_centro_costo.setDisabled(false);
+        this.Cmp.id_centro_costo.allowBlank=false;
+
+    },    
 
 })
 </script>
