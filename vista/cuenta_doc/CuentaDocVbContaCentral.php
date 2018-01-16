@@ -7,16 +7,8 @@
 *@description Archivo con la interfaz de usuario que permite 
 *dar el visto a rendiciones desde la oficina Central
 *
-*/<?php
-/**
-*@package pXP
-*@file CuentaDocVbContaCentral.php
-*@author  Gonzalo Sarmiento
-*@date 17-08-2016
-*@description Archivo con la interfaz de usuario que permite 
-*dar el visto a rendiciones desde la oficina Central
-*
 */
+
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
@@ -73,7 +65,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 
         };
 
-        //Se aumenta columna para la devolución
+        //Se aumenta columna para la devoluciï¿½n
         this.Atributos.push({
             config:{
                 name: 'devolucion',
@@ -113,7 +105,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 iconCls : 'bprint',
                 disabled : false,
                 handler : this.onButtonMemoDesignacion,
-                tooltip : '<b>Reporte de designación</b>'
+                tooltip : '<b>Reporte de designaciï¿½n</b>'
         });
 
         this.addButton('btnSaldo', {
@@ -141,7 +133,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         
         this.finCons = true;
 
-        //Crea ventana para devolución de saldos
+        //Crea ventana para devoluciï¿½n de saldos
         this.crearVentanaDevolucion();
    },
    
@@ -171,7 +163,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
-         //Habilita boton de Devoluciones cuando dev_tipo sea vacío
+         //Habilita boton de Devoluciones cuando dev_tipo sea vacï¿½o
          this.getBoton('btnSaldo').disable();
          if(!data.dev_tipo&&data.estado == 'vbrendicion'){
             this.getBoton('btnSaldo').enable();
@@ -253,7 +245,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 Phx.CP.loadingHide();
                 var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
                 if(reg.datos.a_favor_de=='funcionario'){
-                    //Verificación de opción de devolución en función del monto
+                    //Verificaciï¿½n de opciï¿½n de devoluciï¿½n en funciï¿½n del monto
                     if(reg.datos.por_caja=='si'){
                         //Abrir ventana para pedir datos de la caja y generar solicitud de efectivo a favor del funcionario
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
@@ -261,7 +253,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                             data :  [['cheque','cheque'],['caja','caja']]}
                         );
                     } else {
-                        //Por cheque: abrir ventana para pedir datos para generación del cheque a favor del funcionario
+                        //Por cheque: abrir ventana para pedir datos para generaciï¿½n del cheque a favor del funcionario
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
                             fields :['variable','valor'],
                             data :  [['cheque','cheque']]}
@@ -270,7 +262,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 
                 } else {
                     //'empresa'
-                    //Verificación de opción de devolución en función del monto
+                    //Verificaciï¿½n de opciï¿½n de devoluciï¿½n en funciï¿½n del monto
                     if(reg.datos.por_caja=='si'){
                         //Abrir ventana para pedir datos de la caja y generar recibo de ingreso en caja
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
@@ -279,7 +271,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                         );
 
                     } else {
-                        //Habilitar tab para el registro del depósito
+                        //Habilitar tab para el registro del depï¿½sito
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
                             fields :['variable','valor'],
                             data :  [['deposito','deposito']]}
@@ -323,7 +315,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             fieldLabel: 'Saldo',
             readOnly: true
         });
-        //Combo Forma de devolución
+        //Combo Forma de devoluciï¿½n
         this.cmbFormaDev = new Ext.form.ComboBox({
             name: 'cmbFormaDev',
             fieldLabel: 'Forma Devolucion',
@@ -521,7 +513,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.cmbFormaDev.on('select', function(combo,record,index){
             var rec=this.sm.getSelected();
 
-            //Inicialización
+            //Inicializaciï¿½n
             this.cmbCaja.allowBlank = true;
             this.cmbCaja.setVisible(false);
             this.txtNombreCheque.allowBlank=true;
@@ -531,7 +523,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             this.cmbDeptoLb.allowBlank = true;
             this.cmbDeptoLb.setVisible(false);
 
-            //Lógica
+            //Lï¿½gica
             if(record.data.valor=='caja'){
                 this.cmbCaja.allowBlank = false;
                 this.cmbCaja.setVisible(true);
@@ -622,7 +614,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             return;
         }
 
-        //Confirmación de generación de la devolución
+        //Confirmaciï¿½n de generaciï¿½n de la devoluciï¿½n
         Ext.MessageBox.confirm('Confirmacion', 'Al generar la Devolucion/reposicion la Cuenta Documentada se cerrara y no podra incluir mas descargos. Esta seguro de continuar?',function(resp){
             if(resp=='yes'){
                 Phx.CP.loadingShow();
@@ -657,16 +649,16 @@ Phx.vista.CuentaDocVbContaCentral = {
             success: function(resp){
                 Phx.CP.loadingHide();
                 var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
-                //Si ya se definió la forma de devolución, hace las validaciones correspondientes antes de abrir el wizard
+                //Si ya se definiï¿½ la forma de devoluciï¿½n, hace las validaciones correspondientes antes de abrir el wizard
                 console.log(reg.datos.tipo_rendicion)
-                //Si la rendición es final obliga a que realice la introducción de datos de la Devolución/Reposición
+                //Si la rendiciï¿½n es final obliga a que realice la introducciï¿½n de datos de la Devoluciï¿½n/Reposiciï¿½n
                 if(reg.datos.tipo_rendicion=='final'){
                     if(reg.datos.dev_tipo){
                         if(reg.datos.dev_tipo=='caja'||reg.datos.dev_tipo=='cheque'){
                             //Si es por caja o cheque abre directo el wizard
                             this.mostrarWizard(rec);
                         } else if(reg.datos.dev_tipo=='deposito'){
-                            //Valida que se hayan registrado los depósitos
+                            //Valida que se hayan registrado los depï¿½sitos
                             this.validaDepositos(rec,reg.datos);
                         } else {
                             Ext.MessageBox.alert('Alerta','La Rendicion esta marcada como Final. Registre los datos de la Devolucion/Reposicion para continuar.');    
@@ -683,7 +675,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                         //Si es por caja o cheque abre directo el wizard
                         this.mostrarWizard(rec);
                     } else if(reg.datos.dev_tipo=='deposito'){
-                        //Valida que se hayan registrado los depósitos
+                        //Valida que se hayan registrado los depï¿½sitos
                         this.validaDepositos(rec,reg.datos);
                     } else {
                         Ext.MessageBox.alert('Alerta','Tipo de devolucion no valida ('+reg.datos.dev_tipo+')');
@@ -791,7 +783,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 
 		};
 
-        //Se aumenta columna para la devolución
+        //Se aumenta columna para la devoluciï¿½n
         this.Atributos.push({
             config:{
                 name: 'devolucion',
@@ -831,7 +823,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 				iconCls : 'bprint',
 				disabled : false,
 				handler : this.onButtonMemoDesignacion,
-				tooltip : '<b>Reporte de designación</b>'
+				tooltip : '<b>Reporte de designaciï¿½n</b>'
 		});
 
         this.addButton('btnSaldo', {
@@ -859,7 +851,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 		
 		this.finCons = true;
 
-        //Crea ventana para devolución de saldos
+        //Crea ventana para devoluciï¿½n de saldos
         this.crearVentanaDevolucion();
    },
    
@@ -889,7 +881,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
-         //Habilita boton de Devoluciones cuando dev_tipo sea vacío
+         //Habilita boton de Devoluciones cuando dev_tipo sea vacï¿½o
          this.getBoton('btnSaldo').disable();
          if(!data.dev_tipo&&data.estado == 'vbrendicion'){
             this.getBoton('btnSaldo').enable();
@@ -971,7 +963,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 Phx.CP.loadingHide();
                 var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
                 if(reg.datos.a_favor_de=='funcionario'){
-                    //Verificación de opción de devolución en función del monto
+                    //Verificaciï¿½n de opciï¿½n de devoluciï¿½n en funciï¿½n del monto
                     if(reg.datos.por_caja=='si'){
                         //Abrir ventana para pedir datos de la caja y generar solicitud de efectivo a favor del funcionario
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
@@ -979,7 +971,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                             data :  [['cheque','cheque'],['caja','caja']]}
                         );
                     } else {
-                        //Por cheque: abrir ventana para pedir datos para generación del cheque a favor del funcionario
+                        //Por cheque: abrir ventana para pedir datos para generaciï¿½n del cheque a favor del funcionario
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
                             fields :['variable','valor'],
                             data :  [['cheque','cheque']]}
@@ -988,7 +980,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 
                 } else {
                     //'empresa'
-                    //Verificación de opción de devolución en función del monto
+                    //Verificaciï¿½n de opciï¿½n de devoluciï¿½n en funciï¿½n del monto
                     if(reg.datos.por_caja=='si'){
                         //Abrir ventana para pedir datos de la caja y generar recibo de ingreso en caja
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
@@ -997,7 +989,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                         );
 
                     } else {
-                        //Habilitar tab para el registro del depósito
+                        //Habilitar tab para el registro del depï¿½sito
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
                             fields :['variable','valor'],
                             data :  [['deposito','deposito']]}
@@ -1041,7 +1033,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             fieldLabel: 'Saldo',
             readOnly: true
         });
-        //Combo Forma de devolución
+        //Combo Forma de devoluciï¿½n
         this.cmbFormaDev = new Ext.form.ComboBox({
             name: 'cmbFormaDev',
             fieldLabel: 'Forma Devolucion',
@@ -1239,7 +1231,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.cmbFormaDev.on('select', function(combo,record,index){
             var rec=this.sm.getSelected();
 
-            //Inicialización
+            //Inicializaciï¿½n
             this.cmbCaja.allowBlank = true;
             this.cmbCaja.setVisible(false);
             this.txtNombreCheque.allowBlank=true;
@@ -1249,7 +1241,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             this.cmbDeptoLb.allowBlank = true;
             this.cmbDeptoLb.setVisible(false);
 
-            //Lógica
+            //Lï¿½gica
             if(record.data.valor=='caja'){
                 this.cmbCaja.allowBlank = false;
                 this.cmbCaja.setVisible(true);
@@ -1340,7 +1332,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             return;
         }
 
-        //Confirmación de generación de la devolución
+        //Confirmaciï¿½n de generaciï¿½n de la devoluciï¿½n
         Ext.MessageBox.confirm('Confirmacion', 'Al generar la Devolucion/reposicion la Cuenta Documentada se cerrara y no podra incluir mas descargos. Esta seguro de continuar?',function(resp){
             if(resp=='yes'){
                 Phx.CP.loadingShow();
@@ -1375,16 +1367,16 @@ Phx.vista.CuentaDocVbContaCentral = {
             success: function(resp){
                 Phx.CP.loadingHide();
                 var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
-                //Si ya se definió la forma de devolución, hace las validaciones correspondientes antes de abrir el wizard
+                //Si ya se definiï¿½ la forma de devoluciï¿½n, hace las validaciones correspondientes antes de abrir el wizard
                 console.log(reg.datos.tipo_rendicion)
-                //Si la rendición es final obliga a que realice la introducción de datos de la Devolución/Reposición
+                //Si la rendiciï¿½n es final obliga a que realice la introducciï¿½n de datos de la Devoluciï¿½n/Reposiciï¿½n
                 if(reg.datos.tipo_rendicion=='final'){
                     if(reg.datos.dev_tipo){
                         if(reg.datos.dev_tipo=='caja'||reg.datos.dev_tipo=='cheque'){
                             //Si es por caja o cheque abre directo el wizard
                             this.mostrarWizard(rec);
                         } else if(reg.datos.dev_tipo=='deposito'){
-                            //Valida que se hayan registrado los depósitos
+                            //Valida que se hayan registrado los depï¿½sitos
                             this.validaDepositos(rec,reg.datos);
                         } else {
                             Ext.MessageBox.alert('Alerta','La Rendicion esta marcada como Final. Registre los datos de la Devolucion/Reposicion para continuar.');    
@@ -1401,7 +1393,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                         //Si es por caja o cheque abre directo el wizard
                         this.mostrarWizard(rec);
                     } else if(reg.datos.dev_tipo=='deposito'){
-                        //Valida que se hayan registrado los depósitos
+                        //Valida que se hayan registrado los depï¿½sitos
                         this.validaDepositos(rec,reg.datos);
                     } else {
                         Ext.MessageBox.alert('Alerta','Tipo de devolucion no valida ('+reg.datos.dev_tipo+')');

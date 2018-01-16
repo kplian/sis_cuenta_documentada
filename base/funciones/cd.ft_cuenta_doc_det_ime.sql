@@ -38,14 +38,15 @@ DECLARE
 	v_resp1 				varchar;
 	v_id_cuenta_doc 		integer;
 	v_id_moneda				integer;
+	v_permitir_mod			varchar;
 			    
 BEGIN
 
     v_nombre_funcion = 'cd.ft_cuenta_doc_det_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-   
-    
+    v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
+
 
 	/*********************************    
  	#TRANSACCION:  'CD_CDET_INS'
@@ -66,33 +67,19 @@ BEGIN
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-		    --Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
-			/*if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
-				select escr.id_concepto_ingas
-				into v_id_concepto_ingas
-			    from cd.tcuenta_doc cd
-			    left join cd.tescala_regla escr
-			    on escr.id_escala = cd.id_escala
-			    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
-			end if;    
-
-        	--Si es viático, verifica que no se esté registrando el concepto de gasto de viáticos
-        	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_parametros.id_concepto_ingas = v_id_concepto_ingas then
-        		raise exception 'El Concepto de gasto de Viáticos, no puede registrarse manualmente. El sistema lo calculará automáticamente después de registrar el Itinerario.';
-        	end if;*/
-
         	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
-        	if exists (select 1
-					    from cd.tcuenta_doc cd
-					    left join cd.tescala_regla escr
-					    on escr.id_escala = cd.id_escala
-					    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
-					    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
+        	if v_permitir_mod = 'no' then
+	        	if exists (select 1
+						    from cd.tcuenta_doc cd
+						    left join cd.tescala_regla escr
+						    on escr.id_escala = cd.id_escala
+						    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+						    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+						    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
 
-        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede registrarse manualmente. El sistema lo calculará automáticamente después de registrar el Itinerario.';
+	        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no pueden registrarse manualmente. El sistema los calculará automáticamente después de registrar el Itinerario.';
 
+	        	end if;
         	end if;
 
         	--Obtiene la moneda base
@@ -182,33 +169,19 @@ BEGIN
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-		    /*--Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
-			if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
-				select escr.id_concepto_ingas
-				into v_id_concepto_ingas
-			    from cd.tcuenta_doc cd
-			    left join cd.tescala_regla escr
-			    on escr.id_escala = cd.id_escala
-			    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
-			end if;    
-
-			--Si es viático, verifica que no se esté modificando el concepto de gasto de viáticos
-        	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_parametros.id_concepto_ingas = v_id_concepto_ingas then
-        		raise exception 'El Concepto de gasto de Viáticos, no puede modificarse manualmente. El sistema lo actualizará el total por cada cambio en el itinerario.';
-        	end if;*/
-
         	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
-        	if exists (select 1
-					    from cd.tcuenta_doc cd
-					    left join cd.tescala_regla escr
-					    on escr.id_escala = cd.id_escala
-					    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
-					    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
+        	if v_permitir_mod = 'no' then
+	        	if exists (select 1
+						    from cd.tcuenta_doc cd
+						    left join cd.tescala_regla escr
+						    on escr.id_escala = cd.id_escala
+						    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+						    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+						    and escr.id_concepto_ingas = v_parametros.id_concepto_ingas) then
 
-        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede modificarse manualmente. El sistema lo actualizará el total por cada cambio en el itinerario.';
+	        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no pueden modificarse manualmente. El sistema los actualizará el total por cada cambio en el itinerario.';
 
+	        	end if;
         	end if;
 
 			--Obtiene la moneda base
@@ -279,36 +252,20 @@ BEGIN
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det;
 
-		    /*--Si es viático, obtiene el concepto de gasto de viáticos para impedir registro, modificación o eliminación del mismo
-			if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
-				select escr.id_concepto_ingas, cdocd.id_concepto_ingas
-				into v_id_concepto_ingas, v_id_concepto_ingas1
-			    from  cd.tcuenta_doc_det cdocd
-		    	inner join cd.tcuenta_doc cd
-		    	on cd.id_cuenta_doc = cdocd.id_cuenta_doc
-			    left join cd.tescala_regla escr
-			    on escr.id_escala = cd.id_escala
-			    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det
-			    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER');
-			end if;    
-
-			--Si es viático, verifica que no se esté eliminando el concepto de gasto de viáticos
-        	if v_codigo_tipo_cuenta_doc = 'SOLVIA' and v_id_concepto_ingas1 = v_id_concepto_ingas then
-        		raise exception 'El Concepto de gasto de Viáticos, no puede eliminarse manualmente.';
-        	end if;*/
-
         	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
-        	if exists (select 1 from  cd.tcuenta_doc_det cdocd
-				    	inner join cd.tcuenta_doc cd
-				    	on cd.id_cuenta_doc = cdocd.id_cuenta_doc
-					    left join cd.tescala_regla escr
-					    on escr.id_escala = cd.id_escala
-					    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det
-					    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
-					    and escr.id_concepto_ingas = cdocd.id_concepto_ingas) then
+        	if v_permitir_mod = 'no' then
+	        	if exists (select 1 from  cd.tcuenta_doc_det cdocd
+					    	inner join cd.tcuenta_doc cd
+					    	on cd.id_cuenta_doc = cdocd.id_cuenta_doc
+						    left join cd.tescala_regla escr
+						    on escr.id_escala = cd.id_escala
+						    where cdocd.id_cuenta_doc_det = v_parametros.id_cuenta_doc_det
+						    and escr.codigo in ('CONGAS_VIA_PLA','CONGAS_VIA_SER','CONGAS_HOT_PLA','CONGAS_HOT_SER')
+						    and escr.id_concepto_ingas = cdocd.id_concepto_ingas) then
 
-        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no puede eliminarse manualmente.';
+	        		raise exception 'Los Conceptos de gasto de Viáticos o de Hotel, no pueden eliminarse manualmente.';
 
+	        	end if;
         	end if;
 
 			--Sentencia de la eliminacion
