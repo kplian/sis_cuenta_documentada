@@ -906,8 +906,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				tinit: false,
 				allowBlank: true,
 				origen: 'CATALOGO',
-				gdisplayField: 'tipo_viaje',
-				hiddenName: 'tipo_viaje',
+				gdisplayField: 'medio_transporte',
+				hiddenName: 'medio_transporte',
 				gwidth: 100,
 				anchor: '100%',
 				baseParams:{
@@ -1052,7 +1052,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		    id_grupo: 1,
 		    grid: true,
 		    form: true
-		},
+		}
 	],
 	
 	rowExpander: new Ext.ux.grid.RowExpander({

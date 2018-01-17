@@ -596,3 +596,9 @@ select pxp.f_insert_testructura_gui ('PGSTIPPA', 'PAGSIM');
 select pxp.f_add_catalog('CD','tcuenta_doc__tipo_rendicion','Parcial','parcial','');
 select pxp.f_add_catalog('CD','tcuenta_doc__tipo_rendicion','Final','final','');
 /***********************************F-DAT-RCM-CD-0-12/01/2018*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-16/01/2018*****************************************/
+INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
+VALUES 
+  (E'cd_permitir_modificar_monto_sol', E'si', E'Bandera para permitiri o no la modificación de importes en la solicitud de cuenta documentada');
+/***********************************F-DAT-RCM-CD-0-16/01/2018*****************************************/

@@ -107,6 +107,7 @@ DECLARE
     v_cod_concepto_ingas            varchar;
     v_regla_max_sol                 integer;
     v_sol_abiertas                  varchar;
+    v_permitir_mod          varchar;
 
 BEGIN
 
@@ -777,12 +778,15 @@ BEGIN
                     end if;
 
                     --Verifica que tenga registrado al menos el concepto de gasto de viático
-                    if not exists(select 1 from cd.tcuenta_doc_det
-                                where id_cuenta_doc = v_parametros.id_cuenta_doc
-                                and id_concepto_ingas = v_id_concepto_ingas) then
-                        raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                    v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
+                    if v_permitir_mod = 'no' then
+                      if not exists(select 1 from cd.tcuenta_doc_det
+                                  where id_cuenta_doc = v_parametros.id_cuenta_doc
+                                  and id_concepto_ingas = v_id_concepto_ingas) then
+                            raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                        end if;
+                    
                     end if;
-
 
                 end if;
 

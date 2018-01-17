@@ -2,12 +2,12 @@ CREATE OR REPLACE FUNCTION cd.f_viatico_calcular (
   p_id_usuario integer,
   p_id_usuario_ai integer,
   p_usuario_ai varchar,
-  p_id_cuenta_doc INTEGER,
-  p_tipo varchar = 'solicitud',
-  out o_viatico NUMERIC,
-  out o_hotel NUMERIC,
-  out o_total_dias INTEGER,
-  out o_total_viatico NUMERIC
+  p_id_cuenta_doc integer,
+  p_tipo varchar = 'solicitud'::character varying,
+  out o_viatico numeric,
+  out o_hotel numeric,
+  out o_total_dias integer,
+  out o_total_viatico numeric
 )
 RETURNS record AS
 $body$
@@ -168,6 +168,8 @@ BEGIN
     v_saldo_inicial_dias = coalesce(v_saldo_inicial_dias,0);
     --v_saldo_inicial_dias = 10;
     v_dias_aplicacion_regla = coalesce(v_saldo_inicial_dias,0);
+    
+    
 
     --Recorrido del itinerario de viaje
     for v_rec in select *
@@ -385,6 +387,8 @@ BEGIN
             v_regla_cobertura_dias_acum = v_cobertura_aplicada;
             
         end if;
+        
+        
 
         --Regla por defecto: Cobertura solicitada. En caso de que no aplique ninguna regla anterior, aplica la cobertura de la solicitud
         if v_cobertura_aplicada = 0 then
@@ -392,6 +396,8 @@ BEGIN
             --Cobertura Hotel
             v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
         end if;
+        
+        
         
         ---------------------------------
         --(3) Cálculo del TOTAL VIÁTICO
@@ -404,6 +410,8 @@ BEGIN
         end if;*/
 
         v_dias_hotel = v_dias_destino;
+        
+        
         if v_control_dias = v_dias_total_viaje and not v_aplico_regla_rend_llegada then
 
             --Para el último día si la cobertura era 70% se coloca en 1 la cobertura solicitada
@@ -411,6 +419,8 @@ BEGIN
             if v_rec_cd.cobertura = 0.7 then
                 v_cob_aux = 1;
             end if;
+            
+            
 
             --Registro del cálculo del último día del viaje
             v_total_viatico = v_total_viatico + (v_rec_escala.monto * 1 * v_cob_aux) + (v_rec_escala.monto_hotel * 0 * v_cobertura_aplicada_hotel);
@@ -446,8 +456,13 @@ BEGIN
             v_cobertura_aplicada = 0;
             v_regla_cobertura_hora_llegada = 0;
 
-
-
+        end if;
+        
+         --Regla por defecto: Cobertura solicitada. En caso de que no aplique ninguna regla anterior, aplica la cobertura de la solicitud
+        if v_cobertura_aplicada = 0 then
+            v_cobertura_aplicada = v_rec_cd.cobertura;
+            --Cobertura Hotel
+            v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
         end if;
 
         v_viatico = v_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada);
@@ -499,4 +514,5 @@ $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
-SECURITY INVOKER;
+SECURITY INVOKER
+COST 100;
