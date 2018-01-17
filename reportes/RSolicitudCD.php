@@ -259,7 +259,8 @@ class RSolicitudCD extends  ReportePDF {
 					'espacio' => 'TOTAL: ',
 					't2' => $this->t2
 				);
-		$this-> MultiRow($RowArray,false,1);	
+		$this-> MultiRow($RowArray,false,1);
+		$this->t2 = 0;	
 	}
 	//
 	function calcularMontos($val){
