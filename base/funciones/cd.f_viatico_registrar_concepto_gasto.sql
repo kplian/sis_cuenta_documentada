@@ -170,6 +170,7 @@ BEGIN
     inner join cd.tcuenta_doc_prorrateo cp
     on cp.id_cuenta_doc = cdoc.id_cuenta_doc
     where cdocca.id_cuenta_doc = p_id_cuenta_doc
+    and cdocca.parcial_viatico > 0
     group by cdoc.id_moneda, cdoc.fecha, cp.id_centro_costo, cp.prorrateo;
 
     --Obtención de la partida del concepto de gasto HOTEL
@@ -222,6 +223,7 @@ BEGIN
     inner join cd.tcuenta_doc_prorrateo cp
     on cp.id_cuenta_doc = cdoc.id_cuenta_doc
     where cdocca.id_cuenta_doc = p_id_cuenta_doc
+    and cdocca.parcial_hotel > 0
     group by cdoc.id_moneda, cdoc.fecha, cp.id_centro_costo, cp.prorrateo;
 
 
