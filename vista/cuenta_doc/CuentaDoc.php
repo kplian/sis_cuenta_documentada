@@ -1052,7 +1052,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		    id_grupo: 1,
 		    grid: true,
 		    form: true
-		},
+		}
 	],
 	
 	rowExpander: new Ext.ux.grid.RowExpander({
