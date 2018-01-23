@@ -116,9 +116,9 @@ BEGIN
     --------------------------------------------------
     --Obtener el total que corresponde al itinerario realizado
     select
-    sum((cdocca.dias_destino * cdocca.cobertura_aplicada * cdocca.escala_viatico) /*+ ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel)*/)
+    sum(parcial_viatico /*+ ((cdocca.dias_destino-1) * cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel)*/)
     into v_total_viatico
-    from cd.tcuenta_doc_calculo cdocca
+    from cd.vcuenta_doc_calculo cdocca
     where cdocca.id_cuenta_doc = p_id_cuenta_doc;
 
     --Obtiene el ID del documento del viatico generado

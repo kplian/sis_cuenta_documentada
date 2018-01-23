@@ -19,10 +19,12 @@ Phx.vista.FormRendicionCD = {
 	heightHeader: 245,
 	autorizacion: 'fondo_avance',
 	autorizacion_nulos: 'no',
+	mostrarFuncionario: true,
 		
 	constructor: function(config) {	
 		console.log('aaa',config);
-	   Phx.vista.FormRendicionCD.superclass.constructor.call(this,config);	   
+	   Phx.vista.FormRendicionCD.superclass.constructor.call(this,config);
+	   //this.Cmp.id_funcionario.allowBlank = true;
     },
     
     extraAtributos:[

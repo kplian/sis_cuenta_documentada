@@ -688,7 +688,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'nro_correspondencia',
-				fieldLabel: 'Nro Correspondencia',
+				fieldLabel: 'Nro.Informe',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -926,7 +926,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 		{
 			config: {
 				name: 'cobertura',
-				fieldLabel: 'Cobertura',
+				fieldLabel: 'Tipo de Viático/Cobertura',
 				anchor: '100%',
 				tinit: false,
 				allowBlank: false,

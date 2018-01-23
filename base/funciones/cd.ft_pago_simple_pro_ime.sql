@@ -27,6 +27,7 @@ DECLARE
 	v_mensaje_error         text;
 	v_id_pago_simple_pro	integer;
 	v_id_partida			integer;
+	v_id_gestion 			integer;
 			    
 BEGIN
 
@@ -44,13 +45,29 @@ BEGIN
 					
         begin
 
+        	--Obtencion de la gestion a partir del centro de costo
+        	select id_gestion
+        	into v_id_gestion
+        	from param.vcentro_costo
+        	where id_centro_costo = v_parametros.id_centro_costo;
+
         	--Obtención de la partida a partir del concepto de gasto
-        	select cp.id_partida
+        	select par.id_partida
         	into v_id_partida
         	from param.tconcepto_ingas conig
             inner join pre.tconcepto_partida cp
             on cp.id_concepto_ingas = conig.id_concepto_ingas
-            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas;
+            inner join pre.tpartida par on par.id_partida = cp.id_partida
+            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas
+            and par.id_gestion = v_id_gestion;
+
+            --Verifica el estado de la solicitud
+            if not exists(select 1 from cd.tpago_simple
+            			where id_pago_simple = v_parametros.id_pago_simple
+            			and estado in ('rendicion','vbconta')
+            			) then
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            end if;
 
         	--Sentencia de la insercion
         	insert into cd.tpago_simple_pro(
@@ -79,9 +96,6 @@ BEGIN
 			v_parametros._id_usuario_ai,
 			null,
 			null
-							
-			
-			
 			)RETURNING id_pago_simple_pro into v_id_pago_simple_pro;
 			
 			--Definicion de la respuesta
@@ -104,13 +118,29 @@ BEGIN
 
 		begin
 
+			--Obtencion de la gestion a partir del centro de costo
+        	select id_gestion
+        	into v_id_gestion
+        	from param.vcentro_costo
+        	where id_centro_costo = v_parametros.id_centro_costo;
+
 			--Obtención de la partida a partir del concepto de gasto
-        	select cp.id_partida
+            select par.id_partida
         	into v_id_partida
         	from param.tconcepto_ingas conig
             inner join pre.tconcepto_partida cp
             on cp.id_concepto_ingas = conig.id_concepto_ingas
-            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas;
+            inner join pre.tpartida par on par.id_partida = cp.id_partida
+            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas
+            and par.id_gestion = v_id_gestion;
+
+            --Verifica el estado de la solicitud
+            if not exists(select 1 from cd.tpago_simple
+            			where id_pago_simple = v_parametros.id_pago_simple
+            			and estado in ('rendicion','vbconta')
+            			) then
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            end if;
 
 			--Sentencia de la modificacion
 			update cd.tpago_simple_pro set

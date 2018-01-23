@@ -135,7 +135,50 @@ Phx.vista.PagoSimpleDet = {
 		'desc_tipo_doc_compra_venta','id_tipo_doc_compra_venta','nro_tramite',
 		'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
 		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario'
-	]
+	],
+	abrirFormulario: function(tipo, record){
+   	       var me = this;
+alert('Manda datos')
+console.log(this.maestro.id_gestion)
+   	       
+   	       if(this.maestro.id_depto_conta){
+   	       	
+   	                me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/pago_simple/FormRendicionPS.php',
+			                                me.formTitulo,
+			                                {
+			                                    modal:true,
+			                                    width:'90%',
+												height:(me.regitrarDetalle == 'si')? '100%':'60%',
+		
+		
+			                                    
+			                                }, { data: { 
+				                                	 objPadre: me ,
+				                                	 tipoDoc: me.tipoDoc,	                                	 
+				                                	 id_gestion: this.maestro.id_gestion,
+				                                	 id_periodo: this.maestro.id_periodo,
+				                                	 id_depto: this.maestro.id_depto_conta,
+				                                	 tmpPeriodo: me.tmpPeriodo,
+		                                             tmpGestion: me.tmpGestion,
+				                                	 tipo_form : tipo,
+				                                	 datosOriginales: record
+			                                    },
+			                                    regitrarDetalle: 'si'
+			                                }, 
+			                                this.idContenedor,
+			                                'FormRendicionPS',
+			                                {
+			                                    config:[{
+			                                              event:'successsave',
+			                                              delegate: this.onSaveForm,
+			                                              
+			                                            }],
+			                                    
+			                                    scope:this
+			                                 }); 
+	                                 
+	           }                        
+   }
 	
 };
 

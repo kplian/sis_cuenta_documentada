@@ -62,6 +62,10 @@ class MODPagoSimple extends MODbase{
 		$this->captura('importe','numeric');
 		$this->captura('id_obligacion_pago','integer');
 		$this->captura('desc_obligacion_pago','varchar');
+		$this->captura('id_caja','integer');
+		$this->captura('desc_caja','varchar');
+		$this->captura('id_gestion','integer');
+		$this->captura('id_periodo','integer');
 		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -95,6 +99,7 @@ class MODPagoSimple extends MODbase{
 		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');		
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('id_caja','id_caja','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -129,6 +134,7 @@ class MODPagoSimple extends MODbase{
 		$this->setParametro('id_tipo_pago_simple','id_tipo_pago_simple','int4');		
 		$this->setParametro('importe','importe','numeric');
 		$this->setParametro('id_obligacion_pago','id_obligacion_pago','int4');
+		$this->setParametro('id_caja','id_caja','int4');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -246,6 +252,53 @@ class MODPagoSimple extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+    function listarRepLCV(){
+		  //Definicion de variables para ejecucion del procedimientp
+		  $this->procedimiento='cd.ft_pago_simple_sel';
+		  $this->transaccion='CD_DEPASIMPLE_SEL';
+		  $this->tipo_procedimiento='SEL';//tipo de transaccion
+		  $this->setCount(false);	
+		  //captura parametros adicionales para el count
+		  $this->setParametro('id_pago_simple','id_pago_simple','int4');
+		  //Definicion de la lista del resultado del query
+		  
+		  $this->captura('id_doc_compra_venta','int4');
+		  $this->captura('tipo','VARCHAR');
+		  $this->captura('fecha','DATE');
+		  $this->captura('nit','VARCHAR');
+		  $this->captura('razon_social','VARCHAR');
+		  $this->captura('nro_documento','VARCHAR');
+		  $this->captura('nro_dui','VARCHAR');
+		  $this->captura('nro_autorizacion','VARCHAR');
+		  $this->captura('importe_doc','NUMERIC');
+		  $this->captura('total_excento','NUMERIC');
+		  $this->captura('sujeto_cf','NUMERIC');
+		  $this->captura('importe_descuento','NUMERIC');
+		  $this->captura('subtotal','NUMERIC');
+		  $this->captura('credito_fiscal','NUMERIC');
+		  $this->captura('importe_iva','NUMERIC');
+		  $this->captura('codigo_control','VARCHAR');
+		  //$this->captura('tipo_doc','VARCHAR');
+		  $this->captura('id_plantilla','INTEGER');
+		  $this->captura('id_moneda','INTEGER');
+		  $this->captura('codigo_moneda','VARCHAR');
+		  $this->captura('id_periodo','INTEGER');
+		  $this->captura('id_gestion','INTEGER');
+		  $this->captura('periodo','INTEGER');
+		  $this->captura('gestion','INTEGER');
+		  $this->captura('venta_gravada_cero','NUMERIC');
+          $this->captura('subtotal_venta','NUMERIC');
+          $this->captura('sujeto_df','NUMERIC');
+		  $this->captura('importe_ice','NUMERIC');
+		  $this->captura('importe_excento','NUMERIC');
+		  //Ejecuta la instruccion
+		  $this->armarConsulta();
+		  $this->ejecutarConsulta();
+		
+		  //Devuelve la respuesta
+		  return $this->respuesta;
+	}
+
 			
 }
 ?>

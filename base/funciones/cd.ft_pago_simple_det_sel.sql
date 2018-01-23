@@ -1,7 +1,13 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_pago_simple_det_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION cd.ft_pago_simple_det_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_pago_simple_det_sel
@@ -98,7 +104,10 @@ BEGIN
                         aux.nombre_auxiliar,
                         dcv.id_tipo_doc_compra_venta,
                         (tdcv.codigo||'' - ''||tdcv.nombre)::Varchar as desc_tipo_doc_compra_venta,
-                        (dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0))     as importe_aux_neto
+                        (dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0))     as importe_aux_neto,
+                        fun.id_funcionario,
+                        fun.desc_funcionario2::varchar
+                        
                         
 
 						from cd.tpago_simple_det paside
@@ -113,6 +122,7 @@ BEGIN
 						left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
 						left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante                         
 						left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
+                        left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
 				        
 				        where  ';
 			
@@ -162,6 +172,7 @@ BEGIN
 						left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
 						left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante                         
 						left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
+                        left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
 					    where ';
 			
 			--Definicion de la respuesta		    
@@ -187,7 +198,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_pago_simple_det_sel"(integer, integer, character varying, character varying) OWNER TO postgres;

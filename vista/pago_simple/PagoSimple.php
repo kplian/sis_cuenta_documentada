@@ -14,6 +14,10 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 	nombreVista: 'PagoSimple',
 	constructor:function(config){
 		this.maestro=config.maestro;
+
+		//Historico
+		this.historico = 'no';
+
     	//llama al constructor de la clase padre
 		Phx.vista.PagoSimple.superclass.constructor.call(this,config);
 		this.init();
@@ -49,7 +53,17 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             tooltip : '<b>Agregar facturas/Recibos</b>'
         });
 
-        this.crearVentanaDevolucion();
+        this.addButton('btnDetalleDocumentoPagoSimple',
+            {
+                text: 'Detalle documento ps',
+                grupo:[0,1,2,3,4],
+                iconCls: 'bprint',
+                disabled: true,
+                handler: this.loadDetalleDocPagoSimple,
+                tooltip: '<b>Documentos de la Solicitud</b><br/>Subir los documetos requeridos en la solicitud seleccionada.'
+            });
+
+        this.crearVentana();
 
         this.iniciarEventos();
         //Esconde los campos para el pago-devengado        
@@ -66,7 +80,33 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 
 	},
-			
+		
+    loadDetalleDocPagoSimple : function(){   
+    	
+         var NumSelect=this.sm.getCount();       
+         if(NumSelect!=0)
+         {
+               var data=this.sm.getSelected().data;
+               console.log(data);
+
+                      Phx.CP.loadingShow();
+                      Ext.Ajax.request({
+                            url:'../../sis_cuenta_documentada/control/PagoSimpleRep/reporteLCV',
+                            params:{
+                                   'id_pago_simple':data.id_pago_simple, 
+                            },
+                            success:this.successExport,
+                            failure: this.conexionFailure,
+                            timeout:this.timeout,
+                            scope:this
+                      });
+         }
+         else
+         {
+                Ext.MessageBox.alert('Estado', 'Antes debe seleccionar un item.');
+         }
+    },
+    	
 	Atributos:[
 		{
 			//configuracion del componente
@@ -114,6 +154,26 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 					labelSeparator:'',
 					inputType:'hidden',
 					name: 'id_cuenta_bancaria'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_gestion'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_periodo'
 			},
 			type:'Field',
 			form:true 
@@ -192,7 +252,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			},
 			type:'ComboBox',
 			id_grupo:1,
-			filters:{pfiltro:'tipasi.codigo#tipasi.nombre',type:'string'},
+			filters:{pfiltro:'tps.codigo#tps.nombre',type:'string'},
 			grid:true,
 			form:true
 		},
@@ -387,6 +447,51 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			form:true
 		},
 		{
+			config: {
+				name: 'id_caja',
+				fieldLabel: 'Caja',
+				allowBlank: true,
+				emptyText: 'Elija una opción...',
+				store: new Ext.data.JsonStore({
+					url: '../../sis_tesoreria/control/Caja/listarCaja',
+					id: 'id_caja',
+					root: 'datos',
+					sortInfo: {
+						field: 'codigo',
+						direction: 'ASC'
+					},
+					totalProperty: 'total',
+					fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
+					remoteSort: true,
+					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
+				}),
+				valueField: 'id_caja',
+				displayField: 'codigo',
+				gdisplayField: 'desc_caja',
+				hiddenName: 'id_caja',
+				forceSelection: true,
+				typeAhead: false,
+				triggerAction: 'all',
+				lazyRender: true,
+				mode: 'remote',
+				pageSize: 15,
+				queryDelay: 1000,
+				anchor: '100%',
+				gwidth: 100,
+				minChars: 2,
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
+				renderer : function(value, p, record) {
+					return String.format('{0}', record.data['codigo']);
+				},
+				hidden: true
+			},
+			type: 'ComboBox',
+			id_grupo: 0,
+			filters: {pfiltro: 'movtip.codigo',type: 'string'},
+			grid: true,
+			form: true
+		},
+		{
 			config:{
 				name: 'estado_reg',
 				fieldLabel: 'Estado Reg.',
@@ -536,11 +641,15 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		{name:'codigo_tipo_pago_simple', type: 'string'},		
 		{name:'importe', type: 'numeric'},
 		{name:'id_obligacion_pago', type: 'numeric'},
-		{name:'desc_obligacion_pago', type: 'string'}
+		{name:'desc_obligacion_pago', type: 'string'},
+		{name:'id_caja', type: 'numeric'},
+		{name:'desc_caja', type: 'string'},
+		{name:'id_gestion', type: 'numeric'},
+		{name:'id_periodo', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'id_pago_simple',
-		direction: 'ASC'
+		direction: 'DESC'
 	},
 	bdel:true,
 	bsave:true,
@@ -729,6 +838,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 	},
 
 	preparaMenu: function(n) {
+
 		var data = this.getSelectedData();
 		var tb = this.tbar;
 		Phx.vista.PagoSimple.superclass.preparaMenu.call(this, n);
@@ -736,24 +846,27 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		this.getBoton('ant_estado').disable();
 		this.getBoton('sig_estado').disable();
 
-		if(data.estado == 'borrador') {
-			this.getBoton('sig_estado').enable();
-		} else if(data.estado == 'finalizado'){
-			this.getBoton('sig_estado').disable();
-		} else if(data.estado == 'pendiente'||data.estado == 'vbtesoreria'||data.estado == 'pendiente_pago'){
-			this.getBoton('sig_estado').disable();
-			this.getBoton('ant_estado').disable();
-		} else {
-			this.getBoton('ant_estado').enable();
-			this.getBoton('sig_estado').enable();
-		}
+		//Si está en modo histórico,no habilita ninguno de los botones que generan transacciones
+		if(this.historico=='no'){
+			if(data.estado == 'borrador') {
+				this.getBoton('sig_estado').enable();
+			} else if(data.estado == 'finalizado'){
+				this.getBoton('sig_estado').disable();
+			} else if(data.estado == 'pendiente'||data.estado == 'vbtesoreria'||data.estado == 'pendiente_pago'){
+				this.getBoton('sig_estado').disable();
+				this.getBoton('ant_estado').disable();
+			} else {
+				this.getBoton('ant_estado').enable();
+				this.getBoton('sig_estado').enable();
+			}	
 
-		//Lógica para habilitar o no los documentos (facturas/recibos)
-		this.getBoton('btnAgregarDoc').disable();
-		if(data.estado=='borrador'&&(data.codigo_tipo_pago_simple!='PAG_DEV'&&data.codigo_tipo_pago_simple!='ADU_GEST_ANT')){
-			this.getBoton('btnAgregarDoc').enable();
-		} else if(data.estado=='rendicion'&&(data.codigo_tipo_pago_simple=='PAG_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT')){
-			this.getBoton('btnAgregarDoc').enable();
+			//Lógica para habilitar o no los documentos (facturas/recibos)
+			this.getBoton('btnAgregarDoc').disable();
+			if(data.estado=='borrador'&&(data.codigo_tipo_pago_simple!='PAG_DEV'&&data.codigo_tipo_pago_simple!='ADU_GEST_ANT')){
+				this.getBoton('btnAgregarDoc').enable();
+			} else if(data.estado=='rendicion'&&(data.codigo_tipo_pago_simple=='PAG_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT')){
+				this.getBoton('btnAgregarDoc').enable();
+			}
 		}
 
 		//Habilita el resto de los botones
@@ -766,10 +879,14 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         if(data.codigo_tipo_pago_simple=='ADU_GEST_ANT'){
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
 		}
+		//agregado
+        this.getBoton('btnDetalleDocumentoPagoSimple').enable();
+
         
 		return tb
 	},
 
+		
 	liberaMenu: function() {
 		var tb = Phx.vista.PagoSimple.superclass.liberaMenu.call(this);
 		if (tb) {
@@ -779,6 +896,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('btnObs').disable();
             this.getBoton('btnChequeoDocumentosWf').disable();
             this.getBoton('btnAgregarDoc').disable();
+            
+            this.getBoton('btnDetalleDocumentoPagoSimple').disable();
               
 		}
 		return tb
@@ -880,7 +999,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         height: '40%',
         cls: 'PagoSimplePro'
     }],
-    crearVentanaDevolucion: function(){
+    crearVentana: function(){
     	this.cmbUsuario = new Ext.form.ComboBox({
             name: 'id_usuario',
             fieldLabel: 'Usuario',
@@ -1037,24 +1156,29 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
     	},this);
     },
     manejoComponentes : function (codigo,reset) {
+    	//Oculta os componentespor defecto,luego en funcion del caso se los habilita/deshabilita
+    	this.Cmp.id_proveedor.setDisabled(true);
+		this.Cmp.id_proveedor.allowBlank=true;
+		this.Cmp.id_funcionario_pago.setDisabled(true);
+		this.Cmp.id_funcionario_pago.allowBlank=true;
+		this.Cmp.importe.setVisible(false);
+		this.Cmp.importe.allowBlank=true;
+		this.Cmp.id_obligacion_pago.hide();
+		this.Cmp.id_obligacion_pago.allowBlank=true;
+		this.Cmp.id_caja.hide();
+		this.Cmp.id_caja.allowBlank=true;
+
     	if (reset == 'si') {
-	    	this.Cmp.id_proveedor.setDisabled(true);
-			this.Cmp.id_proveedor.allowBlank=true;
 			this.Cmp.id_proveedor.setValue('');
 			this.Cmp.id_proveedor.selectedIndex=-1;
-		
-			this.Cmp.id_funcionario_pago.setDisabled(true);
-			this.Cmp.id_funcionario_pago.allowBlank=true;
 			this.Cmp.id_funcionario_pago.setValue('');
 			this.Cmp.id_funcionario_pago.selectedIndex=-1;
-		
-			this.Cmp.importe.setVisible(false);
-			this.Cmp.importe.allowBlank=true;
-		
-			this.Cmp.id_obligacion_pago.hide();
 			this.Cmp.id_obligacion_pago.allowBlank=true;
+			this.Cmp.id_obligacion_pago.selectedIndex=-1;
 			this.Cmp.id_obligacion_pago.setValue('');
-		}
+			this.Cmp.id_caja.selectedIndex=-1;
+			this.Cmp.id_caja.setValue('');
+		} 
 	
 		if(codigo == 'PAG_PRO' || codigo == 'SOLO_PAG'){
 			this.Cmp.id_proveedor.setDisabled(false);
@@ -1082,6 +1206,15 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			this.Cmp.id_obligacion_pago.hide();
 			this.Cmp.id_obligacion_pago.allowBlank=true;
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
+		} else if(codigo == 'PAG_CAJ'){
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false;    			
+			this.Cmp.importe.setVisible(false);
+			this.Cmp.importe.allowBlank=true;
+			this.Cmp.id_obligacion_pago.hide();
+			this.Cmp.id_obligacion_pago.allowBlank=true;
+			this.Cmp.id_caja.show();
+			this.Cmp.id_caja.allowBlank=false;
 		}
     },
     onButtonEdit: function(){

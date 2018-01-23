@@ -10,6 +10,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 	Phx.vista.RendicionDet = Ext.extend(Phx.gridInterfaz, {
+		mostrarFuncionario: true,
 		tipoDoc : 'compra',
 		bsave : false,
 		constructor : function(config) {

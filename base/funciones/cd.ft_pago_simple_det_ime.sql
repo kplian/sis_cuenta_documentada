@@ -28,7 +28,9 @@ DECLARE
 	v_resp		            varchar;
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
-	v_id_pago_simple_det	integer;
+	v_registros 			record;
+	v_id_pago_simple_det 	integer;
+    v_total 				numeric;
 			    
 BEGIN
 
@@ -138,12 +140,27 @@ BEGIN
 
 		begin
 
+			--Obtiene datos del pago simple
+			select
+			ps.id_pago_simple,
+			ps.id_tipo_pago_simple,
+			ps.estado,
+			tps.codigo as codigo_tipo_pago_simple
+			into
+			v_registros
+			from cd.tpago_simple_det psd
+			inner join cd.tpago_simple ps
+			on ps.id_pago_simple = psd.id_pago_simple
+			inner join cd.ttipo_pago_simple tps
+			on tps.id_tipo_pago_simple= ps.id_tipo_pago_simple
+			where psd.id_pago_simple_det = v_parametros.id_pago_simple_det;
+
 			--Elimina el documento solo si el pago esta en estado borrador
 			if not exists(select 1 from cd.tpago_simple_det psd
 							inner join cd.tpago_simple ps
 							on ps.id_pago_simple = psd.id_pago_simple
 							where psd.id_pago_simple_det = v_parametros.id_pago_simple_det
-							and ps.estado in ('borrador','rendicion')) then
+							and ps.estado in ('borrador','rendicion','vbconta')) then
 				raise exception 'No puede quitarse el documento porque el Pago no esta en Borrador o de Rendicion';
 
 			end if;
@@ -158,7 +175,20 @@ BEGIN
 			--Sentencia de la eliminacion
 			delete from cd.tpago_simple_det
             where id_pago_simple_det=v_parametros.id_pago_simple_det;
-               
+
+			select f_get_saldo_totales_pago_simple.o_liquido_pagado
+            into v_total
+            from cd.f_get_saldo_totales_pago_simple(v_registros.id_pago_simple)
+            f_get_saldo_totales_pago_simple(p_monto, o_total_documentos,
+            o_liquido_pagado);
+
+            --Se actualiza el campo importe de la cabecera
+            if v_registros.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT') then
+                update cd.tpago_simple set
+                importe = v_total
+                where id_pago_simple = v_registros.id_pago_simple;
+            end if;
+            
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas/Recibos eliminado(a)'); 
             v_resp = pxp.f_agrega_clave(v_resp,'id_pago_simple_det',v_parametros.id_pago_simple_det::varchar);

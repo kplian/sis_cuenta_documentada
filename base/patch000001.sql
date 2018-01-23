@@ -690,3 +690,10 @@ ALTER TABLE cd.tcuenta_doc_calculo
 ALTER TABLE cd.tcuenta_doc
   ADD COLUMN aplicar_regla_15 VARCHAR(2) DEFAULT 'si' NOT NULL;   
 /***********************************F-SCP-CD-RCM-1-15/01/2018****************************************/  
+
+/***********************************I-SCP-CD-RCM-1-20/01/2018****************************************/  
+alter table cd.tpago_simple
+    add column id_caja integer;
+alter table cd.tpago_simple
+    add column id_solicitud_efectivo integer;    
+/***********************************F-SCP-CD-RCM-1-20/01/2018****************************************/      

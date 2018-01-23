@@ -1504,3 +1504,81 @@ CREATE OR REPLACE VIEW cd.vpago_simple_det_prorrateado_directo as
        JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <=
          per.fecha_fin;
 /***********************************F-DEP-RAC-CD-0-14/01/2018*****************************************/
+
+/***********************************I-DEP-RCM-CD-0-22/01/2018*****************************************/
+CREATE OR REPLACE VIEW cd.vcuenta_doc_calculo(
+    id_cuenta_doc_calculo,
+    numero,
+    destino,
+    dias_saldo_ant,
+    dias_destino,
+    cobertura_sol,
+    cobertura_hotel_sol,
+    dias_total_viaje,
+    dias_aplicacion_regla,
+    hora_salida,
+    hora_llegada,
+    escala_viatico,
+    escala_hotel,
+    regla_cobertura_dias_acum,
+    regla_cobertura_hora_salida,
+    regla_cobertura_hora_llegada,
+    regla_cobertura_total_dias,
+    cobertura_aplicada,
+    cobertura_aplicada_hotel,
+    estado_reg,
+    id_cuenta_doc,
+    id_usuario_ai,
+    usuario_ai,
+    fecha_reg,
+    id_usuario_reg,
+    fecha_mod,
+    id_usuario_mod,
+    parcial_viatico,
+    parcial_hotel,
+    total_viatico,
+    dias_hotel,
+    cantidad_personas)
+AS
+  SELECT cdocca.id_cuenta_doc_calculo,
+         cdocca.numero,
+         cdocca.destino,
+         cdocca.dias_saldo_ant,
+         cdocca.dias_destino,
+         cdocca.cobertura_sol,
+         cdocca.cobertura_hotel_sol,
+         cdocca.dias_total_viaje,
+         cdocca.dias_aplicacion_regla,
+         cdocca.hora_salida,
+         cdocca.hora_llegada,
+         cdocca.escala_viatico,
+         cdocca.escala_hotel,
+         cdocca.regla_cobertura_dias_acum,
+         cdocca.regla_cobertura_hora_salida,
+         cdocca.regla_cobertura_hora_llegada,
+         cdocca.regla_cobertura_total_dias,
+         cdocca.cobertura_aplicada,
+         cdocca.cobertura_aplicada_hotel,
+         cdocca.estado_reg,
+         cdocca.id_cuenta_doc,
+         cdocca.id_usuario_ai,
+         cdocca.usuario_ai,
+         cdocca.fecha_reg,
+         cdocca.id_usuario_reg,
+         cdocca.fecha_mod,
+         cdocca.id_usuario_mod,
+         round(cdocca.dias_destino::numeric * cdocca.cobertura_aplicada *
+           cdocca.escala_viatico * cdocca.cantidad_personas::numeric, 0) AS
+           parcial_viatico,
+         COALESCE(cdocca.dias_hotel, cdocca.dias_destino - 1)::numeric *
+           cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel *
+           cdocca.cantidad_personas::numeric AS parcial_hotel,
+         round(cdocca.dias_destino::numeric * cdocca.cobertura_aplicada *
+           cdocca.escala_viatico * cdocca.cantidad_personas::numeric,0) + COALESCE(
+           cdocca.dias_hotel, cdocca.dias_destino - 1)::numeric *
+           cdocca.cobertura_aplicada_hotel * cdocca.escala_hotel *
+           cdocca.cantidad_personas::numeric AS total_viatico,
+         cdocca.dias_hotel,
+         cdocca.cantidad_personas
+  FROM cd.tcuenta_doc_calculo cdocca;
+/***********************************F-DEP-RCM-CD-0-22/01/2018*****************************************/
