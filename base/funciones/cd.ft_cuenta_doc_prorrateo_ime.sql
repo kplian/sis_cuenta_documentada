@@ -54,6 +54,10 @@ BEGIN
             on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
             where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
+            if v_parametros.prorrateo <= 0 then
+            	raise exception 'El prorrateo no puede ser menor o igual a cero.';
+            end if;
+
         	--Sentencia de la insercion
         	insert into cd.tcuenta_doc_prorrateo(
 			id_cuenta_doc,
@@ -124,6 +128,10 @@ BEGIN
             inner join cd.ttipo_cuenta_doc tcdoc
             on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
             where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            if v_parametros.prorrateo <= 0 then
+            	raise exception 'El prorrateo no puede ser menor o igual a cero.';
+            end if;
 
 			--Sentencia de la modificacion
 			update cd.tcuenta_doc_prorrateo set
