@@ -77,6 +77,9 @@ Phx.vista.CuentaDocRen = {
 		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.hidden=false;
 		this.Atributos[this.getIndAtributo('aplicar_regla_15')].config.allowBlank=false;
 
+		this.Atributos[this.getIndAtributo('tipo_contrato')].config.hidden=false;
+		this.Atributos[this.getIndAtributo('tipo_contrato')].config.allowBlank=false;
+
 	   	this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
 				    var  saldo =  me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
 				    saldo = me.roundTwo(saldo);
@@ -414,7 +417,18 @@ Phx.vista.CuentaDocRen = {
 		this.Cmp.id_periodo.modificado = true;
 		this.Cmp.id_periodo.setValue('');
 		this.Cmp.motivo.setValue(this.motivo);
+		this.cargarDatosSolicitud(this);
 		console.log('aaaa',this);
+    },
+
+    cargarDatosSolicitud: function(data){
+    	this.Cmp.motivo.setValue('Rendición de gastos por concepto de: '+this.motivo);
+    	this.Cmp.fecha_salida.setValue(this.fecha_salida);
+    	this.Cmp.fecha_llegada.setValue(this.fecha_llegada);
+    	this.Cmp.cobertura.setValue(this.cobertura);
+    	this.Cmp.cantidad_personas.setValue(this.cantidad_personas);
+    	this.Cmp.aplicar_regla_15.setValue(this.aplicar_regla_15);
+    	this.Cmp.tipo_contrato.setValue(this.tipo_contrato);
     }
 };
 </script>

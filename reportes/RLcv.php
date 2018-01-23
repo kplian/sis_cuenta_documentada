@@ -91,12 +91,12 @@ class RLcv extends  ReportePDF {
 		}*/
 		//else{	
 			$this->Cell($width1, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-	        $this->Cell($width_c1, $height, 'Año:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+	        $this->Cell($width_c1, $height, 'Fecha:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 	        $this->SetFont('', '');
 	        $this->Cell($width_c2, $height, $this->datos_periodo['fecha'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
 	        
-	        $this->Cell($esp_width, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-	        $this->Cell(20, $height,'Mes:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+	        $this->Cell(0.20, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+	        $this->Cell(20, $height,'Solicitante:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 	        $this->SetFont('', '');
 	        $this->Cell(50, $height, $this->datos_periodo['solicitante'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		//}
@@ -105,13 +105,14 @@ class RLcv extends  ReportePDF {
 		$this->Ln();
 		
 		$this->Cell($width1, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $this->Cell($width_c1, $height, 'Nombre o Razón Social:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $this->Cell($width_c1, $height, 'Rótulo comercial:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $this->SetFont('', '');
         $this->SetFillColor(192,192,192, true);
         $this->Cell($width_c2, $height, $this->datos_periodo['rotulo_comercial'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
         
-        $this->Cell($esp_width, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
-        $this->Cell(20, $height,'NIT:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		
+        $this->Cell(0.20, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+        $this->Cell(20, $height,'Glosa:', 0, 0, 'L', false, '', 0, false, 'T', 'C');
         $this->SetFont('', '');
         $this->SetFillColor(192,192,192, true);
         $this->Cell(50, $height, $this->datos_periodo['glosa'], 0, 0, 'L', false, '', 0, false, 'T', 'C');
@@ -173,9 +174,9 @@ class RLcv extends  ReportePDF {
     function generarCabecera(){
     	
 		//arma cabecera de la tabla  17  - 13   20   -    ;  (15,  14  21,   2,,4,6)
-		$conf_par_tablewidths=array(7,15,15,55,14,12,21,18,15,17,17,17,16,20,10);
-        $conf_par_tablealigns=array('C','C','C','C','C','C','C','C','C','C','C','C','C','C','C');
-        $conf_par_tablenumbers=array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+		$conf_par_tablewidths=array(7,15,15,55,14,12,21,18,15,17,17,17,16,20);
+        $conf_par_tablealigns=array('C','C','C','C','C','C','C','C','C','C','C','C','C','C');
+        $conf_par_tablenumbers=array(0,0,0,0,0,0,0,0,0,0,0,0,0,0);
         $conf_tableborders=array();
         $conf_tabletextcolor=array();
 		
@@ -236,17 +237,17 @@ class RLcv extends  ReportePDF {
         $this->SetTextColor(0);
         $this->SetFont('','',6);
 			
-		$conf_par_tablewidths=array(7,15,15,55,14,12,21,18,15,17,17,17,16,20,10);
-        $conf_par_tablealigns=array('C','C','R','L','R','R','R','R','R','R','R','R','R','L','C');
-        $conf_par_tablenumbers=array(0,0,0,0,0,0,0,2,2,2,2,2,2,0,0);
-		$conf_tableborders=array('LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR');
+		$conf_par_tablewidths=array(7,15,15,55,14,12,21,18,15,17,17,17,16,20);
+        $conf_par_tablealigns=array('C','C','R','L','R','R','R','R','R','R','R','R','R','L');
+        $conf_par_tablenumbers=array(0,0,0,0,0,0,0,2,2,2,2,2,2,0);
+		$conf_tableborders=array('LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR','LR');
 		$this->tablewidths=$conf_par_tablewidths;
         $this->tablealigns=$conf_par_tablealigns;
         $this->tablenumbers=$conf_par_tablenumbers;
         $this->tableborders=$conf_tableborders;
         $this->tabletextcolor=$conf_tabletextcolor;
 		
-		//$this->caclularMontos($val);
+		$this->caclularMontos($val);
 		
 		$newDate = date("d/m/Y", strtotime( $val['fecha']));
 		
@@ -303,8 +304,8 @@ class RLcv extends  ReportePDF {
 
         if ($startY > 190) {
 
-            //$this->cerrarCuadro();
-            //$this->cerrarCuadroTotal();
+            $this->cerrarCuadro();
+            $this->cerrarCuadroTotal();
 
             if($this->total!= 0){
                 $this->AddPage();
@@ -319,7 +320,7 @@ class RLcv extends  ReportePDF {
 	
 	
 	
-	/*function caclularMontos($val){
+	function caclularMontos($val){
 		
 		$this->s1 = $this->s1 + $val['importe_doc'];
 		$this->s2 = $this->s2 + $val['total_excento'];
@@ -338,17 +339,17 @@ class RLcv extends  ReportePDF {
 		
 		
 		
-	}*/
-  /*function cerrarCuadro(){
+	}
+  function cerrarCuadro(){
   	
 	   
 	   	    //si noes inicio termina el cuardro anterior
 				
 								
-	   	    $this->tablewidths=array(7 +15 +15 +55 +14 +12 +21,18,15,17,17,17,16,20,10);
-	        $this->tablealigns=array('R','R','R','R','R','R','R','R','R');
-	        $this->tablenumbers=array(0,2,2,2,2,2,2,0,0);	
-	        $this->tableborders=array('T','LRTB','LRTB','LRTB','LRTB','LRTB','LRTB','T','T');
+	   	    $this->tablewidths=array(7 +15 +15 +55 +14 +12 +21,18,15,17,17,17,16);
+	        $this->tablealigns=array('R','R','R','R','R','R','R','R');
+	        $this->tablenumbers=array(0,2,2,2,2,2,2,0);	
+	        $this->tableborders=array('T','LRTB','LRTB','LRTB','LRTB','LRTB','LRTB','T');
 	        
 	        $RowArray = array( 
 	                    'espacio' => 'Subtotal: ',
@@ -358,8 +359,8 @@ class RLcv extends  ReportePDF {
 	                    's4' => $this->s4,
 	                    's5' => $this->s5,
 	                    's6' => $this->s6,
-	                    's7' => '',
-	                    's8' => ''
+	                    //'s7' => '',
+	                    //'s8' => ''
 	                  );     
 	                     
 	        $this-> MultiRow($RowArray,false,1);
@@ -371,16 +372,16 @@ class RLcv extends  ReportePDF {
 			$this->s5 = 0;
 			$this->s6 = 0;
 	
-  }*/
+  }
 
-  /*function cerrarCuadroTotal(){
+  function cerrarCuadroTotal(){
   	
 	   
 	   	    //si noes inicio termina el cuardro anterior
 									
 			$this->tablewidths=array(7 +15 +15 +55 +14 +12 +21,18,15,17,17,17,16);
 	        $this->tablealigns=array('R','R','R','R','R','R','R');
-	        $this->tablenumbers=array(0,2,2,2,2,2,2);	
+	        $this->tablenumbers=array(0,2,2,2,2,2,2,0);	
 	        $this->tableborders=array('','LRTB','LRTB','LRTB','LRTB','LRTB','LRTB');
 	        
 	        $RowArray = array( 
@@ -395,7 +396,7 @@ class RLcv extends  ReportePDF {
 	                     
 	        $this-> MultiRow($RowArray,false,1);
 	
-  }*/
+  }
   
  
 }
