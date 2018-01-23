@@ -21,32 +21,10 @@ Phx.vista.PagoSimpleVb = {
 	nombreVista: 'PagoSimpleVb',
 	
 	constructor: function(config) {
-	    //funcionalidad para listado de historicos
-        this.historico = 'no';
-        this.tbarItems = ['-',{
-            text: 'Histórico',
-            enableToggle: true,
-            pressed: false,
-            toggleHandler: function(btn, pressed) {
-               
-                if(pressed){
-                    this.historico = 'si';
-                     this.desBotoneshistorico();
-                }
-                else{
-                   this.historico = 'no' 
-                }
-                
-                this.store.baseParams.historico = this.historico;
-                this.reload();
-             },
-            scope: this
-           }];
-           
         var me = this;
 	   
-	   Phx.vista.PagoSimpleVb.superclass.constructor.call(this,config);
-       this.init();
+	    Phx.vista.PagoSimpleVb.superclass.constructor.call(this,config);
+        this.init();
        
 		this.store.baseParams = { tipo_interfaz: this.nombreVista };
 		
@@ -68,9 +46,9 @@ Phx.vista.PagoSimpleVb = {
         this.getBoton('btnChequeoDocumentosWf').enable();
         this.getBoton('diagrama_gantt').enable();
         this.getBoton('btnObs').enable();
-
+console.log('asdasdasdasds');
         if(this.historico == 'no'){
-         
+
             if(data.estado=='borrador'||data.estado=='pendiente'||data.estado=='pendiente_pago'||data.estado=='finalizado'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
@@ -80,20 +58,43 @@ Phx.vista.PagoSimpleVb = {
             } else if (data.estado=='rendicion'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').enable();
+            } else if (data.estado=='tesoreria'){
+                this.getBoton('ant_estado').enable();
+                this.getBoton('sig_estado').enable();
+            } else if (data.estado=='vbconta'){
+                this.getBoton('ant_estado').enable();
+                this.getBoton('sig_estado').enable();
             }
 
             //Lógica para habilitar o no los documentos (facturas/recibos)
             this.getBoton('btnAgregarDoc').disable();
             if(data.estado=='borrador'&&data.codigo_tipo_pago_simple!='PAG_DEV'){
                 this.getBoton('btnAgregarDoc').enable();
-            } else if(data.estado=='rendicion'&&data.codigo_tipo_pago_simple=='PAG_DEV'){
+            } else if(data.estado=='rendicion'){
                 this.getBoton('btnAgregarDoc').enable();
             }
-            
-         
+
+            if(data.estado=='rendicion'||data.estado=='vbconta'&&(data.codigo_tipo_pago_simple=='PAG_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT'||data.codigo_tipo_pago_simple=='SOLO_DEV')){
+                this.getBoton('btnAgregarDoc').enable();   
+            }
+
+            if(data.estado=='borrador'&&data.codigo_tipo_pago_simple=='DVPGPR'){
+                this.getBoton('btnAgregarDoc').enable();   
+            }
+
         } else{
             this.desBotoneshistorico();
         }   
+
+        //Habilita/deshabilita los tabs
+        this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
+
+        //if(data.estado=='rendicion'||data.estado=='vbconta'){
+            if(data.codigo_tipo_pago_simple=='DVPGPR'||data.codigo_tipo_pago_simple=='SOLO_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT'||data.codigo_tipo_pago_simple=='PAG_DEV'){
+                this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);       
+            }
+        //}
+        
         return tb;
    },
    

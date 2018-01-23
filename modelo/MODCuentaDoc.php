@@ -96,6 +96,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('tipo_rendicion','VARCHAR');
 		$this->captura('aplicar_regla_15','VARCHAR');
 		
+		
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

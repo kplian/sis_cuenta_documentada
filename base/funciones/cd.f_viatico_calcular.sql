@@ -60,6 +60,7 @@ DECLARE
     v_dias_hotel                        integer=0;
     v_aplico_regla_rend_llegada         boolean = false;
     v_cob_aux                           numeric;
+    v_escala_viatico                    numeric;
 
 BEGIN
 
@@ -250,7 +251,7 @@ BEGIN
                 dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
                 escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
                 regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
-                dias_hotel
+                dias_hotel                      ,cantidad_personas
                 ) values (
                 p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
                 p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont                         ,v_rec_escala.destino,
@@ -258,7 +259,7 @@ BEGIN
                 v_saldo_ant_dias + 1            ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
                 v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,v_regla_cobertura_hora_salida  ,v_regla_cobertura_hora_llegada,
                 v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
-                1
+                1                               ,v_rec_cd.cantidad_personas
                 );
                 
                 v_saldo_ant_dias = v_saldo_ant_dias + 1;
@@ -316,7 +317,7 @@ BEGIN
                 dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
                 escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
                 regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
-                dias_hotel
+                dias_hotel                      ,cantidad_personas
                 ) values (
                 p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
                 p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont + 1                     ,v_rec_escala.destino,
@@ -324,7 +325,7 @@ BEGIN
                 v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
                 v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,0                              ,v_regla_cobertura_hora_llegada,
                 v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
-                0
+                0                               ,v_rec_cd.cantidad_personas
                 );
 
                 --Descuenta 1 día a la cantidad de días por destino
@@ -360,7 +361,7 @@ BEGIN
                 dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
                 escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
                 regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
-                dias_hotel
+                dias_hotel                      ,cantidad_personas
                 ) values (
                 p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
                 p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont                         ,v_rec_escala.destino,
@@ -368,7 +369,7 @@ BEGIN
                 15                              ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
                 v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,v_regla_cobertura_hora_salida  ,v_regla_cobertura_hora_llegada,
                 v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
-                v_aux_dias_normal
+                v_aux_dias_normal               ,v_rec_cd.cantidad_personas
                 );
 
                 --Actualización de variables
@@ -419,6 +420,18 @@ BEGIN
             if v_rec_cd.cobertura = 0.7 then
                 v_cob_aux = 1;
             end if;
+
+            if v_dias_total_viaje = 1 then
+                v_viatico = v_viatico + (v_rec_escala.monto_sp * v_dias_destino * v_cobertura_aplicada);
+                v_hotel = 0;
+                v_total_viatico = v_viatico;
+                v_escala_viatico = v_rec_escala.monto_sp;
+            else
+                v_viatico = v_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada);
+                v_hotel = v_hotel + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
+                v_total_viatico = v_total_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada) + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
+                v_escala_viatico = v_rec_escala.monto;
+            end if;
             
             
 
@@ -437,15 +450,15 @@ BEGIN
             dias_aplicacion_regla           ,hora_salida                    ,hora_llegada                   ,escala_viatico,
             escala_hotel                    ,regla_cobertura_dias_acum      ,regla_cobertura_hora_salida    ,regla_cobertura_hora_llegada,
             regla_cobertura_total_dias      ,cobertura_aplicada             ,cobertura_aplicada_hotel       ,cobertura_hotel_sol,
-            dias_hotel
+            dias_hotel                      ,cantidad_personas
             ) values (
             p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
             p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont + 1                     ,v_rec_escala.destino,
             v_saldo_inicial_dias+ v_dias_total_viaje - 1          ,1        ,v_rec_cd.cobertura             ,v_dias_total_viaje,
-            v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
+            v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_escala_viatico,
             v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,0                              ,v_regla_cobertura_hora_llegada,
             v_regla_cobertura_total_dias    ,v_cob_aux           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
-            0
+            0                               ,v_rec_cd.cantidad_personas
             );
 
             --Descuenta 1 día a la cantidad de días por destino
@@ -465,10 +478,6 @@ BEGIN
             v_cobertura_aplicada_hotel = v_rec_cd.cobertura_hotel;
         end if;
 
-        v_viatico = v_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada);
-        v_hotel = v_hotel + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
-        v_total_viatico = v_total_viatico + (v_rec_escala.monto * v_dias_destino * v_cobertura_aplicada) + (v_rec_escala.monto_hotel * v_dias_hotel * v_cobertura_aplicada_hotel);
-
         ----------------------------------------
         --(4) Registro del cálculo del viático
         ----------------------------------------
@@ -485,7 +494,7 @@ BEGIN
             p_id_usuario                    ,now()                          ,'activo'                       ,p_id_usuario_ai,
             p_id_usuario_ai                 ,v_rec_cd.id_cuenta_doc         ,v_cont                         ,v_rec_escala.destino,
             v_saldo_ant_dias                ,v_dias_destino                 ,v_rec_cd.cobertura             ,v_dias_total_viaje,
-            v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_rec_escala.monto,
+            v_dias_aplicacion_regla         ,v_hora_salida                  ,v_hora_llegada                 ,v_escala_viatico,
             v_rec_escala.monto_hotel        ,v_regla_cobertura_dias_acum    ,v_regla_cobertura_hora_salida  ,v_regla_cobertura_hora_llegada,
             v_regla_cobertura_total_dias    ,v_cobertura_aplicada           ,v_cobertura_aplicada_hotel     ,v_rec_cd.cobertura_hotel,
             v_dias_hotel                    ,v_rec_cd.cantidad_personas

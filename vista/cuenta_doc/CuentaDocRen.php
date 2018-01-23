@@ -50,7 +50,7 @@ Phx.vista.CuentaDocRen = {
 	constructor: function(config) {
 	   	var me = this;
 	   	this.maestro = config;
-		
+		console.log('dd',this.maestro);
 	   	this.Atributos[this.getIndAtributo('id_cuenta_doc_fk')].form = true;
 	   	this.Atributos[this.getIndAtributo('id_funcionario')].form = false;
 	   	this.Atributos[this.getIndAtributo('id_depto')].form = false; 
@@ -227,6 +227,7 @@ Phx.vista.CuentaDocRen = {
 		}
 	},
 	onButtonEdit:function(){
+		console.log('entra');
 		Phx.vista.CuentaDocRen.superclass.onButtonEdit.call(this);
 		this.Cmp.fecha.fireEvent('change');
 	},
@@ -277,12 +278,8 @@ Phx.vista.CuentaDocRen = {
     	Phx.vista.CuentaDocRen.superclass.loadValoresIniciales.call(this);  
     	this.Cmp.id_cuenta_doc_fk.setValue(this.id_cuenta_doc);      
    },
-   
-   onButtonNew : function() {   
-		Phx.vista.CuentaDocRen.superclass.onButtonNew.call(this);
-		this.Cmp.motivo.setValue(this.motivo);
-   },
-   
+
+  
 	tabsouth: [
 		{
             url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',
@@ -416,6 +413,8 @@ Phx.vista.CuentaDocRen = {
 		this.Cmp.id_periodo.setDisabled(false);
 		this.Cmp.id_periodo.modificado = true;
 		this.Cmp.id_periodo.setValue('');
+		this.Cmp.motivo.setValue(this.motivo);
+		console.log('aaaa',this);
     }
 };
 </script>

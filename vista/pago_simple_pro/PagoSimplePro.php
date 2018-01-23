@@ -59,6 +59,15 @@ Phx.vista.PagoSimplePro=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_gestion'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			config:{
 				name: 'factor',
 				fieldLabel: 'Factor',
 				allowBlank: true,
@@ -284,7 +293,31 @@ Phx.vista.PagoSimplePro=Ext.extend(Phx.gridInterfaz,{
 	bsave:true,
 	onReloadPage: function(m) {
         this.maestro = m;
-        this.Atributos[1].valorInicial = this.maestro.id_pago_simple
+        this.Atributos[1].valorInicial = this.maestro.id_pago_simple;
+        this.Atributos[this.getIndAtributo('id_gestion')].valorInicial = this.maestro.id_gestion;
+
+        //Filtro de gestion para los centros de costo
+		/*var time = new Date(this.maestro.fecha);
+
+        Ext.Ajax.request({
+            url:'../../sis_parametros/control/Gestion/obtenerGestionByFecha',
+            params: {fecha: this.maestro.fecha},
+            success: function(resp){
+            	var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
+        		Ext.apply(this.Cmp.id_centro_costo.store.baseParams,{id_gestion: reg.datos.id_gestion});*/
+        		Ext.apply(this.Cmp.id_centro_costo.store.baseParams,{id_gestion: this.maestro.id_gestion})
+				this.Cmp.id_centro_costo.modificado=true;
+				this.Cmp.id_centro_costo.setValue('');
+            /*},
+            failure: function(resp) {
+                 Phx.CP.conexionFailure(resp);
+            },
+            timeout: function() {
+                Phx.CP.config_ini.timeout();
+            },
+            scope:this
+        });*/
+
 
         //Filtro para los datos
         this.store.baseParams = {

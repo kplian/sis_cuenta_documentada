@@ -602,3 +602,8 @@ INSERT INTO pxp.variable_global ("variable", "valor", "descripcion")
 VALUES 
   (E'cd_permitir_modificar_monto_sol', E'si', E'Bandera para permitiri o no la modificación de importes en la solicitud de cuenta documentada');
 /***********************************F-DAT-RCM-CD-0-16/01/2018*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-20/01/2018*****************************************/
+select pxp.f_insert_tgui ('Solicitud Pago Simple', 'Solicitud de Pago Simple', 'PGSSOL', 'si', 3, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleSol.php', 3, '', 'PagoSimpleSol', 'CD');
+select pxp.f_insert_testructura_gui ('PGSSOL', 'PAGSIM');
+/***********************************F-DAT-RCM-CD-0-20/01/2018*****************************************/

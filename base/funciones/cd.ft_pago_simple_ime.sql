@@ -64,6 +64,7 @@ DECLARE
     v_fac_imp_ant			integer;
     v_obligacion_pago		record;
     v_pago_simple			record;
+    v_codigo_tipo_pago_simple varchar;
 			    
 BEGIN
 
@@ -80,8 +81,14 @@ BEGIN
 	if(p_transaccion='CD_PAGSIM_INS')then
 					
         begin
+
+        	--Obtienen el codigo macro
+        	select tps.flujo_wf
+        	into v_codigo_proceso_macro
+        	from cd.ttipo_pago_simple tps
+        	where tps.id_tipo_pago_simple = v_parametros.id_tipo_pago_simple;
+
         	--Obtener id del proceso macro
-            v_codigo_proceso_macro = 'CD_PAGSIM';
             select
             pm.id_proceso_macro
             into
@@ -195,7 +202,8 @@ BEGIN
 			id_tipo_pago_simple,
 			id_funcionario_pago,			
 			importe,
-			id_obligacion_pago
+			id_obligacion_pago,
+			id_caja
           	) values(
 			'activo',
 			v_parametros.id_depto_conta,
@@ -219,7 +227,8 @@ BEGIN
 			v_parametros.id_tipo_pago_simple,
 			v_parametros.id_funcionario_pago,			
 			v_parametros.importe,
-			v_parametros.id_obligacion_pago
+			v_parametros.id_obligacion_pago,
+			v_parametros.id_caja
 			) RETURNING id_pago_simple into v_id_pago_simple;
 			
 			--Definicion de la respuesta
@@ -249,6 +258,10 @@ BEGIN
             if (v_pago_simple.estado != 'borrador') then
             	raise exception 'No se puede modificar un pago que no esta en estado borrador. Envie el pago a estado borrador para poder modificarlo';
             end if;
+
+            if v_parametros.id_tipo_pago_simple <> v_pago_simple.id_tipo_pago_simple then
+            	raise exception 'No es posible cambiar el Tipo de Pago';
+            end if;
 			
 			--Sentencia de la modificacion
 			update cd.tpago_simple set
@@ -267,7 +280,8 @@ BEGIN
 			id_tipo_pago_simple = v_parametros.id_tipo_pago_simple,
 			id_funcionario_pago = v_parametros.id_funcionario_pago,			
 			importe = v_parametros.importe,
-			id_obligacion_pago = v_parametros.id_obligacion_pago
+			id_obligacion_pago = v_parametros.id_obligacion_pago,
+			id_caja = v_parametros.id_caja
 			where id_pago_simple=v_parametros.id_pago_simple;
                
 			--Definicion de la respuesta
@@ -334,12 +348,15 @@ BEGIN
 			select
 			c.id_proceso_wf,
 			c.id_estado_wf,
-			c.estado
+			c.estado,
+			tps.codigo
 			into
 			v_id_proceso_wf,
 			v_id_estado_wf,
-			v_codigo_estado
+			v_codigo_estado,
+			v_codigo_tipo_pago_simple
 			from cd.tpago_simple c
+			inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = c.id_tipo_pago_simple
 			where c.id_pago_simple = v_parametros.id_pago_simple;
 
 	        --Recupera datos del estado
@@ -450,27 +467,46 @@ BEGIN
 			--------------------------------------------------
 			--  ACTUALIZA EL NUEVO ESTADO DE LA CUENTA DOCUMENTADA
 			----------------------------------------------------
-			IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
-              v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
-           END IF;
+			IF pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+                v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
+            END IF;
 
-           IF  pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
-              v_id_depto_lb =  v_parametros.id_depto_lb;
-           END IF;
+            IF pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
+                v_id_depto_lb =  v_parametros.id_depto_lb;
+            END IF;
 
+			if v_codigo_tipo_pago_simple = 'PAG_CAJ' then
 
-			if cd.f_fun_inicio_pago_simple_wf(p_id_usuario,
-				v_parametros._id_usuario_ai,
-				v_parametros._nombre_usuario_ai,
-				v_id_estado_actual,
-				v_id_proceso_wf,
-				v_codigo_estado_siguiente,
-				v_id_depto_lb,
-                v_id_cuenta_bancaria,
-                v_codigo_estado
-				) then
+				if cd.f_fun_inicio_pago_simple_caja_wf(p_id_usuario,
+						v_parametros._id_usuario_ai,
+						v_parametros._nombre_usuario_ai,
+						v_id_estado_actual,
+						v_id_proceso_wf,
+						v_codigo_estado_siguiente,
+						v_id_depto_lb,
+		                v_id_cuenta_bancaria,
+		                v_codigo_estado
+					) then
+
+				end if;
+
+			else
+
+				if cd.f_fun_inicio_pago_simple_wf(p_id_usuario,
+						v_parametros._id_usuario_ai,
+						v_parametros._nombre_usuario_ai,
+						v_id_estado_actual,
+						v_id_proceso_wf,
+						v_codigo_estado_siguiente,
+						v_id_depto_lb,
+		                v_id_cuenta_bancaria,
+		                v_codigo_estado
+					) then
+
+				end if;
 
 			end if;
+			
 
 
 			-- si hay mas de un estado disponible  preguntamos al usuario
@@ -596,8 +632,8 @@ BEGIN
             from cd.tpago_simple
             where id_pago_simple = v_parametros.id_pago_simple;
             
-            if (v_pago_simple.estado not in ( 'borrador', 'rendicion')) then
-            	raise exception 'No se puede modificar un pago que no esta en estado borrador o rendicion. Envie el pago a dichos estados para poder modificarlo';
+            if (v_pago_simple.estado not in ( 'borrador', 'rendicion','vbconta')) then
+            	raise exception 'No se puede agregar documentos por|que no esta en estado Borrador, Rendicion o Vbconta. Envie el pago a dichos estados para poder modificarlo';
             end if;
 
         	--Obtenemos datos basicos
@@ -605,7 +641,9 @@ BEGIN
 			c.id_pago_simple,
 			c.id_tipo_pago_simple,
 			c.estado,
-			tps.codigo as codigo_tipo_pago_simple
+			tps.codigo as codigo_tipo_pago_simple,
+			c.id_depto_conta,
+			c.id_moneda
 			into
 			v_registros_proc
 			from cd.tpago_simple c
@@ -614,14 +652,15 @@ BEGIN
 
 
         	--Validación para permitir o no la importación de facturas
-        	v_permitir = false;
-        	if v_registros_proc.estado = 'borrador' and v_registros_proc.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT') then
+        	v_permitir=true;
+        	/*v_permitir = false;
+        	if v_registros_proc.estado = 'borrador' and v_registros_proc.codigo_tipo_pago_simple NOT IN ('PAG_DEV','ADU_GEST_ANT','DVPGPR','SOLO_DEV') then
         		--Obliga la importación de facturas
         		v_permitir = true;
-        	elsif v_registros_proc.estado = 'rendicion' and v_registros_proc.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT') then
+        	elsif v_registros_proc.estado = 'rendicion' and v_registros_proc.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT','DVPGPR','SOLO_DEV') then
         		--Obliga la importación de facturas
         		v_permitir = true;
-        	end if;
+        	end if;*/
 
 			if not v_permitir then
 				raise exception 'No está permitido agregar documentos en este estado';

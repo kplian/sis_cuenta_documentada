@@ -138,7 +138,6 @@ Phx.vista.PagoSimpleDet = {
 	],
 	abrirFormulario: function(tipo, record){
    	       var me = this;
-
    	       
    	       if(this.maestro.id_depto_conta){
    	       	
@@ -154,8 +153,10 @@ Phx.vista.PagoSimpleDet = {
 			                                }, { data: { 
 				                                	 objPadre: me ,
 				                                	 tipoDoc: me.tipoDoc,	                                	 
-				                                	 id_gestion: me.cmbGestion.getValue(),
-				                                	 id_periodo: me.cmbPeriodo.getValue(),
+
+				                                	 id_gestion: this.maestro.id_gestion,
+				                                	 id_periodo: this.maestro.id_periodo,
+
 				                                	 id_depto: this.maestro.id_depto_conta,
 				                                	 tmpPeriodo: me.tmpPeriodo,
 		                                             tmpGestion: me.tmpGestion,
