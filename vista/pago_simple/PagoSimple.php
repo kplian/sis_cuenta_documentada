@@ -191,7 +191,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'pagsim.nro_tramite',type:'string'},
 				id_grupo:1,
 				grid:true,
-				form:false
+				form:false,
+				bottom_filter:true
 		},
 		{
 			config:{
@@ -346,7 +347,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             id_grupo: 1,
             filters: { pfiltro:'pro.desc_proveedor',type:'string'},
             grid: true,
-            form: true
+            form: true,
+            bottom_filter:true,
         },
         {
    			config:{
@@ -382,7 +384,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'pagsim.estado',type:'string'},
 				id_grupo:1,
 				grid:true,
-				form:false
+				form:false,
+				bottom_filter:true
 		},
 		{
 			config:{
@@ -397,7 +400,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				filters:{pfiltro:'pagsim.obs',type:'string'},
 				id_grupo:1,
 				grid:true,
-				form:true
+				form:true,
+				bottom_filter:true
 		},
 		{
 			config:{
