@@ -44,7 +44,8 @@ class ACTPagoSimpleRep extends ACTbase{
 			$reporte = new RLcv($this->objParam);  
 		
 	         
-			$reporte->datosHeader($dataSource->getDatos(),$dataPeriodo->getDatos(),'','');
+		
+			$reporte->datosHeader($dataSource->getDatos(), '', $dataPeriodo->getDatos() );
 			//$reporte->datosHeader($dataSource->getDatos(),  $dataSource->extraData, $dataEntidad->getDatos() , $dataPeriodo->getDatos() );
 			
 			$reporte->generarReporte();
