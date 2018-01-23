@@ -245,10 +245,43 @@ class ACTCuentaDoc extends ACTbase{
 		$v=$this->objParam->getParametro('tipo');
 
 		if(strpos($v,'Viáticos') === false){
+			//Fondos en Avance
 			$reporte = new RSolicitudCD_Fondo($this->objParam); 			
 		}else{
+			//Viáticos
 			$reporte = new RSolicitudCD($this->objParam); 
 		}
+				
+		$reporte->datosHeader($dataSource->getDatos(), $dataProrrateo->getDatos(), $dataItinerario->getDatos(),$dataPresupuesto->getDatos());
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+		
+	}
+
+	function reporteSolicitudViaticos(){
+		//$id=$this->objParam->getParametro('id_cuenta_doc');			
+		$nombreArchivo = uniqid(md5(session_id()).'Egresos') . '.pdf'; 
+		
+		$dataSource = $this->recuperarSolicitudFondos();			
+		$dataProrrateo = $this->recuperarDatosProrrateo();
+		$dataItinerario = $this->recuperarDatosItinerario();
+		$dataPresupuesto = $this->recuperarDatosPresupuesto();		
+		
+		//parametros basicos
+		$tamano = 'LETTER';
+		$orientacion = 'p';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+
+		$reporte = new RSolicitudCD($this->objParam); 
+
 				
 		$reporte->datosHeader($dataSource->getDatos(), $dataProrrateo->getDatos(), $dataItinerario->getDatos(),$dataPresupuesto->getDatos());
 		$reporte->generarReporte();
