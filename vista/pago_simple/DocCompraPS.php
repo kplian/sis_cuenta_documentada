@@ -25,9 +25,7 @@ Phx.vista.DocCompraPS = {
 	constructor: function(config) {
 		
 	    Phx.vista.DocCompraPS.superclass.constructor.call(this,config);
-	    
 	   
-	    
         //this.Cmp.id_plantilla.store.baseParams = Ext.apply(this.Cmp.id_plantilla.store.baseParams, {tipo_plantilla:this.tipoDoc});
     },
    
@@ -85,39 +83,42 @@ Phx.vista.DocCompraPS = {
    
    abrirFormulario: function(tipo, record){
    	       var me = this;
-   	       me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/pago_simple/FormRendicionPS.php',
-	                                me.formTitulo,
-	                                {
-	                                    modal:true,
-	                                    width:'90%',
-										height:(me.regitrarDetalle == 'si')? '100%':'60%',
-
-
-	                                    
-	                                }, { data: { 
-		                                	 objPadre: me ,
-		                                	 tipoDoc: me.tipoDoc,	                                	 
-		                                	 id_gestion: me.cmbGestion.getValue(),
-		                                	 id_periodo: me.cmbPeriodo.getValue(),
-		                                	 id_depto: me.cmbDepto.getValue(),
-		                                	 tmpPeriodo: me.tmpPeriodo,
-                                             tmpGestion: me.tmpGestion,
-		                                	 tipo_form : tipo,
-		                                	 datosOriginales: record
-	                                    },
-	                                    regitrarDetalle: 'si'
-	                                }, 
-	                                this.idContenedor,
-	                                'FormRendicionPS',
-	                                {
-	                                    config:[{
-	                                              event:'successsave',
-	                                              delegate: this.onSaveForm,
-	                                              
-	                                            }],
-	                                    
-	                                    scope:this
-	                                 });  
+   	       	
+   	                me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/pago_simple/FormRendicionPS.php',
+			                                me.formTitulo,
+			                                {
+			                                    modal:true,
+			                                    width:'90%',
+												height:(me.regitrarDetalle == 'si')? '100%':'60%',
+		
+		
+			                                    
+			                                }, { data: { 
+				                                	 objPadre: me ,
+				                                	 tipoDoc: me.tipoDoc,	                                	 
+				                                	 id_gestion: me.cmbGestion.getValue(),
+				                                	 id_periodo: me.cmbPeriodo.getValue(),
+				                                	 id_depto: this.cmbDepto.getValue(),
+				                                	 tmpPeriodo: me.tmpPeriodo,
+		                                             tmpGestion: me.tmpGestion,
+				                                	 tipo_form : tipo,
+				                                	 datosOriginales: record
+			                                    },
+			                                    regitrarDetalle: 'si'
+			                                }, 
+			                                this.idContenedor,
+			                                'FormRendicionPS',
+			                                {
+			                                    config:[{
+			                                              event:'successsave',
+			                                              delegate: this.onSaveForm,
+			                                              
+			                                            }],
+			                                    
+			                                    scope:this
+			                                 }); 
+	                                 
+                     
    },
    
   

@@ -217,6 +217,7 @@ class MODRendicionDet extends MODbase{
 			$this->setParametro('importe_retgar','importe_retgar','numeric');
 			$this->setParametro('importe_neto','importe_neto','numeric');
 			$this->setParametro('id_auxiliar','id_auxiliar','integer');
+			$this->setParametro('id_funcionario','id_funcionario','integer');
 			
 			//Ejecuta la instruccion
             $this->armarConsulta();
@@ -435,6 +436,7 @@ class MODRendicionDet extends MODbase{
 			$this->setParametro('importe_retgar','importe_retgar','numeric');
 			$this->setParametro('importe_neto','importe_neto','numeric');
 			$this->setParametro('id_auxiliar','id_auxiliar','integer');
+			$this->setParametro('id_funcionario','id_funcionario','integer');
 			
 			//Ejecuta la instruccion
             $this->armarConsulta();

@@ -97,6 +97,11 @@ class MODPagoSimpleDet extends MODbase{
 		$this->captura('id_tipo_doc_compra_venta','integer');
 		$this->captura('desc_tipo_doc_compra_venta','varchar');		
 		$this->captura('importe_aux_neto','numeric');
+		
+		$this->captura('id_funcionario','integer');		
+		$this->captura('desc_funcionario2','varchar');
+		
+		
 
 		
 		//Ejecuta la instruccion
@@ -106,6 +111,7 @@ class MODPagoSimpleDet extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+		
 			
 	function insertarPagoSimpleDet(){
 		//Definicion de variables para ejecucion del procedimiento
