@@ -46,7 +46,7 @@ Phx.vista.PagoSimpleVb = {
         this.getBoton('btnChequeoDocumentosWf').enable();
         this.getBoton('diagrama_gantt').enable();
         this.getBoton('btnObs').enable();
-console.log('asdasdasdasds');
+
         if(this.historico == 'no'){
 
             if(data.estado=='borrador'||data.estado=='pendiente'||data.estado=='pendiente_pago'||data.estado=='finalizado'){
@@ -80,6 +80,11 @@ console.log('asdasdasdasds');
 
             if(data.estado=='borrador'&&data.codigo_tipo_pago_simple=='DVPGPR'){
                 this.getBoton('btnAgregarDoc').enable();   
+            }
+
+            //Caso Paso ADU_GEST_ANT
+            if(data.estado=='vbtesoreria'&&data.codigo_tipo_pago_simple=='ADU_GEST_ANT'){
+                this.getBoton('ant_estado').enable();
             }
 
         } else{
