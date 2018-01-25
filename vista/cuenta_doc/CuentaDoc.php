@@ -817,9 +817,9 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''},
 				hidden: true,
-				id: this.idContenedor+'fecha_salida',
-				vtype: 'daterange',
-        		endDateField: this.idContenedor+'fecha_llegada'
+				//id: this.idContenedor+'fecha_salida',
+				//vtype: 'daterange',
+        		//endDateField: this.idContenedor+'fecha_llegada'
 			},
 			type:'DateField',
 			filters: { pfiltro:'cdoc.fecha_salida', type:'date' },
@@ -854,9 +854,9 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				format: 'd/m/Y', 
 				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y'):''},
 				hidden: true,
-				id: this.idContenedor+'fecha_llegada',
-				vtype: 'daterange',
-        		startDateField: this.idContenedor+'fecha_salida'
+				//id: this.idContenedor+'fecha_llegada',
+				//vtype: 'daterange',
+        		//startDateField: this.idContenedor+'fecha_salida'
 			},
 			type:'DateField',
 			filters: { pfiltro:'cdoc.fecha_llegada', type:'date' },
