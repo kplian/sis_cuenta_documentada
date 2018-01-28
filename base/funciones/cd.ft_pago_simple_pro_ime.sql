@@ -64,9 +64,9 @@ BEGIN
             --Verifica el estado de la solicitud
             if not exists(select 1 from cd.tpago_simple
             			where id_pago_simple = v_parametros.id_pago_simple
-            			and estado in ('rendicion','vbconta')
+            			and estado in ('rendicion','vbconta','borrador')
             			) then
-            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
             end if;
 
         	--Sentencia de la insercion
@@ -137,9 +137,9 @@ BEGIN
             --Verifica el estado de la solicitud
             if not exists(select 1 from cd.tpago_simple
             			where id_pago_simple = v_parametros.id_pago_simple
-            			and estado in ('rendicion','vbconta')
+            			and estado in ('rendicion','vbconta','borrador')
             			) then
-            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
             end if;
 
 			--Sentencia de la modificacion

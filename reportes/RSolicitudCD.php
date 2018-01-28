@@ -294,7 +294,7 @@ class RSolicitudCD extends  ReportePDF {
 		$width1 = 5;
 		$esp_width = 10;
 		$width_c1= 55;
-		$width_c2= 90;		
+		$width_c2= 110;		
 		$this->Ln(8);
 		$fechaactual = date("d-m-Y H:i:s");
 				
@@ -311,8 +311,9 @@ class RSolicitudCD extends  ReportePDF {
 		$this->Cell($width1, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->Cell($width_c1, $height, 'MOTIVO', 1, 0, 'L', false, '', 0, false, 'T', 'C');
 		$this->SetFont('', '',10);				
-		$this->Cell($width_c2, $height, $this->datos_detalle[0]['motivo'], 1, 0, 'L', true, '', 0, false, 'T', 'C');
-		$this->Ln(6);
+		//$this->Cell($width_c2, $height, $this->datos_detalle[0]['motivo'], 1, 0, 'L', true, '', 0, false, 'T', 'C');
+		$this->MultiCell($w = 110, $h = $hLong, $txt = $this->datos_detalle[0]['motivo'], $border = 1, $align = 'L', $fill = true, $ln = 1, $x = '', $y = '', $reseth = true, $stretch = 0, $ishtml = false, $autopadding = true, $maxh = $hMedium, $valign = 'M', $fitcell = false);
+		$this->Ln(2);
 		
 		$this->SetFont('', 'B',10);
 		$this->SetFillColor(192,192,192, true);	

@@ -999,7 +999,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
         cls: 'PagoSimpleDet'
     }, {
 		url: '../../../sis_cuenta_documentada/vista/pago_simple_pro/PagoSimplePro.php',
-        title: 'Prorrateo mannual',
+        title: 'Prorrateo manual',
         height: '40%',
         cls: 'PagoSimplePro'
     }],
@@ -1020,7 +1020,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
                 totalProperty: 'total',
                 fields: ['id_usuario', 'desc_person'],
                 remoteSort: true,
-                baseParams: {par_filtro: 'PERSON.nombre_completo2',_adicionar:'si'}
+                baseParams: {par_filtro: 'PERSON.nombre_completo2'/*,_adicionar:'no'*/}
             }),
             valueField: 'id_usuario',
             displayField: 'desc_person',
@@ -1059,7 +1059,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
                         'sw_autorizacion','sw_codigo_control','tipo_plantilla','sw_nro_dui','sw_ic','tipo_excento','valor_excento','sw_qr','sw_nit','plantilla_qr',
                         'sw_estacion','sw_punto_venta','sw_codigo_no_iata'],
                     remoteSort: true,
-                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si',_adicionar:'si'}
+                    baseParams:{par_filtro:'plt.desc_plantilla',sw_compro:'si',sw_tesoro:'si'/*,_adicionar:'no'*/}
                 }),
             tpl:'<tpl for="."><div class="x-combo-list-item"><p>{desc_plantilla}</p></div></tpl>',
             valueField: 'id_plantilla',
@@ -1219,6 +1219,9 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			this.Cmp.id_obligacion_pago.allowBlank=true;
 			this.Cmp.id_caja.show();
 			this.Cmp.id_caja.allowBlank=false;
+		} else {
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false;
 		}
     },
     onButtonEdit: function(){

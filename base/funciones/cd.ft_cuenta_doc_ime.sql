@@ -107,6 +107,8 @@ DECLARE
     v_cod_concepto_ingas            varchar;
     v_regla_max_sol                 integer;
     v_sol_abiertas                  varchar;
+    v_permitir_mod                  varchar;
+    v_cc_sigema                     text;
 
 BEGIN
 
@@ -776,11 +778,15 @@ BEGIN
                         raise exception 'No se encuenta definido el Concepto de Gasto para la escala de la solicitud. Comuníquese con el Administrador';
                     end if;
 
-                    --Verifica que tenga registrado al menos el concepto de gasto de viático
-                    if not exists(select 1 from cd.tcuenta_doc_det
-                                where id_cuenta_doc = v_parametros.id_cuenta_doc
-                                and id_concepto_ingas = v_id_concepto_ingas) then
-                        raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                    v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
+
+                    if v_permitir_mod = 'no' then
+                        --Verifica que tenga registrado al menos el concepto de gasto de viático
+                        if not exists(select 1 from cd.tcuenta_doc_det
+                                    where id_cuenta_doc = v_parametros.id_cuenta_doc
+                                    and id_concepto_ingas = v_id_concepto_ingas) then
+                            raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                        end if;
                     end if;
 
 
@@ -1095,7 +1101,8 @@ BEGIN
               c.id_escala,
               c.tipo_contrato,
               c.cantidad_personas,
-              c.aplicar_regla_15
+              c.aplicar_regla_15,
+              c.tipo_pago
             into
               v_registros_cd
             from cd.tcuenta_doc c
@@ -1263,7 +1270,8 @@ BEGIN
                     tipo_contrato,
                     cantidad_personas,
                     tipo_rendicion,
-                    aplicar_regla_15
+                    aplicar_regla_15,
+                    tipo_pago
                 ) values(
                     v_id_tipo_cuenta_doc,
                     v_id_proceso_wf,
@@ -1299,7 +1307,8 @@ BEGIN
                     v_registros_cd.tipo_contrato,
                     v_registros_cd.cantidad_personas,
                     v_parametros.tipo_rendicion,
-                    v_registros_cd.aplicar_regla_15
+                    v_registros_cd.aplicar_regla_15,
+                    v_registros_cd.tipo_pago
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
             --Replica el prorrateo de la solicitud (usado en viaticos)
@@ -1994,13 +2003,20 @@ BEGIN
             if not exists(with sigema as (select * from cd.vsigema_gral)
                 select 1
                 from sigema sigra
-                left join param.vcentro_costo cc
+                inner join param.vcentro_costo cc
                 on cc.codigo_tcc = sigra.codigo_cc
                 and cc.gestion = sigra.gestion::integer
                 where sigra.id_sigema = v_parametros.id_sigema
                 and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema) then
 
-              raise exception 'No se encuentra el Centro de Costo asociado';
+                with sigema as (select * from cd.vsigema_gral)
+                select pxp.list(sigra.codigo_cc)
+                into v_cc_sigema
+                from sigema sigra
+                where sigra.id_sigema = v_parametros.id_sigema
+                and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema;
+
+                raise exception 'No se encuentra registrado el presupuesto en sistema para el(los) centro(s) de costo: %. Comuníquese con el Area de de Finanzas',v_cc_sigema;
 
             end if;
 

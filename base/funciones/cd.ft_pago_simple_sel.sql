@@ -7,66 +7,66 @@ CREATE OR REPLACE FUNCTION cd.ft_pago_simple_sel (
 RETURNS varchar AS
 $body$
 /**************************************************************************
- SISTEMA:		Cuenta Documenta
- FUNCION: 		cd.ft_pago_simple_sel
+ SISTEMA:       Cuenta Documenta
+ FUNCION:       cd.ft_pago_simple_sel
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'
- AUTOR: 		 (admin)
- FECHA:	        31-12-2017 12:33:30
- COMENTARIOS:	
+ AUTOR:          (admin)
+ FECHA:         31-12-2017 12:33:30
+ COMENTARIOS:   
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-#ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				31-12-2017 12:33:30								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'	
+#ISSUE              FECHA               AUTOR               DESCRIPCION
+ #0             31-12-2017 12:33:30                             Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'    
  #
  ***************************************************************************/
 
 DECLARE
 
-	v_consulta    		varchar;
-	v_parametros  		record;
-	v_nombre_funcion   	text;
-	v_resp				varchar;
-	v_estado			varchar;
-	v_filtro			varchar;
-	v_historico			varchar;
-	v_inner 			varchar;
-    v_strg_cd 			varchar;
-    v_strg_obs			varchar;
-			    
+    v_consulta          varchar;
+    v_parametros        record;
+    v_nombre_funcion    text;
+    v_resp              varchar;
+    v_estado            varchar;
+    v_filtro            varchar;
+    v_historico         varchar;
+    v_inner             varchar;
+    v_strg_cd           varchar;
+    v_strg_obs          varchar;
+                
 BEGIN
 
-	v_nombre_funcion = 'cd.ft_pago_simple_sel';
+    v_nombre_funcion = 'cd.ft_pago_simple_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
- 	#TRANSACCION:  'CD_PAGSIM_SEL'
- 	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		admin	
- 	#FECHA:		31-12-2017 12:33:30
-	***********************************/
+    /*********************************    
+    #TRANSACCION:  'CD_PAGSIM_SEL'
+    #DESCRIPCION:   Consulta de datos
+    #AUTOR:     admin   
+    #FECHA:     31-12-2017 12:33:30
+    ***********************************/
 
-	if(p_transaccion='CD_PAGSIM_SEL')then
-     				
-    	begin
+    if(p_transaccion='CD_PAGSIM_SEL')then
+                    
+        begin
 
-			/*if pxp.f_existe_parametro(p_tabla,'estado') then
-				v_estado =  v_parametros.estado;
-			else
-				v_estado = 'ninguno';
-			end if;
+            /*if pxp.f_existe_parametro(p_tabla,'estado') then
+                v_estado =  v_parametros.estado;
+            else
+                v_estado = 'ninguno';
+            end if;
 
-			v_filtro='';
-			if (v_parametros.id_funcionario_usu is null) then
-				v_parametros.id_funcionario_usu = -1;
-			end if;
+            v_filtro='';
+            if (v_parametros.id_funcionario_usu is null) then
+                v_parametros.id_funcionario_usu = -1;
+            end if;
 
-			if  pxp.f_existe_parametro(p_tabla,'historico') then
-				v_historico =  v_parametros.historico;
-			else
-				v_historico = 'no';
-			end if;
+            if  pxp.f_existe_parametro(p_tabla,'historico') then
+                v_historico =  v_parametros.historico;
+            else
+                v_historico = 'no';
+            end if;
 
-			if v_parametros.tipo_interfaz in ('PagoSol') then
+            if v_parametros.tipo_interfaz in ('PagoSol') then
 
                 if p_administrador != 1  then
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
@@ -74,64 +74,64 @@ BEGIN
 
             end if;
 
-			if v_parametros.tipo_interfaz in ('PagoSimpleVb') then
+            if v_parametros.tipo_interfaz in ('PagoSimpleVb') then
 
-				select  
-				pxp.aggarray(depu.id_depto)
-				into 
-				va_id_depto
-				from param.tdepto_usuario depu 
-				where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
+                select  
+                pxp.aggarray(depu.id_depto)
+                into 
+                va_id_depto
+                from param.tdepto_usuario depu 
+                where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
 
-				if v_historico = 'no' then  
-					if p_administrador !=1 then
-					  	v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and pagsim.estado in( ''vbtesoreria''))  ) and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
-					else
-					  	v_filtro = ' (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
-					end if;
-				else
-					if p_administrador !=1 then
-					  	v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and  (lower(cdoc.estado)!=''borrador'')  and ';
-					else
-					  	v_filtro = ' (lower(cdoc.estado)!=''borrador'')  and ';
-					end if;
+                if v_historico = 'no' then  
+                    if p_administrador !=1 then
+                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and pagsim.estado in( ''vbtesoreria''))  ) and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                    else
+                        v_filtro = ' (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                    end if;
+                else
+                    if p_administrador !=1 then
+                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||')) and  (lower(cdoc.estado)!=''borrador'')  and ';
+                    else
+                        v_filtro = ' (lower(cdoc.estado)!=''borrador'')  and ';
+                    end if;
 
-				end if;
+                end if;
 
-			end if;
+            end if;
 
-			if v_historico =  'si' then            
+            if v_historico =  'si' then            
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = pagsim.id_proceso_wf';
                v_strg_cd = 'DISTINCT(pagsim.id_pago_simple)'; 
                v_strg_obs = '''---''::text';               
-           	else            
+            else            
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf';
                v_strg_cd = 'pagsim.id_pago_simple';
                v_strg_obs = 'ew.obs'; 
-           	end if;*/
+            end if;*/
 
-           	--Filtros
-           	v_filtro='';
+            --Filtros
+            v_filtro='';
 
-           	if pxp.f_existe_parametro(p_tabla,'historico') then
-				v_historico =  v_parametros.historico;
-			else
-				v_historico = 'no';
-			end if;
+            if pxp.f_existe_parametro(p_tabla,'historico') then
+                v_historico =  v_parametros.historico;
+            else
+                v_historico = 'no';
+            end if;
 
-           	if v_parametros.tipo_interfaz in ('PagoSimpleSol') then
+            if v_parametros.tipo_interfaz in ('PagoSimpleSol') then
 
                 if p_administrador != 1  then
-                	--Filtro para  visualizacion de usuarios
+                    --Filtro para  visualizacion de usuarios
                     v_filtro = '(
-                    	(pagsim.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||')
-                    	or
+                        (pagsim.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||')
+                        or
                         ('||p_id_usuario||' in (select id_usuario from param.tdepto_usuario where id_depto = pagsim.id_depto_conta))
                     ) and ';
 
                     --Filtro de los estados
                     if v_historico = 'no' then
-                    	v_filtro = v_filtro || 'pagsim.estado in (''borrador'') and ';
+                        v_filtro = v_filtro || 'pagsim.estado in (''borrador'') and ';
                     end if;
                     
                 end if;
@@ -140,13 +140,14 @@ BEGIN
                 v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
 
                 if p_administrador != 1  then
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                    --v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                    v_filtro = v_filtro||'(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and ';
                 end if;
 
             end if;
 
-    		--Sentencia de la consulta
-			v_consulta:='select
+            --Sentencia de la consulta
+            v_consulta:='select
                             pagsim.id_pago_simple,
                             pagsim.estado_reg,
                             pagsim.id_depto_conta,
@@ -187,56 +188,56 @@ BEGIN
                             pagsim.id_caja,
                             caj.codigo as desc_caja,
                             (select 
-							ges.id_gestion
-							from param.tgestion ges
-							where ges.gestion = (date_part(''year'', pagsim.fecha))::integer
-							limit 1 offset 0) as id_gestion,
-							(select
-							id_periodo
-							from param.tperiodo
-							where pagsim.fecha between fecha_ini and fecha_fin
-							limit 1 offset 0) as id_periodo
-						from cd.tpago_simple pagsim
+                            ges.id_gestion
+                            from param.tgestion ges
+                            where ges.gestion = (date_part(''year'', pagsim.fecha))::integer
+                            limit 1 offset 0) as id_gestion,
+                            (select
+                            id_periodo
+                            from param.tperiodo
+                            where pagsim.fecha between fecha_ini and fecha_fin
+                            limit 1 offset 0) as id_periodo
+                        from cd.tpago_simple pagsim
                         inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
-						inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
-						inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
-						inner join orga.vfuncionario fun on fun.id_funcionario = pagsim.id_funcionario
-						left join tes.tcuenta_bancaria cban on cban.id_cuenta_bancaria = pagsim.id_cuenta_bancaria
-						left join param.tdepto deplb on deplb.id_depto = pagsim.id_depto_lb
-						left join param.tinstitucion ins on ins.id_institucion = cban.id_institucion
-						inner join param.tmoneda mon on mon.id_moneda = pagsim.id_moneda
-						left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
-						inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
-						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
-						left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
+                        inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
+                        left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
+                        inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
+                        inner join orga.vfuncionario fun on fun.id_funcionario = pagsim.id_funcionario
+                        left join tes.tcuenta_bancaria cban on cban.id_cuenta_bancaria = pagsim.id_cuenta_bancaria
+                        left join param.tdepto deplb on deplb.id_depto = pagsim.id_depto_lb
+                        left join param.tinstitucion ins on ins.id_institucion = cban.id_institucion
+                        inner join param.tmoneda mon on mon.id_moneda = pagsim.id_moneda
+                        left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
+                        inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
+                        left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
+                        left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
                         left join tes.tcaja caj on caj.id_caja = pagsim.id_caja
-				        where  ';
+                        where  ';
 
-			v_consulta = v_consulta || v_filtro;
-			
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
-			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+            v_consulta = v_consulta || v_filtro;
+            
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
-			--Devuelve la respuesta
-			return v_consulta;
-						
-		end;
-	/*********************************    
- 	#TRANSACCION:  'CD_DETPAG_SEL'
- 	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		JUAN	
- 	#FECHA:		07-01-2018 12:33:30
-	***********************************/
+            --Devuelve la respuesta
+            return v_consulta;
+                        
+        end;
+    /*********************************    
+    #TRANSACCION:  'CD_DETPAG_SEL'
+    #DESCRIPCION:   Consulta de datos
+    #AUTOR:     JUAN    
+    #FECHA:     07-01-2018 12:33:30
+    ***********************************/
 
-	ELSIF(p_transaccion='CD_DETPAG_SEL')then
-     				
-    	begin
+    ELSIF(p_transaccion='CD_DETPAG_SEL')then
+                    
+        begin
 
 
-    		--Sentencia de la consulta
-			v_consulta:='SELECT 
+            --Sentencia de la consulta
+            v_consulta:='SELECT 
                           cv.id_doc_compra_venta::INTEGER,
                           cv.id_funcionario::INTEGER,
                           (select vf.desc_funcionario1 from orga.tfuncionario f join orga.vfuncionario vf on vf.id_funcionario=f.id_funcionario where f.id_funcionario=cv.id_funcionario)::varchar desc_funcionario1,
@@ -253,69 +254,69 @@ BEGIN
                           join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                           join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
                           inner join wf.testado_wf ew on ew.id_estado_wf = ps.id_estado_wf
-				        where  ';
+                        where  ';
 
-		
-			--Definicion de la respuesta
-			v_consulta:=v_consulta||v_parametros.filtro;
-			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+        
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
-			--Devuelve la respuesta
-			return v_consulta;
-						
-		end;
+            --Devuelve la respuesta
+            return v_consulta;
+                        
+        end;
     /*********************************    
- 	#TRANSACCION:  'CD_DETPAG_CONT'
- 	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		JUAN	
- 	#FECHA:		07-01-2018 12:33:30
-	***********************************/
+    #TRANSACCION:  'CD_DETPAG_CONT'
+    #DESCRIPCION:   Conteo de registros
+    #AUTOR:     JUAN    
+    #FECHA:     07-01-2018 12:33:30
+    ***********************************/
 
-	elsif(p_transaccion='CD_DETPAG_CONT')then
+    elsif(p_transaccion='CD_DETPAG_CONT')then
 
-		begin
-			--Sentencia de la consulta de conteo de registros
-			v_consulta:='SELECT 
+        begin
+            --Sentencia de la consulta de conteo de registros
+            v_consulta:='SELECT 
                 count(cv.id_funcionario)
                 FROM conta.tdoc_compra_venta cv 
                 join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                 join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
                 inner join wf.testado_wf ew on ew.id_estado_wf = ps.id_estado_wf
-					    where ';
-			
-			--Definicion de la respuesta		    
-			v_consulta:=v_consulta||v_parametros.filtro;
+                        where ';
+            
+            --Definicion de la respuesta            
+            v_consulta:=v_consulta||v_parametros.filtro;
 
-			--Devuelve la respuesta
-			return v_consulta;
+            --Devuelve la respuesta
+            return v_consulta;
 
-		end;
+        end;
         
-	/*********************************    
- 	#TRANSACCION:  'CD_PAGSIM_CONT'
- 	#DESCRIPCION:	Conteo de registros
- 	#AUTOR:		admin	
- 	#FECHA:		31-12-2017 12:33:30
-	***********************************/
+    /*********************************    
+    #TRANSACCION:  'CD_PAGSIM_CONT'
+    #DESCRIPCION:   Conteo de registros
+    #AUTOR:     admin   
+    #FECHA:     31-12-2017 12:33:30
+    ***********************************/
 
-	elsif(p_transaccion='CD_PAGSIM_CONT')then
+    elsif(p_transaccion='CD_PAGSIM_CONT')then
 
-		begin
+        begin
 
-			v_filtro='';
-    		if v_parametros.tipo_interfaz in ('PagoSimpleSol') then
+            v_filtro='';
+            if v_parametros.tipo_interfaz in ('PagoSimpleSol') then
 
                 if p_administrador != 1  then
                     --Filtro para  visualizacion de usuarios
                     v_filtro = '(
-                    	(pagsim.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||')
-                    	or
+                        (pagsim.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||')
+                        or
                         ('||p_id_usuario||' in (select id_usuario from param.tdepto_usuario where id_depto = pagsim.id_depto_conta))
                     ) and ';
 
                     --Filtro de los estados
                     if v_historico = 'no' then
-                    	v_filtro = v_filtro || 'pagsim.estado in (''borrador'') and ';
+                        v_filtro = v_filtro || 'pagsim.estado in (''borrador'') and ';
                     end if;
 
                 end if;
@@ -324,54 +325,55 @@ BEGIN
                 v_filtro = ' pagsim.estado not in (''borrador'',''finalizado'') and ';
 
                 if p_administrador != 1  then
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                    --v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or pagsim.id_usuario_reg='||p_id_usuario||') and ';
+                    v_filtro = v_filtro||'(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') and ';
                 end if;
 
             end if;
 
 
-			--Sentencia de la consulta de conteo de registros
-			v_consulta:='select count(id_pago_simple)
-					    from cd.tpago_simple pagsim
+            --Sentencia de la consulta de conteo de registros
+            v_consulta:='select count(id_pago_simple)
+                        from cd.tpago_simple pagsim
                         inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
-						inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
-						inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
-						inner join orga.vfuncionario fun on fun.id_funcionario = pagsim.id_funcionario
-						left join tes.tcuenta_bancaria cban on cban.id_cuenta_bancaria = pagsim.id_cuenta_bancaria
-						left join param.tdepto deplb on deplb.id_depto = pagsim.id_depto_lb
-						left join param.tinstitucion ins on ins.id_institucion = cban.id_institucion
-						inner join param.tmoneda mon on mon.id_moneda = pagsim.id_moneda
-						left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
-						inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
-						left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
-						left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
+                        inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
+                        left join segu.tusuario usu2 on usu2.id_usuario = pagsim.id_usuario_mod
+                        inner join param.tdepto dep on dep.id_depto = pagsim.id_depto_conta
+                        inner join orga.vfuncionario fun on fun.id_funcionario = pagsim.id_funcionario
+                        left join tes.tcuenta_bancaria cban on cban.id_cuenta_bancaria = pagsim.id_cuenta_bancaria
+                        left join param.tdepto deplb on deplb.id_depto = pagsim.id_depto_lb
+                        left join param.tinstitucion ins on ins.id_institucion = cban.id_institucion
+                        inner join param.tmoneda mon on mon.id_moneda = pagsim.id_moneda
+                        left join param.vproveedor pro on pro.id_proveedor = pagsim.id_proveedor
+                        inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
+                        left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
+                        left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
                         left join tes.tcaja caj on caj.id_caja = pagsim.id_caja
-					    where ';
+                        where ';
 
-			v_consulta = v_consulta || v_filtro;
-			
-			--Definicion de la respuesta		    
-			v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta = v_consulta || v_filtro;
+            
+            --Definicion de la respuesta            
+            v_consulta:=v_consulta||v_parametros.filtro;
 
-			--Devuelve la respuesta
-			return v_consulta;
+            --Devuelve la respuesta
+            return v_consulta;
 
-		end;
-	/*********************************    
- 	#TRANSACCION:  'CD_DEPASIMPLE_SEL'
- 	#DESCRIPCION:	Consulta de datos
- 	#AUTOR:		JUAN	
- 	#FECHA:		20-01-2018 12:33:30
-	***********************************/
+        end;
+    /*********************************    
+    #TRANSACCION:  'CD_DEPASIMPLE_SEL'
+    #DESCRIPCION:   Consulta de datos
+    #AUTOR:     JUAN    
+    #FECHA:     20-01-2018 12:33:30
+    ***********************************/
 
-	ELSIF(p_transaccion='CD_DEPASIMPLE_SEL')then
-     				
-    	begin
+    ELSIF(p_transaccion='CD_DEPASIMPLE_SEL')then
+                    
+        begin
 
             --raise exception 'error provocado %',v_parametros.id_pago_simple;
-    		--Sentencia de la consulta
-			v_consulta:='select 
+            --Sentencia de la consulta
+            v_consulta:='select 
                          id_doc_compra_venta::integer,
                          tipo::Varchar,
                          fecha::date,
@@ -405,32 +407,32 @@ BEGIN
                          from conta.vldet_doc_pag_simple
                          where  id_pago_simple='||v_parametros.id_pago_simple||'  ';
 
-		RAISE NOTICE 'ver consulta juan %',v_consulta;
-			--Definicion de la respuesta
-			--v_consulta:=v_consulta||v_parametros.filtro;
-			--v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+        RAISE NOTICE 'ver consulta juan %',v_consulta;
+            --Definicion de la respuesta
+            --v_consulta:=v_consulta||v_parametros.filtro;
+            --v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
             
             --raise exception 'error provocado %',v_consulta;
-			--Devuelve la respuesta
-			return v_consulta;
-						
-		end;
-			
-					
-	else
-					     
-		raise exception 'Transaccion inexistente';
-					         
-	end if;
-					
+            --Devuelve la respuesta
+            return v_consulta;
+                        
+        end;
+            
+                    
+    else
+                         
+        raise exception 'Transaccion inexistente';
+                             
+    end if;
+                    
 EXCEPTION
-					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+                    
+    WHEN OTHERS THEN
+            v_resp='';
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+            v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+            v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+            raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'
