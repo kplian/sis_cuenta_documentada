@@ -111,6 +111,7 @@ class MODPagoSimpleDet extends MODbase{
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
+		
 			
 	function insertarPagoSimpleDet(){
 		//Definicion de variables para ejecucion del procedimiento

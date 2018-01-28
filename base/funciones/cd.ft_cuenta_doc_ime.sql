@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -109,6 +111,7 @@ DECLARE
     v_sol_abiertas                  varchar;
     v_permitir_mod                  varchar;
     v_cc_sigema                     text;
+
 
 BEGIN
 
@@ -782,6 +785,8 @@ BEGIN
 
                     if v_permitir_mod = 'no' then
                         --Verifica que tenga registrado al menos el concepto de gasto de viático
+
+
                         if not exists(select 1 from cd.tcuenta_doc_det
                                     where id_cuenta_doc = v_parametros.id_cuenta_doc
                                     and id_concepto_ingas = v_id_concepto_ingas) then
@@ -1998,8 +2003,13 @@ BEGIN
 
             --Elimna todo el prorrateo y lo vuelve a generar
             delete from cd.tcuenta_doc_prorrateo where id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            if v_parametros.id_cuenta_doc = 800 then
+--            	raise exception 'Procesando ... %  %',v_parametros.id_sigema,v_parametros.tipo_sol_sigema;
+            end if;
 
             --Verifica que almenos exista una coincidencia
+             --Verifica que almenos exista una coincidencia
             if not exists(with sigema as (select * from cd.vsigema_gral)
                 select 1
                 from sigema sigra
@@ -2019,6 +2029,7 @@ BEGIN
                 raise exception 'No se encuentra registrado el presupuesto en sistema para el(los) centro(s) de costo: %. Comuníquese con el Area de de Finanzas',v_cc_sigema;
 
             end if;
+
 
             --Replica el prorrateo de las vistas del SIGEMA
             insert into cd.tcuenta_doc_prorrateo(

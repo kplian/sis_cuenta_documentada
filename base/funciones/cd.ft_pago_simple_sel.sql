@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_sel (
   p_administrador integer,
   p_id_usuario integer,

@@ -88,8 +88,8 @@ BEGIN
     where ic.id_int_comprobante = p_id_int_comprobante;
      
     IF v_reg_cbte.estado_reg = 'validado' THEN
-       raise exception 'no puede eliminar comprobantes validados';
-    END IF;
+      -- raise exception 'no puede eliminar comprobantes validados';
+    ELSE
      
    --  recupera estado anterior segun Log del WF
         SELECT  
@@ -159,7 +159,7 @@ BEGIN
           
           END IF;   
              
-     
+    END IF ;
     
   
 RETURN  TRUE;

@@ -138,8 +138,6 @@ Phx.vista.PagoSimpleDet = {
 	],
 	abrirFormulario: function(tipo, record){
    	       var me = this;
-alert('Manda datos')
-console.log(this.maestro.id_gestion)
    	       
    	       if(this.maestro.id_depto_conta){
    	       	
@@ -155,8 +153,10 @@ console.log(this.maestro.id_gestion)
 			                                }, { data: { 
 				                                	 objPadre: me ,
 				                                	 tipoDoc: me.tipoDoc,	                                	 
+
 				                                	 id_gestion: this.maestro.id_gestion,
 				                                	 id_periodo: this.maestro.id_periodo,
+
 				                                	 id_depto: this.maestro.id_depto_conta,
 				                                	 tmpPeriodo: me.tmpPeriodo,
 		                                             tmpGestion: me.tmpGestion,
