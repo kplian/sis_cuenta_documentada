@@ -1,4 +1,6 @@
-CREATE OR REPLACE FUNCTION cd.f_lista_depto_conta_pago_solicitante_wf (
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION cd.f_lista_depto_conta_pago_simple_wf (
   p_id_usuario integer,
   p_id_tipo_estado integer,
   p_fecha date = now(),
@@ -13,11 +15,11 @@ $body$
 /**************************************************************************
  SISTEMA ENDESIS - SISTEMA DE ...
 ***************************************************************************
- SCRIPT:    adq.f_lista_depto_conta_x_lb_wf_sel
- DESCRIPCIÓN:   Lista los departmatos de tesoreia que coinciden con la EP y UP de la cotizacion adjudicada
- AUTOR:     Rensi Arteaga Copari
- FECHA:     20/01/2018
- COMENTARIOS: 
+ SCRIPT: 		adq.f_lista_depto_conta_x_lb_wf_sel
+ DESCRIPCIÓN: 	Lista los departmatos de tesoreia que coinciden con la EP y UP de la cotizacion adjudicada
+ AUTOR: 		Rensi Arteaga Copari
+ FECHA:			20/01/2018
+ COMENTARIOS:	
 ***************************************************************************
  HISTORIA DE MODIFICACIONES:
 
@@ -50,7 +52,7 @@ $body$
 */
 
 DECLARE
-  
+	
     v_depto_asignacion    varchar;
     v_nombre_depto_func_list   varchar;
     
@@ -68,13 +70,13 @@ DECLARE
     v_uos_eps varchar;
     v_size    integer;
     v_i       integer;
-    v_codigo_subsistema varchar;
-    v_id_deptos_conta varchar;
+    v_codigo_subsistema	varchar;
+    v_id_deptos_conta	varchar;
     v_registros_depto   record;
-    g_registros     record;
+    g_registros 		record;
 
 BEGIN
-  v_nombre_funcion ='cd.f_lista_depto_conta_pago_solicitante_wf';
+  v_nombre_funcion ='cd.f_lista_depto_conta_pago_simple_wf';
 
     --recuperamos la cotizacion a partir del id_estado_wf
     --validar de que sistema es el estado_wf
@@ -141,15 +143,15 @@ BEGIN
         
        
 EXCEPTION
-          
-  WHEN OTHERS THEN
-      v_resp='';
-      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-      raise exception '%',v_resp;
+					
+	WHEN OTHERS THEN
+			v_resp='';
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+			raise exception '%',v_resp;
 
-                
+				        
 END;
 $body$
 LANGUAGE 'plpgsql'

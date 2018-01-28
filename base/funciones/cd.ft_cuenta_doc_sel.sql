@@ -184,13 +184,13 @@ BEGIN
                                        
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
+                        v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or cdoc.id_usuario_reg = '||p_id_usuario||') and  (cdoc.estado in(''vbrendicion'',''borrador'')  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
                         v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or cdoc.id_usuario_reg = '||p_id_usuario||') and  (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
                       v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
@@ -382,13 +382,13 @@ BEGIN
                                        
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-            v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (cdoc.estado in(''vbrendicion'',''borrador''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
+            v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or cdoc.id_usuario_reg = '||p_id_usuario||') and  (cdoc.estado in(''vbrendicion'',''borrador'')  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
                       v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''finalizado'' ) and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or  (lower(cdoc.estado)!=''borrador'') and cdoc.id_cuenta_doc_fk is not null and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or cdoc.id_usuario_reg = '||p_id_usuario||') and  (lower(cdoc.estado)!=''borrador'') and cdoc.id_cuenta_doc_fk is not null and ';
                   ELSE
                       v_filtro = '   (lower(cdoc.estado)!=''borrador'')  and cdoc.id_cuenta_doc_fk is not null and ';
                   END IF;
@@ -987,7 +987,7 @@ BEGIN
   elsif(p_transaccion='CD_DATPRO_SEL')then            
       begin
         --Sentencia de la consulta
-        v_consulta:='SELECT cc.descripcion_tcc,c.prorrateo
+        v_consulta:='SELECT (cc.codigo_tcc || '' - '' || cc.descripcion_tcc)::varchar,c.prorrateo
                     FROM cd.tcuenta_doc_prorrateo c
                     join param.vcentro_costo cc on cc.id_centro_costo = c.id_centro_costo
                     WHERE c.id_cuenta_doc IN(SELECT a.id_cuenta_doc

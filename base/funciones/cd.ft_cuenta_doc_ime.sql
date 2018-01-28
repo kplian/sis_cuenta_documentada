@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -107,6 +109,8 @@ DECLARE
     v_cod_concepto_ingas            varchar;
     v_regla_max_sol                 integer;
     v_sol_abiertas                  varchar;
+    v_permitir_mod                	varchar;
+    v_cc_sigema 					text;
 
 BEGIN
 
@@ -775,12 +779,16 @@ BEGIN
                     if v_id_concepto_ingas is null then
                         raise exception 'No se encuenta definido el Concepto de Gasto para la escala de la solicitud. Comuníquese con el Administrador';
                     end if;
+                    
+                    v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
 
-                    --Verifica que tenga registrado al menos el concepto de gasto de viático
-                    if not exists(select 1 from cd.tcuenta_doc_det
-                                where id_cuenta_doc = v_parametros.id_cuenta_doc
-                                and id_concepto_ingas = v_id_concepto_ingas) then
-                        raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                    if v_permitir_mod = 'no' then
+                    	--Verifica que tenga registrado al menos el concepto de gasto de viático
+                        if not exists(select 1 from cd.tcuenta_doc_det
+                                    where id_cuenta_doc = v_parametros.id_cuenta_doc
+                                    and id_concepto_ingas = v_id_concepto_ingas) then
+                            raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
+                        end if;
                     end if;
 
 
@@ -1989,20 +1997,33 @@ BEGIN
 
             --Elimna todo el prorrateo y lo vuelve a generar
             delete from cd.tcuenta_doc_prorrateo where id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            if v_parametros.id_cuenta_doc = 800 then
+--            	raise exception 'Procesando ... %  %',v_parametros.id_sigema,v_parametros.tipo_sol_sigema;
+            end if;
 
             --Verifica que almenos exista una coincidencia
+             --Verifica que almenos exista una coincidencia
             if not exists(with sigema as (select * from cd.vsigema_gral)
                 select 1
                 from sigema sigra
-                left join param.vcentro_costo cc
+                inner join param.vcentro_costo cc
                 on cc.codigo_tcc = sigra.codigo_cc
                 and cc.gestion = sigra.gestion::integer
                 where sigra.id_sigema = v_parametros.id_sigema
                 and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema) then
 
-              raise exception 'No se encuentra el Centro de Costo asociado';
+                with sigema as (select * from cd.vsigema_gral)
+                select pxp.list(sigra.codigo_cc)
+                into v_cc_sigema
+                from sigema sigra
+                where sigra.id_sigema = v_parametros.id_sigema
+                and sigra.tipo_sol_sigema = v_parametros.tipo_sol_sigema;
+
+                raise exception 'No se encuentra registrado el presupuesto en sistema para el(los) centro(s) de costo: %. Comuníquese con el Area de de Finanzas',v_cc_sigema;
 
             end if;
+
 
             --Replica el prorrateo de las vistas del SIGEMA
             insert into cd.tcuenta_doc_prorrateo(

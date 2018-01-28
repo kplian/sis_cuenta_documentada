@@ -1,8 +1,13 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_pago_simple_pro_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
 
+CREATE OR REPLACE FUNCTION cd.ft_pago_simple_pro_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_pago_simple_pro_ime
@@ -64,9 +69,9 @@ BEGIN
             --Verifica el estado de la solicitud
             if not exists(select 1 from cd.tpago_simple
             			where id_pago_simple = v_parametros.id_pago_simple
-            			and estado in ('rendicion','vbconta')
+            			and estado in ('rendicion','vbconta','borrador')
             			) then
-            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
             end if;
 
         	--Sentencia de la insercion
@@ -137,9 +142,9 @@ BEGIN
             --Verifica el estado de la solicitud
             if not exists(select 1 from cd.tpago_simple
             			where id_pago_simple = v_parametros.id_pago_simple
-            			and estado in ('rendicion','vbconta')
+            			and estado in ('rendicion','vbconta','borrador')
             			) then
-            	raise exception 'La Solicitud del pago debe estar en estado Rendicion o VbConta';
+            	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
             end if;
 
 			--Sentencia de la modificacion
@@ -203,7 +208,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_pago_simple_pro_ime"(integer, integer, character varying, character varying) OWNER TO postgres;
