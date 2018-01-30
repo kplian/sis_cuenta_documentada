@@ -128,6 +128,11 @@ Phx.vista.CuentaDocVb = {
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
+
+        if(data.estado == 'vbrendicion'){
+            this.getBoton('ant_estado').disable();
+            this.getBoton('sig_estado').disable();
+        }
       }     
       else{
           this.desBotoneshistorico();
