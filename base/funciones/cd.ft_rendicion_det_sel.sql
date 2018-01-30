@@ -99,7 +99,10 @@ BEGIN
                             (tdcv.codigo||'' - ''||tdcv.nombre)::Varchar as desc_tipo_doc_compra_venta,
                             rd.id_rendicion_det,
                             rd.id_cuenta_doc,
-                            rd.id_cuenta_doc_rendicion
+                            rd.id_cuenta_doc_rendicion,
+                            dcv.id_funcionario,
+                            fun.desc_funcionario2
+
                         
 						from conta.tdoc_compra_venta dcv
                         inner join cd.trendicion_det rd on rd.id_doc_compra_venta = dcv.id_doc_compra_venta
@@ -111,6 +114,7 @@ BEGIN
                           left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
                           left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
                           left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
+                          left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
 				        where   ';
 			
 			--Definicion de la respuesta
@@ -156,6 +160,7 @@ BEGIN
                           left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
                           left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
                           left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
+                          left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
 				        where   ';
 			
 			--Definicion de la respuesta		    

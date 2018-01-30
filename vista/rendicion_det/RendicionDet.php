@@ -778,7 +778,10 @@ header("content-type: text/javascript; charset=UTF-8");
 				  {name : 'importe_anticipo',type : 'numeric'}, 
 				  {name : 'importe_retgar',type : 'numeric'}, 
 				  {name : 'importe_neto',type : 'numeric'}, 
-		          'tipo_reg','desc_depto', 'desc_plantilla', 'importe_descuento_ley', 'importe_pago_liquido', 'nro_dui', 'id_moneda', 'desc_moneda', 'id_auxiliar', 'codigo_auxiliar', 'nombre_auxiliar'],
+		          'tipo_reg','desc_depto', 'desc_plantilla', 'importe_descuento_ley', 'importe_pago_liquido', 'nro_dui', 'id_moneda', 'desc_moneda', 'id_auxiliar', 'codigo_auxiliar', 'nombre_auxiliar',
+				  {name : 'id_funcionario',type : 'numeric'}, 
+		          {name : 'desc_funcionario2',type : 'string'} 
+		          ],
 		
 	sortInfo : {
 			field : 'id_rendicion_det',
@@ -838,6 +841,7 @@ header("content-type: text/javascript; charset=UTF-8");
 	                	Phx.CP.loadingHide();
 	                	var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText));
 	                	_plantilla = reg.datos;
+	                	console.log('PRORRATEO',_plantilla)
 	                	//Abre la interfaz de registro documentos
 				        this.abrirFormularioDocumentos(tipo,record,readOnly,_plantilla,_autoriz);
 	                },
@@ -862,7 +866,6 @@ header("content-type: text/javascript; charset=UTF-8");
 
 		/*plantillaProrrateo: [{id_centro_costo: 97, desc_cc:'11500000 -  Amortización Inmovilizado sujeto remuner German Rocha 911   2017', factor: 0.60}, 
 				                    {id_centro_costo:98 , desc_cc:'P112 - 97, xxxx ',factor: 0.40}] //07/12/2017 RAC , se adciona parametro de plantilla para prorrateo de gastos */
-
 		me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/rendicion_det/FormRendicionCD.php', 'Formulario de rendicion', {
 				modal : true,
 				width : '95%',
