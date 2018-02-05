@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.f_get_saldo_totales_pago_simple (
   p_id_pago_simple integer,
   out p_monto numeric,
@@ -49,8 +51,8 @@ $body$
           sum(dcv.importe_pago_liquido) as importe_pago_liquido,
           sum(dcv.importe_doc ) as importe_doc
         INTO
-          o_total_documentos,
-          o_liquido_pagado          
+          o_liquido_pagado,
+          o_total_documentos          
         from cd.tpago_simple_det psd
         inner join conta.tdoc_compra_venta dcv   on dcv.id_doc_compra_venta = psd.id_doc_compra_venta
         where  psd.id_pago_simple = p_id_pago_simple;
