@@ -90,7 +90,10 @@ BEGIN
             pc.fecha,
             pc.id_gestion,
             tpc.sw_solicitud,
-            pc.id_cuenta_doc_fk
+            pc.id_cuenta_doc_fk,
+            pc.tipo_rendicion,
+            pc.dev_tipo,
+            pc.dev_saldo
       into
             v_registros
       
@@ -237,7 +240,9 @@ BEGIN
                   
                   --IF  v_total_rendido >= v_registros_cv.importe   THEN
                   --if v_rec_saldo.o_saldo = 0 then
-                  if (v_rec_saldo.o_a_favor_de='funcionario' and v_rec_saldo.o_saldo = 0) or (v_rec_saldo.o_a_favor_de='empresa' and v_rec_saldo.o_saldo >= 0) then
+                  --if (v_rec_saldo.o_a_favor_de='funcionario' and v_rec_saldo.o_saldo = 0) or (v_rec_saldo.o_a_favor_de='empresa' and v_rec_saldo.o_saldo >= 0) then
+                  --RCM 04-02-2018 se cambia la linea de arriba por esta, para corregir la finalizacion de la solicitud
+                  if (v_registros.tipo_rendicion='final' and v_registros.dev_saldo is not null) then
                   
                         
                         /************************************

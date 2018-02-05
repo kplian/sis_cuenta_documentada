@@ -1,3 +1,4 @@
+<font size="10"><span><b>Rendición: </b></span>&nbsp;<?php echo strtoupper($this->datos_detalle[0]["tipo_rendicion"])?></font><br>
 <table width="100%" cellpadding="5px"  rules="cols" border="1" style="font-size: 9" border="1">
 	<tbody>
 	<tr>		
@@ -16,11 +17,14 @@
 	    <td width="33.33%" class="td_label"><font size="9">&nbsp;<b>LUGAR:</b>&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["lugar"]?></font></td>
 		
 	</tr>
-	
 	<tr>
-		<td width="66.66%" class="td_label" rowspan="42"><font size="9">&nbsp;<b>MONTO (Literal):</b><br/>
+		<td width="66.66%" class="td_label"><font size="9">&nbsp;<b>MONTO ENTREGADO:</b></font></td>
+		<td width="33.33%"  align="right"><font size="9">&nbsp;<?php  echo number_format($this->datos_detalle[0]["total_entregado"], 2, '.', ','); ?></font></td>
+	</tr>
+	<tr>
+		<td width="66.66%" class="td_label" rowspan="42"><font size="9">&nbsp;<b>MONTO RENDIDO (Literal):</b><br/>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["importe_literal"].'  '. $this->datos_detalle[0]['desc_moneda']; ?></font></td>
-		<td width="33.33%"  align="center"><font size="9">&nbsp;<b>MONTO (<?php  echo $this->datos_detalle[0]['desc_moneda']; ?> ):</b></font></td>
+		<td width="33.33%"  align="center"><font size="9">&nbsp;<b>MONTO RENDIDO (<?php  echo $this->datos_detalle[0]['desc_moneda']; ?> ):</b></font></td>
 	</tr>
 	<tr>
 		<td width="33.33%"  align="right"><font size="9"><?php echo number_format($this->datos_detalle[0]["importe"], 2, '.', ',') ?>&nbsp;&nbsp;&nbsp;</font></td>

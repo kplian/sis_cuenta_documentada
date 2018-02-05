@@ -354,6 +354,15 @@ class RSolicitudCD extends  ReportePDF {
 		$this->SetFont('', '',10);				
 		$this->Cell($width_c2, $height, $this->datos_detalle[0]['fecha'], 1, 0, 'L', true, '', 0, false, 'T', 'C');
 		$this->Ln(6);
+
+		$this->SetFont('', 'B',10);
+		$this->SetFillColor(192,192,192, true);	
+		$this->Cell($width1, $height, '', 0, 0, 'L', false, '', 0, false, 'T', 'C');
+		$this->Cell($width_c1, $height, 'SIGEMA ', 1, 0, 'L', false, '', 0, false, 'T', 'C');
+		$this->SetFont('', '',10);				
+		$this->Cell(55, $height, $this->datos_detalle[0]['tipo_sol_sigema'], 1, 0, 'L', true, '', 0, false, 'T', 'C');
+		$this->Cell(55, $height, $this->datos_detalle[0]['nro_solicitud'], 1, 0, 'L', true, '', 0, false, 'T', 'C');
+		$this->Ln(6);
 		
 		$this->Ln(6);
 		$this->SetFont('','B',6);

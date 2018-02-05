@@ -42,8 +42,7 @@ Phx.vista.RendicionDetReg = {
 	          this.getBoton('new').enable();
 	          this.getBoton('edit').enable();
 	          this.getBoton('del').enable();
-	      }
-	      else{
+	      } else{
 	         
 	         this.getBoton('new').disable();
 	         this.getBoton('edit').disable();

@@ -521,6 +521,11 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('num_rendicion','VARCHAR');
 		$this->captura('nro_cheque','integer');		
 		$this->captura('importe_solicitado','numeric');				
+		$this->captura('tipo_sol_sigema','VARCHAR');
+		$this->captura('nro_solicitud','VARCHAR');
+		$this->captura('tipo_rendicion','VARCHAR');
+		$this->captura('total_entregado','numeric');
+
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

@@ -897,7 +897,8 @@ BEGIN
           
         
         --Sentencia de la consulta
-      v_consulta:='select
+      v_consulta:='with sigema as (select * from cd.vsigema_gral)
+                              select
                               cdoc.id_cuenta_doc, 
                               cdoc.id_tipo_cuenta_doc,
                               cdoc.id_proceso_wf,
@@ -945,12 +946,16 @@ BEGIN
                             '''||v_gaf[3]||'''::varchar as  gerente_financiero,
                             upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero,
                             funapro.desc_funcionario1 as aprobador,
-                  upper(orga.f_get_cargo_x_funcionario_str(funapro.id_funcionario,CURRENT_DATE)) as cargo_aprobador,
+                            upper(orga.f_get_cargo_x_funcionario_str(funapro.id_funcionario,CURRENT_DATE)) as cargo_aprobador,
                             cbte.nro_cbte,
                             cdoc.num_memo,
                             COALESCE(cdoc.num_rendicion,''s/n'') as num_rendicion,
                             lb.nro_cheque,
-                            cdori.importe as importe_solicitado
+                            cdori.importe as importe_solicitado,
+                            cdoc.tipo_sol_sigema,
+                            sigra.nro_solicitud,
+                            cdoc.tipo_rendicion,
+                            (select importe from cd.tcuenta_doc where id_cuenta_doc = cdoc.id_cuenta_doc_fk) as total_entregado
                         from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -959,16 +964,20 @@ BEGIN
                         inner join wf.tproceso_wf pwf on pwf.id_proceso_wf = cdoc.id_proceso_wf
                         inner join orga.vfuncionario fun on fun.id_funcionario = cdoc.id_funcionario
                         left join orga.vfuncionario funapro on funapro.id_funcionario = cdoc.id_funcionario_aprobador
-            inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
+                        inner join segu.tusuario usu1 on usu1.id_usuario = cdoc.id_usuario_reg
                         inner join wf.testado_wf ew on ew.id_estado_wf = cdoc.id_estado_wf
                         left join conta.tint_comprobante cbte on cbte.id_int_comprobante = cdoc.id_int_comprobante
                         left join tes.tts_libro_bancos lb on lb.id_int_comprobante=cbte.id_int_comprobante
                         left join cd.tcuenta_doc cdori on cdori.id_cuenta_doc = cdoc.id_cuenta_doc_fk
-            left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
+                        left join segu.tusuario usu2 on usu2.id_usuario = cdoc.id_usuario_mod
                         left join orga.tfuncionario_cuenta_bancaria fcb on fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
+                        left join sigema sigra
+                        on sigra.tipo_sol_sigema = cdoc.tipo_sol_sigema
+                        and sigra.id_sigema = cdoc.id_sigema
+                        and sigra.gestion::integer = extract(year from cdoc.fecha)::integer
                           
                             
-            where  cdoc.id_proceso_wf = '||v_parametros.id_proceso_wf;
+                        where  cdoc.id_proceso_wf = '||v_parametros.id_proceso_wf;
 
                         raise notice '%', v_consulta;
       
