@@ -229,6 +229,8 @@ Phx.vista.CuentaDocVbContaCentral = {
             exit;
         }
 
+        this.crearVentanaDevolucion();
+
         //Seteo baseparams de caja y cuenta bancaria
         Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
         Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
@@ -503,7 +505,8 @@ Phx.vista.CuentaDocVbContaCentral = {
                 {
                 text: 'Cerrar',
                 handler: function() {
-                    this.winDatos.hide();
+                    //this.winDatos.hide();
+                    this.winDatos.destroy();
                 },
                 scope: this
             }]
@@ -932,6 +935,12 @@ Phx.vista.CuentaDocVbContaCentral = {
 	          height:'50%',
 	          cls: 'RendicionDetTes'
          },
+         /*{
+             url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
+             title:'Facturas', 
+             height:'50%',
+             cls:'RendicionDetReg'
+        },*/
          {
 			  url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
 			  title: 'Depositos',
@@ -944,7 +953,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 
         if(rec.data.tipo_rendicion=='parcial'){
             Ext.MessageBox.alert('Alerta','La Rendicion esta marcada como Parcial, aun no debe registrarse los datos de la Devolucion/Reposicion.');
-            exit;
+            return;
         }
 
         //Seteo baseparams de caja y cuenta bancaria

@@ -343,9 +343,42 @@ BEGIN
     --------------------------------
     --Si el estado es pendiente genera el comprobante
     if p_codigo_estado = 'pendiente' then
+        
+        --Si es solicitud y el pago es por caja no genera comprobante. Si es rendicion siempre genera comprobante
+        if v_reg_cuenta_doc.sw_solicitud = 'si' then
+        
+            if v_reg_cuenta_doc.tipo_pago != 'caja' then
+                --Variable global para sincronización con ENDESIS
+                v_sincronizar = pxp.f_get_variable_global('sincronizar');
 
-        --Si el pago es por caja no genera comprobante
-        if v_reg_cuenta_doc.tipo_pago != 'caja' then
+                --Inicio de sincronización si corresponde
+                if v_sincronizar = 'true' then
+                    select * into v_nombre_conexion from migra.f_crear_conexion();     
+                end if;
+
+                --Generación del comprobante
+                v_id_int_comprobante = conta.f_gen_comprobante(v_reg_cuenta_doc.id_cuenta_doc, 
+                                                                v_reg_cuenta_doc.codigo_plantilla_cbte,
+                                                                p_id_estado_wf,                                                     
+                                                                p_id_usuario,
+                                                                p_id_usuario_ai, 
+                                                                p_usuario_ai, 
+                                                                v_nombre_conexion);
+
+                --Actualización del Id del comprobante en la cuenta documentada
+                update cd.tcuenta_doc set 
+                id_int_comprobante = v_id_int_comprobante          
+                where id_proceso_wf = p_id_proceso_wf;
+
+                --Fin de sincronización si corresponde
+                if v_sincronizar = 'true' then
+                    select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+                end if;
+                
+            end if;
+        
+        elsif v_reg_cuenta_doc.sw_solicitud = 'no' then
+            
             --Variable global para sincronización con ENDESIS
             v_sincronizar = pxp.f_get_variable_global('sincronizar');
 
@@ -372,7 +405,12 @@ BEGIN
             if v_sincronizar = 'true' then
                 select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
             end if;
+        else
+            raise exception 'No se generó comprobante porque no se pudo identificar si era una solicitud de fondos o rendición';
         end if;
+        
+        
+        
         
      
     end if;
