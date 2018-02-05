@@ -135,10 +135,15 @@ BEGIN
             IF v_parametros.tipo_interfaz in ('CuentaDocReg','CuentaDocSol') THEN
 
                 IF p_administrador != 1  THEN
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                    ) and ';
                 END IF;
 
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
+
+                --Filtro del tipo asistentes
+
 
             END IF;
            
@@ -330,10 +335,12 @@ BEGIN
            END IF;
            
            
-           IF v_parametros.tipo_interfaz = 'CuentaDocReg' THEN
+           IF v_parametros.tipo_interfaz in ('CuentaDocReg','CuentaDocSol') THEN
         
                IF p_administrador != 1  THEN
-                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||') and ';
+                    v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                    ) and ';
                END IF;
                
                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
