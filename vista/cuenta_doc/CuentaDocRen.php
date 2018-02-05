@@ -192,6 +192,7 @@ Phx.vista.CuentaDocRen = {
       this.getBoton('btnChequeoDocumentosWf').setDisabled(false);
       this.getBoton('diagrama_gantt').enable();
       this.getBoton('btnObs').enable();
+      this.getBoton('onBtnRen').enable();
 
 	  if(this.dias_para_rendir < 0 ){
 		  this.disableTabFacturasDepositos();
@@ -429,6 +430,20 @@ Phx.vista.CuentaDocRen = {
     	this.Cmp.cantidad_personas.setValue(this.cantidad_personas);
     	this.Cmp.aplicar_regla_15.setValue(this.aplicar_regla_15);
     	this.Cmp.tipo_contrato.setValue(this.tipo_contrato);
-    }
+    },
+    liberaMenu:function(){
+        var tb = Phx.vista.CuentaDoc.superclass.liberaMenu.call(this);
+        if(tb){
+            this.getBoton('sig_estado').disable();
+            this.getBoton('ant_estado').disable();
+            this.getBoton('btnChequeoDocumentosWf').disable();
+            this.getBoton('diagrama_gantt').disable();
+            this.getBoton('btnObs').disable();
+            this.getBoton('chkpresupuesto').disable();
+            this.getBoton('onBtnRen').disable();
+            
+        }
+        return tb
+    },
 };
 </script>

@@ -1533,34 +1533,36 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
     
     onOpenObs: function() {
             var rec=this.sm.getSelected();            
-            var data = {
-            	id_proceso_wf: rec.data.id_proceso_wf,
-            	id_estado_wf: rec.data.id_estado_wf,
-            	num_tramite: rec.data.num_tramite
+
+            if (rec.data) {
+            	var data = {
+	            	id_proceso_wf: rec.data.id_proceso_wf,
+	            	id_estado_wf: rec.data.id_estado_wf,
+	            	num_tramite: rec.data.num_tramite
+	            }
+	            
+	            Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
+	                    'Observaciones del WF',
+	                    {
+	                        width: '80%',
+	                        height: '70%'
+	                    },
+	                    data,
+	                    this.idContenedor,
+	                    'Obs');
             }
             
-            Phx.CP.loadWindows('../../../sis_workflow/vista/obs/Obs.php',
-                    'Observaciones del WF',
-                    {
-                        width: '80%',
-                        height: '70%'
-                    },
-                    data,
-                    this.idContenedor,
-                    'Obs');
     },		
 	onBtnRepSol: function() {
 		var rec = this.sm.getSelected();
-		var data = rec.data;
-		console.log(data);
-		if (data) {
+		if (rec.data) {
 			Phx.CP.loadingShow();
 			Ext.Ajax.request({
 				url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteSolicitudFondos',
 				params : {
-					'id_proceso_wf' : data.id_proceso_wf,
-					'id_cuenta_doc': data.id_cuenta_doc,
-					'tipo':data.tipo_cuenta_doc
+					'id_proceso_wf' : rec.data.id_proceso_wf,
+					'id_cuenta_doc': rec.data.id_cuenta_doc,
+					'tipo':rec.data.tipo_cuenta_doc
 				},
 				success : this.successExport,
 				failure : this.conexionFailure,
@@ -1572,13 +1574,12 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	
 	onBtnRepRenCon: function() {
 			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
+			if (rec.data) {
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
 					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionCon',
 					params : {
-						'id_proceso_wf' : data.id_proceso_wf
+						'id_proceso_wf' : rec.data.id_proceso_wf
 					},
 					success : this.successExport,
 					failure : this.conexionFailure,
@@ -1590,13 +1591,12 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	
 	onBtnRendicion : function() {
 			var rec = this.sm.getSelected();
-			var data = rec.data;
-			if (data) {
+			if (rec.data) {
 				Phx.CP.loadingShow();
 				Ext.Ajax.request({
 					url : '../../sis_cuenta_documentada/control/CuentaDoc/reporteRendicionFondos',
 					params : {
-						'id_proceso_wf' : data.id_proceso_wf
+						'id_proceso_wf' : rec.data.id_proceso_wf
 					},
 					success : this.successExport,
 					failure : this.conexionFailure,
