@@ -29,6 +29,7 @@ DECLARE
 	v_rec 					record;
 	v_id_cuenta_doc integer;
 	v_resp1 varchar;
+	v_total 				numeric;
 			    
 BEGIN
 
@@ -55,7 +56,16 @@ BEGIN
             where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
             if v_parametros.prorrateo <= 0 then
-            	raise exception 'El prorrateo no puede ser menor o igual a cero.';
+            	raise exception 'El porcentaje no puede ser menor o igual a cero.';
+            end if;
+
+            --Verifica que no se supere el 100%
+            select coalesce(sum(prorrateo),0) + v_parametros.prorrateo into v_total
+            from cd.tcuenta_doc_prorrateo 
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            if v_total > 1 then
+            	raise exception 'El prorrateo supera el cien por ciento (1). Revise/corrija los porcentajes';
             end if;
 
         	--Sentencia de la insercion
@@ -131,6 +141,16 @@ BEGIN
 
             if v_parametros.prorrateo <= 0 then
             	raise exception 'El prorrateo no puede ser menor o igual a cero.';
+            end if;
+
+            --Verifica que no se supere el 100%
+            select coalesce(sum(prorrateo),0) + v_parametros.prorrateo into v_total
+            from cd.tcuenta_doc_prorrateo 
+            where id_cuenta_doc = v_parametros.id_cuenta_doc
+            and id_cuenta_doc_prorrateo <> v_parametros.id_cuenta_doc_prorrateo;
+
+            if v_total > 1 then
+            	raise exception 'El prorrateo supera el cien por ciento (1). Revise/corrija los porcentajes';
             end if;
 
 			--Sentencia de la modificacion
