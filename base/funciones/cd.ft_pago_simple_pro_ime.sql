@@ -31,6 +31,7 @@ DECLARE
 	v_id_pago_simple_pro	integer;
 	v_id_partida			integer;
 	v_id_gestion 			integer;
+	v_total 				numeric;
 			    
 BEGIN
 
@@ -70,6 +71,15 @@ BEGIN
             			and estado in ('rendicion','vbconta','borrador')
             			) then
             	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
+            end if;
+
+            --Verifica que no se supere el 100%
+            select coalesce(sum(factor),0) + v_parametros.factor into v_total
+            from cd.tpago_simple_pro 
+            where id_pago_simple = v_parametros.id_pago_simple;
+
+            if v_total > 1 then
+            	raise exception 'El prorrateo supera el cien por ciento (1). Revise/corrija los porcentajes';
             end if;
 
         	--Sentencia de la insercion
@@ -143,6 +153,16 @@ BEGIN
             			and estado in ('rendicion','vbconta','borrador')
             			) then
             	raise exception 'La Solicitud del pago debe estar en estado Rendicion, VbConta, Borrador';
+            end if;
+
+            --Verifica que no se supere el 100%
+            select coalesce(sum(factor),0) + v_parametros.factor into v_total
+            from cd.tpago_simple_pro 
+            where id_pago_simple = v_parametros.id_pago_simple
+            and id_pago_simple_pro <> v_parametros.id_pago_simple_pro;
+
+            if v_total > 1 then
+            	raise exception 'El prorrateo supera el cien por ciento (1). Revise/corrija los porcentajes';
             end if;
 
 			--Sentencia de la modificacion
