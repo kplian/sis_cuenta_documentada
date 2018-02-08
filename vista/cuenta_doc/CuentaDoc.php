@@ -230,7 +230,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
                 renderer: function (value, p, record){
                 	if(record.data.sw_solicitud == 'no' ){
                 		if(record.data.sw_max_doc_rend == 'no' ){
-	                	     return String.format('<div title="No permite regitro de facturas grandes"><b><font color="green">{0}</font></b></div>', value);
+	                	     return String.format('<div title="No permite registro de facturas grandes"><b><font color="green">{0}</font></b></div>', value);
 	                	}
 	                	else{
 	                		 return String.format('<div title="Si permite el registro de facturas grandes"><b><font color="red">{0}</font></b></div>', value);
@@ -262,10 +262,10 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 	                	}
 	                	else{
 	                		if(value < 5){
-	                		   return String.format('<div title="Días restante para rendir"><b><font color="orange">{0}</font></b></div>', value);
+	                		   return String.format('<div title="Días restantes para rendir"><b><font color="orange">{0}</font></b></div>', value);
 	                	    }
 	                	    else{
-	                	    	return String.format('<div title="Días restante para rendir"><b><font color="green">{0}</font></b></div>', value);
+	                	    	return String.format('<div title="Días restantes para rendir"><b><font color="green">{0}</font></b></div>', value);
 	                	    }
 	                	}
                 	}
@@ -754,8 +754,8 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
-							format: 'd/m/Y', 
-							renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
+				format: 'd/m/Y', 
+				renderer:function (value,p,record){return value?value.dateFormat('d/m/Y H:i:s'):''}
 			},
 				type:'DateField',
 				filters:{pfiltro:'cdoc.fecha_mod',type:'date'},

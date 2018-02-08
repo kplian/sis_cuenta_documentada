@@ -957,7 +957,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         }
 
         //Seteo baseparams de caja y cuenta bancaria
-        Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
+        //Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
         Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
         this.cmbCaja.setValue('');
         this.cmbCaja.modificado = true;
