@@ -920,7 +920,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                         //Habilitar tab para el registro del dep�sito
                         this.cmbFormaDev.store = new Ext.data.ArrayStore({
                             fields :['variable','valor'],
-                            data :  [['deposito','deposito']]}
+                            data :  [['deposito','deposito'],['caja','caja']]}
                         );
                     }
 
