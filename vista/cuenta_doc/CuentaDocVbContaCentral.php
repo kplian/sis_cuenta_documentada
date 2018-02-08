@@ -134,7 +134,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.finCons = true;
 
         //Crea ventana para devoluci�n de saldos
-        this.crearVentanaDevolucion();
+        //this.crearVentanaDevolucion();
    },
    
     preparaMenu:function(n){
@@ -221,90 +221,7 @@ Phx.vista.CuentaDocVbContaCentral = {
               cls: 'CdDeposito'
          }
        ],
-    onButtonSaldo: function(){
-        var rec=this.sm.getSelected();
 
-        if(rec.data.tipo_rendicion=='parcial'){
-            Ext.MessageBox.alert('Alerta','La Rendicion esta marcada como Parcial, aun no debe registrarse los datos de la Devolucion/Reposicion.');
-            exit;
-        }
-
-        this.crearVentanaDevolucion();
-
-        //Seteo baseparams de caja y cuenta bancaria
-        Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
-        Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
-        this.cmbCaja.setValue('');
-        this.cmbCaja.modificado = true;
-        this.cmbCuentaBancaria.setValue('');
-        this.cmbCuentaBancaria.modificado = true;
-
-        Phx.CP.loadingShow();
-        Ext.Ajax.request({
-            url:'../../sis_cuenta_documentada/control/CuentaDoc/obtenerSaldoCuentaDoc',
-            params: {'id_cuenta_doc':rec.data.id_cuenta_doc},
-            success: function(resp){
-                Phx.CP.loadingHide();
-                var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
-                if(reg.datos.a_favor_de=='funcionario'){
-                    //Verificaci�n de opci�n de devoluci�n en funci�n del monto
-                    if(reg.datos.por_caja=='si'){
-                        //Abrir ventana para pedir datos de la caja y generar solicitud de efectivo a favor del funcionario
-                        this.cmbFormaDev.store = new Ext.data.ArrayStore({
-                            fields :['variable','valor'],
-                            data :  [['cheque','cheque'],['caja','caja']]}
-                        );
-                    } else {
-                        //Por cheque: abrir ventana para pedir datos para generaci�n del cheque a favor del funcionario
-                        this.cmbFormaDev.store = new Ext.data.ArrayStore({
-                            fields :['variable','valor'],
-                            data :  [['cheque','cheque']]}
-                        );
-                    }
-
-                } else {
-                    //'empresa'
-                    //Verificaci�n de opci�n de devoluci�n en funci�n del monto
-                    if(reg.datos.por_caja=='si'){
-                        //Abrir ventana para pedir datos de la caja y generar recibo de ingreso en caja
-                        this.cmbFormaDev.store = new Ext.data.ArrayStore({
-                            fields :['variable','valor'],
-                            data :  [['deposito','deposito'],['caja','caja']]}
-                        );
-
-                    } else {
-                        //Habilitar tab para el registro del dep�sito
-                        this.cmbFormaDev.store = new Ext.data.ArrayStore({
-                            fields :['variable','valor'],
-                            data :  [['deposito','deposito']]}
-                        );
-                    }
-
-                }
-
-                //Seteo de variables del formulario
-                this.txtAFavorDe.setValue(reg.datos.a_favor_de);
-                this.txtSaldo.setValue(reg.datos.saldo);
-
-                if(reg.datos.saldo==0){
-                    this.cmbFormaDev.allowBlank=true;
-                    this.cmbFormaDev.setDisabled(true);
-                    this.cmbFormaDev.setValue('deposito');
-                }
-
-                this.abrirVentana();
-            },
-            failure: function(resp) {
-                //alert("fail");
-                Phx.CP.conexionFailure(resp);
-            },
-            timeout: function() {
-                //alert("timeout");
-                Phx.CP.config_ini.timeout();
-            },
-            scope:this
-        });
-    },
     crearVentanaDevolucion: function(){
         //Componentes
         this.txtAFavorDe = new Ext.form.TextField({
@@ -627,7 +544,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                     success: function(resp){
                         var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
                         this.reload();
-                        this.winDatos.hide();
+                        this.winDatos.destroy();
                         Phx.CP.loadingHide();
                         Ext.MessageBox.alert('Hecho',reg.datos.respuesta);
                     },
@@ -855,7 +772,7 @@ Phx.vista.CuentaDocVbContaCentral = {
 		this.finCons = true;
 
         //Crea ventana para devoluci�n de saldos
-        this.crearVentanaDevolucion();
+        //this.crearVentanaDevolucion();
    },
    
     preparaMenu:function(n){
@@ -955,6 +872,8 @@ Phx.vista.CuentaDocVbContaCentral = {
             Ext.MessageBox.alert('Alerta','La Rendicion esta marcada como Parcial, aun no debe registrarse los datos de la Devolucion/Reposicion.');
             return;
         }
+
+        this.crearVentanaDevolucion();
 
         //Seteo baseparams de caja y cuenta bancaria
         //Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
@@ -1230,7 +1149,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 {
                 text: 'Cerrar',
                 handler: function() {
-                    this.winDatos.hide();
+                    this.winDatos.destroy();
                 },
                 scope: this
             }]
@@ -1351,7 +1270,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                     success: function(resp){
                         var reg = Ext.util.JSON.decode(Ext.util.Format.trim(resp.responseText)).ROOT;
                         this.reload();
-                        this.winDatos.hide();
+                        this.winDatos.destroy();
                         Phx.CP.loadingHide();
                         Ext.MessageBox.alert('Hecho',reg.datos.respuesta);
                     },
