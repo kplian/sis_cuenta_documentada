@@ -27,6 +27,13 @@
 	<tr>
 		<td width="50%" class="td_label"><font size="9">&nbsp;<b>LUGAR:</b>&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["lugar"]?></font></td>
 		<td width="50%" class="td_label"><font size="9">&nbsp;<b>TIPO PAGO:</b>&nbsp;&nbsp;&nbsp;<?php echo strtoupper($this->datos_detalle[0]["tipo_pago"])?></font></td>
+		
+	</tr>
+
+	<tr>
+		<td width="33.33%" class="td_label"><font size="9">&nbsp;<b>SIGEMA:</b></font></td>
+		<td width="33.33%" class="td_label"><font size="9">&nbsp;&nbsp;&nbsp;<?php echo strtoupper($this->datos_detalle[0]["tipo_sol_sigema"])?></font></td>
+		<td width="33.33%" class="td_label"><font size="9">&nbsp;&nbsp;&nbsp;<?php echo strtoupper($this->datos_detalle[0]["nro_solicitud"])?></font></td>
 	</tr>
 	<tr>
 		<td width="70%" class="td_label" rowspan="42"><font size="9">&nbsp;<b>MONTO (Literal):</b><br/>
