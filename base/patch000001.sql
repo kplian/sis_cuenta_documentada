@@ -697,3 +697,29 @@ alter table cd.tpago_simple
 alter table cd.tpago_simple
     add column id_solicitud_efectivo integer;    
 /***********************************F-SCP-CD-RCM-1-20/01/2018****************************************/      
+
+
+/***********************************I-SCP-CD-RCM-1-20/02/2018****************************************/
+ALTER TABLE cd.ttipo_cuenta_doc
+  ADD COLUMN codigo_plantilla_cbte_devrep VARCHAR(100);
+
+COMMENT ON COLUMN cd.ttipo_cuenta_doc.codigo_plantilla_cbte_devrep
+IS 'Código de la plantilla de comprobante para devolución o reposición de saldos por cheque o depósito';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_int_comprobante_devrep integer;
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_int_comprobante_devrep
+IS 'Id del comprobante pode la devolución o reposición generado';
+/***********************************F-SCP-CD-RCM-1-20/02/2018****************************************/
+
+/***********************************I-SCP-CD-RCM-1-26/02/2018****************************************/
+CREATE TABLE cd.tcuenta_doc_excepcion (
+  id_cuenta_doc_excepcion SERIAL,
+  id_cuenta_doc INTEGER,
+  id_usuario INTEGER,
+  PRIMARY KEY(id_cuenta_doc_excepcion)
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+/***********************************F-SCP-CD-RCM-1-26/02/2018****************************************/

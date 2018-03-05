@@ -14,7 +14,7 @@
 	</tr>
 	<tr>
 		<td style="width: 54%; color: #444444;" rowspan="2"><h2><?php  echo $titulo2?></h2></td>
-		<td style="width: 23%; color: #444444;"><b>Fecha:</b> <?php  echo $newDate; ?></td>
+		<td style="width: 23%; color: #444444;"><b>Fecha:</b> <?php echo $newDate; ?></td>
 	</tr>
 	<tr>
 		<td style="width: 23%; color: #444444;"><b>Moneda</b> <?php  echo $this->datos_detalle[0]['desc_moneda']; ?> </td>

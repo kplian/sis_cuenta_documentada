@@ -42,6 +42,7 @@ DECLARE
     v_rec               record;
     v_id_cuenta_doc     integer;
     v_gestion           varchar;
+    v_id_plantilla      integer;
           
 BEGIN
 
@@ -137,7 +138,7 @@ BEGIN
                 IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
                                 or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
-                    ) and ';
+                    or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                 END IF;
 
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
@@ -340,7 +341,7 @@ BEGIN
                IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
                                 or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
-                    ) and ';
+                    or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                END IF;
                
                v_filtro = v_filtro || ' tcd.sw_solicitud = ''si'' and ';
@@ -945,7 +946,7 @@ BEGIN
                               (select l.nombre  
                             from param.tlugar l 
                             inner join orga.tcargo c on  c.id_lugar =  l.id_lugar
-                            where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')))::varchar as lugar, 
+                            where  c.id_cargo = ANY (orga.f_get_cargo_x_funcionario(cdoc.id_funcionario  , cdoc.fecha , ''oficial'')) limit 1)::varchar as lugar, 
                             upper(orga.f_get_cargo_x_funcionario_str(cdoc.id_funcionario  , cdoc.fecha , ''oficial''))::Varchar as cargo_funcionario,
                             uo.nombre_unidad,
                             pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
@@ -962,7 +963,19 @@ BEGIN
                             cdoc.tipo_sol_sigema,
                             sigra.nro_solicitud,
                             cdoc.tipo_rendicion,
-                            (select importe from cd.tcuenta_doc where id_cuenta_doc = cdoc.id_cuenta_doc_fk) as total_entregado
+                            (select importe from cd.tcuenta_doc where id_cuenta_doc = cdoc.id_cuenta_doc_fk) as total_entregado,
+                            (select
+                            coalesce(sum(coalesce(dcv.importe_pago_liquido,0)),0)
+                            from cd.tcuenta_doc cd
+                            inner join  cd.trendicion_det rd
+                            on rd.id_cuenta_doc_rendicion = cd.id_cuenta_doc
+                            inner join conta.tdoc_compra_venta dcv
+                            on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                            and dcv.estado_reg = ''activo''
+                            where cd.id_cuenta_doc_fk = cdoc.id_cuenta_doc_fk
+                            and cd.estado = ''rendido''
+                            and cd.id_cuenta_doc <> cdoc.id_cuenta_doc
+                            and cd.id_cuenta_doc < cdoc.id_cuenta_doc) as otras_rendiciones
                         from cd.tcuenta_doc cdoc
                         inner join orga.tuo uo on uo.id_uo = cdoc.id_uo
                         inner join cd.ttipo_cuenta_doc tcd on tcd.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
@@ -1454,10 +1467,200 @@ BEGIN
             return v_consulta;
             
         end; 
+
+  /*********************************    
+  #TRANSACCION: 'CD_VIA110_SEL'
+  #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+  #AUTOR:       RCM
+  #FECHA:       27/02/2018
+  ***********************************/
+
+  elseif(p_transaccion='CD_VIA110_SEL')then
+            
+    begin
+
+        v_id_plantilla = 41;
+       
+        --Sentencia de la consulta
+        v_consulta:='select
+                    dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,
+                    sum(dcv.importe_doc) as total,
+                    (select coalesce(sum(dcv1.importe_doc),0)
+                    from conta.tdoc_compra_venta dcv1
+                    where dcv1.id_funcionario = dcv.id_funcionario
+                    and dcv1.id_plantilla = '||v_id_plantilla||'
+                    and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                    and dcv1.id_int_comprobante is null
+                    ) as sin_cbte,
+                    (select coalesce(sum(dcv1.importe_doc),0)
+                    from conta.tdoc_compra_venta dcv1
+                    where dcv1.id_funcionario = dcv.id_funcionario
+                    and dcv1.id_plantilla = '||v_id_plantilla||'
+                    and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                    and dcv1.id_int_comprobante is not null
+                    ) as con_cbte
+                    from conta.tdoc_compra_venta dcv
+                    inner join param.tdepto dep
+                    on dep.id_depto = dcv.id_depto_conta
+                    left join orga.vfuncionario fun
+                    on fun.id_funcionario = dcv.id_funcionario
+                    where dcv.id_plantilla = '||v_id_plantilla||'
+                    and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
+
+        v_consulta:=v_consulta||v_parametros.filtro;
+        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre';
+      
+      --Definicion de la respuesta
+      
+      v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+      --Devuelve la respuesta
+      return v_consulta;
+            
+    end;
+
+  /*********************************    
+  #TRANSACCION: 'CD_VIA110_CONT'
+  #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+  #AUTOR:       RCM
+  #FECHA:       27/02/2018
+  ***********************************/
+
+  elseif(p_transaccion='CD_VIA110_CONT')then
+            
+    begin
+
+        v_id_plantilla = 41;
+       
+        --Sentencia de la consulta
+        v_consulta:='with tcontar as (select dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,sum(dcv.importe_doc) as total
+                    from conta.tdoc_compra_venta dcv
+                    inner join param.tdepto dep
+                    on dep.id_depto = dcv.id_depto_conta
+                    left join orga.vfuncionario fun
+                    on fun.id_funcionario = dcv.id_funcionario
+                    where dcv.id_plantilla = '||v_id_plantilla||'
+                    and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
+
+        v_consulta:=v_consulta||v_parametros.filtro;
+        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre)
+                                select count(1) from tcontar';
+
+      --Devuelve la respuesta
+      return v_consulta;
+            
+    end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_VIA110DET_SEL'
+    #DESCRIPCION: Listado del detalle de recibos sin retenciones de viáticos utilizados por funcionario para Form 110
+    #AUTOR:       RCM
+    #FECHA:       28/02/2018
+    ***********************************/
+
+    elseif(p_transaccion='CD_VIA110DET_SEL') then
+            
+        begin
+
+            v_id_plantilla = 41;
+           
+            --Sentencia de la consulta
+            v_consulta:='select
+                        dcv.id_doc_compra_venta,
+                        dcv.nro_tramite,
+                        pla.desc_plantilla,
+                        dcv.id_int_comprobante,
+                        case coalesce(dcv.id_int_comprobante,0)
+                          when 0 then ''''
+                          else case cbte.estado_reg
+                                when ''validado'' then ''validado''
+                                else ''NO VALIDADO''
+                                end
+                        end estado_cbte,
+                        dcv.nit,
+                        dcv.nro_documento,
+                        dcv.nro_autorizacion,
+                        dcv.fecha,
+                        dcv.razon_social,
+                        dcv.importe_doc,
+                        dcv.importe_excento,
+                        dcv.importe_descuento,
+                        dcv.importe_neto,
+                        dcv.codigo_control,
+                        dcv.importe_iva,
+                        dcv.importe_it,
+                        dcv.importe_ice,
+                        dcv.importe_pago_liquido,
+                        dcv.nro_dui,
+                        cdo.nro_tramite as nro_tramite_viatico,
+                        cdo.fecha as fecha_viatico,
+                        fun.desc_funcionario2 as desc_funcionario_sol,
+                        dcv.id_funcionario,
+                        fun1.desc_funcionario2 as desc_funcionario
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tplantilla pla
+                        on pla.id_plantilla = dcv.id_plantilla
+                        left join orga.vfuncionario fun1
+                        on fun1.id_funcionario = dcv.id_funcionario
+                        left join conta.tint_comprobante cbte
+                        on cbte.id_int_comprobante = dcv.id_int_comprobante
+                        left join cd.trendicion_det rd
+                        on rd.id_rendicion_det = dcv.id_origen
+                        left join cd.tcuenta_doc cdo
+                        on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = cdo.id_funcionario
+                        where dcv.id_plantilla = '||v_id_plantilla||'
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+            --Devuelve la respuesta
+            return v_consulta;
+        end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_VIA110DET_CONT'
+    #DESCRIPCION: Recuento del detalle de recibos sin retenciones de viáticos utilizados por funcionario para Form 110
+    #AUTOR:       RCM
+    #FECHA:       28/02/2018
+    ***********************************/
+    elseif(p_transaccion='CD_VIA110DET_CONT') then
+            
+        begin
+
+            v_id_plantilla = 41;
+           
+            --Sentencia de la consulta
+            v_consulta:='select count(1) as total
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tplantilla pla
+                        on pla.id_plantilla = dcv.id_plantilla
+                         left join orga.vfuncionario fun1
+                        on fun1.id_funcionario = dcv.id_funcionario
+                        left join conta.tint_comprobante cbte
+                        on cbte.id_int_comprobante = dcv.id_int_comprobante
+                        left join cd.trendicion_det rd
+                        on rd.id_rendicion_det = dcv.id_origen
+                        left join cd.tcuenta_doc cdo
+                        on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = cdo.id_funcionario
+                        where dcv.id_plantilla = '||v_id_plantilla||'
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Devuelve la respuesta
+            return v_consulta;
+        end;
     
-  else
+    else
         raise exception 'Transaccion inexistente';
-  end if;
+    end if;
           
 EXCEPTION
           

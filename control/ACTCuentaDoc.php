@@ -688,5 +688,59 @@ class ACTCuentaDoc extends ACTbase{
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
 
+	function listarViaticosForm110(){
+		$this->objParam->defecto('ordenacion','dcv.id_funcionario');
+		$this->objParam->defecto('dir_ordenacion','asc');
+
+		if($this->objParam->getParametro('id_periodo')!=''){
+            $this->objParam->addFiltro("dcv.id_periodo = ".$this->objParam->getParametro('id_periodo'));    
+        }
+
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0)
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));    
+        }
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarViaticosForm110');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarViaticosForm110($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function listarViaticosForm110Det(){
+		$this->objParam->defecto('ordenacion','dcv.fecha');
+		$this->objParam->defecto('dir_ordenacion','asc');
+
+		if($this->objParam->getParametro('id_periodo')!=''){
+            $this->objParam->addFiltro("dcv.id_periodo = ".$this->objParam->getParametro('id_periodo'));    
+        }
+
+        if($this->objParam->getParametro('id_funcionario')!=''){
+            $this->objParam->addFiltro("dcv.id_funcionario = ".$this->objParam->getParametro('id_funcionario'));
+        } else {
+        	$this->objParam->addFiltro("dcv.id_funcionario is null");
+        }
+
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0)
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));    
+        }
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarViaticosForm110Det');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarViaticosForm110Det($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
 }
 ?>

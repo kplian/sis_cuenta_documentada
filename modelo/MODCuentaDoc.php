@@ -525,6 +525,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('nro_solicitud','VARCHAR');
 		$this->captura('tipo_rendicion','VARCHAR');
 		$this->captura('total_entregado','numeric');
+		$this->captura('otras_rendiciones','numeric');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
@@ -1090,6 +1091,76 @@ class MODCuentaDoc extends MODbase{
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarViaticosForm110(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_VIA110_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		$this->setParametro('id_periodo','id_periodo','int4');
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_funcionario','INTEGER');
+		$this->captura('codigo','VARCHAR');
+		$this->captura('desc_funcionario2','TEXT');
+		$this->captura('ci','VARCHAR');
+		$this->captura('id_depto_conta','INTEGER');
+		$this->captura('desc_depto','TEXT');
+		$this->captura('total','NUMERIC');
+		$this->captura('sin_cbte','NUMERIC');
+		$this->captura('con_cbte','NUMERIC');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function listarViaticosForm110Det(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_VIA110DET_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+
+		$this->setParametro('id_periodo','id_periodo','int4');
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_doc_compra_venta','BIGINT');
+		$this->captura('nro_tramite','VARCHAR');
+		$this->captura('desc_plantilla','VARCHAR');
+		$this->captura('id_int_comprobante','INTEGER');
+		$this->captura('estado_cbte','TEXT');
+		$this->captura('nit','VARCHAR');
+		$this->captura('nro_documento','VARCHAR');
+		$this->captura('nro_autorizacion','VARCHAR');
+		$this->captura('fecha','DATE');
+		$this->captura('razon_social','VARCHAR');
+		$this->captura('importe_doc','NUMERIC');
+		$this->captura('importe_excento','NUMERIC');
+		$this->captura('importe_descuento','NUMERIC');
+		$this->captura('importe_neto','NUMERIC');
+		$this->captura('codigo_control','VARCHAR');
+		$this->captura('importe_iva','NUMERIC');
+		$this->captura('importe_it','NUMERIC');
+		$this->captura('importe_ice','NUMERIC');
+		$this->captura('importe_pago_liquido','NUMERIC');
+		$this->captura('nro_dui','VARCHAR');
+		$this->captura('nro_tramite_viatico','VARCHAR');
+		$this->captura('fecha_viatico','DATE');
+		$this->captura('desc_funcionario_sol','TEXT');
+		$this->captura('id_funcionario','integer');
+		$this->captura('desc_funcionario','TEXT');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}

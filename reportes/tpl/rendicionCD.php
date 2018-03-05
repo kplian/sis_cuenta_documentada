@@ -18,9 +18,18 @@
 		
 	</tr>
 	<tr>
-		<td width="66.66%" class="td_label"><font size="9">&nbsp;<b>MONTO ENTREGADO:</b></font></td>
-		<td width="33.33%"  align="right"><font size="9">&nbsp;<?php  echo number_format($this->datos_detalle[0]["total_entregado"], 2, '.', ','); ?></font></td>
+		<td width="22.22%" class="td_label" align="center"><span><b>Importe Entregado</b></span></td>
+                <td width="22.22%" class="td_label" align="center"><span><b>Otras Rendiciones</b></span></td>
+                <td width="22.22%" class="td_label" align="center"><span><b>Saldo</b></span></td>
+		<td width="33.33%" class="td_label" align="center"><span><b>Moneda</b></span></td>
 	</tr>
+	<tr>
+                <td width="22.22%" class="td_label" align="right"><font size="9">&nbsp;<?php echo number_format($this->datos_detalle[0]["total_entregado"],2,'.',',')?></font></td>
+                <td width="22.22%" class="td_label" align="right"><font size="9">&nbsp;<?php echo number_format($this->datos_detalle[0]["otras_rendiciones"],2,'.',',')?></font></td>
+                <td width="22.22%" class="td_label" align="right"><font size="9">&nbsp;<?php $te=$this->datos_detalle[0]["total_entregado"];$or=$this->datos_detalle[0]["otras_rendiciones"];$tot=$te-$or; echo number_format($tot,2,'.',',')?></font></td>
+		<td width="33.33%" class="td_label" align="center" ><font size="9">&nbsp;<?php echo $this->datos_detalle[0]["desc_moneda"]?></font></td>
+        </tr>
+
 	<tr>
 		<td width="66.66%" class="td_label" rowspan="42"><font size="9">&nbsp;<b>MONTO RENDIDO (Literal):</b><br/>
 			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<?php echo $this->datos_detalle[0]["importe_literal"].'  '. $this->datos_detalle[0]['desc_moneda']; ?></font></td>
@@ -122,8 +131,25 @@
 	</tr>
 	
 	<tr>
-		<td width="85%" align="right"><b>SALDO A FAVOR DE LA EMPRESA&nbsp;&nbsp;&nbsp;&nbsp;</b></td>	
-	    <td width="15%" align="right" class="td_currency"><span><b><?php  echo number_format($this->datos_detalle[0]["importe_solicitado"] - ($total_deposito + $total_facturas), 2, '.', ','); ?></b></span></td>
+		<td width="85%" align="right"><b><?php 
+						 $te=$this->datos_detalle[0]["total_entregado"];
+                                                 $or=$this->datos_detalle[0]["otras_rendiciones"];
+                                                 $tot=$te-$or;
+						 $saldo=$tot-($total_deposito + $total_facturas);
+						 $msg="SALDO A FAVOR DE LA EMPRESA";
+
+						if($saldo<0){
+							$msg="SALDO A FAVOR DEL FUNCIONARIO";
+						}
+
+
+						echo $msg;?>&nbsp;&nbsp;&nbsp;&nbsp;</b></td>	
+		<td width="15%" align="right" class="td_currency"><span><b><?php
+									$te=$this->datos_detalle[0]["total_entregado"];
+									$or=$this->datos_detalle[0]["otras_rendiciones"];
+									$tot=$te-$or;
+									echo number_format(abs($tot - ($total_deposito + $total_facturas)), 2, '.', ',');
+									?></b></span></td>
 	</tr>
 	
     </tbody>
