@@ -1116,6 +1116,7 @@ class MODCuentaDoc extends MODbase{
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		//echo $this->consulta;exit;
 		$this->ejecutarConsulta();
 
 		//Devuelve la respuesta
@@ -1159,6 +1160,35 @@ class MODCuentaDoc extends MODbase{
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+
+	function reporteViaticosForm110(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_cuenta_doc_sel';
+		$this->transaccion='CD_VIA110_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this->setCount(false);
+
+		$this->setParametro('id_periodo','id_periodo','int4');
+		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_funcionario','INTEGER');
+		$this->captura('codigo','VARCHAR');
+		$this->captura('desc_funcionario2','TEXT');
+		$this->captura('ci','VARCHAR');
+		$this->captura('id_depto_conta','INTEGER');
+		$this->captura('desc_depto','TEXT');
+		$this->captura('total','NUMERIC');
+		$this->captura('sin_cbte','NUMERIC');
+		$this->captura('con_cbte','NUMERIC');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		//echo $this->consulta;exit;
 		$this->ejecutarConsulta();
 
 		//Devuelve la respuesta

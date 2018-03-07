@@ -437,7 +437,7 @@ Phx.vista.ReporteViaticos110Det=Ext.extend(Phx.gridInterfaz,{
         this.store.baseParams = {
             id_funcionario: this.maestro.id_funcionario,
             id_depto: this.maestro.id_depto_conta,
-            id_periodo: 13
+            id_periodo: this.maestro.id_periodo
         };
         this.load({
             params: {

@@ -235,6 +235,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         //Seteo baseparams de caja y cuenta bancaria
         //Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
         Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
+        console.log('aaaaaaa',rec.data);
         this.cmbCaja.setValue('');
         this.cmbCaja.modificado = true;
         this.cmbCuentaBancaria.setValue('');
@@ -286,6 +287,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 //Seteo de variables del formulario
                 this.txtAFavorDe.setValue(reg.datos.a_favor_de);
                 this.txtSaldo.setValue(reg.datos.saldo);
+                //this.txtSaldoOriginal.setValue(reg.datos.saldo+' '+rec.data.desc_moneda);
 
                 if(reg.datos.saldo==0){
                     this.cmbFormaDev.allowBlank=true;
@@ -313,11 +315,56 @@ Phx.vista.CuentaDocVbContaCentral = {
             fieldLabel: 'Saldo a Favor de',
             readOnly: true
         });
+        /*this.txtSaldoOriginal = new Ext.form.TextField({
+            name: 'txtSaldoOriginal',
+            fieldLabel: 'Saldo Moneda Original',
+            readOnly: true
+        });*/
         this.txtSaldo = new Ext.form.TextField({
             name: 'txtSaldo',
             fieldLabel: 'Saldo',
             readOnly: true
         });
+        //Combo moneda
+        this.cmbMoneda = new Ext.form.ComboBox({
+            name: 'cmbMoneda',
+            fieldLabel: 'Moneda',
+            allowBlank: true,
+            emptyText: 'Elija una opcion...',
+            store: new Ext.data.JsonStore({
+                url: '../../sis_tesoreria/control/Caja/listarCaja',
+                id: 'id_caja',
+                root: 'datos',
+                sortInfo: {
+                    field: 'codigo',
+                    direction: 'ASC'
+                },
+                totalProperty: 'total',
+                fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
+                remoteSort: true,
+                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
+            }),
+            valueField: 'id_caja',
+            displayField: 'codigo',
+            gdisplayField: 'desc_caja',
+            hiddenName: 'id_caja',
+            forceSelection: true,
+            typeAhead: false,
+            triggerAction: 'all',
+            lazyRender: true,
+            mode: 'remote',
+            pageSize: 15,
+            queryDelay: 1000,
+            anchor: '100%',
+            minChars: 2,
+            tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>{codigo}</b></p><p>CAJERO: {cajero}</p></div></tpl>',
+            renderer : function(value, p, record) {
+                return String.format('{0}', record.data['codigo']);
+            },
+            hidden: true,
+            width: 200
+        });
+
         //Combo Forma de devoluci�n
         this.cmbFormaDev = new Ext.form.ComboBox({
             name: 'cmbFormaDev',
@@ -474,7 +521,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.frmDatos = new Ext.form.FormPanel({
             layout: 'form',
             items: [
-                this.txtSaldo,this.txtAFavorDe,this.cmbFormaDev, this.cmbCaja, this.txtNombreCheque,this.cmbDeptoLb,this.cmbCuentaBancaria
+                /*this.txtSaldoOriginal,*/this.txtSaldo,this.txtAFavorDe,this.cmbFormaDev, this.cmbCaja, this.txtNombreCheque,this.cmbDeptoLb,this.cmbCuentaBancaria
             ],
             padding: this.paddingForm,
             bodyStyle: this.bodyStyleForm,

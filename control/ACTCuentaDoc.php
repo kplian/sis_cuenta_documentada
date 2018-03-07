@@ -7,14 +7,12 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 require_once(dirname(__FILE__).'/../reportes/RSolicitudCD.php');
-
 require_once(dirname(__FILE__).'/../reportes/RRendicionCD.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionCD_Fondo.php');
-
 require_once(dirname(__FILE__).'/../reportes/RCuentaDoc.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionConXls.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoAsignacion.php');
-
+require_once(dirname(__FILE__).'/../reportes/RViaticosForm110Xls.php');
 
 class ACTCuentaDoc extends ACTbase{    
 			
@@ -741,6 +739,58 @@ class ACTCuentaDoc extends ACTbase{
 		}
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+
+	function reporteViaticosForm110(){
+		$nombreArchivo = uniqid('RepViaticosForm110-'.session_id()).'.xls'; 
+		$dataSource = $this->recuperarViaticoForm110();
+		
+		//Parámetros básicos
+		$tamano = 'LETTER';
+		$orientacion = 'L';
+		$titulo = 'Consolidado';
+		
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		$reporte = new RDetalleDepXls($this->objParam); 
+		$reporte->datosHeader($dataSource->getDatos());
+		$reporte->generarReporte(); 
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+		
+	}
+
+	function recuperarViaticoForm110(){
+		if($this->objParam->getParametro('id_periodo')!=''){
+            $this->objParam->addFiltro("dcv.id_periodo = ".$this->objParam->getParametro('id_periodo'));    
+        }
+
+        if($this->objParam->getParametro('id_funcionario')!=''){
+            $this->objParam->addFiltro("dcv.id_funcionario = ".$this->objParam->getParametro('id_funcionario'));
+        } else {
+        	$this->objParam->addFiltro("dcv.id_funcionario is null");
+        }
+
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0)
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));
+        }
+
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->reporteViaticosForm110($this->objParam);
+		var_dump($cbteHeader);exit;
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		} else{
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		} 
+    }
 
 }
 ?>

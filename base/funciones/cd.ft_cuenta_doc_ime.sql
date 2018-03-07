@@ -112,6 +112,7 @@ DECLARE
     v_permitir_mod                  varchar;
     v_cc_sigema                     text;
     v_saldo                         numeric;
+    v_id_moneda                     integer;
 
 BEGIN
 
@@ -1794,11 +1795,20 @@ BEGIN
 
             --Casos especiales para devolver en bolivianos lo entregado en dólares, geda, vi-000473-2018
             v_saldo = v_registros_cd.o_saldo;
-            if v_parametros.id_cuenta_doc = 1602 then
+
+          --Temporal
+          select id_moneda into v_id_moneda from cd.tcuenta_doc where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+          if v_id_moneda = 2 then
+            v_saldo = round(v_saldo*6.96,2);
+          end if;
+
+
+            /*if v_parametros.id_cuenta_doc = 1602 then
                 v_saldo = round(v_saldo*6.96,2);
             elsif v_parametros.id_cuenta_doc = 1665 then
                 v_saldo = round(v_saldo*6.96,2);
-            end if;
+            end if;*/
 
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Verificacion de registro de Itinerario realizado');

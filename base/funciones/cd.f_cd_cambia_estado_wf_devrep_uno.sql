@@ -51,10 +51,17 @@ BEGIN
   	if v_rec.dev_tipo = 'caja' then
     	v_resp1 = true;
     else
-    	--Verifica el saldo, si es cero pasa a rendicio, de lo contrario va a tesoreia
+    	--Verifica el saldo, si es cero pasa a rendicion, de lo contrario va a tesoreria
     	select * into v_rec_saldo from cd.f_get_saldo_totales_cuenta_doc(v_rec.id_cuenta_doc);
     
     	if v_rec_saldo.o_saldo = 0 then
+
+            --Actualiza el registro de cuenta doc poniendo el saldo en cero
+            update cd.tcuenta_doc set
+            dev_saldo = 0,
+            dev_tipo = 'deposito'
+            where id_cuenta_doc = v_rec.id_cuenta_doc;
+
         	v_resp1 = true;
         end if;
     end if;

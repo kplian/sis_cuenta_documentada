@@ -37,6 +37,16 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
 			this.capturaFiltros();
 		    
         },this);
+
+        //Botones para el reporte
+        this.addButton('btnReporte',
+        {
+            text: 'Reporte',
+            iconCls: 'bchecklist',
+            handler: this.loadReporte,
+            disabled: false,
+            tooltip: '<b>Reporte Form.110</b><br/>Listado de viajes para el Form.110.'
+        });
 	},
 			
 	Atributos:[
@@ -161,6 +171,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         {name:'desc_depto', type: 'string'},
         {name:'sin_cbte', type: 'numeric'},
         {name:'con_cbte', type: 'numeric'}
+        {name:'id_periodo', type: 'numeric'}
 	],
 	sortInfo:{
 		field: 'fun.desc_funcionario2',
@@ -314,6 +325,39 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         title: 'Detalle Viátios Form.110',
         height: '40%',
         cls: 'ReporteViaticos110Det'
+    },
+
+    loadReporte: function() {
+
+        if(!this.validarFiltros()){
+            alert('Debe especificar año y mes previamente')
+        } else {
+
+            var rec = this.sm.getSelected();
+            Ext.MessageBox.alert('Información','Este reporte solamente incluye a los Recibos Sin Retención de Viáticos que tienen asociado al Funcionario y tienen su Comprobante Validado');
+
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url: '../../sis_cuenta_documentada/control/CuentaDoc/reporteViaticosForm110',
+                params: {
+                    id_periodo: this.cmbPeriodo.getValue(),
+                    id_depto: this.cmbDepto.getValue(),
+                    tipo: 'oficial',
+                    sort: 'dcv.id_funcionario',
+                    dir:'ASC',
+                    start: 0,
+                    limit: 10000
+                },
+                success: this.successExport,
+                failure: this.conexionFailure,
+                timeout: this.timeout,
+                scope: this
+            });
+
+        }
+
+
+
     }
 
 })
