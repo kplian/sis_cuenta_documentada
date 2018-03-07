@@ -172,8 +172,10 @@ BEGIN
                         
             end if;
 
-            --Actualiza el importe de la cabecera con el total detalle del presupuesto
-            v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_reg_cuenta_doc.id_cuenta_doc);
+            --Actualiza el importe de la cabecera con el total detalle del presupuesto si es Viáticos
+            if v_reg_cuenta_doc.codigo_tipo_cuenta_doc = 'SOLVIA' then
+                v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_reg_cuenta_doc.id_cuenta_doc);
+            end if;
 
         end if;
 

@@ -1110,6 +1110,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('ci','VARCHAR');
 		$this->captura('id_depto_conta','INTEGER');
 		$this->captura('desc_depto','TEXT');
+		$this->captura('id_periodo','INTEGER');
 		$this->captura('total','NUMERIC');
 		$this->captura('sin_cbte','NUMERIC');
 		$this->captura('con_cbte','NUMERIC');

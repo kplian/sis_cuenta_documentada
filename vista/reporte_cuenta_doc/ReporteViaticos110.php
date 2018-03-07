@@ -170,7 +170,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         {name:'id_depto_conta', type: 'numeric'},
         {name:'desc_depto', type: 'string'},
         {name:'sin_cbte', type: 'numeric'},
-        {name:'con_cbte', type: 'numeric'}
+        {name:'con_cbte', type: 'numeric'},
         {name:'id_periodo', type: 'numeric'}
 	],
 	sortInfo:{
