@@ -13,6 +13,7 @@ require_once(dirname(__FILE__).'/../reportes/RCuentaDoc.php');
 require_once(dirname(__FILE__).'/../reportes/RRendicionConXls.php');
 require_once(dirname(__FILE__).'/../reportes/RMemoAsignacion.php');
 require_once(dirname(__FILE__).'/../reportes/RViaticosForm110Xls.php');
+require_once(dirname(__FILE__).'/../reportes/RPasajesFuncionariosXls.php');
 
 class ACTCuentaDoc extends ACTbase{    
 			
@@ -741,31 +742,177 @@ class ACTCuentaDoc extends ACTbase{
 	}
 
 	function reporteViaticosForm110(){
-		$nombreArchivo = uniqid('RepViaticosForm110-'.session_id()).'.xls'; 
+		//Obtención Descripción Depto
+		$paramDepto="Todos";
+		if($this->objParam->getParametro('id_depto')!=0){
+			$this->objFunc = $this->create('sis_parametros/MODDepto');
+			$datosDepto = $this->objFunc->recuperarDescripcionDepto($this->objParam);
+			$aux=$datosDepto->getDatos();
+			$paramDepto = $aux[0]['nombre'];
+		}
+
+		//Obtención totales viáticos
 		$dataSource = $this->recuperarViaticoForm110();
+
+		//Obtención detalle de documentos
+		$dataSourceDet = $this->recuperarViaticoForm110Det();
 		
 		//Parámetros básicos
 		$tamano = 'LETTER';
 		$orientacion = 'L';
-		$titulo = 'Consolidado';
-		
+		$titulo = 'Listado Viáticos';
+		$nombreArchivo = uniqid('RepViaticosForm110-'.session_id()).'.xls';
 		$this->objParam->addParametro('orientacion',$orientacion);
-		$this->objParam->addParametro('tamano',$tamano);		
-		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('tamano',$tamano);
+		$this->objParam->addParametro('titulo_archivo',$titulo);
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		
-		$reporte = new RDetalleDepXls($this->objParam); 
+		//Generación del Reporte
+		$reporte = new RViaticosForm110Xls($this->objParam);
+		$reporte->setParamDepto($paramDepto);
 		$reporte->datosHeader($dataSource->getDatos());
-		$reporte->generarReporte(); 
+		$reporte->setDataSet($dataSource->getDatos());
+		$reporte->setDataSetDet($dataSourceDet->getDatos());
+		$reporte->generarReporte();
 		
+		//Salida del reporte
 		$this->mensajeExito=new Mensaje();
 		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
 		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
 		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
-		
 	}
 
 	function recuperarViaticoForm110(){
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0){
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));
+			}
+        }
+
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->reporteViaticosForm110($this->objParam);
+
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		} else {
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		} 
+    }
+
+    function recuperarViaticoForm110Det(){
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0){
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));
+			}
+        }
+
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->listarViaticosForm110Det($this->objParam);
+
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		} else {
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		} 
+    }
+
+    function modificarViaticosForm110Det(){
+		$this->objFunc=$this->create('MODCuentaDoc');	
+		$this->res=$this->objFunc->modificarViaticosForm110Det($this->objParam);
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function listarPasajesFuncionario(){
+		$this->objParam->defecto('ordenacion','dcv.id_funcionario');
+		$this->objParam->defecto('dir_ordenacion','asc');
+
+		if($this->objParam->getParametro('id_periodo')!=''){
+            $this->objParam->addFiltro("dcv.id_periodo = ".$this->objParam->getParametro('id_periodo'));    
+        }
+
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0)
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));    
+        }
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarPasajesFuncionario');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarPasajesFuncionario($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function reportePasajesFuncionarios(){
+		//Obtención Descripción Depto
+		$paramDepto="Todos";
+		if($this->objParam->getParametro('id_depto')!=0){
+			$this->objFunc = $this->create('sis_parametros/MODDepto');
+			$datosDepto = $this->objFunc->recuperarDescripcionDepto($this->objParam);
+			$aux=$datosDepto->getDatos();
+			$paramDepto = $aux[0]['nombre'];
+		}
+
+		//Obtención totales viáticos
+		$dataSource = $this->recuperarPasajesFuncionarios();
+
+		//Obtención detalle de documentos
+		$dataSourceDet = $this->recuperarPasajesFuncionariosDet();
+		
+		//Parámetros básicos
+		$tamano = 'LETTER';
+		$orientacion = 'L';
+		$titulo = 'Pasajes funcionarios';
+		$nombreArchivo = uniqid('RepPasajesFuncionarios-'.session_id()).'.xls';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);
+		$this->objParam->addParametro('titulo_archivo',$titulo);
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		//Generación del Reporte
+		$reporte = new RPasajesFuncionariosXls($this->objParam);
+		$reporte->setParamDepto($paramDepto);
+		$reporte->datosHeader($dataSource->getDatos());
+		$reporte->setDataSet($dataSource->getDatos());
+		$reporte->setDataSetDet($dataSourceDet->getDatos());
+		$reporte->generarReporte();
+		
+		//Salida del reporte
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}
+
+	function recuperarPasajesFuncionarios(){
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0){
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));
+			}
+        }
+
+		$this->objFunc = $this->create('MODCuentaDoc');
+		$cbteHeader = $this->objFunc->reportePasajesFuncionarios($this->objParam);
+
+		//var_dump($cbteHeader);exit;
+
+		if($cbteHeader->getTipo() == 'EXITO'){				
+			return $cbteHeader;
+		} else {
+		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
+			exit;
+		} 
+    }
+
+    function listarPasajesFuncionariosDet(){
+		$this->objParam->defecto('ordenacion','dcv.fecha');
+		$this->objParam->defecto('dir_ordenacion','asc');
+
 		if($this->objParam->getParametro('id_periodo')!=''){
             $this->objParam->addFiltro("dcv.id_periodo = ".$this->objParam->getParametro('id_periodo'));    
         }
@@ -778,15 +925,33 @@ class ACTCuentaDoc extends ACTbase{
 
         if($this->objParam->getParametro('id_depto')!=''){
 			if($this->objParam->getParametro('id_depto')!=0)
+				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));    
+        }
+
+		if($this->objParam->getParametro('tipoReporte')=='excel_grid' || $this->objParam->getParametro('tipoReporte')=='pdf_grid'){
+			$this->objReporte = new Reporte($this->objParam,$this);
+			$this->res = $this->objReporte->generarReporteListado('MODCuentaDoc','listarPasajesFuncionariosDet');
+		} else{
+			$this->objFunc=$this->create('MODCuentaDoc');
+			
+			$this->res=$this->objFunc->listarPasajesFuncionariosDet($this->objParam);
+		}
+		$this->res->imprimirRespuesta($this->res->generarJson());
+	}
+
+	function recuperarPasajesFuncionariosDet(){
+        if($this->objParam->getParametro('id_depto')!=''){
+			if($this->objParam->getParametro('id_depto')!=0){
 				$this->objParam->addFiltro("dcv.id_depto_conta = ".$this->objParam->getParametro('id_depto'));
+			}
         }
 
 		$this->objFunc = $this->create('MODCuentaDoc');
-		$cbteHeader = $this->objFunc->reporteViaticosForm110($this->objParam);
-		var_dump($cbteHeader);exit;
+		$cbteHeader = $this->objFunc->listarPasajesFuncionariosDet($this->objParam);
+
 		if($cbteHeader->getTipo() == 'EXITO'){				
 			return $cbteHeader;
-		} else{
+		} else {
 		    $cbteHeader->imprimirRespuesta($cbteHeader->generarJson());
 			exit;
 		} 

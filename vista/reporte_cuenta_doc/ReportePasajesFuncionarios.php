@@ -1,21 +1,21 @@
 <?php
 /**
 *@package pXP
-*@file ReporteViaticos110
+*@file ReportePasajesFuncionarios
 *@author  RCM
-*@date 27/02/2018
+*@date 19/03/2018
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
+Phx.vista.ReportePasajesFuncionarios=Ext.extend(Phx.gridInterfaz,{
 
   constructor:function(config){
     this.maestro=config.maestro;
     this.initButtons=[this.cmbDepto, this.cmbGestion, this.cmbPeriodo];
       //Llama al constructor de la clase padre
-    Phx.vista.ReporteViaticos110.superclass.constructor.call(this,config);
+    Phx.vista.ReportePasajesFuncionarios.superclass.constructor.call(this,config);
     this.init();
 
     this.cmbGestion.on('select', function(combo, record, index){
@@ -45,7 +45,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
             iconCls: 'bchecklist',
             handler: this.loadReporte,
             disabled: false,
-            tooltip: '<b>Reporte Form.110</b><br/>Listado de viajes para el Form.110.'
+            tooltip: '<b>Reporte pasajes funcionarios</b><br/>Listado de los pasajes aéreos de los funcionarios'
         });
   },
       
@@ -107,15 +107,25 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         {
           config:{
             name: 'total',
-            fieldLabel: 'Total BS.',
+            fieldLabel: 'Importe Doc. BS.',
             allowBlank: false,
             anchor: '50%',
             gwidth: 130,
             maxLength:30,
-            /*renderer: function(value,p,record){
-                return String.format("<b><font color='green'>TOTAL:</font> <u>{0}</u></b><br>"+
-                                     "<font color='blue'>Con Cbte.:</font> {1}, <font color='red'>Sin Cbte.:</font> {2}<br>",value,record.data.con_cbte,record.data.sin_cbte);
-            }*/
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },
+        {
+          config:{
+            name: 'total_excento',
+            fieldLabel: 'Importe Excento. BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
           },
           type:'TextField',
           id_grupo:1,
@@ -139,8 +149,37 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         },
         {
           config:{
+            name: 'con_cbte_excento',
+            fieldLabel: 'Con Cbte Excento. BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
+
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },
+        {
+          config:{
             name: 'sin_cbte',
             fieldLabel: 'SIN CBTE. BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },
+        {
+          config:{
+            name: 'sin_cbte_excento',
+            fieldLabel: 'SIN CBTE. EXCENTO BS.',
             allowBlank: false,
             anchor: '50%',
             gwidth: 130,
@@ -189,7 +228,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
   ],
   tam_pag:50, 
   title:'Viáticos Form.110',
-  ActList:'../../sis_cuenta_documentada/control/CuentaDoc/listarViaticosForm110',
+  ActList:'../../sis_cuenta_documentada/control/CuentaDoc/listarPasajesFuncionario',
   id_store:'id_funcionario',
   fields: [
     {name:'id_funcionario', type: 'numeric'},
@@ -197,11 +236,14 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
     {name:'desc_funcionario2', type: 'string'},
     {name:'ci', type: 'string'},
     {name:'total', type: 'numeric'},
-        {name:'id_depto_conta', type: 'numeric'},
-        {name:'desc_depto', type: 'string'},
-        {name:'sin_cbte', type: 'numeric'},
-        {name:'con_cbte', type: 'numeric'},
-        {name:'id_periodo', type: 'numeric'}
+    {name:'id_depto_conta', type: 'numeric'},
+    {name:'desc_depto', type: 'string'},
+    {name:'sin_cbte', type: 'numeric'},
+    {name:'con_cbte', type: 'numeric'},
+    {name:'id_periodo', type: 'numeric'},
+    {name:'sin_cbte_excento', type: 'numeric'},
+    {name:'con_cbte_excento', type: 'numeric'},
+    {name:'total_excento', type: 'numeric'}
   ],
   sortInfo:{
     field: 'fun.desc_funcionario2',
@@ -346,15 +388,15 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
             this.store.baseParams.id_periodo = this.cmbPeriodo.getValue();
             this.store.baseParams.id_depto = this.cmbDepto.getValue();
             this.store.baseParams.nombre_vista = this.nombreVista;
-            Phx.vista.ReporteViaticos110.superclass.onButtonAct.call(this);
+            Phx.vista.ReportePasajesFuncionarios.superclass.onButtonAct.call(this);
         }
     },
 
     south: {
-        url: '../../../sis_cuenta_documentada/vista/reporte_cuenta_doc/ReporteViaticos110Det.php',
+        url: '../../../sis_cuenta_documentada/vista/reporte_cuenta_doc/ReportePasajesFuncionariosDet.php',
         title: 'Detalle Viátios Form.110',
         height: '40%',
-        cls: 'ReporteViaticos110Det'
+        cls: 'ReportePasajesFuncionariosDet'
     },
 
     loadReporte: function() {
@@ -364,11 +406,10 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         } else {
 
             var rec = this.sm.getSelected();
-            alert('Este reporte solamente incluye a los Recibos Sin Retención de Viáticos que tienen asociado al Funcionario y tienen su Comprobante Validado');
 
             Phx.CP.loadingShow();
             Ext.Ajax.request({
-                url: '../../sis_cuenta_documentada/control/CuentaDoc/reporteViaticosForm110',
+                url: '../../sis_cuenta_documentada/control/CuentaDoc/reportePasajesFuncionarios',
                 params: {
                     id_periodo: this.cmbPeriodo.getValue(),
                     id_depto: this.cmbDepto.getValue(),

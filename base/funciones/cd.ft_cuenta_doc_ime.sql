@@ -113,6 +113,7 @@ DECLARE
     v_cc_sigema                     text;
     v_saldo                         numeric;
     v_id_moneda                     integer;
+    v_tmp_resp                      boolean;
 
 BEGIN
 
@@ -1502,7 +1503,7 @@ BEGIN
 
 
              IF v_registros_cd.estado != 'borrador' THEN
-                raise exception 'Solo puede eliminar regitros en borrador';
+                raise exception 'Solo puede eliminar registros en borrador';
              END IF;
 
 
@@ -1559,8 +1560,10 @@ BEGIN
                 inner join orga.tfuncionario f on f.id_persona = u.id_persona
                 where u.id_usuario = p_id_usuario;
 
-                IF v_id_funcionario is null THEN
-                   raise exception 'el usaurio no tiene un funcionario';
+                IF p_administrador !=1 THEN
+                    IF v_id_funcionario is null THEN
+                        raise exception 'El usuario no tiene un funcionario';
+                    END IF;                
                 END IF;
 
 
@@ -1585,7 +1588,7 @@ BEGIN
 
 
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada inactivada(a)');
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada inactivada');
             v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
 
             --Devuelve la respuesta
@@ -1892,7 +1895,7 @@ BEGIN
             id_depto_lb           = v_parametros.id_depto_lb
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-            --Verifica si el saldo es mayor a cero para generar el dpcumento en función del tipo de desembolso/reposición a realizar
+            --Verifica si el saldo es mayor a cero para generar el documento en función del tipo de desembolso/reposición a realizar
             if v_parametros.dev_saldo > 0 then
 
                 --Lógica para creación de la forma de devolución
@@ -1906,7 +1909,7 @@ BEGIN
                         v_registros_cd.id_funcionario as id_funcionario,
                         'ingreso' as tipo_solicitud,
                         now() as fecha,
-                        'Reposición de fondos por cuenta documentada a la empresa' as motivo,
+                        'Devolución de fondos por cuenta documentada a la empresa' as motivo,
                         null::integer as id_solicitud_efectivo_fk
                         into v_registros;
 
@@ -1925,6 +1928,11 @@ BEGIN
                         from tes.tsolicitud_efectivo
                         where id_solicitud_efectivo = v_id_solicitud_efectivo;
 
+                        --Marca el recibo de ingreso
+                        update tes.tsolicitud_efectivo set
+                        ingreso_cd = 'si'
+                        where id_solicitud_efectivo = v_id_solicitud_efectivo;
+
                         v_mensaje = 'Recibo de caja de ingreso generado para la devolucion a la empresa número: '||v_sol_efect;
 
                     elsif v_parametros.dev_tipo = 'deposito' then
@@ -1941,7 +1949,7 @@ BEGIN
                         v_registros_cd.id_funcionario as id_funcionario,
                         'solicitud' as tipo_solicitud,
                         now() as fecha,
-                        'Devolución de fondos por cuenta documentada al funcionario' as motivo,
+                        'Reposición de fondos por cuenta documentada al funcionario' as motivo,
                         null::integer as id_solicitud_efectivo_fk
                         into v_registros;
 
@@ -2053,6 +2061,51 @@ BEGIN
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Prorrateo del SIGEMA importado)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+      /*********************************
+      #TRANSACCION: 'CD_VIA110DET_MOD'
+      #DESCRIPCION: Modificación funcionario en Recibos - Viáticos Form 110
+      #AUTOR:       RCM
+      #FECHA:       07/03/2018
+      ***********************************/
+
+      elsif(p_transaccion='CD_VIA110DET_MOD')then
+
+        begin
+
+            --Verifica existencia del registro
+            if not exists(select 1 from conta.tdoc_compra_venta
+                        where id_doc_compra_venta = v_parametros.id_doc_compra_venta) then
+                raise exception 'Documento no encontrado';
+            end if;
+
+            --Verifica si el periodo está abierto
+            select id_periodo, id_depto_conta
+            into v_id_periodo, v_id_depto_conta
+            from conta.tdoc_compra_venta
+            where id_doc_compra_venta = v_parametros.id_doc_compra_venta;
+
+            v_tmp_resp = conta.f_revisa_periodo_compra_venta(p_id_usuario, v_id_depto_conta, v_id_periodo);
+
+            --Validación parámetros
+            if v_parametros.id_funcionario is null then
+                raise exception 'El funcionario no puede tener valor nulo';
+            end if;
+
+            --Modificación del funcionario
+            update conta.tdoc_compra_venta set
+            id_funcionario = v_parametros.id_funcionario
+            where id_doc_compra_venta = v_parametros.id_doc_compra_venta;
+
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Funcionario modificado en el recibo de viáticos');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_doc_compra_venta',v_parametros.id_doc_compra_venta::varchar);
 
             --Devuelve la respuesta
             return v_resp;

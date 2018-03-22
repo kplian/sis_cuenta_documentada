@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION cd.f_cd_cambia_estado_wf_devrep_uno (
+CREATE OR REPLACE FUNCTION cd.f_cd_cambia_estado_wf_devrep_tres (
   p_id_usuario integer,
   p_id_proceso_wf integer,
   p_id_estado_anterior integer,
@@ -8,11 +8,11 @@ RETURNS boolean AS
 $body$
 /**************************************************************************
  SISTEMA:       Sistema de Cuenta Documentada
- FUNCION:       cd.f_cd_cambia_estado_wf_devrep_uno
+ FUNCION:       cd.f_cd_cambia_estado_wf_devrep_tres
                 
  DESCRIPCION:   Función para evaluar el cambio de estado cuando es una devolución/reposición
  AUTOR:         RCM
- FECHA:         26/02/2018
+ FECHA:         08/03/2018
  COMENTARIOS: 
 
  ***************************************************************************
@@ -34,7 +34,7 @@ DECLARE
 
 BEGIN
 
-  v_nombre_funcion = 'cd.f_cd_cambia_estado_wf_devrep_uno';
+  v_nombre_funcion = 'cd.f_cd_cambia_estado_wf_devrep_tres';
 
   --Obtención de datos de la cuenta documentada
   select
@@ -43,32 +43,16 @@ BEGIN
   from cd.tcuenta_doc cd
   where cd.id_proceso_wf = p_id_proceso_wf;
 
-  --Si es una rendición parcial devuelve TRUE;
-  if v_rec.tipo_rendicion = 'parcial'  then
+  if v_rec.dev_tipo is null then
+    raise exception 'Falta definir la forma de la devolución/reposición';
+  end if;
+
+
+  --Verifica si el saldo irá por caja para pasar directo al estado rendido
+  if v_rec.dev_tipo <> 'caja' then
     v_resp1 = true;
-  elsif v_rec.tipo_rendicion = 'final' then
-  
-    /*if v_rec.dev_tipo = 'caja' then
-      v_resp1 = true;
-    else*/
-      --Verifica el saldo, si es cero pasa a rendicion, de lo contrario va a tesoreria
-      select * into v_rec_saldo from cd.f_get_saldo_totales_cuenta_doc(v_rec.id_cuenta_doc);
-    
-      if v_rec_saldo.o_saldo = 0 then
+  end if;
 
-            --Actualiza el registro de cuenta doc poniendo el saldo en cero
-            update cd.tcuenta_doc set
-            dev_saldo = 0,
-            dev_tipo = 'deposito'
-            where id_cuenta_doc = v_rec.id_cuenta_doc;
-
-          v_resp1 = true;
-        end if;
-    --end if;
-    
-  end if; 
-
-  --Respuesta negativa por defecto
   return v_resp1;
   
 

@@ -130,7 +130,7 @@ BEGIN
                   va_regla,
                   va_prioridad
               
-              FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente');
+              FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente',p_id_usuario);
               
               
               

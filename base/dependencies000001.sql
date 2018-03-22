@@ -1644,3 +1644,33 @@ AS
      LEFT JOIN orga.tfuncionario_cuenta_bancaria fcb ON fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
   WHERE cdoc.id_cuenta_doc_fk IS NOT NULL AND (COALESCE(cdoc.dev_tipo, ''::character varying)::text = ANY (ARRAY['deposito'::character varying, 'cheque'::character varying]::text[]));
 /***********************************F-DEP-RCM-CD-0-22/02/2018*****************************************/
+
+/***********************************I-DEP-RCM-CD-0-12/03/2018*****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_solicitud_efectivo FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_caja_dev FOREIGN KEY (id_caja_dev)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_plantilla FOREIGN KEY (id_plantilla)
+    REFERENCES param.tplantilla(id_plantilla)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;        
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_int_comprobante_devrep FOREIGN KEY (id_int_comprobante_devrep)
+    REFERENCES conta.tint_comprobante(id_int_comprobante)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;    
+/***********************************F-DEP-RCM-CD-0-12/03/2018*****************************************/    

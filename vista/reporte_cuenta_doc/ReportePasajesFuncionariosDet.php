@@ -1,7 +1,7 @@
 <?php
 /**
 *@package pXP
-*@file ReporteViaticos110Det
+*@file ReportePasajesFuncionariosDet
 *@author  RCM
 *@date 28/02/2018
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
@@ -9,12 +9,12 @@
 header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
-Phx.vista.ReporteViaticos110Det=Ext.extend(Phx.gridInterfaz,{
+Phx.vista.ReportePasajesFuncionariosDet=Ext.extend(Phx.gridInterfaz,{
 
     constructor:function(config){
         this.maestro=config.maestro;
         //Llama al constructor de la clase padre
-        Phx.vista.ReporteViaticos110Det.superclass.constructor.call(this,config);
+        Phx.vista.ReportePasajesFuncionariosDet.superclass.constructor.call(this,config);
         this.init();
 
         this.grid.getTopToolbar().disable();
@@ -423,7 +423,7 @@ Phx.vista.ReporteViaticos110Det=Ext.extend(Phx.gridInterfaz,{
     ],
     tam_pag:50, 
     title:'Detalle Viáticos Form.110',
-    ActList:'../../sis_cuenta_documentada/control/CuentaDoc/listarViaticosForm110Det',
+    ActList:'../../sis_cuenta_documentada/control/CuentaDoc/listarPasajesFuncionariosDet',
     ActSave:'../../sis_cuenta_documentada/control/CuentaDoc/modificarViaticosForm110Det',
     id_store:'id_doc_compra_venta',
     fields: [

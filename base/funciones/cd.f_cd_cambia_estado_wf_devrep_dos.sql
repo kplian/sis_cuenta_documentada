@@ -24,12 +24,13 @@ $body$
 ***************************************************************************/
 DECLARE
 
-	v_nombre_funcion text;
+  v_nombre_funcion text;
     v_id_cuenta_doc integer;
     v_rec record;
     v_saldo numeric;
     v_resp varchar;
     v_resp1 boolean = false;
+    v_rec_saldo record;
 
 BEGIN
 
@@ -44,30 +45,28 @@ BEGIN
   
   --Si no es una rendición final devuelve FALSE;
   if v_rec.tipo_rendicion <> 'final' then
-  		v_resp1 = false;
+      v_resp1 = false;
+  else
+        
+        select * into v_rec_saldo from cd.f_get_saldo_totales_cuenta_doc(v_rec.id_cuenta_doc);
+          
+        if v_rec_saldo.o_saldo > 0 then
+            v_resp1 = true;
+        end if;
+ 
   end if;
   
-  --Si la devolución/reposición irá por caja, devuelve falso
-  if v_rec.dev_tipo = 'caja' then
-  	v_resp1 = false;
-  end if;
-  
-  --Siendo una rendición final, verifica si el saldo es mayor a cero para mandar a vbtesoreria
-  if v_rec.dev_saldo > 0 then
-  	v_resp1 = true;
-  end if;
---  raise exception 'dos: %',v_resp1;
   --Respuesta negativa por defecto
   return v_resp1;
   
 EXCEPTION
 
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;  
+  WHEN OTHERS THEN
+      v_resp='';
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+      raise exception '%',v_resp;  
   
 END;
 $body$

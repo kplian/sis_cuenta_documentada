@@ -142,27 +142,34 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.getBoton('chkpresupuesto').enable(); 
 
         if(this.sw_solicitud == 'si'){
-        this.getBoton('onBtnRepSol').enable(); 
+            this.getBoton('onBtnRepSol').enable(); 
         }
         else{
         	this.getBoton('onBtnRepSol').disable(); 
         }
+
         if(this.historico == 'no'){
           
-         if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado=='rendido'||data.estado=='pendiente_tes'){
+            if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado=='rendido'||data.estado=='pendiente_tes'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
-         }
-            
-         if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'&&data.estado != 'rendido'&&data.estado!='pendiente_tes'){
+            }
+
+            if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'&&data.estado != 'rendido'&&data.estado!='pendiente_tes'){
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
-         }
-         //Habilita boton de Devoluciones cuando dev_tipo sea vac�o
-         this.getBoton('btnSaldo').disable();
-         if(!data.dev_tipo&&data.estado == 'vbtesoreria'){
+            }
+
+            if(data.estado=='vbtesoreria'){
+                this.getBoton('ant_estado').disable();
+            }
+
+
+            //Habilita boton de Devoluciones cuando dev_tipo sea vac�o
+            this.getBoton('btnSaldo').disable();
+            if(!data.dev_tipo&&data.estado == 'vbtesoreria'){
             this.getBoton('btnSaldo').enable();
-         }
+            }
         }     
         else{
           this.desBotoneshistorico();
@@ -235,7 +242,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         //Seteo baseparams de caja y cuenta bancaria
         //Ext.apply(this.cmbCaja.store.baseParams, {id_moneda: rec.data.id_moneda});
         Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: rec.data.id_moneda});
-        console.log('aaaaaaa',rec.data);
+
         this.cmbCaja.setValue('');
         this.cmbCaja.modificado = true;
         this.cmbCuentaBancaria.setValue('');

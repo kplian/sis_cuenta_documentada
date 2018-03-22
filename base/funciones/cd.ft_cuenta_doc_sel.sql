@@ -167,9 +167,9 @@ BEGIN
             
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbtesoreria'',''vbrendicion''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' )  and (lower(cdoc.estado)!=''pendiente_tes'' ) and ';
                   ELSE
-                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' )  and (lower(cdoc.estado)!=''pendiente_tes'' ) and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
@@ -367,10 +367,9 @@ BEGIN
             
                IF v_historico =  'no' THEN  
                   IF p_administrador !=1 THEN
-                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbrendicion'',''vbtesoreria''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and cdoc.estado in( ''vbrendicion'',''vbtesoreria''))  ) and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' )  and (lower(cdoc.estado)!=''pendiente_tes'' ) and ';
                   ELSE
-                      --v_filtro = '  (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
-                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
+                      v_filtro = '  (lower(cdoc.estado)!=''rendido'') and (lower(cdoc.estado)!=''contabilizado'') and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' )  and (lower(cdoc.estado)!=''pendiente_tes'' ) and ';
                   END IF;
                 ELSE
                   IF p_administrador !=1 THEN
@@ -1484,7 +1483,7 @@ BEGIN
        
         --Sentencia de la consulta
         v_consulta:='select
-                    dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,dcv.id_periodo,
+                    dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,
                     sum(dcv.importe_doc) as total,
                     (select coalesce(sum(dcv1.importe_doc),0)
                     from conta.tdoc_compra_venta dcv1
@@ -1492,7 +1491,6 @@ BEGIN
                     and dcv1.id_plantilla = '||v_id_plantilla||'
                     and dcv1.id_periodo = '||v_parametros.id_periodo||'
                     and dcv1.id_int_comprobante is null
-                    and dcv1.id_depto_conta = dcv.id_depto_conta
                     ) as sin_cbte,
                     (select coalesce(sum(dcv1.importe_doc),0)
                     from conta.tdoc_compra_venta dcv1
@@ -1500,7 +1498,6 @@ BEGIN
                     and dcv1.id_plantilla = '||v_id_plantilla||'
                     and dcv1.id_periodo = '||v_parametros.id_periodo||'
                     and dcv1.id_int_comprobante is not null
-                    and dcv1.id_depto_conta = dcv.id_depto_conta
                     ) as con_cbte
                     from conta.tdoc_compra_venta dcv
                     inner join param.tdepto dep
@@ -1511,7 +1508,7 @@ BEGIN
                     and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
 
         v_consulta:=v_consulta||v_parametros.filtro;
-        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre,dcv.id_periodo';
+        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre';
       
       --Definicion de la respuesta
       

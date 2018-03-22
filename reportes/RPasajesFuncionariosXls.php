@@ -1,5 +1,5 @@
 <?php
-class RViaticosForm110Xls
+class RPasajesFuncionariosXls
 {
 	private $docexcel;
 	private $objWriter;
@@ -85,7 +85,7 @@ class RViaticosForm110Xls
 		$sheet->setCellValueByColumnAndRow(0,1,$this->objParam->getParametro('titulo_rep'));
 		
 		//Título Principal
-		$titulo1 = "REPORTE LISTADO VIÁTICOS - FORM. 110";
+		$titulo1 = "REPORTE PASAJES FUNCIONARIOS";
 		$this->cell($sheet,$titulo1,'A1',0,1,"center",true,$this->tam_letra_titulo,Arial);
 		$sheet->mergeCells('A1:E1');
 
@@ -167,7 +167,8 @@ class RViaticosForm110Xls
 		$this->cell($sheet,'NOMBRE FUNCIONARIO',"B$f",1,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'CÓDIGO',"C$f",2,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'DOCUMENTO IDENTIDAD',"D$f",3,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IMPORTE Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'IMPORTE DOC. Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'IMPORTE EXCENTO Bs.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 
 		//////////////////
 		//Detalle de datos
@@ -189,6 +190,7 @@ class RViaticosForm110Xls
 			$this->cell($sheet,$this->dataSet[$fil]['codigo'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
 			$this->cell($sheet,$this->dataSet[$fil]['ci'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
 			$this->cell($sheet,$this->dataSet[$fil]['total'],"E$f",4,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
+			$this->cell($sheet,$this->dataSet[$fil]['total_excento'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 
 			//Actualiza los totales
 			$arrayTotal['total']+=$this->dataSet[$fil]['total'];
@@ -207,6 +209,8 @@ class RViaticosForm110Xls
 
 		$range_sum='=SUM(E'.($this->fila+1).':E'.($f-1).')';
 		$this->cell($sheet,$range_sum,"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		$range_sum='=SUM(F'.($this->fila+1).':F'.($f-1).')';
+		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
 		//$this->cell($sheet,number_format($arrayTotal['total'],2),"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,false,true);
 
 		//Actualización variables
@@ -311,13 +315,14 @@ class RViaticosForm110Xls
 		$sheet->getColumnDimension('C')->setWidth(15);
 		$sheet->getColumnDimension('D')->setWidth(20);
 		$sheet->getColumnDimension('E')->setWidth(15);
+		$sheet->getColumnDimension('F')->setWidth(20);
 	}
 
 	function initializeColumnWidthDetail($sheet){
 		$sheet->getColumnDimension('A')->setWidth(5);
 		$sheet->getColumnDimension('B')->setWidth(10);
-		$sheet->getColumnDimension('C')->setWidth(15);
-		$sheet->getColumnDimension('D')->setWidth(25);
+		$sheet->getColumnDimension('C')->setWidth(25);
+		$sheet->getColumnDimension('D')->setWidth(40);
 		$sheet->getColumnDimension('E')->setWidth(35);
 		$sheet->getColumnDimension('F')->setWidth(15);
 		$sheet->getColumnDimension('G')->setWidth(10);
@@ -363,7 +368,7 @@ class RViaticosForm110Xls
         $sheet->setTitle("Detalle Recibos");
 
         //Título 
-        $titulo = "DETALLE DE LOS RECIBOS SIN RETENCIÓN DE VIÁTICOS";
+        $titulo = "DETALLE DE LOS PASAJES POR FORMULARIO";
 		$this->cell($sheet,$titulo,'A1',0,1,"center",true,$this->tam_letra_titulo,Arial);
 		$sheet->mergeCells('A1:E1');
 
@@ -397,9 +402,6 @@ class RViaticosForm110Xls
 		$this->cell($sheet,'ICE',"V$f",21,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'LÍQUIDO PAGABLE',"W$f",22,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'DUI',"X$f",23,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NRO.TRÁMITE VIÁTICOS',"Y$f",24,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'FECHA VIÁTICO',"Z$f",25,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'SOLICITANTE VIÁTICO',"AA$f",26,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 
 		//////////////////
 		//Detalle de datos
@@ -435,11 +437,6 @@ class RViaticosForm110Xls
 			$this->cell($sheet,$this->dataSetDet[$fil]['importe_ice'],"V$f",21,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 			$this->cell($sheet,$this->dataSetDet[$fil]['importe_pago_liquido'],"W$f",22,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 			$this->cell($sheet,$this->dataSetDet[$fil]['nro_dui'],"X$f",23,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_tramite_viatico'],"Y$f",24,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['fecha_viatico'],"Z$f",25,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['desc_funcionario_sol'],"AA$f",26,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			
-
 		}
 
 		//Borde a la caja
