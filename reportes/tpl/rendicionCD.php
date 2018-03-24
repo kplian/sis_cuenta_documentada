@@ -103,7 +103,7 @@
 	 <?php 
 	   $total_deposito = 0;
 	   
-	  
+	    $this->datos_depositos=[];//RCM 23/03/2018: Se vacía los depósitos para que no salga en elreporte por el cambio en la separación de rendición entre contabilidad y tesorería
 	   foreach($this->datos_depositos as $key=>$val){
 	   	 $newDate = date("d/m/Y", strtotime(  $val['fecha']));	
 		 $total_deposito = $total_deposito	 + $val['importe_deposito'];   

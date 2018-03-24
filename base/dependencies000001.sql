@@ -1412,7 +1412,7 @@ AS
          opd.id_partida,
          opd.id_centro_costo,
          opd.monto_pago_mb / op.total_pago AS factor,
-         dc.precio_total_final *(opd.monto_pago_mb / op.total_pago) AS
+         dc.precio_total_final *(opd.monto_pago_mo / op.total_pago) AS
            importe_pro,
          ps.importe AS total_pagado,
          dc.id_concepto_ingas,
