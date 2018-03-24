@@ -16,14 +16,14 @@ Phx.vista.CuentaDocVb = {
     bnew:false,
     bsave:false,
     bdel:false,
-	require:'../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDoc.php',
-	requireclase:'Phx.vista.CuentaDoc',
-	title:'Cuenta Documentada',
-	nombreVista: 'CuentaDocVb',
-	
-	constructor: function(config) {
-	   
-	    //funcionalidad para listado de historicos
+  require:'../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDoc.php',
+  requireclase:'Phx.vista.CuentaDoc',
+  title:'Cuenta Documentada',
+  nombreVista: 'CuentaDocVb',
+  
+  constructor: function(config) {
+     
+      //funcionalidad para listado de historicos
         this.historico = 'no';
         this.tbarItems = ['-',{
             text: 'Histórico',
@@ -46,60 +46,60 @@ Phx.vista.CuentaDocVb = {
            }];
            
         var me = this;
-		this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
-			    
-				if (record.data.estado == 'vbrendicion') {
-					var  saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
-			        saldo = me.roundTwo(saldo);
-					return String.format("<b><font color = 'red'>Monto a Rendir: {0}</font></b><br>"+
-										 "<b><font color = 'green' >En Documentos:{1}</font></b><br>"+
-										 "<b><font color = 'green' >En Depositos:{2}</font></b><br>"+
-										 "<b><font color = 'orange' >Retenciones de Ley:{3}</font></b>", saldo, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones );
-				} 
-				else {
-					return String.format('<font>Solicitado: {0}</font>', value);
-				}
-				
-				
+    this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+          
+        if (record.data.estado == 'vbrendicion') {
+          var  saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) -  me.roundTwo(record.data.importe_retenciones);
+              saldo = me.roundTwo(saldo);
+          return String.format("<b><font color = 'red'>Monto a Rendir: {0}</font></b><br>"+
+                     "<b><font color = 'green' >En Documentos:{1}</font></b><br>"+
+                     "<b><font color = 'green' >En Depositos:{2}</font></b><br>"+
+                     "<b><font color = 'orange' >Retenciones de Ley:{3}</font></b>", saldo, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones );
+        } 
+        else {
+          return String.format('<font>Solicitado: {0}</font>', value);
+        }
+        
+        
 
-		};
-	   
-	   Phx.vista.CuentaDocVb.superclass.constructor.call(this,config);
+    };
+     
+     Phx.vista.CuentaDocVb.superclass.constructor.call(this,config);
        this.init();
        
        this.addButton('onBtnRepSol', {
-				grupo : [0,1,2,3],
-				text : 'Reporte Sol.',
-				iconCls : 'bprint',
-				disabled : false,
-				handler : this.onBtnRepSol,
-				tooltip : '<b>Reporte de solicitud de fondos</b>'
-		});
-		
-		this.addButton('onBtnMemo', {
-				grupo : [0,1,2,3],
-				text : 'Memo',
-				iconCls : 'bprint',
-				disabled : false,
-				handler : this.onButtonMemoDesignacion,
-				tooltip : '<b>Reporte de designación</b>'
-		});
-		
-		
+        grupo : [0,1,2,3],
+        text : 'Reporte Sol.',
+        iconCls : 'bprint',
+        disabled : false,
+        handler : this.onBtnRepSol,
+        tooltip : '<b>Reporte de solicitud de fondos</b>'
+    });
+    
+    this.addButton('onBtnMemo', {
+        grupo : [0,1,2,3],
+        text : 'Memo',
+        iconCls : 'bprint',
+        disabled : false,
+        handler : this.onButtonMemoDesignacion,
+        tooltip : '<b>Reporte de designación</b>'
+    });
+    
+    
        
-		this.store.baseParams = { tipo_interfaz: this.nombreVista };
-		
-		if(config.filtro_directo){
+    this.store.baseParams = { tipo_interfaz: this.nombreVista };
+    
+    if(config.filtro_directo){
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
         }
-		//primera carga
-		this.store.baseParams.pes_estado = 'borrador';
-    	this.load({params:{start:0, limit:this.tam_pag}});
-    	
-    	
-		
-		this.finCons = true;
+    //primera carga
+    this.store.baseParams.pes_estado = 'borrador';
+      this.load({params:{start:0, limit:this.tam_pag}});
+      
+      
+    
+    this.finCons = true;
    },
    
     preparaMenu:function(n){
@@ -115,16 +115,16 @@ Phx.vista.CuentaDocVb = {
         this.getBoton('onBtnRepSol').enable(); 
       }
       else{
-      	this.getBoton('onBtnRepSol').disable(); 
+        this.getBoton('onBtnRepSol').disable(); 
       }
       if(this.historico == 'no'){
           
-         if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado == 'rendido'){
+         if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado == 'rendido'||  data.estado == 'pendiente_tes'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
          }
             
-         if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'&&data.estado != 'rendido'){
+         if(data.estado != 'borrador' && data.estado !='anulado' && data.estado !='finalizado'&& data.estado !='pendiente' && data.estado !='contabilizado'&&data.estado != 'rendido'&&data.estado != 'pendiente_tes'){
                 this.getBoton('ant_estado').enable();
                 this.getBoton('sig_estado').enable();
          }
@@ -133,6 +133,13 @@ Phx.vista.CuentaDocVb = {
             this.getBoton('ant_estado').disable();
             this.getBoton('sig_estado').disable();
         }
+
+        if(data.estado == 'vbtesoreria'&&data.sw_solicitud=='no'){
+            this.getBoton('ant_estado').disable();
+            this.getBoton('sig_estado').disable();
+        }
+
+
       }     
       else{
           this.desBotoneshistorico();
@@ -172,18 +179,18 @@ Phx.vista.CuentaDocVb = {
      
     
    tabsouth:[
-	     {
-	          url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
-	          title:'Facturas', 
-	          height:'50%',
-	          cls: 'RendicionDetTes'
+       {
+            url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
+            title:'Facturas', 
+            height:'50%',
+            cls: 'RendicionDetTes'
          },
          {
-			  url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
-			  title: 'Depositos',
-			  height: '50%',
-			  cls: 'CdDeposito'
-		 }
-	   ] 
+        url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
+        title: 'Depositos',
+        height: '50%',
+        cls: 'CdDeposito'
+     }
+     ] 
 };
 </script>

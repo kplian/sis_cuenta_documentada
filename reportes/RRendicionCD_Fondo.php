@@ -23,6 +23,7 @@ class RSolicitudCD_Fondo extends  ReportePDF {
 			
 		$titulo1='<b>SOLICITUD DE FONDOS</b>';
 		$titulo2='Cuenta Documentada';
+
 		$newDate = date("d/m/Y", strtotime( $this->datos_detalle[0]['fecha']));		
 		$dataSource = $this->datos_detalle; 
 	    ob_start();

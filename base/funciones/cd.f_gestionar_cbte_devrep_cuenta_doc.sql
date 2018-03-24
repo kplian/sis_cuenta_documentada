@@ -1,6 +1,6 @@
 --------------- SQL ---------------
 
-CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_cuenta_doc (
+CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_devrep_cuenta_doc (
   p_id_usuario integer,
   p_id_usuario_ai integer,
   p_usuario_ai varchar,
@@ -11,9 +11,9 @@ RETURNS boolean AS
 $body$
 
 /*
-Autor: RAC KPLIAN
-Fecha:   17  abril  de 2016
-Descripcion  Esta funcion gestiona los cbtes de cuenta_documentada cuando son validados          
+Autor: RCM
+Fecha:   25/02/2018
+Descripcion  Esta funcion gestiona los cbtes de devolucion/reposicion de cuenta_documentada cuando son validados          
 */
 
 
@@ -59,7 +59,7 @@ DECLARE
     
 BEGIN
 
-	v_nombre_funcion = 'cd.f_gestionar_cbte_cuenta_doc';
+	v_nombre_funcion = 'cd.f_gestionar_cbte_devrep_cuenta_doc';
  
    -- 1) con el id_comprobante identificar el plan de pago
    
@@ -104,13 +104,13 @@ BEGIN
 	  inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
       left join param.tdepto dpc on dpc.id_depto = pc.id_depto_conta
 	  left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
-      where  pc.id_int_comprobante = p_id_int_comprobante; 
+      where  pc.id_int_comprobante_devrep = p_id_int_comprobante; 
     
     
       --2) Validar que tenga una cuenta documentada
     
      IF  v_registros.id_cuenta_doc is NULL  THEN
-        raise exception 'El comprobante no esta relacionado con ninguna cuenta documentada';
+        raise exception 'El comprobante de devolucion/reposicion no esta relacionado con ninguna cuenta documentada';
      END IF;
    
      
@@ -130,7 +130,7 @@ BEGIN
                   va_regla,
                   va_prioridad
               
-              FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente',p_id_usuario);
+              FROM wf.f_obtener_estado_wf(v_registros.id_proceso_wf, v_registros.id_estado_wf,NULL,'siguiente');
               
               
               
@@ -202,7 +202,7 @@ BEGIN
                   
                   
                   -- asociamos las facturas rendidas al cbte  de rendicion validado
-                    FOR v_registros_tmp in ( 
+                    /*FOR v_registros_tmp in ( 
                                       SELECT cv.id_doc_compra_venta,
                                              cv.id_moneda
                                       FROM conta.tdoc_compra_venta cv
@@ -214,7 +214,7 @@ BEGIN
                                 id_int_comprobante = p_id_int_comprobante
                               where id_doc_compra_venta = v_registros_tmp.id_doc_compra_venta;
                        
-                   END LOOP; 
+                   END LOOP; */
                   
                   -- asociamos los depositos al cbte de rendicion  validado
                    FOR v_registros_tmp in ( 
@@ -258,7 +258,7 @@ BEGIN
                             va_regla,
                             va_prioridad
                         
-                        FROM wf.f_obtener_estado_wf(v_registros_cv.id_proceso_wf, v_registros_cv.id_estado_wf,NULL,'siguiente',p_id_usuario);
+                        FROM wf.f_obtener_estado_wf(v_registros_cv.id_proceso_wf, v_registros_cv.id_estado_wf,NULL,'siguiente');
                         
                         
                         

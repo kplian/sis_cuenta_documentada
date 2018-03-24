@@ -1,8 +1,11 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_cuenta_doc_det_ime" (	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
-
+CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_det_ime (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_cuenta_doc_det_ime
@@ -39,6 +42,7 @@ DECLARE
 	v_id_cuenta_doc 		integer;
 	v_id_moneda				integer;
 	v_permitir_mod			varchar;
+    v_id_gestion			integer;
 			    
 BEGIN
 
@@ -66,6 +70,16 @@ BEGIN
 		    inner join  cd.ttipo_cuenta_doc tcdoc
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+            --Obtiene la gestión en base a la fecha de la solicitud
+            select id_gestion
+            into v_id_gestion
+            from param.tgestion
+            where gestion = extract(year from v_fecha);
+            
+            if v_id_gestion is null then
+            	raise exception 'Gestión no encontrada';
+            end if;
 
         	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
         	if v_permitir_mod = 'no' then
@@ -99,7 +113,13 @@ BEGIN
         	from param.tconcepto_ingas conig
             inner join pre.tconcepto_partida cp
             on cp.id_concepto_ingas = conig.id_concepto_ingas
-            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas;
+            inner join pre.tpartida par on par.id_partida = cp.id_partida
+            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas
+            and par.id_gestion = v_id_gestion;
+            
+            if v_id_partida is null then
+            	raise exception 'Partida no encontrada';
+            end if;
 
             --Verifica si se usa el prorrateo o no
             if v_parametros.usar_prorrateo = 'no' then
@@ -216,6 +236,16 @@ BEGIN
 		    inner join  cd.ttipo_cuenta_doc tcdoc
 		    on tcdoc.id_tipo_cuenta_doc = cdoc.id_tipo_cuenta_doc
 		    where cdoc.id_cuenta_doc = v_parametros.id_cuenta_doc;
+            
+             --Obtiene la gestión en base a la fecha de la solicitud
+            select id_gestion
+            into v_id_gestion
+            from param.tgestion
+            where gestion = extract(year from v_fecha);
+            
+            if v_id_gestion is null then
+            	raise exception 'Gestión no encontrada';
+            end if;
 
         	--Verifica si se trata de de registrar concepto de gasto de Viático u Hotel
         	if v_permitir_mod = 'no' then
@@ -249,7 +279,13 @@ BEGIN
         	from param.tconcepto_ingas conig
             inner join pre.tconcepto_partida cp
             on cp.id_concepto_ingas = conig.id_concepto_ingas
-            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas;
+            inner join pre.tpartida par on par.id_partida = cp.id_partida
+            where conig.id_concepto_ingas = v_parametros.id_concepto_ingas
+            and par.id_gestion = v_id_gestion;
+            
+            if v_id_partida is null then
+            	raise exception 'Partida no encontrada';
+            end if;
 
 			--Sentencia de la modificacion
 			update cd.tcuenta_doc_det set
@@ -348,7 +384,9 @@ EXCEPTION
 		raise exception '%',v_resp;
 				        
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_cuenta_doc_det_ime"(integer, integer, character varying, character varying) OWNER TO postgres;

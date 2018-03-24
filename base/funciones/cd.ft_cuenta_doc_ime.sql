@@ -111,7 +111,9 @@ DECLARE
     v_sol_abiertas                  varchar;
     v_permitir_mod                  varchar;
     v_cc_sigema                     text;
-
+    v_saldo                         numeric;
+    v_id_moneda                     integer;
+    v_tmp_resp                      boolean;
 
 BEGIN
 
@@ -223,7 +225,7 @@ BEGIN
                    v_codigo_tipo_proceso,
                    v_parametros.id_funcionario,
                    v_parametros.id_depto,
-                   'Solicitud de efectivo por fondo en avance',
+                   'Solicitud de efectivo por Fondos con Cargo a Rendición de Cuentas',
                    '' );
 
 
@@ -438,12 +440,12 @@ BEGIN
                 -----------------------------
 
 
-                v_asunto = 'Fondo en Avance :  '||v_registros.nro_tramite;
+                v_asunto = 'Fondos con Cargo a Rendición de Cuentas :  '||v_registros.nro_tramite;
                 v_destinatorio = '<br>Estimad@';
                 v_template = '<br>
                         <br>A la fecha esta por cumplirse el plazo previsto para realizar sus rendiciones,
                               <br>aun cuenta con 2 dias para realizar sus rendiciones, el monto a rendir es  '||v_registros.importe||' Bs.
-                              <br>del fondo en avance con numero de tramite <b>'||v_registros.nro_tramite||'
+                              <br>del Fondos con Cargo a Rendicion de Cuentas con numero de tramite <b>'||v_registros.nro_tramite||'
                               <br>solicitado con el motivo '||v_registros.motivo || '</b>
                               <br>
                               <br>Es obligatorio realizar sus rendiciones antes del plazo establecido segun la normativa de Tesoreria.
@@ -451,7 +453,7 @@ BEGIN
                               <br> Atentamente
                               <br> &nbsp;&nbsp;&nbsp;Control de limite de rendiciones de Fondos en Avance del Sistema ERP BOA';
 
-            v_titulo  = 'Recordatorio de rendicion fondo en avance';
+            v_titulo  = 'Recordatorio de rendicion Fondos con Cargo a Rendicion de Cuentas';
 
                 v_parametros_ad = '{}';
 
@@ -625,13 +627,14 @@ BEGIN
     end;
 
     /*********************************
-  #TRANSACCION:  'CD_SIGESCD_IME'
-  #DESCRIPCION:  cambia al siguiente estado
-  #AUTOR:   RAC
-  #FECHA:   16-05-2016 12:12:51
-  ***********************************/
+    #TRANSACCION:  'CD_SIGESCD_IME'
+    #DESCRIPCION:  cambia al siguiente estado
+    #AUTOR:   RAC
+    #FECHA:   16-05-2016 12:12:51
+    ***********************************/
 
-  elseif(p_transaccion='CD_SIGESCD_IME')then
+    elseif(p_transaccion='CD_SIGESCD_IME')then
+        
         begin
 
          /*   PARAMETROS
@@ -644,277 +647,261 @@ BEGIN
         $this->setParametro('json_procesos','json_procesos','text');
         */
 
-        --obtenermos datos basicos
-          select
-              c.id_proceso_wf,
-              c.id_estado_wf,
-              c.estado,
-              c.tipo_pago,
-              c.id_caja,
-              c.tipo_contrato
-             into
-              v_id_proceso_wf,
-              v_id_estado_wf,
-              v_codigo_estado,
-              v_tipo_pago,
-              v_id_caja,
-              v_tipo_contrato
-          from cd.tcuenta_doc c
-          where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+        --Obtenermos datos basicos
+        select
+        c.id_proceso_wf,
+        c.id_estado_wf,
+        c.estado,
+        c.tipo_pago,
+        c.id_caja,
+        c.tipo_contrato
+        into
+        v_id_proceso_wf,
+        v_id_estado_wf,
+        v_codigo_estado,
+        v_tipo_pago,
+        v_id_caja,
+        v_tipo_contrato
+        from cd.tcuenta_doc c
+        where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+        --Recupera datos del estado
+        select
+        ew.id_tipo_estado,
+        te.codigo
+        into
+        v_id_tipo_estado,
+        v_codigo_estado
+        from wf.testado_wf ew
+        inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
+        where ew.id_estado_wf = v_parametros.id_estado_wf_act;
 
 
+        --Obtener datos tipo estado
+        select te.codigo
+        into v_codigo_estado_siguiente
+        from wf.ttipo_estado te
+        where te.id_tipo_estado = v_parametros.id_tipo_estado;
 
-          -- recupera datos del estado
+        IF pxp.f_existe_parametro(p_tabla,'id_depto_wf') THEN
+            v_id_depto = v_parametros.id_depto_wf;
+        END IF;
 
-           select
-            ew.id_tipo_estado,
-            te.codigo
-           into
-            v_id_tipo_estado,
-            v_codigo_estado
-          from wf.testado_wf ew
-          inner join wf.ttipo_estado te on te.id_tipo_estado = ew.id_tipo_estado
-          where ew.id_estado_wf = v_parametros.id_estado_wf_act;
+        IF pxp.f_existe_parametro(p_tabla,'obs') THEN
+            v_obs=v_parametros.obs;
+        ELSE
+            v_obs='---';
+        END IF;
 
+        IF v_codigo_estado_siguiente in ('vbgerencia','vbgaf') THEN
 
-           -- obtener datos tipo estado
-           select
-                 te.codigo
-            into
-                 v_codigo_estado_siguiente
-           from wf.ttipo_estado te
-           where te.id_tipo_estado = v_parametros.id_tipo_estado;
+            --Verifica que si la cuenta documentada va por caja no exceda el maximo de la caja
+            if v_tipo_pago = 'caja' then
+                --Obtención del total del importe
+                select o_total
+                into v_importe_total
+                from cd.f_get_total_cuenta_doc_sol(v_parametros.id_cuenta_doc,'si');
 
-           IF  pxp.f_existe_parametro(p_tabla,'id_depto_wf') THEN
-              v_id_depto = v_parametros.id_depto_wf;
-           END IF;
-
-           IF  pxp.f_existe_parametro(p_tabla,'obs') THEN
-                  v_obs=v_parametros.obs;
-           ELSE
-                  v_obs='---';
-           END IF;
-
-           IF v_codigo_estado_siguiente in ('vbgerencia','vbgaf') THEN
-
-                --Verifica que si la cuenta documentada va por caja no exceda el maximo de la caja
-                if v_tipo_pago = 'caja' then
-                  --Obtención del total del importe
-                  select o_total
-                  into v_importe_total
-                  from cd.f_get_total_cuenta_doc_sol(v_parametros.id_cuenta_doc,'si');
-
-                  if v_importe_total <= 0 then
-                      raise exception 'No se puede generar el Recibo. El importe debe ser mayo a cero.';
-                  end if;
-
-                  --Validación que el importe no supere al máximo permitido
-                  v_max_cd_caja = pxp.f_get_variable_global('cd_importe_maximo_cajas');
-
-                  if v_importe_total > v_max_cd_caja then
-                      raise exception 'El importe solicitado (%) supera al máximo permitido (%)',v_importe_total, v_max_cd_caja;
-                  end if;
-
-                  --Validación que el importe no supere el máximo permitido por la caja seleccionada
-                  select importe_maximo_item
-                  into v_importe_maximo_caja
-                  from tes.tcaja
-                  where id_caja = v_id_caja;
-
-                  if v_importe_maximo_caja < v_importe_total then
-                      raise exception 'El importe solicitado (%) supera al máximo permitido en la caja seleccionada (%)',v_importe_total, v_importe_maximo_caja;
-                  end if;
-
+                if v_importe_total <= 0 then
+                  raise exception 'No se puede generar el Recibo. El importe debe ser mayo a cero.';
                 end if;
 
-                UPDATE cd.tcuenta_doc
-                SET id_funcionario_aprobador = v_parametros.id_funcionario_wf
-                WHERE id_cuenta_doc=v_parametros.id_cuenta_doc;
+                --Validación que el importe no supere al máximo permitido
+                v_max_cd_caja = pxp.f_get_variable_global('cd_importe_maximo_cajas');
 
-                --RCM 26/10/2017: Verificación de Viático
-                select tcdo.codigo
-                into v_codigo_tipo_cuenta_doc
-                from cd.tcuenta_doc cdo
-                inner join cd.ttipo_cuenta_doc tcdo
-                on tcdo.id_tipo_cuenta_doc = cdo.id_tipo_cuenta_doc
-                where cdo.id_cuenta_doc = v_parametros.id_cuenta_doc;
+                if v_importe_total > v_max_cd_caja then
+                  raise exception 'El importe solicitado (%) supera al máximo permitido (%)',v_importe_total, v_max_cd_caja;
+                end if;
 
-                if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
-                    --Debe tener registrado el Itinerario
-                    if not exists(select 1 from cd.tcuenta_doc_itinerario
-                                where id_cuenta_doc = v_parametros.id_cuenta_doc) then
-                        raise exception 'Debe registrar el Itinerario del viaje.';
-                    end if;
-                    
-                    --Verificación del prorrateo
-                    select sum(prorrateo)
-                    into v_total_prorrateo
-                    from cd.tcuenta_doc_prorrateo
-                    where id_cuenta_doc = v_parametros.id_cuenta_doc;
+                --Validación que el importe no supere el máximo permitido por la caja seleccionada
+                select importe_maximo_item
+                into v_importe_maximo_caja
+                from tes.tcaja
+                where id_caja = v_id_caja;
 
-                    if v_total_prorrateo > 1 then
-                        raise exception 'El prorrateo supera a 1 (prorrateo = %). Corrija y vuelva a interntarlo',v_total_prorrateo;
-                    elsif v_total_prorrateo < 1 then
-                        raise exception 'El prorrateo es inferior a 1 (prorrateo = %). Corrija y vuelva a intentarlo',v_total_prorrateo;
-                    end if;
+                if v_importe_maximo_caja < v_importe_total then
+                  raise exception 'El importe solicitado (%) supera al máximo permitido en la caja seleccionada (%)',v_importe_total, v_importe_maximo_caja;
+                end if;
+
+            end if;
+
+            UPDATE cd.tcuenta_doc SET
+            id_funcionario_aprobador = v_parametros.id_funcionario_wf
+            WHERE id_cuenta_doc=v_parametros.id_cuenta_doc;
+
+            --RCM 26/10/2017: Verificación de Viático
+            select tcdo.codigo
+            into v_codigo_tipo_cuenta_doc
+            from cd.tcuenta_doc cdo
+            inner join cd.ttipo_cuenta_doc tcdo
+            on tcdo.id_tipo_cuenta_doc = cdo.id_tipo_cuenta_doc
+            where cdo.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            if v_codigo_tipo_cuenta_doc = 'SOLVIA' then
+                --Debe tener registrado el Itinerario
+                if not exists(select 1 from cd.tcuenta_doc_itinerario
+                            where id_cuenta_doc = v_parametros.id_cuenta_doc) then
+                    raise exception 'Debe registrar el Itinerario del viaje.';
+                end if;
+                
+                --Verificación del prorrateo
+                select sum(prorrateo)
+                into v_total_prorrateo
+                from cd.tcuenta_doc_prorrateo
+                where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+                if v_total_prorrateo > 1 then
+                    raise exception 'El prorrateo supera a 1 (prorrateo = %). Corrija y vuelva a interntarlo',v_total_prorrateo;
+                elsif v_total_prorrateo < 1 then
+                    raise exception 'El prorrateo es inferior a 1 (prorrateo = %). Corrija y vuelva a intentarlo',v_total_prorrateo;
+                end if;
 
 
-                    if v_tipo_contrato = 'planta_obra_determinada' then
-                      v_cod_concepto_ingas = 'CONGAS_VIA_PLA';
-                    elsif v_tipo_contrato='servicio' then
-                      v_cod_concepto_ingas = 'CONGAS_VIA_SER';
-                    else
-                      raise exception 'No se ha definido el Tipo de contrato del solicitante';
-                    end if;
+                if v_tipo_contrato = 'planta_obra_determinada' then
+                    v_cod_concepto_ingas = 'CONGAS_VIA_PLA';
+                elsif v_tipo_contrato='servicio' then
+                    v_cod_concepto_ingas = 'CONGAS_VIA_SER';
+                else
+                  raise exception 'No se ha definido el Tipo de contrato del solicitante';
+                end if;
 
+                --Verifica que tenga registrado al menos el concepto de gasto de viático
+                select escr.id_concepto_ingas
+                into v_id_concepto_ingas
+                from cd.tcuenta_doc cd
+                left join cd.tescala_regla escr
+                on escr.id_escala = cd.id_escala
+                where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
+                and escr.codigo = v_cod_concepto_ingas;
+
+                --Si no existe en la escala despliega el error
+                if v_id_concepto_ingas is null then
+                    raise exception 'No se encuenta definido el Concepto de Gasto para la escala de la solicitud. Comuníquese con el Administrador';
+                end if;
+
+                v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
+
+                if v_permitir_mod = 'no' then
                     --Verifica que tenga registrado al menos el concepto de gasto de viático
-                    select escr.id_concepto_ingas
-                    into v_id_concepto_ingas
-                    from cd.tcuenta_doc cd
-                    left join cd.tescala_regla escr
-                    on escr.id_escala = cd.id_escala
-                    where cd.id_cuenta_doc = v_parametros.id_cuenta_doc
-                    and escr.codigo = v_cod_concepto_ingas;
-
-                    --Si no existe en la escala despliega el error
-                    if v_id_concepto_ingas is null then
-                        raise exception 'No se encuenta definido el Concepto de Gasto para la escala de la solicitud. Comuníquese con el Administrador';
+                    if not exists(select 1 from cd.tcuenta_doc_det
+                                where id_cuenta_doc = v_parametros.id_cuenta_doc
+                                and id_concepto_ingas = v_id_concepto_ingas) then
+                        raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
                     end if;
-
-                    v_permitir_mod = pxp.f_get_variable_global('cd_permitir_modificar_monto_sol');
-
-                    if v_permitir_mod = 'no' then
-                        --Verifica que tenga registrado al menos el concepto de gasto de viático
-
-
-                        if not exists(select 1 from cd.tcuenta_doc_det
-                                    where id_cuenta_doc = v_parametros.id_cuenta_doc
-                                    and id_concepto_ingas = v_id_concepto_ingas) then
-                            raise exception 'Debe registrar el presupuesto para el Concepto de gasto de viáticos';
-                        end if;
-                    end if;
-
-
                 end if;
 
-           END IF;
 
-           ---------------------------------------
-           -- REGISTRA EL SIGUIENTE ESTADO DEL WF
-           ---------------------------------------
+            end if;
 
+        END IF;
 
-           --configurar acceso directo para la alarma
-            v_acceso_directo = '';
-            v_clase = '';
-            v_parametros_ad = '';
+        ---------------------------------------
+        -- REGISTRA EL SIGUIENTE ESTADO DEL WF
+        ---------------------------------------
+        --Configurar acceso directo para la alarma
+        v_acceso_directo = '';
+        v_clase = '';
+        v_parametros_ad = '';
+        v_tipo_noti = 'notificacion';
+        v_titulo  = 'Visto Bueno';
+
+        IF v_codigo_estado_siguiente not in('borrador','finalizado','anulado') THEN
+            v_acceso_directo = '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVb.php';
+            v_clase = 'CuentaDocVb';
+            v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
             v_tipo_noti = 'notificacion';
             v_titulo  = 'Visto Bueno';
+        END IF;
 
-           IF   v_codigo_estado_siguiente not in('borrador','finalizado','anulado')   THEN
-                  v_acceso_directo = '../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDocVb.php';
-                 v_clase = 'CuentaDocVb';
-                 v_parametros_ad = '{filtro_directo:{campo:"cd.id_proceso_wf",valor:"'||v_id_proceso_wf::varchar||'"}}';
-                 v_tipo_noti = 'notificacion';
-                 v_titulo  = 'Visto Bueno';
+        v_id_estado_actual = wf.f_registra_estado_wf(v_parametros.id_tipo_estado,
+                                                       v_parametros.id_funcionario_wf,
+                                                       v_parametros.id_estado_wf_act,
+                                                       v_id_proceso_wf,
+                                                       p_id_usuario,
+                                                       v_parametros._id_usuario_ai,
+                                                       v_parametros._nombre_usuario_ai,
+                                                       v_id_depto,                       --depto del estado anterior
+                                                       v_obs,
+                                                       v_acceso_directo,
+                                                       v_clase,
+                                                       v_parametros_ad,
+                                                       v_tipo_noti,
+                                                       v_titulo);
 
-           END IF;
+        --------------------------------------
+        -- Registra los procesos disparados
+        --------------------------------------
+        FOR v_registros_proc in ( select * from json_populate_recordset(null::wf.proceso_disparado_wf, v_parametros.json_procesos::json)) LOOP
 
-           v_id_estado_actual =  wf.f_registra_estado_wf(  v_parametros.id_tipo_estado,
-                                                           v_parametros.id_funcionario_wf,
-                                                           v_parametros.id_estado_wf_act,
-                                                           v_id_proceso_wf,
-                                                           p_id_usuario,
-                                                           v_parametros._id_usuario_ai,
-                                                           v_parametros._nombre_usuario_ai,
-                                                           v_id_depto,                       --depto del estado anterior
-                                                           v_obs,
-                                                           v_acceso_directo,
-                                                           v_clase,
-                                                           v_parametros_ad,
-                                                           v_tipo_noti,
-                                                           v_titulo);
+            --Get codigo tipo proceso
+            select tp.codigo
+            into v_codigo_tipo_pro
+            from wf.ttipo_proceso tp
+            where tp.id_tipo_proceso = v_registros_proc.id_tipo_proceso_pro;
 
-          --------------------------------------
-          -- registra los procesos disparados
-          --------------------------------------
+            --Disparar creacion de procesos seleccionados
+            SELECT
+                   ps_id_proceso_wf,
+                   ps_id_estado_wf,
+                   ps_codigo_estado
+            into
+                   v_id_proceso_wf,
+                   v_id_estado_wf,
+                   v_codigo_estado
+            FROM wf.f_registra_proceso_disparado_wf(
+                   p_id_usuario,
+                   v_parametros._id_usuario_ai,
+                   v_parametros._nombre_usuario_ai,
+                   v_id_estado_actual,
+                   v_registros_proc.id_funcionario_wf_pro,
+                   v_registros_proc.id_depto_wf_pro,
+                   v_registros_proc.obs_pro,
+                   v_codigo_tipo_pro,
+                   v_codigo_tipo_pro);
+        END LOOP;
 
-          FOR v_registros_proc in ( select * from json_populate_recordset(null::wf.proceso_disparado_wf, v_parametros.json_procesos::json)) LOOP
+        IF pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
+            v_id_cuenta_bancaria = v_parametros.id_cuenta_bancaria;
+        END IF;
 
-               -- get cdigo tipo proceso
-               select
-                  tp.codigo
-               into
-                  v_codigo_tipo_pro
-               from wf.ttipo_proceso tp
-               where  tp.id_tipo_proceso =  v_registros_proc.id_tipo_proceso_pro;
+        IF pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
+            v_id_depto_lb = v_parametros.id_depto_lb;
+        END IF;
 
+        IF pxp.f_existe_parametro(p_tabla,'id_depto_conta') THEN
+            v_id_depto_conta = v_parametros.id_depto_conta;
+        END IF;
 
-              -- disparar creacion de procesos seleccionados
-              SELECT
-                       ps_id_proceso_wf,
-                       ps_id_estado_wf,
-                       ps_codigo_estado
-                 into
-                       v_id_proceso_wf,
-                       v_id_estado_wf,
-                       v_codigo_estado
-              FROM wf.f_registra_proceso_disparado_wf(
-                       p_id_usuario,
-                       v_parametros._id_usuario_ai,
-                       v_parametros._nombre_usuario_ai,
-                       v_id_estado_actual,
-                       v_registros_proc.id_funcionario_wf_pro,
-                       v_registros_proc.id_depto_wf_pro,
-                       v_registros_proc.obs_pro,
-                       v_codigo_tipo_pro,
-                       v_codigo_tipo_pro);
-           END LOOP;
-
-           IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria') THEN
-              v_id_cuenta_bancaria =  v_parametros.id_cuenta_bancaria;
-           END IF;
-
-           IF  pxp.f_existe_parametro(p_tabla,'id_depto_lb') THEN
-              v_id_depto_lb =  v_parametros.id_depto_lb;
-           END IF;
-
-           IF  pxp.f_existe_parametro(p_tabla,'id_depto_conta') THEN
-              v_id_depto_conta =  v_parametros.id_depto_conta;
-           END IF;
-
-           IF  pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
-              v_id_cuenta_bancaria_mov =  v_parametros.id_cuenta_bancaria_mov;
-           END IF;
+        IF pxp.f_existe_parametro(p_tabla,'id_cuenta_bancaria_mov') THEN
+            v_id_cuenta_bancaria_mov = v_parametros.id_cuenta_bancaria_mov;
+        END IF;
 
 
-          --------------------------------------------------
-          --  ACTUALIZA EL NUEVO ESTADO DE LA CUENTA DOCUMENTADA
-          ----------------------------------------------------
+        --------------------------------------------------
+        --  ACTUALIZA EL NUEVO ESTADO DE LA CUENTA DOCUMENTADA
+        ----------------------------------------------------
 
-          IF  cd.f_fun_inicio_cuenta_doc_wf(p_id_usuario,
-                            v_parametros._id_usuario_ai,
-                                            v_parametros._nombre_usuario_ai,
-                                            v_id_estado_actual,
-                                            v_id_proceso_wf,
-                                            v_codigo_estado_siguiente,
-                                            v_id_depto_lb,
-                                            v_id_cuenta_bancaria,
-                                            v_id_depto_conta,
-                                            v_codigo_estado,
-                                            v_id_cuenta_bancaria_mov
-                                            ) THEN
+        IF cd.f_fun_inicio_cuenta_doc_wf(p_id_usuario,
+                                        v_parametros._id_usuario_ai,
+                                        v_parametros._nombre_usuario_ai,
+                                        v_id_estado_actual,
+                                        v_id_proceso_wf,
+                                        v_codigo_estado_siguiente,
+                                        v_id_depto_lb,
+                                        v_id_cuenta_bancaria,
+                                        v_id_depto_conta,
+                                        v_codigo_estado,
+                                        v_id_cuenta_bancaria_mov
+                                        ) THEN
 
-          END IF;
+        END IF;
 
+        --Respuesta
+        v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del cuenta documentada id='||v_parametros.id_cuenta_doc);
+        v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
 
-          -- si hay mas de un estado disponible  preguntamos al usuario
-          v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del cuenta documentada id='||v_parametros.id_cuenta_doc);
-          v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
-
-
-          -- Devuelve la respuesta
-          return v_resp;
+        --Devuelve la respuesta
+        return v_resp;
 
      end;
 
@@ -1339,6 +1326,9 @@ BEGIN
                 v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc,'rendicion');
                 --Generación automática de documento de rendición de viático
                 v_resp1 = cd.f_viatico_registrar_doc_rendicion(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_id_cuenta_doc);
+
+                --Actualizacion del importe total en la cabecera
+                v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_id_cuenta_doc);
             end if;
 
              -- inserta documentos en estado borrador si estan configurados
@@ -1513,7 +1503,7 @@ BEGIN
 
 
              IF v_registros_cd.estado != 'borrador' THEN
-                raise exception 'Solo puede eliminar regitros en borrador';
+                raise exception 'Solo puede eliminar registros en borrador';
              END IF;
 
 
@@ -1570,8 +1560,10 @@ BEGIN
                 inner join orga.tfuncionario f on f.id_persona = u.id_persona
                 where u.id_usuario = p_id_usuario;
 
-                IF v_id_funcionario is null THEN
-                   raise exception 'el usaurio no tiene un funcionario';
+                IF p_administrador !=1 THEN
+                    IF v_id_funcionario is null THEN
+                        raise exception 'El usuario no tiene un funcionario';
+                    END IF;                
                 END IF;
 
 
@@ -1596,7 +1588,7 @@ BEGIN
 
 
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada inactivada(a)');
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada inactivada');
             v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
 
             --Devuelve la respuesta
@@ -1804,13 +1796,30 @@ BEGIN
             
             select * into v_registros_cd from cd.f_get_saldo_totales_cuenta_doc(v_parametros.id_cuenta_doc);
 
+            --Casos especiales para devolver en bolivianos lo entregado en dólares, geda, vi-000473-2018
+            v_saldo = v_registros_cd.o_saldo;
+
+          --Temporal
+          select id_moneda into v_id_moneda from cd.tcuenta_doc where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+          if v_id_moneda = 2 then
+            v_saldo = round(v_saldo*6.96,2);
+          end if;
+
+
+            /*if v_parametros.id_cuenta_doc = 1602 then
+                v_saldo = round(v_saldo*6.96,2);
+            elsif v_parametros.id_cuenta_doc = 1665 then
+                v_saldo = round(v_saldo*6.96,2);
+            end if;*/
+
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Verificacion de registro de Itinerario realizado');
             v_resp = pxp.f_agrega_clave(v_resp,'total_solicitado',v_registros_cd.o_total_solicitado::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'total_rendido',v_registros_cd.o_total_rendido::varchar);
-            v_resp = pxp.f_agrega_clave(v_resp,'saldo',v_registros_cd.o_saldo::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'saldo',v_saldo::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'a_favor_de',v_registros_cd.o_a_favor_de::varchar);
-            v_resp = pxp.f_agrega_clave(v_resp,'por_caja',v_registros_cd.o_por_caja::varchar);
+            v_resp = pxp.f_agrega_clave(v_resp,'por_caja','si');--v_registros_cd.o_por_caja::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_registros_cd.o_tipo::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'saldo_parcial',v_registros_cd.o_saldo_parcial::varchar);
             v_resp = pxp.f_agrega_clave(v_resp,'tipo_rendicion',v_registros_cd.o_tipo_rendicion::varchar);
@@ -1886,7 +1895,7 @@ BEGIN
             id_depto_lb           = v_parametros.id_depto_lb
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
-            --Verifica si el saldo es mayor a cero para generar el dpcumento en función del tipo de desembolso/reposición a realizar
+            --Verifica si el saldo es mayor a cero para generar el documento en función del tipo de desembolso/reposición a realizar
             if v_parametros.dev_saldo > 0 then
 
                 --Lógica para creación de la forma de devolución
@@ -1900,7 +1909,7 @@ BEGIN
                         v_registros_cd.id_funcionario as id_funcionario,
                         'ingreso' as tipo_solicitud,
                         now() as fecha,
-                        'Reposición de fondos por cuenta documentada a la empresa' as motivo,
+                        'Devolución de fondos por cuenta documentada a la empresa' as motivo,
                         null::integer as id_solicitud_efectivo_fk
                         into v_registros;
 
@@ -1919,6 +1928,11 @@ BEGIN
                         from tes.tsolicitud_efectivo
                         where id_solicitud_efectivo = v_id_solicitud_efectivo;
 
+                        --Marca el recibo de ingreso
+                        update tes.tsolicitud_efectivo set
+                        ingreso_cd = 'si'
+                        where id_solicitud_efectivo = v_id_solicitud_efectivo;
+
                         v_mensaje = 'Recibo de caja de ingreso generado para la devolucion a la empresa número: '||v_sol_efect;
 
                     elsif v_parametros.dev_tipo = 'deposito' then
@@ -1935,7 +1949,7 @@ BEGIN
                         v_registros_cd.id_funcionario as id_funcionario,
                         'solicitud' as tipo_solicitud,
                         now() as fecha,
-                        'Devolución de fondos por cuenta documentada al funcionario' as motivo,
+                        'Reposición de fondos por cuenta documentada al funcionario' as motivo,
                         null::integer as id_solicitud_efectivo_fk
                         into v_registros;
 
@@ -2047,6 +2061,51 @@ BEGIN
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Prorrateo del SIGEMA importado)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_cuenta_doc',v_parametros.id_cuenta_doc::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;
+
+      /*********************************
+      #TRANSACCION: 'CD_VIA110DET_MOD'
+      #DESCRIPCION: Modificación funcionario en Recibos - Viáticos Form 110
+      #AUTOR:       RCM
+      #FECHA:       07/03/2018
+      ***********************************/
+
+      elsif(p_transaccion='CD_VIA110DET_MOD')then
+
+        begin
+
+            --Verifica existencia del registro
+            if not exists(select 1 from conta.tdoc_compra_venta
+                        where id_doc_compra_venta = v_parametros.id_doc_compra_venta) then
+                raise exception 'Documento no encontrado';
+            end if;
+
+            --Verifica si el periodo está abierto
+            select id_periodo, id_depto_conta
+            into v_id_periodo, v_id_depto_conta
+            from conta.tdoc_compra_venta
+            where id_doc_compra_venta = v_parametros.id_doc_compra_venta;
+
+            v_tmp_resp = conta.f_revisa_periodo_compra_venta(p_id_usuario, v_id_depto_conta, v_id_periodo);
+
+            --Validación parámetros
+            if v_parametros.id_funcionario is null then
+                raise exception 'El funcionario no puede tener valor nulo';
+            end if;
+
+            --Modificación del funcionario
+            update conta.tdoc_compra_venta set
+            id_funcionario = v_parametros.id_funcionario
+            where id_doc_compra_venta = v_parametros.id_doc_compra_venta;
+
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Funcionario modificado en el recibo de viáticos');
+            v_resp = pxp.f_agrega_clave(v_resp,'id_doc_compra_venta',v_parametros.id_doc_compra_venta::varchar);
 
             --Devuelve la respuesta
             return v_resp;

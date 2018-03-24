@@ -32,8 +32,8 @@ $body$
 DECLARE
 
     v_nombre_funcion                text;
-    v_resp                          varchar;     
-    v_mensaje                       varchar;    
+    v_resp                          varchar; 
+    v_mensaje                       varchar; 
     v_registros                     record;
     v_regitros_pp                   record;
     v_monto_ejecutar_mo             numeric;
@@ -63,6 +63,15 @@ DECLARE
     v_importe_maximo_caja           numeric;
     v_id_solicitud_efectivo         integer;
     v_sw_generar_sol_efectivo       boolean;
+    v_id_plantilla                  integer = 41;
+    v_resp1                         varchar;
+    va_id_tipo_estado               integer[];
+    va_codigo_estado                varchar[];
+    va_disparador                   varchar[];
+    va_regla                        varchar[]; 
+    va_prioridad                    integer[];
+    v_id_estado_actual              integer;
+    v_rec_devrep                    record;
    
 BEGIN
 
@@ -94,7 +103,10 @@ BEGIN
     c.tipo_pago,
     c.id_caja,
     c.fecha_entrega,
-    c.motivo
+    c.motivo,
+    tcd.codigo_plantilla_cbte_devrep,
+    c.tipo_rendicion,
+    c.dev_tipo
     into
     v_reg_cuenta_doc
     from cd.tcuenta_doc c
@@ -167,6 +179,11 @@ BEGIN
 
                 end if;
                         
+            end if;
+
+            --Actualiza el importe de la cabecera con el total detalle del presupuesto si es Viáticos
+            if v_reg_cuenta_doc.codigo_tipo_cuenta_doc = 'SOLVIA' then
+                v_resp1 = cd.f_actualizar_cuenta_doc_total_cabecera(p_id_usuario, v_reg_cuenta_doc.id_cuenta_doc);
             end if;
 
         end if;
@@ -294,6 +311,21 @@ BEGIN
         if v_reg_cuenta_doc.id_cuenta_doc_fk is null then
             raise exception 'No es una rendición, verifique el tipo de cuenta documentada %',v_reg_cuenta_doc.nombre;
         end if;
+
+        --Si es vbrendicion verifica si tiene recibo sin retencion de viaticos que tenga funcionario
+        if p_codigo_estado = 'vbrendicion' then
+            if exists(select 1
+                        from cd.trendicion_det rd
+                        inner join conta.tdoc_compra_venta dcv
+                        on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+                        inner join param.tplantilla pla
+                        on pla.id_plantilla = dcv.id_plantilla
+                        where rd.id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc
+                        and dcv.id_plantilla = v_id_plantilla
+                        and dcv.id_funcionario is null) then
+                raise exception 'Existen Recibos sin Retención de Viáticos que no tienen definido el funcionario. Complete esa información requerida.';
+            end if;
+        end if;
          
         ------------------------------------------------------------------------------------
         --3.1 Si la rendición está saliendo del estado borrador, comprometemos presupuesto
@@ -409,9 +441,79 @@ BEGIN
             raise exception 'No se generó comprobante porque no se pudo identificar si era una solicitud de fondos o rendición';
         end if;
         
+    elsif p_codigo_estado = 'pendiente_tes' then
         
-        
-        
+        --Generación del comprobante
+        v_id_int_comprobante = conta.f_gen_comprobante(v_reg_cuenta_doc.id_cuenta_doc, 
+                                                        v_reg_cuenta_doc.codigo_plantilla_cbte_devrep,
+                                                        p_id_estado_wf,                                                     
+                                                        p_id_usuario,
+                                                        p_id_usuario_ai, 
+                                                        p_usuario_ai, 
+                                                        v_nombre_conexion);
+
+        --Actualización del Id del comprobante en la cuenta documentada
+        update cd.tcuenta_doc set 
+        id_int_comprobante_devrep = v_id_int_comprobante          
+        where id_proceso_wf = p_id_proceso_wf;        
+
+    elsif p_codigo_estado = 'rendido' then
+
+        if v_reg_cuenta_doc.sw_solicitud = 'no' then
+
+            --Obtiene datos de la solicitud
+            select estado,id_proceso_wf,id_estado_wf
+            into v_rec_devrep
+            from cd.tcuenta_doc
+            where id_cuenta_doc = v_reg_cuenta_doc.id_cuenta_doc_fk;
+
+
+            --Si es una rendición final, la devolución va por caja (y la solicitud aún no está finalizada), finaliza la solicitud
+            if v_reg_cuenta_doc.tipo_rendicion = 'final' and v_reg_cuenta_doc.dev_tipo = 'caja' and v_rec_devrep.estado<>'finalizado' then
+
+                /************************************
+                   CAMBIA DE ESTADO LA SOLICITUD
+                *************************************/
+                SELECT 
+                *
+                into
+                va_id_tipo_estado,
+                va_codigo_estado,
+                va_disparador,
+                va_regla,
+                va_prioridad
+                FROM wf.f_obtener_estado_wf(v_rec_devrep.id_proceso_wf, v_rec_devrep.id_estado_wf,NULL,'siguiente');
+                
+                IF va_codigo_estado[2] is not null THEN
+                   raise exception 'El proceso de WF esta mal parametrizado, solo admite un estado siguiente para el estado: %', v_rec_devrep.estado;
+                END IF;
+                
+                IF va_codigo_estado[1] is  null THEN
+                   raise exception 'El proceso de WF esta mal parametrizado, no se encuentra el estado siguiente para el estado: %', v_rec_devrep.estado;           
+                END IF;
+                
+                -- estado siguiente
+                v_id_estado_actual = wf.f_registra_estado_wf(va_id_tipo_estado[1], 
+                                                               v_reg_cuenta_doc.id_funcionario, 
+                                                               v_rec_devrep.id_estado_wf, 
+                                                               v_rec_devrep.id_proceso_wf,
+                                                               p_id_usuario,
+                                                               p_id_usuario_ai, -- id_usuario_ai
+                                                               p_usuario_ai, -- usuario_ai
+                                                               p_id_depto_conta,
+                                                               'Solicitud finalizada');
+                --Actualiza estado del proceso
+                update cd.tcuenta_doc pc  set 
+                id_estado_wf =  v_id_estado_actual,
+                estado = va_codigo_estado[1],
+                id_usuario_mod = p_id_usuario,
+                fecha_mod = now(),
+                id_usuario_ai = p_id_usuario_ai,
+                usuario_ai = p_usuario_ai
+                where pc.id_cuenta_doc  = v_reg_cuenta_doc.id_cuenta_doc_fk; 
+
+            end if;
+        end if;
      
     end if;
    

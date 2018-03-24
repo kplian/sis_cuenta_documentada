@@ -64,6 +64,9 @@ DECLARE
     v_rendicion_det             record;
     v_id_presupuesto			integer;
     v_pre_verificar_categoria   varchar;
+    v_pre_verificar_tipo_cc     varchar;
+    v_control_partida           varchar;
+    va_resp_pre                 varchar[];
   
 BEGIN
  
@@ -318,9 +321,11 @@ BEGIN
         v_mensage_error = '';
         v_sw_error = false;
         v_pre_verificar_categoria = pxp.f_get_variable_global('pre_verificar_categoria');
+        v_pre_verificar_tipo_cc = pxp.f_get_variable_global('pre_verificar_tipo_cc');
+        v_control_partida = 'si'; --por defeto controlamos los monstos por partidas 
           
         --Lógica en función si la verificación es agrupada o no
-        if v_pre_verificar_categoria = 'no' then
+        if v_pre_verificar_categoria = 'no' and v_pre_verificar_tipo_cc = 'no' then
             --Verifica agrupando por presupuesto    
             for v_registros in (select
                                 dc.id_centro_costo,
@@ -374,66 +379,147 @@ BEGIN
             end loop;
         
         else
-            --Verifica agrupando por categoria programatica
-            for v_registros in (select
-                                c.id_gestion,
-                                c.id_cuenta_doc,
-                                dc.id_partida,
-                                sum(dc.precio_total_final) as precio_total_final,    
-                                c.id_moneda,
-                                par.codigo,
-                                par.nombre_partida,
-                                p.id_categoria_prog,
-                                cp.codigo_categoria,
-                                par.sw_movimiento,
-                                p.codigo_cc
-                                from cd.tcuenta_doc c
-                                inner join cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
-                                inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
-                                inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta 
-                                inner join pre.tpartida par on par.id_partida = dc.id_partida
-                                inner join pre.vpresupuesto_cc p on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
-                                inner join pre.vcategoria_programatica cp on p.id_categoria_prog = cp.id_categoria_programatica
-                                where dc.estado_reg = 'activo'
-                                and c.id_cuenta_doc = p_id_cuenta_doc                            
-                                group by                              
-                                p.id_categoria_prog,
-                                cp.codigo_categoria,
-                                c.id_gestion,
-                                c.id_cuenta_doc,
-                                dc.id_partida,
-                                c.id_moneda,
-                                par.codigo,
-                                par.nombre_partida,
-                                par.sw_movimiento,
-                                p.codigo_cc) loop
+        
+            IF  v_pre_verificar_categoria = 'si'  THEN
+            
+                  --Verifica agrupando por categoria programatica
+                  for v_registros in (select
+                                          c.id_gestion,
+                                          c.id_cuenta_doc,
+                                          dc.id_partida,
+                                          sum(dc.precio_total_final) as precio_total_final,    
+                                          c.id_moneda,
+                                          par.codigo,
+                                          par.nombre_partida,
+                                          p.id_categoria_prog,
+                                          cp.codigo_categoria,
+                                          par.sw_movimiento,
+                                          p.codigo_cc
+                                      from cd.tcuenta_doc c
+                                      inner join cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
+                                      inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
+                                      inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta 
+                                      inner join pre.tpartida par on par.id_partida = dc.id_partida
+                                      inner join pre.vpresupuesto_cc p on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
+                                      inner join pre.vcategoria_programatica cp on p.id_categoria_prog = cp.id_categoria_programatica
+                                      where dc.estado_reg = 'activo'
+                                      and c.id_cuenta_doc = p_id_cuenta_doc                            
+                                      group by                              
+                                          p.id_categoria_prog,
+                                          cp.codigo_categoria,
+                                          c.id_gestion,
+                                          c.id_cuenta_doc,
+                                          dc.id_partida,
+                                          c.id_moneda,
+                                          par.codigo,
+                                          par.nombre_partida,
+                                          par.sw_movimiento,
+                                          p.codigo_cc) loop
+                                            
+                      --Verifica que no sea partida de flujo                      
+                      if v_registros.sw_movimiento != 'flujo' then
+                          --Recupera un presupuesto cualquiera con la misma categoria para la verificacion
+                          select 
+                          p.id_presupuesto
+                          into 
+                          v_id_presupuesto                                      
+                          from pre.vpresupuesto_cc p
+                          where p.id_categoria_prog = v_registros.id_categoria_prog
+                          offset 0 limit 1; 
+
+                          --Verificación del presupuesto
+                          v_resp_pre = pre.f_verificar_presupuesto_partida (v_id_presupuesto,
+                                                                          v_registros.id_partida,
+                                                                          v_registros.id_moneda,
+                                                                          v_registros.precio_total_final);
+
+                          --Verificación de error para definir el mensaje
+                          if v_resp_pre = 'false' then
+                              v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <br/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);
+                              v_sw_error = true;
+                          end if;
+
+                      end if;
+
+                  end loop;
+            
+            
+            ELSEIF v_pre_verificar_tipo_cc = 'si' THEN
+            
+                        --RAC 27/02/2018  verificacion presupeustaria por control de techo y partida
+                        --Verifica agrupando por TIPO DE PRESUPUESTO TECHO    
+                        for v_registros in (select                                           
+                                                c.id_gestion,
+                                                c.id_cuenta_doc,                                          
+                                                sum(dc.precio_total_final) as precio_total_final,                                           
+                                                c.id_moneda,                                                
+                                                tcc.codigo_techo,
+                                                CASE
+                                                 WHEN  tcc.control_partida::text = 'no' THEN
+                                                    0
+                                                 ELSE 
+                                                     dc.id_partida
+                                                 END     AS id_par,
+                                             CASE
+                                                 WHEN  tcc.control_partida::text = 'no' THEN
+                                                    'No se considera partida'::varchar
+                                                ELSE 
+                                                   par.nombre_partida
+                                             END AS nombre_partida_desc,
+                                             pxp.aggarray(p.id_centro_costo) AS id_centro_costos  
+                                                
+                                                
+                                            from cd.tcuenta_doc c
+                                            inner join cd.trendicion_det r on r.id_cuenta_doc_rendicion = c.id_cuenta_doc
+                                            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = r.id_doc_compra_venta
+                                            inner join conta.tdoc_concepto dc on dc.id_doc_compra_venta = dcv.id_doc_compra_venta 
+                                            inner join pre.tpartida par on par.id_partida = dc.id_partida
+                                            inner join param.vcentro_costo p on p.id_centro_costo = dc.id_centro_costo and dc.estado_reg = 'activo'
+                                            inner join param.vtipo_cc_techo tcc ON tcc.id_tipo_cc = p.id_tipo_cc
+                                            where dc.estado_reg = 'activo' and c.id_cuenta_doc = p_id_cuenta_doc                           
+                                            group by                              
+                                                
+                                                c.id_gestion,
+                                                c.id_cuenta_doc,
+                                                tcc.control_partida,                                               
+                                                tcc.codigo_techo,                                            
+                                                c.id_moneda,                                                                                         
+                                                p.codigo_cc,                                               
+                                                id_par,                             
+                                                nombre_partida_desc
+                                            ) loop
+                                            
+                                            
+                                            
+                                                     
+                            --Verifica que no sea partida de flujo
+                             -- if v_registros.sw_movimiento != 'flujo' then
+                                  v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_centro_costos[1],
+                                                                                    v_registros.id_par,
+                                                                                    v_registros.id_moneda,
+                                                                                    v_registros.precio_total_final,
+                                                                                    'si');
+                                                                                    
+                                                                                    
+                                  va_resp_pre = string_to_array(v_resp_pre,',');                                                  
+                                                                                
+                                  if va_resp_pre[1] = 'false' then
+                                      v_mensage_error = v_mensage_error||format('Presupuesto:  %s, ( %s) necesitamos %s, tenemos %s <br/>', v_registros.codigo_techo, v_registros.nombre_partida_desc,v_registros.precio_total_final::varchar,va_resp_pre[2] );    
+                                      v_sw_error = true;
                                       
-                --Verifica que no sea partida de flujo                      
-                if v_registros.sw_movimiento != 'flujo' then
-                    --Recupera un presupuesto cualquiera con la misma categoria para la verificacion
-                    select 
-                    p.id_presupuesto
-                    into 
-                    v_id_presupuesto                                      
-                    from pre.vpresupuesto_cc p
-                    where p.id_categoria_prog = v_registros.id_categoria_prog
-                    offset 0 limit 1; 
+                                      
+                                       --raise exception ' UTI, % , %, %, % , %',v_registros.id_centro_costos[1],  v_registros.id_par,v_registros.id_moneda, v_registros.precio_total_final, p_id_cuenta_doc;  
+                                   
+                                  end if;
+                          --  end if;
 
-                    --Verificación del presupuesto
-                    v_resp_pre = pre.f_verificar_presupuesto_partida (v_id_presupuesto,
-                                                                    v_registros.id_partida,
-                                                                    v_registros.id_moneda,
-                                                                    v_registros.precio_total_final);
-
-                    --Verificación de error para definir el mensaje
-                    if v_resp_pre = 'false' then
-                        v_mensage_error = v_mensage_error||format('Presupuesto:  %s, partida (%s) %s <br/>', v_registros.codigo_cc, v_registros.codigo,v_registros.nombre_partida);
-                        v_sw_error = true;
-                    end if;
-
-                end if;
-
-            end loop;
+                    end loop;
+            
+            
+            ELSE
+               raise exception 'no se reconoce el tipo de verificacion presupesutaria';            
+            END IF;
+            
 
         end if;
              

@@ -607,3 +607,20 @@ VALUES
 select pxp.f_insert_tgui ('Solicitud Pago Simple', 'Solicitud de Pago Simple', 'PGSSOL', 'si', 3, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleSol.php', 3, '', 'PagoSimpleSol', 'CD');
 select pxp.f_insert_testructura_gui ('PGSSOL', 'PAGSIM');
 /***********************************F-DAT-RCM-CD-0-20/01/2018*****************************************/
+
+
+/***********************************I-DAT-RCM-CD-0-27/02/2018*****************************************/
+select pxp.f_insert_tgui ('Reportes', 'Reportes varios', 'CDREPVAR', 'si', 6, '', 2, '', '', 'CD');
+select pxp.f_insert_tgui ('Viáticos Funcionarios Form.110', 'Viáticos Funcionarios Form.110', 'REPCD110', 'si', 5, 'sis_cuenta_documentada/vista/reporte_cuenta_doc/ReporteViaticos110.php', 2, '', 'ReporteViaticos110', 'CD');
+
+select pxp.f_insert_testructura_gui ('CDREPVAR', 'CD');
+select pxp.f_insert_testructura_gui ('REPCD110', 'CDREPVAR');
+/***********************************F-DAT-RCM-CD-0-27/02/2018*****************************************/
+
+/***********************************I-DAT-RCM-CD-0-19/03/2018*****************************************/
+select pxp.f_insert_tgui ('Pasajes funcionarios', 'Pasajes funcionarios', 'REPCDPASAJ', 'si', 7, 'sis_cuenta_documentada/vista/reporte_cuenta_doc/ReportePasajesFuncionarios.php', 2, '', 'ReportePasajesFuncionarios', 'CD');
+select pxp.f_insert_testructura_gui ('REPCDPASAJ', 'CDREPVAR');
+
+select pxp.f_insert_tgui ('Devoluciones/Reposiciones', 'Devoluciones/Reposiciones', 'CDDEVREP', 'si', 4, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocDevolRepo.php', 2, '', 'CuentaDocDevolRepo', 'CD');
+select pxp.f_insert_testructura_gui ('CDDEVREP', 'CD');
+/***********************************F-DAT-RCM-CD-0-19/03/2018*****************************************/

@@ -40,8 +40,10 @@ DECLARE
     v_id_cuenta_doc     integer;
     v_importe_fondo     numeric;
     v_verifica_rendiciones_menor_fondo  varchar;
-  v_tipo_informe      varchar;
+    v_tipo_informe      varchar;
     v_fecha_doc       date;
+    v_resp1         varchar;
+    v_total_documentos numeric;
 
 BEGIN
 
@@ -163,6 +165,29 @@ BEGIN
                       hstore(v_parametros)
                     );
 
+            --------------------------------------------------------------------------------------------
+            --3.2 Cálculo del importe de la rendición sumando documentos y depósitos de las rendiciones
+            --------------------------------------------------------------------------------------------
+            select coalesce(sum(coalesce(dcv.importe_pago_liquido,0)),0)::numeric
+            into v_total_documentos
+            from cd.trendicion_det rd
+            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+            where dcv.estado_reg = 'activo'
+            and rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;
+
+            select coalesce(sum(coalesce(dpcd.importe_contable_deposito,lb.importe_deposito,0)),0)::numeric
+            into v_importe_depositos
+            from tes.tts_libro_bancos lb
+            left join cd.tdeposito_cd dpcd on dpcd.id_libro_bancos = lb.id_libro_bancos
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc'
+            where c.estado_reg = 'activo'
+            and c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            --Actualziación del importe de la rendición
+            update cd.tcuenta_doc set 
+            importe = v_total_documentos + v_importe_depositos       
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
             --Respuesta
             return v_resp;            
 
@@ -224,9 +249,32 @@ BEGIN
               raise exception 'error al validar';
             END IF;
 
+            --------------------------------------------------------------------------------------------
+            --3.2 Cálculo del importe de la rendición sumando documentos y depósitos de las rendiciones
+            --------------------------------------------------------------------------------------------
+            select coalesce(sum(coalesce(dcv.importe_pago_liquido,0)),0)::numeric
+            into v_total_documentos
+            from cd.trendicion_det rd
+            inner join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = rd.id_doc_compra_venta
+            where dcv.estado_reg = 'activo'
+            and rd.id_cuenta_doc_rendicion = v_parametros.id_cuenta_doc;
 
-      --Definicion de la respuesta
-      v_resp = pxp.f_agrega_clave(v_resp,'mensaje','validado factura rendicion'||v_id_rendicion_det||')');
+            select coalesce(sum(coalesce(dpcd.importe_contable_deposito,lb.importe_deposito,0)),0)::numeric
+            into v_importe_depositos
+            from tes.tts_libro_bancos lb
+            left join cd.tdeposito_cd dpcd on dpcd.id_libro_bancos = lb.id_libro_bancos
+            inner join cd.tcuenta_doc c on c.id_cuenta_doc = lb.columna_pk_valor and  lb.columna_pk = 'id_cuenta_doc' and lb.tabla = 'cd.tcuenta_doc'
+            where c.estado_reg = 'activo'
+            and c.id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            --Actualziación del importe de la rendición
+            update cd.tcuenta_doc set 
+            importe = v_total_documentos + v_importe_depositos       
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','validado factura rendicion'||v_id_rendicion_det||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_rendicion_det',v_id_rendicion_det::varchar);
 
             --Devuelve la respuesta
@@ -376,8 +424,8 @@ BEGIN
              where id_libro_bancos=v_parametros.id_libro_bancos;
 
 
-             IF v_registros.estado not in ('borrador','vbrendicion') THEN
-                raise exception 'No puede insertar depositos en una rendición en estado %, debería estar en Borrador o Visto bueno rendición',v_registros.estado;
+             IF v_registros.estado not in ('borrador','vbtesoreria') THEN
+                raise exception 'No puede insertar depositos en una rendición en estado %, debería estar en Borrador o Visto bueno tesoreria',v_registros.estado;
              END IF;
 
             IF  not cd.f_validar_documentos(p_id_usuario, v_registros.id_cuenta_doc) THEN

@@ -36,7 +36,7 @@ BEGIN
     update cd.tcuenta_doc set
     id_usuario_mod = p_id_usuario,
     fecha_mod = now(),
-    importe = v_total
+    importe = coalesce(v_total,0)
     where id_cuenta_doc = p_id_cuenta_doc;
 
     --Respuesta
