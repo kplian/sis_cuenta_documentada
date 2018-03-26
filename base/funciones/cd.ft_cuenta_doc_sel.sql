@@ -1945,6 +1945,48 @@ BEGIN
             --Devuelve la respuesta
             return v_consulta;
         end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_PASAFUNDET_CONT'
+    #DESCRIPCION: Listado del detalle de pasajes
+    #AUTOR:       RCM
+    #FECHA:       28/02/2018
+    ***********************************/
+
+    elseif(p_transaccion='CD_PASAFUNDET_CONT') then
+            
+        begin
+
+            v_id_plantilla = 38;
+            v_id_plantilla_1 = 42;
+            v_id_moneda_base = param.f_get_moneda_base();
+           
+            --Sentencia de la consulta
+            v_consulta:='select
+                        count(1) as total
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tplantilla pla
+                        on pla.id_plantilla = dcv.id_plantilla
+                        left join orga.vfuncionario fun1
+                        on fun1.id_funcionario = dcv.id_funcionario
+                        left join conta.tint_comprobante cbte
+                        on cbte.id_int_comprobante = dcv.id_int_comprobante
+                        left join cd.trendicion_det rd
+                        on rd.id_rendicion_det = dcv.id_origen
+                        left join cd.tcuenta_doc cdo
+                        on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = cdo.id_funcionario
+                        inner join param.tmoneda mon
+                        on mon.id_moneda = dcv.id_moneda
+                        where dcv.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Devuelve la respuesta
+            return v_consulta;
+        end;
     
     else
         raise exception 'Transaccion inexistente';
