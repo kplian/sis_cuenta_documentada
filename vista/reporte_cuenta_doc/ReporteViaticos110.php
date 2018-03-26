@@ -157,8 +157,26 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         },
         {
           config:{
+            name: 'total_bs',
+            fieldLabel: 'TOTAL BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
+            renderer: function(value,p,record){
+                var total=record.data.total + record.data.total_excento;
+                return String.format("<b>{0}</b>",total);
+            }
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },
+        {
+          config:{
             name: 'sin_cbte',
-            fieldLabel: 'SIN CBTE. BS.',
+            fieldLabel: 'Observaciones',
             allowBlank: false,
             anchor: '50%',
             gwidth: 130,
