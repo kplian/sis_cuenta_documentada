@@ -164,7 +164,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
             gwidth: 130,
             maxLength:30,
             renderer: function(value,p,record){
-                var total=record.data.total + record.data.total_excento;
+                var total=parseFloat(record.data.total) + parseFloat(record.data.total_excento);
                 return String.format("<b>{0}</b>",total);
             }
           },
