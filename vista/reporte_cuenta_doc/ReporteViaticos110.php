@@ -107,7 +107,40 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         {
           config:{
             name: 'total',
-            fieldLabel: 'Total BS.',
+            fieldLabel: 'Viáticos BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
+            /*renderer: function(value,p,record){
+                return String.format("<b><font color='green'>TOTAL:</font> <u>{0}</u></b><br>"+
+                                     "<font color='blue'>Con Cbte.:</font> {1}, <font color='red'>Sin Cbte.:</font> {2}<br>",value,record.data.con_cbte,record.data.sin_cbte);
+            }*/
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },
+        /*{
+          config:{
+            name: 'con_cbte',
+            fieldLabel: 'Con Cbte. BS.',
+            allowBlank: false,
+            anchor: '50%',
+            gwidth: 130,
+            maxLength:30,
+
+          },
+          type:'TextField',
+          id_grupo:1,
+          grid:true,
+          form:true
+        },*/
+        {
+          config:{
+            name: 'total_excento',
+            fieldLabel: 'Pasajes (Excento) BS.',
             allowBlank: false,
             anchor: '50%',
             gwidth: 130,
@@ -124,27 +157,19 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
         },
         {
           config:{
-            name: 'con_cbte',
-            fieldLabel: 'Con Cbte. BS.',
-            allowBlank: false,
-            anchor: '50%',
-            gwidth: 130,
-            maxLength:30,
-
-          },
-          type:'TextField',
-          id_grupo:1,
-          grid:true,
-          form:true
-        },
-        {
-          config:{
             name: 'sin_cbte',
             fieldLabel: 'SIN CBTE. BS.',
             allowBlank: false,
             anchor: '50%',
             gwidth: 130,
             maxLength:30,
+            renderer: function(value,p,record){
+                var msg='';
+                if(value>0){
+                    msg='Existe algún documento (recibo/factura) sin comprobante';
+                }
+                return String.format("<b>{0}</b>",msg);
+            }
           },
           type:'TextField',
           id_grupo:1,
@@ -197,11 +222,11 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
     {name:'desc_funcionario2', type: 'string'},
     {name:'ci', type: 'string'},
     {name:'total', type: 'numeric'},
-        {name:'id_depto_conta', type: 'numeric'},
-        {name:'desc_depto', type: 'string'},
-        {name:'sin_cbte', type: 'numeric'},
-        {name:'con_cbte', type: 'numeric'},
-        {name:'id_periodo', type: 'numeric'}
+    {name:'total_excento', type: 'numeric'},
+    {name:'id_depto_conta', type: 'numeric'},
+    {name:'desc_depto', type: 'string'},
+    {name:'sin_cbte', type: 'numeric'},
+    {name:'id_periodo', type: 'numeric'}
   ],
   sortInfo:{
     field: 'fun.desc_funcionario2',
