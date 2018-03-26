@@ -104,6 +104,19 @@ Phx.vista.ReportePasajesFuncionariosDet=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'importe_mb_excento',
+                fieldLabel: 'Importe Excento Moneda Base',
+                allowBlank: false,
+                anchor: '50%',
+                gwidth: 170
+            },
+            type:'TextField',
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'id_int_comprobante',
                 fieldLabel: 'Id.Cbte.',
                 allowBlank: false,
@@ -453,7 +466,8 @@ Phx.vista.ReportePasajesFuncionariosDet=Ext.extend(Phx.gridInterfaz,{
         {name:'id_funcionario', type: 'numeric'},
         {name:'desc_funcionario', type: 'string'},
         {name:'desc_moneda', type: 'string'},
-        {name:'importe_mb', type: 'numeric'}
+        {name:'importe_mb', type: 'numeric'},
+        {name:'importe_mb_excento', type: 'numeric'}
     ],
     sortInfo:{
         field: 'dcv.fecha',
