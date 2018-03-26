@@ -43,6 +43,8 @@ DECLARE
     v_id_cuenta_doc     integer;
     v_gestion           varchar;
     v_id_plantilla      integer;
+    v_id_moneda_base    integer;
+    v_id_plantilla_1    integer;
           
 BEGIN
 
@@ -1517,12 +1519,15 @@ BEGIN
     begin
 
         v_id_plantilla = 41;
+        v_id_moneda_base = param.f_get_moneda_base();
        
         --Sentencia de la consulta
         v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,dcv.id_periodo,
-                    sum(dcv.importe_doc) as total,
-                    (select coalesce(sum(dcv1.importe_doc),0)
+                    --sum(dcv.importe_doc) as total,
+                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                    (select 
+                    sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
                     from conta.tdoc_compra_venta dcv1
                     where dcv1.id_funcionario = dcv.id_funcionario
                     and dcv1.id_plantilla = '||v_id_plantilla||'
@@ -1530,7 +1535,8 @@ BEGIN
                     and dcv1.id_int_comprobante is null
                     and dcv1.id_depto_conta = dcv.id_depto_conta
                     ) as sin_cbte,
-                    (select coalesce(sum(dcv1.importe_doc),0)
+                    (select 
+                    sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
                     from conta.tdoc_compra_venta dcv1
                     where dcv1.id_funcionario = dcv.id_funcionario
                     and dcv1.id_plantilla = '||v_id_plantilla||'
@@ -1603,6 +1609,7 @@ BEGIN
         begin
 
             v_id_plantilla = 41;
+            v_id_moneda_base = param.f_get_moneda_base();
            
             --Sentencia de la consulta
             v_consulta:='select
@@ -1636,7 +1643,9 @@ BEGIN
                         cdo.fecha as fecha_viatico,
                         fun.desc_funcionario2 as desc_funcionario_sol,
                         dcv.id_funcionario,
-                        fun1.desc_funcionario2 as desc_funcionario
+                        fun1.desc_funcionario2 as desc_funcionario,
+                        mon.codigo as desc_moneda,
+                        param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,now()::date,''O'',2) as importe_mb
                         from conta.tdoc_compra_venta dcv
                         inner join param.tplantilla pla
                         on pla.id_plantilla = dcv.id_plantilla
@@ -1650,6 +1659,8 @@ BEGIN
                         on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
                         left join orga.vfuncionario fun
                         on fun.id_funcionario = cdo.id_funcionario
+                        inner join param.tmoneda mon
+                        on mon.id_moneda = dcv.id_moneda
                         where dcv.id_plantilla = '||v_id_plantilla||'
                         and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
 
@@ -1689,6 +1700,8 @@ BEGIN
                         on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
                         left join orga.vfuncionario fun
                         on fun.id_funcionario = cdo.id_funcionario
+                        inner join param.tmoneda mon
+                        on mon.id_moneda = dcv.id_moneda
                         where dcv.id_plantilla = '||v_id_plantilla||'
                         and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
 
@@ -1696,6 +1709,163 @@ BEGIN
 
             --Devuelve la respuesta
             return v_consulta;
+        end;
+
+
+  /*********************************    
+  #TRANSACCION: 'CD_VIA110REP_SEL'
+  #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+  #AUTOR:       RCM
+  #FECHA:       27/02/2018
+  ***********************************/
+
+  elseif(p_transaccion='CD_VIA110REP_SEL')then
+            
+    begin
+
+        v_id_plantilla = 41;
+        v_id_moneda_base = param.f_get_moneda_base();
+       
+        --Sentencia de la consulta
+        v_consulta:='select
+                    dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo,
+                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                    param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
+                    from conta.tdoc_compra_venta dcv
+                    inner join orga.vfuncionario fun
+                    on fun.id_funcionario = dcv.id_funcionario
+                    inner join conta.tint_comprobante cb
+                    on cb.id_int_comprobante = dcv.id_int_comprobante
+                    and cb.estado_reg = ''validado''
+                    where dcv.id_plantilla = '||v_id_plantilla||'
+                    and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
+
+        v_consulta:=v_consulta||v_parametros.filtro;
+        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo';
+      
+      --Definicion de la respuesta
+      
+      v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+      --Devuelve la respuesta
+      return v_consulta;
+            
+    end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_PASAFUN_SEL'
+    #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+    #AUTOR:       RCM
+    #FECHA:       27/02/2018
+    ***********************************/
+    elseif(p_transaccion='CD_PASAFUN_SEL')then
+                
+        begin
+
+            v_id_plantilla = 38;
+            v_id_plantilla_1 = 42;
+            v_id_moneda_base = param.f_get_moneda_base();
+           
+            --Sentencia de la consulta
+            v_consulta:='select
+                        dcv.id_funcionario,
+                        fun.codigo,
+                        fun.desc_funcionario2,
+                        fun.ci,
+                        dcv.id_depto_conta,
+                        dep.codigo||''-''||dep.nombre as desc_depto,
+                        dcv.id_periodo,
+                        sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                        sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_excento,dcv.fecha,''O'',2)) as total_excento,
+                        (select 
+                        sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
+                        from conta.tdoc_compra_venta dcv1
+                        where dcv1.id_funcionario = dcv.id_funcionario
+                        and dcv1.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                        and dcv1.id_int_comprobante is null
+                        and dcv1.id_depto_conta = dcv.id_depto_conta
+                        ) as sin_cbte,
+                        (select 
+                        sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_excento,dcv1.fecha,''O'',2))
+                        from conta.tdoc_compra_venta dcv1
+                        where dcv1.id_funcionario = dcv.id_funcionario
+                        and dcv1.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                        and dcv1.id_int_comprobante is null
+                        and dcv1.id_depto_conta = dcv.id_depto_conta
+                        ) as sin_cbte_excento,
+                        (select 
+                        sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
+                        from conta.tdoc_compra_venta dcv1
+                        where dcv1.id_funcionario = dcv.id_funcionario
+                        and dcv1.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                        and dcv1.id_int_comprobante is not null
+                        and dcv1.id_depto_conta = dcv.id_depto_conta
+                        ) as con_cbte,
+                        (select 
+                        sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_excento,dcv1.fecha,''O'',2))
+                        from conta.tdoc_compra_venta dcv1
+                        where dcv1.id_funcionario = dcv.id_funcionario
+                        and dcv1.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv1.id_periodo = '||v_parametros.id_periodo||'
+                        and dcv1.id_int_comprobante is not null
+                        and dcv1.id_depto_conta = dcv.id_depto_conta
+                        ) as con_cbte_excento,
+                        param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tdepto dep
+                        on dep.id_depto = dcv.id_depto_conta
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = dcv.id_funcionario
+                        where dcv.id_plantilla = '||v_id_plantilla||'
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre,dcv.id_periodo';
+          
+          --Definicion de la respuesta
+          
+          v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+          --Devuelve la respuesta
+          return v_consulta;
+                
+        end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_PASAFUN_CONT'
+    #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+    #AUTOR:       RCM
+    #FECHA:       27/02/2018
+    ***********************************/
+    elseif(p_transaccion='CD_PASAFUN_CONT')then
+                
+        begin
+
+            v_id_plantilla = 38;
+            v_id_plantilla_1 = 42;
+            v_id_moneda_base = param.f_get_moneda_base();
+           
+            --Sentencia de la consulta
+            v_consulta:='with tcontar as (select
+                        count(1) as total
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tdepto dep
+                        on dep.id_depto = dcv.id_depto_conta
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = dcv.id_funcionario
+                        where dcv.id_plantilla = '||v_id_plantilla||'
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+            v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo,dep.nombre,dcv.id_periodo)';
+            v_consulta:=v_consulta||' select count(1) from tcontar';
+          
+            --Devuelve la respuesta
+            return v_consulta;
+                
         end;
     
     else

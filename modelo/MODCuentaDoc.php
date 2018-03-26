@@ -1161,7 +1161,7 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_funcionario','TEXT');
 		$this->captura('desc_moneda','VARCHAR');
 		$this->captura('importe_mb','NUMERIC');
-
+		$this->captura('importe_mb_excento','NUMERIC');
 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
