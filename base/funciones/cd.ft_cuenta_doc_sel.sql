@@ -1867,6 +1867,84 @@ BEGIN
             return v_consulta;
                 
         end;
+
+    /*********************************    
+    #TRANSACCION: 'CD_PASAFUNDET_SEL'
+    #DESCRIPCION: Listado del detalle de pasajes
+    #AUTOR:       RCM
+    #FECHA:       28/02/2018
+    ***********************************/
+
+    elseif(p_transaccion='CD_PASAFUNDET_SEL') then
+            
+        begin
+
+            v_id_plantilla = 38;
+            v_id_plantilla_1 = 42;
+            v_id_moneda_base = param.f_get_moneda_base();
+           
+            --Sentencia de la consulta
+            v_consulta:='select
+                        dcv.id_doc_compra_venta,
+                        dcv.nro_tramite,
+                        pla.desc_plantilla,
+                        dcv.id_int_comprobante,
+                        case coalesce(dcv.id_int_comprobante,0)
+                          when 0 then ''''
+                          else case cbte.estado_reg
+                                when ''validado'' then ''validado''
+                                else ''NO VALIDADO''
+                                end
+                        end estado_cbte,
+                        dcv.nit,
+                        dcv.nro_documento,
+                        dcv.nro_autorizacion,
+                        dcv.fecha,
+                        dcv.razon_social,
+                        dcv.importe_doc,
+                        dcv.importe_excento,
+                        dcv.importe_descuento,
+                        dcv.importe_neto,
+                        dcv.codigo_control,
+                        dcv.importe_iva,
+                        dcv.importe_it,
+                        dcv.importe_ice,
+                        dcv.importe_pago_liquido,
+                        dcv.nro_dui,
+                        cdo.nro_tramite as nro_tramite_viatico,
+                        cdo.fecha as fecha_viatico,
+                        fun.desc_funcionario2 as desc_funcionario_sol,
+                        dcv.id_funcionario,
+                        fun1.desc_funcionario2 as desc_funcionario,
+                        mon.codigo as desc_moneda,
+                        param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,now()::date,''O'',2) as importe_mb,
+                        param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_excento,now()::date,''O'',2) as importe_mb_excento
+                        from conta.tdoc_compra_venta dcv
+                        inner join param.tplantilla pla
+                        on pla.id_plantilla = dcv.id_plantilla
+                        left join orga.vfuncionario fun1
+                        on fun1.id_funcionario = dcv.id_funcionario
+                        left join conta.tint_comprobante cbte
+                        on cbte.id_int_comprobante = dcv.id_int_comprobante
+                        left join cd.trendicion_det rd
+                        on rd.id_rendicion_det = dcv.id_origen
+                        left join cd.tcuenta_doc cdo
+                        on cdo.id_cuenta_doc = rd.id_cuenta_doc_rendicion
+                        left join orga.vfuncionario fun
+                        on fun.id_funcionario = cdo.id_funcionario
+                        inner join param.tmoneda mon
+                        on mon.id_moneda = dcv.id_moneda
+                        where dcv.id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')
+                        and dcv.id_periodo = '||v_parametros.id_periodo||' AND ';
+
+            v_consulta:=v_consulta||v_parametros.filtro;
+
+            --Definicion de la respuesta
+            v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+
+            --Devuelve la respuesta
+            return v_consulta;
+        end;
     
     else
         raise exception 'Transaccion inexistente';
