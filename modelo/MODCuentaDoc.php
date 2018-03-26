@@ -1112,8 +1112,9 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('desc_depto','TEXT');
 		$this->captura('id_periodo','INTEGER');
 		$this->captura('total','NUMERIC');
+		$this->captura('total_excento','NUMERIC');
 		$this->captura('sin_cbte','NUMERIC');
-		$this->captura('con_cbte','NUMERIC');
+		//$this->captura('con_cbte','NUMERIC');
 		$this->captura('desc_periodo','VARCHAR');
 
 		//Ejecuta la instruccion

@@ -45,6 +45,7 @@ DECLARE
     v_id_plantilla      integer;
     v_id_moneda_base    integer;
     v_id_plantilla_1    integer;
+    v_id_plantilla_2    integer;
           
 BEGIN
 
@@ -1519,13 +1520,19 @@ BEGIN
     begin
 
         v_id_plantilla = 41;
+        v_id_plantilla_1 = 38;
+        v_id_plantilla_2 = 42;
         v_id_moneda_base = param.f_get_moneda_base();
        
         --Sentencia de la consulta
         v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,dcv.id_periodo,
-                    --sum(dcv.importe_doc) as total,
-                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                    (sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2))
+                    + coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
+                                from conta.tdoc_compra_venta
+                                where id_periodo = dcv.id_periodo
+                                and id_funcionario = dcv.id_funcionario
+                                and id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')),0)) as total,
                     (select 
                     sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
                     from conta.tdoc_compra_venta dcv1
