@@ -167,7 +167,9 @@ class RViaticosForm110Xls
 		$this->cell($sheet,'NOMBRE FUNCIONARIO',"B$f",1,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'CÓDIGO',"C$f",2,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 		$this->cell($sheet,'DOCUMENTO IDENTIDAD',"D$f",3,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IMPORTE Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'VIÁTICO Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'PASAJE (EXCENTO) Bs.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'TOTAL Bs.',"G$f",6,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
 
 		//////////////////
 		//Detalle de datos
@@ -189,6 +191,9 @@ class RViaticosForm110Xls
 			$this->cell($sheet,$this->dataSet[$fil]['codigo'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
 			$this->cell($sheet,$this->dataSet[$fil]['ci'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
 			$this->cell($sheet,$this->dataSet[$fil]['total'],"E$f",4,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
+			$this->cell($sheet,$this->dataSet[$fil]['total_excento'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
+			$range_sum='=SUM(E'.($f).';F'.($f).')';
+			$this->cell($sheet,$range_sum,"G$f",6,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 
 			//Actualiza los totales
 			$arrayTotal['total']+=$this->dataSet[$fil]['total'];
@@ -205,9 +210,14 @@ class RViaticosForm110Xls
 		$sheet->mergeCells("A$f:D$f");
 		$this->cellBorder($sheet,"A$f:D$f");
 
+
 		$range_sum='=SUM(E'.($this->fila+1).':E'.($f-1).')';
 		$this->cell($sheet,$range_sum,"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
-		//$this->cell($sheet,number_format($arrayTotal['total'],2),"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,false,true);
+		$range_sum='=SUM(F'.($this->fila+1).':F'.($f-1).')';
+		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		$range_sum='=SUM(G'.($this->fila+1).':G'.($f-1).')';
+		$this->cell($sheet,$range_sum,"G$f",6,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		
 
 		//Actualización variables
 		$this->fila=$f+6;

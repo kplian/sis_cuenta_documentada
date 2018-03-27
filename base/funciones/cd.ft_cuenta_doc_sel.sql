@@ -1527,12 +1527,12 @@ BEGIN
         --Sentencia de la consulta
         v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_depto_conta,dep.codigo||''-''||dep.nombre as desc_depto,dcv.id_periodo,
-                    (sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2))
-                    + coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
+                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                    coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
                                 from conta.tdoc_compra_venta
                                 where id_periodo = dcv.id_periodo
                                 and id_funcionario = dcv.id_funcionario
-                                and id_plantilla in ('||v_id_plantilla||','||v_id_plantilla_1||')),0)) as total,
+                                and id_plantilla in ('||v_id_plantilla_1||','||v_id_plantilla_2||')),0) as total_excento,
                     (select 
                     sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
                     from conta.tdoc_compra_venta dcv1
@@ -1542,16 +1542,7 @@ BEGIN
                     and dcv1.id_int_comprobante is null
                     and dcv1.id_depto_conta = dcv.id_depto_conta
                     ) as sin_cbte,
-                    (select 
-                    sum(param.f_convertir_moneda(dcv1.id_moneda,'||v_id_moneda_base||',dcv1.importe_doc,dcv1.fecha,''O'',2))
-                    from conta.tdoc_compra_venta dcv1
-                    where dcv1.id_funcionario = dcv.id_funcionario
-                    and dcv1.id_plantilla = '||v_id_plantilla||'
-                    and dcv1.id_periodo = '||v_parametros.id_periodo||'
-                    and dcv1.id_int_comprobante is not null
-                    and dcv1.id_depto_conta = dcv.id_depto_conta
-                    ) as con_cbte,
-                    param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
+                     param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
                     from conta.tdoc_compra_venta dcv
                     inner join param.tdepto dep
                     on dep.id_depto = dcv.id_depto_conta
@@ -1731,12 +1722,22 @@ BEGIN
     begin
 
         v_id_plantilla = 41;
+        v_id_plantilla_1 = 38;
+        v_id_plantilla_2 = 42;
         v_id_moneda_base = param.f_get_moneda_base();
        
         --Sentencia de la consulta
         v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo,
-                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
+                    (
+                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2))
+                    +
+                    coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
+                                from conta.tdoc_compra_venta
+                                where id_periodo = dcv.id_periodo
+                                and id_funcionario = dcv.id_funcionario
+                                and id_plantilla in ('||v_id_plantilla_1||','||v_id_plantilla_2||')),0)
+                    ) as total,
                     param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
                     from conta.tdoc_compra_venta dcv
                     inner join orga.vfuncionario fun
