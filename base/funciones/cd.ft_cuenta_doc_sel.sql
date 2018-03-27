@@ -1729,15 +1729,12 @@ BEGIN
         --Sentencia de la consulta
         v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo,
-                    (
-                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2))
-                    +
+                    sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
                     coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
                                 from conta.tdoc_compra_venta
                                 where id_periodo = dcv.id_periodo
                                 and id_funcionario = dcv.id_funcionario
-                                and id_plantilla in ('||v_id_plantilla_1||','||v_id_plantilla_2||')),0)
-                    ) as total,
+                                and id_plantilla in ('||v_id_plantilla_1||','||v_id_plantilla_2||')),0) as total_excento,
                     param.f_get_periodo_literal(dcv.id_periodo) as desc_periodo
                     from conta.tdoc_compra_venta dcv
                     inner join orga.vfuncionario fun

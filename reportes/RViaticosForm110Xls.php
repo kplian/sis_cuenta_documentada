@@ -192,7 +192,8 @@ class RViaticosForm110Xls
 			$this->cell($sheet,$this->dataSet[$fil]['ci'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
 			$this->cell($sheet,$this->dataSet[$fil]['total'],"E$f",4,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 			$this->cell($sheet,$this->dataSet[$fil]['total_excento'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$range_sum='=SUM(E'.($f).';F'.($f).')';
+			$range_sum='=E'.($f).'+F'.($f);
+			//echo $range_sum;exit;
 			$this->cell($sheet,$range_sum,"G$f",6,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
 
 			//Actualiza los totales
@@ -321,6 +322,8 @@ class RViaticosForm110Xls
 		$sheet->getColumnDimension('C')->setWidth(15);
 		$sheet->getColumnDimension('D')->setWidth(20);
 		$sheet->getColumnDimension('E')->setWidth(15);
+		$sheet->getColumnDimension('F')->setWidth(15);
+		$sheet->getColumnDimension('G')->setWidth(15);
 	}
 
 	function initializeColumnWidthDetail($sheet){
