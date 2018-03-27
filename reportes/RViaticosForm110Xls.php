@@ -87,23 +87,23 @@ class RViaticosForm110Xls
 		//Título Principal
 		$titulo1 = "REPORTE LISTADO VIÁTICOS - FORM. 110";
 		$this->cell($sheet,$titulo1,'A1',0,1,"center",true,$this->tam_letra_titulo,Arial);
-		$sheet->mergeCells('A1:E1');
+		$sheet->mergeCells('A1:G1');
 
 		//Título 1
 		$titulo1 = $this->dataSet[0]['desc_periodo'];
 		$this->cell($sheet,$titulo1,'A2',0,2,"center",true,$this->tam_letra_titulo,Arial);
-		$sheet->mergeCells('A2:E2');
+		$sheet->mergeCells('A2:G2');
 		
 		//Título 2
 		$fecha_hasta = date("d/m/Y",strtotime($this->objParam->getParametro('fecha_hasta')));
 		$titulo2 = "Depto.: ";
 		$this->cell($sheet,$titulo2.$this->paramDepto,'A3',0,3,"center",true,$this->tam_letra_subtitulo,Arial);
-		$sheet->mergeCells('A3:E3');
+		$sheet->mergeCells('A3:G3');
 		
 		//Título 3
 		$titulo3="";
 		$this->cell($sheet,$titulo3,'A4',0,4,"center",true,$this->tam_letra_subtitulo,Arial);
-		$sheet->mergeCells('A4:E4');
+		$sheet->mergeCells('A4:G4');
 
 		//Logo
 		$objDrawing = new PHPExcel_Worksheet_Drawing();
