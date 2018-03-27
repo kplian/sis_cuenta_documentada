@@ -233,7 +233,7 @@ Phx.vista.ReporteViaticos110=Ext.extend(Phx.gridInterfaz,{
   tam_pag:50, 
   title:'Viáticos Form.110',
   ActList:'../../sis_cuenta_documentada/control/CuentaDoc/listarViaticosForm110',
-  id_store:'id_funcionario',
+  //id_store:'id_funcionario',
   fields: [
     {name:'id_funcionario', type: 'numeric'},
     {name:'codigo', type: 'string'},
