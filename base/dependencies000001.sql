@@ -1674,3 +1674,74 @@ ALTER TABLE cd.tcuenta_doc
     ON UPDATE NO ACTION
     NOT DEFERRABLE;    
 /***********************************F-DEP-RCM-CD-0-12/03/2018*****************************************/    
+
+
+/***********************************I-DEP-RCM-CD-0-10/05/2018*****************************************/
+DROP VIEW cd.vcuenta_doc_cbte_devrep;
+
+CREATE VIEW cd.vcuenta_doc_cbte_devrep (
+    id_cuenta_doc,
+    id_funcionario,
+    id_depto_conta,
+    fecha_cbte,
+    id_moneda,
+    id_gestion,
+    nro_tramite,
+    dev_tipo,
+    dev_a_favor_de,
+    dev_nombre_cheque,
+    dev_saldo_deposito,
+    dev_saldo_cheque,
+    dev_saldo,
+    id_cuenta_bancaria,
+    id_depto_lb,
+    funcionario_solicitante,
+    correo_solicitante,
+    moneda,
+    nro_cuenta,
+    id_institucion,
+    prioridad,
+    tipo_cbte)
+AS
+SELECT cdoc.id_cuenta_doc,
+    cdoc.id_funcionario,
+    cdoc.id_depto_conta,
+    cdoc.fecha AS fecha_cbte,
+    cdoc.id_moneda,
+    cdoc.id_gestion,
+    cdoc.nro_tramite,
+    cdoc.dev_tipo,
+    cdoc.dev_a_favor_de,
+    cdoc.dev_nombre_cheque,
+        CASE cdoc.dev_a_favor_de
+            WHEN 'empresa'::text THEN cdoc.dev_saldo
+            ELSE 0::numeric
+        END AS dev_saldo_deposito,
+        CASE cdoc.dev_a_favor_de
+            WHEN 'funcionario'::text THEN cdoc.dev_saldo
+            ELSE 0::numeric
+        END AS dev_saldo_cheque,
+    cdoc.dev_saldo,
+    cdoc.id_cuenta_bancaria,
+    cdoc.id_depto_lb,
+    f.desc_funcionario1 AS funcionario_solicitante,
+    fu.email_empresa AS correo_solicitante,
+    mo.codigo AS moneda,
+    fcb.nro_cuenta,
+    fcb.id_institucion,
+    de.prioridad,
+        CASE cdoc.dev_a_favor_de
+            WHEN 'empresa'::text THEN 'INGRESOCON'::text
+            ELSE 'PAGOCON'::text
+        END AS tipo_cbte
+FROM cd.tcuenta_doc cdoc
+     JOIN orga.vfuncionario f ON f.id_funcionario = cdoc.id_funcionario
+     JOIN orga.tfuncionario fu ON fu.id_funcionario = cdoc.id_funcionario
+     JOIN param.tmoneda mo ON mo.id_moneda = cdoc.id_moneda
+     JOIN param.tdepto de ON de.id_depto = cdoc.id_depto
+     LEFT JOIN orga.tfuncionario_cuenta_bancaria fcb ON
+         fcb.id_funcionario_cuenta_bancaria = cdoc.id_funcionario_cuenta_bancaria
+WHERE cdoc.id_cuenta_doc_fk IS NOT NULL AND (COALESCE(cdoc.dev_tipo,
+    ''::character varying)::text = ANY (ARRAY['deposito'::character varying::text, 'cheque'::character varying::text]));
+
+/***********************************F-DEP-RCM-CD-0-10/05/2018*****************************************/
