@@ -1009,6 +1009,8 @@ class MODCuentaDoc extends MODbase{
         $this->setParametro('id_cuenta_bancaria','id_cuenta_bancaria','int4');
         $this->setParametro('total_dev','total_dev','numeric');
         $this->setParametro('id_depto_lb','id_depto_lb','int4');
+        $this->setParametro('dev_saldo_original','dev_saldo_original','numeric');
+        $this->setParametro('id_moneda_dev','id_moneda_dev','int4');
         
 		//Ejecuta la instruccion
         $this->armarConsulta();

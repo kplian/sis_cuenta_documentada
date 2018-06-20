@@ -625,7 +625,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 					totalProperty: 'total',
 					fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
 					remoteSort: true,
-					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
+					baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no',solo_resp: 'si'}
 				}),
 				valueField: 'id_caja',
 				displayField: 'codigo',

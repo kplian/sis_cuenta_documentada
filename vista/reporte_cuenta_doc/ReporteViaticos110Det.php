@@ -40,6 +40,21 @@ Phx.vista.ReporteViaticos110Det=Ext.extend(Phx.gridInterfaz,{
         },
         {
             config:{
+                name: 'id',
+                fieldLabel: 'Id.Doc.',
+                allowBlank: false,
+                anchor: '50%',
+                maxLength:30,
+                renderer:function(value, p, record){return String.format('{0}', record.data['id_doc_compra_venta']);}
+            },
+            type:'TextField',
+            filters:{pfiltro:'dcv.nro_tramite',type:'string'},
+            id_grupo:1,
+            grid:true,
+            form:true
+        },
+        {
+            config:{
                 name: 'nro_tramite',
                 fieldLabel: 'Nro.Trámite',
                 allowBlank: false,

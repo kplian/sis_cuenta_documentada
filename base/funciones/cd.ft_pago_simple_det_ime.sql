@@ -16,8 +16,8 @@ $body$
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				01-01-2018 06:21:25								Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple_det'	
- #
+ #0				01-01-2018 06:21:25						funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple_det'	
+ #99            18/06/2018                RAC           validacion de cbte antes de quitar una factura
  ***************************************************************************/
 
 DECLARE
@@ -145,15 +145,21 @@ BEGIN
 			ps.id_pago_simple,
 			ps.id_tipo_pago_simple,
 			ps.estado,
-			tps.codigo as codigo_tipo_pago_simple
+			tps.codigo as codigo_tipo_pago_simple,
+            dcv.id_int_comprobante
 			into
 			v_registros
 			from cd.tpago_simple_det psd
-			inner join cd.tpago_simple ps
-			on ps.id_pago_simple = psd.id_pago_simple
-			inner join cd.ttipo_pago_simple tps
-			on tps.id_tipo_pago_simple= ps.id_tipo_pago_simple
+			inner join cd.tpago_simple ps on ps.id_pago_simple = psd.id_pago_simple
+			inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple= ps.id_tipo_pago_simple
+            left join conta.tdoc_compra_venta dcv on dcv.id_doc_compra_venta = psd.id_doc_compra_venta  --#99++
 			where psd.id_pago_simple_det = v_parametros.id_pago_simple_det;
+            
+            
+             --#99  validacion
+            IF v_registros.id_int_comprobante is not null THEN
+               raise exception 'No puede quitar la factura, por que tiene un cbte asociado,  ID %', v_registros.id_int_comprobante;
+            END IF;
 
 			--Elimina el documento solo si el pago esta en estado borrador
 			if not exists(select 1 from cd.tpago_simple_det psd

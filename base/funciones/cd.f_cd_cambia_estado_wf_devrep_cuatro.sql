@@ -44,7 +44,8 @@ BEGIN
   where cd.id_proceso_wf = p_id_proceso_wf;
 
   if v_rec.dev_tipo is null then
-    raise exception 'Falta definir la forma de la devolución/reposición';
+    --raise exception 'Falta definir la forma de la devolución/reposición';
+    return false;
   end if;
 
 

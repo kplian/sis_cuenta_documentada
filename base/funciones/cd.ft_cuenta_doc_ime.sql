@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -1800,11 +1798,11 @@ BEGIN
             v_saldo = v_registros_cd.o_saldo;
 
           --Temporal
-          select id_moneda into v_id_moneda from cd.tcuenta_doc where id_cuenta_doc = v_parametros.id_cuenta_doc;
+          /*select id_moneda into v_id_moneda from cd.tcuenta_doc where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
           if v_id_moneda = 2 then
             v_saldo = round(v_saldo*6.96,2);
-          end if;
+          end if;*/
 
 
             /*if v_parametros.id_cuenta_doc = 1602 then
@@ -1892,7 +1890,9 @@ BEGIN
             dev_saldo           = v_parametros.dev_saldo,
             id_cuenta_bancaria  = v_parametros.id_cuenta_bancaria,
             importe_total_rendido = v_registros_proc.o_total_dev,
-            id_depto_lb           = v_parametros.id_depto_lb
+            id_depto_lb           = v_parametros.id_depto_lb,
+            dev_saldo_original  = v_parametros.dev_saldo_original,
+            id_moneda_dev       = v_parametros.id_moneda_dev
             where id_cuenta_doc = v_parametros.id_cuenta_doc;
 
             --Verifica si el saldo es mayor a cero para generar el documento en función del tipo de desembolso/reposición a realizar
@@ -2019,7 +2019,7 @@ BEGIN
             delete from cd.tcuenta_doc_prorrateo where id_cuenta_doc = v_parametros.id_cuenta_doc;
             
             if v_parametros.id_cuenta_doc = 800 then
---            	raise exception 'Procesando ... %  %',v_parametros.id_sigema,v_parametros.tipo_sol_sigema;
+--              raise exception 'Procesando ... %  %',v_parametros.id_sigema,v_parametros.tipo_sol_sigema;
             end if;
 
             --Verifica que almenos exista una coincidencia

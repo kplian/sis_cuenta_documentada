@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_det_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -19,7 +17,7 @@ $body$
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
  #0				01-01-2018 06:21:25								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple_det'	
- #
+ #99            18-06-2018              RAC                 solucion BUG donde facturas pierden estado PROC  
  ***************************************************************************/
 
 DECLARE
@@ -106,7 +104,8 @@ BEGIN
                         (tdcv.codigo||'' - ''||tdcv.nombre)::Varchar as desc_tipo_doc_compra_venta,
                         (dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0))     as importe_aux_neto,
                         fun.id_funcionario,
-                        fun.desc_funcionario2::varchar
+                        fun.desc_funcionario2::varchar,
+                        dcv.sw_pgs  --#99+
                         
                         
 

@@ -829,7 +829,7 @@ header("content-type: text/javascript; charset=UTF-8");
 			_autoriz=me.maestro.codigo_tipo_cuenta_doc=='RVI'?'viatico':'fondo_avance'
 
 			//Obtiene la plantilla de prorrateo si corresponde
-			if(me.maestro.codigo_tipo_cuenta_doc=='RVI'){
+			//if(me.maestro.codigo_tipo_cuenta_doc=='RVI'){
 				Phx.CP.loadingShow();
 
 	            Ext.Ajax.request({
@@ -849,10 +849,10 @@ header("content-type: text/javascript; charset=UTF-8");
 	                timeout: this.timeout,
 	                scope: this
 	            });
-			} else {
+			/*} else {
 				//Abre la interfaz de registro documentos
 				this.abrirFormularioDocumentos(tipo,record,readOnly,_plantilla,_autoriz);
-			}
+			}*/
 			
 	},
 		

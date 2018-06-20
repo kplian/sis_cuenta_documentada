@@ -423,10 +423,10 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 						direction: 'ASC'
 					},
 					totalProperty: 'total',
-					fields: ['id_obligacion_pago','num_tramite','fecha','obs','tipo_obligacion','total_pago','tipo_solicitud','desc_funcionario1'],
+					fields: ['id_obligacion_pago','num_tramite','fecha','obs','tipo_obligacion','total_pago','tipo_solicitud','desc_funcionario1','desc_proveedor'],
 					// turn on remote sorting
 					remoteSort: true,
-					baseParams:{par_filtro:'op.num_tramite',  pago_simple : 'si' }
+					baseParams:{par_filtro:'obpg.num_tramite#pv.desc_proveedor',  pago_simple : 'si' }
 				}),
 				valueField: 'id_obligacion_pago',
 				displayField: 'num_tramite',
@@ -442,7 +442,9 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 				resizable: true,
 				renderer : function(value, p, record) {
 					return String.format('{0}', record.data['desc_obligacion_pago']);
-				}
+				},
+				minChars: 2,
+				 tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>Nro.Trámite:</b> {num_tramite}</p><p><b>Proveedor:</b> {desc_proveedor}</p></div></tpl>',
 			},
 			type:'ComboBox',
 			id_grupo:1,

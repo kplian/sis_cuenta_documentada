@@ -101,6 +101,8 @@ class MODPagoSimpleDet extends MODbase{
 		$this->captura('id_funcionario','integer');		
 		$this->captura('desc_funcionario2','varchar');
 		
+		$this->captura('sw_pgs','varchar');
+		
 		
 
 		

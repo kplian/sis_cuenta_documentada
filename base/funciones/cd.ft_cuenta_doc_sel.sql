@@ -43,7 +43,7 @@ DECLARE
     v_id_cuenta_doc     integer;
     v_gestion           varchar;
     v_id_plantilla      integer;
-    v_id_moneda_base    integer;
+    v_id_moneda_base  integer;
     v_id_plantilla_1    integer;
     v_id_plantilla_2    integer;
           
@@ -329,7 +329,6 @@ BEGIN
       --Definicion de la respuesta
       v_consulta:=v_consulta||v_parametros.filtro;
       v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
             raise notice '%', v_consulta;
       --Devuelve la respuesta
       return v_consulta;
@@ -514,7 +513,10 @@ BEGIN
            
            
                 IF p_administrador !=1 THEN
-                      v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'  ) and ';
+                      --v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'  ) and ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                    or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                 END IF;
 
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
@@ -650,7 +652,10 @@ BEGIN
              
             IF  v_parametros.tipo_interfaz in ('CuentaDocRen') THEN
                 IF p_administrador !=1 THEN
-                      v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||')and ';
+                      --v_filtro = ' ((ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||') or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||')and ';
+                      v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                    or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                 END IF;
                 v_filtro = v_filtro || ' tcd.sw_solicitud = ''no'' and ';
             END IF;
@@ -959,7 +964,8 @@ BEGIN
                               cdoc.id_cuenta_doc_fk,
                               cdoc.nro_tramite,
                               upper(cdoc.motivo)::varchar as motivo,
-                              case when cdoc.id_tipo_cuenta_doc = 1 then lb.fecha else cdoc.fecha end as fecha,
+                              --case when cdoc.id_tipo_cuenta_doc = 1 then lb.fecha else cdoc.fecha end as fecha,
+                              cdoc.fecha,
                               cdoc.id_moneda,
                               cdoc.estado,
                               cdoc.estado_reg,
@@ -1557,7 +1563,7 @@ BEGIN
       --Definicion de la respuesta
       
       v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
+raise notice '%',v_consulta;
       --Devuelve la respuesta
       return v_consulta;
             
@@ -1708,26 +1714,25 @@ BEGIN
             --Devuelve la respuesta
             return v_consulta;
         end;
+        
+    /*********************************    
+    #TRANSACCION: 'CD_VIA110REP_SEL'
+    #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
+    #AUTOR:       RCM
+    #FECHA:       27/02/2018
+    ***********************************/
 
+    elseif(p_transaccion='CD_VIA110REP_SEL')then
+              
+      begin
 
-  /*********************************    
-  #TRANSACCION: 'CD_VIA110REP_SEL'
-  #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
-  #AUTOR:       RCM
-  #FECHA:       27/02/2018
-  ***********************************/
-
-  elseif(p_transaccion='CD_VIA110REP_SEL')then
-            
-    begin
-
-        v_id_plantilla = 41;
-        v_id_plantilla_1 = 38;
-        v_id_plantilla_2 = 42;
-        v_id_moneda_base = param.f_get_moneda_base();
-       
-        --Sentencia de la consulta
-        v_consulta:='select
+          v_id_plantilla = 41;
+          v_id_plantilla_1 = 38;
+          v_id_plantilla_2 = 42;
+          v_id_moneda_base = param.f_get_moneda_base();
+         
+          --Sentencia de la consulta
+          v_consulta:='select
                     dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo,
                     sum(param.f_convertir_moneda(dcv.id_moneda,'||v_id_moneda_base||',dcv.importe_doc,dcv.fecha,''O'',2)) as total,
                     coalesce((select sum(param.f_convertir_moneda(id_moneda,'||v_id_moneda_base||',importe_excento,fecha,''O'',2))
@@ -1745,19 +1750,19 @@ BEGIN
                     where dcv.id_plantilla = '||v_id_plantilla||'
                     and dcv.id_periodo = '||v_parametros.id_periodo||' and ';
 
-        v_consulta:=v_consulta||v_parametros.filtro;
-        v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo';
+          v_consulta:=v_consulta||v_parametros.filtro;
+          v_consulta:=v_consulta||' group by dcv.id_funcionario,fun.codigo,fun.desc_funcionario2,fun.ci,dcv.id_periodo';
+        
+        --Definicion de la respuesta
+        
+        v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
+raise notice '%',v_consulta;
+        --Devuelve la respuesta
+        return v_consulta;
+              
+      end;
       
-      --Definicion de la respuesta
-      
-      v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-
-      --Devuelve la respuesta
-      return v_consulta;
-            
-    end;
-
-    /*********************************    
+  /*********************************    
     #TRANSACCION: 'CD_PASAFUN_SEL'
     #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
     #AUTOR:       RCM
@@ -1838,7 +1843,7 @@ BEGIN
           return v_consulta;
                 
         end;
-
+        
     /*********************************    
     #TRANSACCION: 'CD_PASAFUN_CONT'
     #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
@@ -1872,7 +1877,7 @@ BEGIN
             return v_consulta;
                 
         end;
-
+        
     /*********************************    
     #TRANSACCION: 'CD_PASAFUNDET_SEL'
     #DESCRIPCION: Listado del detalle de pasajes
@@ -1981,7 +1986,7 @@ BEGIN
             --Devuelve la respuesta
             return v_consulta;
         end;
-
+        
     /*********************************    
     #TRANSACCION: 'CD_PASAFUNREP_SEL'
     #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110

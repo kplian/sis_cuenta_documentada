@@ -1,19 +1,19 @@
-    CREATE OR REPLACE FUNCTION cd.f_get_saldo_totales_cuenta_doc (
-      p_id_cuenta_doc_rendicion integer,
-      p_solo_esta_rendicion varchar = 'no',
-      out o_total_solicitado numeric,
-      out o_total_rendido numeric,
-      out o_saldo numeric,
-      out o_a_favor_de varchar,
-      out o_por_caja varchar,
-      out o_tipo varchar,
-      out o_total_dev numeric,
-      out o_total_rep numeric,
-      out o_saldo_parcial numeric,
-      out o_tipo_rendicion varchar
-    )
-    RETURNS record AS
-    $body$
+CREATE OR REPLACE FUNCTION cd.f_get_saldo_totales_cuenta_doc (
+  p_id_cuenta_doc_rendicion integer,
+  p_solo_esta_rendicion varchar = 'no'::character varying,
+  out o_total_solicitado numeric,
+  out o_total_rendido numeric,
+  out o_saldo numeric,
+  out o_a_favor_de varchar,
+  out o_por_caja varchar,
+  out o_tipo varchar,
+  out o_total_dev numeric,
+  out o_total_rep numeric,
+  out o_saldo_parcial numeric,
+  out o_tipo_rendicion varchar
+)
+RETURNS record AS
+$body$
     /**************************************************************************
      SISTEMA:       Cuenta Documenta
      FUNCION:       cd.f_get_saldo_totales_cuenta_doc
@@ -63,6 +63,8 @@
 
         --Validación que el importe no supere al máximo permitido
         v_max_cd_caja = pxp.f_get_variable_global('cd_importe_maximo_cajas');
+        
+        
 
         --Obtención de datos de la cuenta documentada (rendición)
         select
@@ -137,7 +139,7 @@
         --2.4 TOTAL DEVOLUCIONES
         v_total_dev = 0;
         v_total_rep = 0;
-
+        
         --Lógica en función del signo del saldo
         if v_saldo_parcial > 0 then
             --A favor de la empresa
@@ -176,7 +178,7 @@
                     v_total_dev = v_saldo_parcial;
                 end if;
             else
-                raise exception 'Tipo de devolución incorrecta (%)',coalesce(v_rec_cd.dev_tipo,'deposito');
+                raise exception 'Tipo de devolución incorrecta (%)[%, %, %   : %, %]',coalesce(v_rec_cd.dev_tipo,'deposito'),v_total_solicitado,v_total_rendido,v_saldo_parcial,v_id_cuenta_doc_sol,p_id_cuenta_doc_rendicion;
             end if;
 
         elsif v_saldo_parcial < 0 then
@@ -228,8 +230,9 @@
             raise exception '%',v_resp;
 
     END;
-    $body$
-    LANGUAGE 'plpgsql'
-    VOLATILE
-    CALLED ON NULL INPUT
-    SECURITY INVOKER;
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+COST 100;

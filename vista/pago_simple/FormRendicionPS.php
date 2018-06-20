@@ -48,7 +48,9 @@ Phx.vista.FormRendicionPS = {
 	
 	onEdit: function(){    	
     	Phx.vista.FormRendicionPS.superclass.onEdit.call(this);	
-    	this.Cmp.sw_pgs.setValue('reg');	
+    	if(this.Cmp.sw_pgs.getValue()!='proc'){
+    		this.Cmp.sw_pgs.setValue('reg');
+    	}	
        		
 	},
 	

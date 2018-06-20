@@ -17,14 +17,17 @@ Phx.vista.CuentaDocVbContaCentral = {
     bnew:false,
     bsave:false,
     bdel:false,
-	require:'../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDoc.php',
-	requireclase:'Phx.vista.CuentaDoc',
-	title:'Cuenta Documentada',
-	nombreVista: 'CuentaDocVbContaCentral',
-	
-	constructor: function(config) {
-	   
-	    //funcionalidad para listado de historicos
+    require:'../../../sis_cuenta_documentada/vista/cuenta_doc/CuentaDoc.php',
+    requireclase:'Phx.vista.CuentaDoc',
+    title:'Cuenta Documentada',
+    nombreVista: 'CuentaDocVbContaCentral',
+    idMonedaBase: 0,
+    monedaBase: '',
+    idMoneda: 0,
+    
+    constructor: function(config) {
+       
+        //funcionalidad para listado de historicos
         this.historico = 'no';
         this.tbarItems = ['-',{
             text: 'Historico',
@@ -47,18 +50,18 @@ Phx.vista.CuentaDocVbContaCentral = {
            }];
            
         var me = this;
-		this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
-			if (record.data.estado == 'vbrendicion') {
-				var saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) - me.roundTwo(record.data.importe_retenciones);
-		        saldo = me.roundTwo(saldo);
-				return String.format("<b><font color='red'>Monto a Rendir: {0}</font></b><br>"+
-									 "<b><font color='green'>En Documentos: {1}</font></b><br>"+
-									 "<b><font color='green'>En Depositos: {2}</font></b><br>"+
-									 "<b><font color='orange'>Retenciones de Ley: {3}</font></b>", saldo, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones);
-			} else {
-				return String.format('<font>Solicitado: {0}</font>', value);
-			}
-		};
+        this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+            if (record.data.estado == 'vbrendicion') {
+                var saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) - me.roundTwo(record.data.importe_retenciones);
+                saldo = me.roundTwo(saldo);
+                return String.format("<b><font color='red'>Monto a Rendir: {0}</font></b><br>"+
+                                     "<b><font color='green'>En Documentos: {1}</font></b><br>"+
+                                     "<b><font color='green'>En Depositos: {2}</font></b><br>"+
+                                     "<b><font color='orange'>Retenciones de Ley: {3}</font></b>", saldo, record.data.importe_documentos, record.data.importe_depositos, record.data.importe_retenciones);
+            } else {
+                return String.format('<font>Solicitado: {0}</font>', value);
+            }
+        };
 
         //Se aumenta columna para la devoluci�n
         this.Atributos.push({
@@ -81,27 +84,27 @@ Phx.vista.CuentaDocVbContaCentral = {
             grid:true,
             form:false
         });
-	   
-	    Phx.vista.CuentaDocVbContaCentral.superclass.constructor.call(this,config);
+       
+        Phx.vista.CuentaDocVbContaCentral.superclass.constructor.call(this,config);
         this.init();
        
         this.addButton('onBtnRepSol', {
-				grupo : [0,1,2,3],
-				text : 'Reporte Sol.',
-				iconCls : 'bprint',
-				disabled : false,
-				handler : this.onBtnRepSol,
-				tooltip : '<b>Reporte de solicitud de fondos</b>'
-		});
-		
-		this.addButton('onBtnMemo', {
-				grupo : [0,1,2,3],
-				text : 'Memo',
-				iconCls : 'bprint',
-				disabled : false,
-				handler : this.onButtonMemoDesignacion,
-				tooltip : '<b>Reporte de designaci�n</b>'
-		});
+                grupo : [0,1,2,3],
+                text : 'Reporte Sol.',
+                iconCls : 'bprint',
+                disabled : false,
+                handler : this.onBtnRepSol,
+                tooltip : '<b>Reporte de solicitud de fondos</b>'
+        });
+        
+        this.addButton('onBtnMemo', {
+                grupo : [0,1,2,3],
+                text : 'Memo',
+                iconCls : 'bprint',
+                disabled : false,
+                handler : this.onButtonMemoDesignacion,
+                tooltip : '<b>Reporte de designaci�n</b>'
+        });
 
         this.addButton('btnSaldo', {
                 grupo : [0,1,2,3],
@@ -111,22 +114,22 @@ Phx.vista.CuentaDocVbContaCentral = {
                 handler : this.onButtonSaldo,
                 tooltip : '<b>Devolucion/Reposicion para cierre de la cuenta documentada</b>'
         });
-		
-		
+        
+        
        
-		this.store.baseParams = { tipo_interfaz: this.nombreVista };
-		
-		if(config.filtro_directo){
+        this.store.baseParams = { tipo_interfaz: this.nombreVista };
+        
+        if(config.filtro_directo){
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
         }
-		//primera carga
-		this.store.baseParams.pes_estado = 'borrador';
-    	this.load({params:{start:0, limit:this.tam_pag}});
-    	
-    	
-		
-		this.finCons = true;
+        //primera carga
+        this.store.baseParams.pes_estado = 'borrador';
+        this.load({params:{start:0, limit:this.tam_pag}});
+        
+        
+        
+        this.finCons = true;
 
         //Crea ventana para devoluci�n de saldos
         //this.crearVentanaDevolucion();
@@ -145,7 +148,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             this.getBoton('onBtnRepSol').enable(); 
         }
         else{
-        	this.getBoton('onBtnRepSol').disable(); 
+            this.getBoton('onBtnRepSol').disable(); 
         }
 
         if(this.historico == 'no'){
@@ -210,11 +213,11 @@ Phx.vista.CuentaDocVbContaCentral = {
      
     
    tabsouth:[
-	     {
-	          url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
-	          title:'Facturas', 
-	          height:'50%',
-	          cls: 'RendicionDetTes'
+         {
+              url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
+              title:'Facturas', 
+              height:'50%',
+              cls: 'RendicionDetTes'
          },
          /*{
              url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
@@ -223,12 +226,12 @@ Phx.vista.CuentaDocVbContaCentral = {
              cls:'RendicionDetReg'
         },*/
          {
-			  url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
-			  title: 'Depositos',
-			  height: '50%',
-			  cls: 'CdDeposito'
-		 }
-	   ],
+              url: '../../../sis_cuenta_documentada/vista/rendicion_det/CdDeposito.php',
+              title: 'Depositos',
+              height: '50%',
+              cls: 'CdDeposito'
+         }
+       ],
     onButtonSaldo: function(){
         var rec=this.sm.getSelected();
 
@@ -247,6 +250,9 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.cmbCaja.modificado = true;
         this.cmbCuentaBancaria.setValue('');
         this.cmbCuentaBancaria.modificado = true;
+
+        //Obtención de la moneda base
+        this.obtenerMonedaBase();
 
         Phx.CP.loadingShow();
         Ext.Ajax.request({
@@ -294,7 +300,10 @@ Phx.vista.CuentaDocVbContaCentral = {
                 //Seteo de variables del formulario
                 this.txtAFavorDe.setValue(reg.datos.a_favor_de);
                 this.txtSaldo.setValue(reg.datos.saldo);
-                //this.txtSaldoOriginal.setValue(reg.datos.saldo+' '+rec.data.desc_moneda);
+                this.txtSaldoOriginal.setValue(reg.datos.saldo);
+                this.txtMoneda.setValue(rec.data.desc_moneda);
+                this.txtMonedaProc.setValue(rec.data.desc_moneda);
+                this.idMoneda = rec.data.id_moneda
 
                 if(reg.datos.saldo==0){
                     this.cmbFormaDev.allowBlank=true;
@@ -316,22 +325,27 @@ Phx.vista.CuentaDocVbContaCentral = {
         });
     },
     crearVentanaDevolucion: function(){
+        //Inicializa variables globales
+        this.idMonedaBase=0;
+        this.monedaBase='';
+        this.idMoneda=0;
+
         //Componentes
         this.txtAFavorDe = new Ext.form.TextField({
             name: 'txtAFavorDe',
-            fieldLabel: 'Saldo a Favor de',
-            readOnly: true
+            fieldLabel: 'A Favor de',
+            readOnly: true,
+            width: 235,
+            style: 'background-color: #ddd; background-image: none;'
         });
-        /*this.txtSaldoOriginal = new Ext.form.TextField({
-            name: 'txtSaldoOriginal',
-            fieldLabel: 'Saldo Moneda Original',
-            readOnly: true
-        });*/
         this.txtSaldo = new Ext.form.TextField({
             name: 'txtSaldo',
             fieldLabel: 'Saldo',
-            readOnly: true
+            readOnly: true,
+            qtip: 'Monto a considerar para procesar la devolución, si va por Caja corresponde a la conversión del saldo a Bolivianos. En otros casos se mantiene el saldo en moneda original',
+            style: 'background-color: #ffffb3; background-image: none;'
         });
+        
         //Combo moneda
         this.cmbMoneda = new Ext.form.ComboBox({
             name: 'cmbMoneda',
@@ -349,7 +363,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 totalProperty: 'total',
                 fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
                 remoteSort: true,
-                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
+                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no',solo_resp: 'si'}
             }),
             valueField: 'id_caja',
             displayField: 'codigo',
@@ -392,7 +406,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             /*pageSize: 15,
             queryDelay: 1000,
             minChars: 2,*/
-            width: 200,
+            width: 235,
             listWidth: 300
         });
 
@@ -413,7 +427,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 totalProperty: 'total',
                 fields: ['id_caja', 'codigo', 'desc_moneda','id_depto','cajero'],
                 remoteSort: true,
-                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no'}
+                baseParams: {par_filtro: 'caja.codigo', tipo_interfaz:'solicitudcaja', con_detalle:'no',solo_resp: 'si'}
             }),
             valueField: 'id_caja',
             displayField: 'codigo',
@@ -432,8 +446,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             renderer : function(value, p, record) {
                 return String.format('{0}', record.data['codigo']);
             },
-            hidden: true,
-            width: 200
+            hidden: true
         });
 
         //Textfield nombre cheque
@@ -519,16 +532,46 @@ Phx.vista.CuentaDocVbContaCentral = {
             renderer: function(value, p, record) {
                 return String.format('{0}', record.data['denominacion']);
             },
-            hidden: true,
-            width: 200
+            hidden: true
         });
 
+        this.txtSaldoOriginal = new Ext.form.TextField({
+            name: 'txtSaldoOriginal',
+            fieldLabel: 'Saldo Moneda Original',
+            readOnly: true,
+            style: 'background-color: #ddd; background-image: none;'
+        });
+        this.txtMoneda = new Ext.form.TextField({
+            name: 'txtMoneda',
+            fieldLabel: 'Moneda Original',
+            readOnly: true,
+            width: 50,
+            style: 'background-color: #ddd; background-image: none;'
+        });
 
+        //Saldo en moneda original
+        this.cmpSaldoOriginal = new Ext.form.CompositeField({
+            fieldLabel: 'Saldo Moneda Original',
+            items: [this.txtSaldoOriginal,this.txtMoneda]
+        });
+
+        //Componente para el saldo que se utilizará para procesar
+        this.txtMonedaProc = new Ext.form.TextField({
+            name: 'txtMoneda',
+            fieldLabel: 'Moneda Original',
+            readOnly: true,
+            width: 50,
+            style: 'background-color: #ffffb3; background-image: none;'
+        });
+        this.cmpSaldoProc = new Ext.form.CompositeField({
+            fieldLabel: 'Saldo',
+            items: [this.txtSaldo,this.txtMonedaProc]
+        });
         //Formulario
         this.frmDatos = new Ext.form.FormPanel({
             layout: 'form',
             items: [
-                /*this.txtSaldoOriginal,*/this.txtSaldo,this.txtAFavorDe,this.cmbFormaDev, this.cmbCaja, this.txtNombreCheque,this.cmbDeptoLb,this.cmbCuentaBancaria
+                /*this.txtSaldoOriginal,this.txtMoneda*/this.cmpSaldoOriginal,this.txtAFavorDe/*,this.txtSaldo*/,this.cmpSaldoProc,this.cmbFormaDev, this.cmbCaja, this.txtNombreCheque,this.cmbDeptoLb,this.cmbCuentaBancaria
             ],
             padding: this.paddingForm,
             bodyStyle: this.bodyStyleForm,
@@ -542,8 +585,8 @@ Phx.vista.CuentaDocVbContaCentral = {
 
         //Window
         this.winDatos = new Ext.Window({
-            width: 450,
-            height: 200,
+            width: 500,
+            height: 280,
             modal: true,
             closeAction: 'hide',
             labelAlign: 'top',
@@ -590,6 +633,12 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.cmbCuentaBancaria.selectedIndex=-1;
                 this.cmbDeptoLb.setValue('');
                 this.cmbDeptoLb.selectedIndex=-1;
+
+                //Convierte el saldo original a Bs en el campo saldo
+                var fecha = new Date();
+                this.convertirSaldo(this.txtSaldoOriginal.getValue(),rec.data.id_moneda,fecha.format("d/m/Y"),'O')
+                this.idMoneda = this.idMonedaBase;
+
             } else if(record.data.valor=='cheque'){
                 this.txtNombreCheque.allowBlank=false;
                 this.txtNombreCheque.setVisible(true);
@@ -603,6 +652,11 @@ Phx.vista.CuentaDocVbContaCentral = {
 
                 this.cmbDeptoLb.allowBlank = false;
                 this.cmbDeptoLb.setVisible(true);
+
+                //Setea el campo saldo con el saldo original y moneda original
+                this.txtSaldo.setValue(this.txtSaldoOriginal.getValue());
+                this.txtMonedaProc.setValue(this.txtMoneda.getValue());
+                this.idMoneda = rec.data.id_moneda
             } else if(record.data.valor=='deposito'){
                 //Reseteo de campos de caja
                 this.cmbCaja.setValue('');
@@ -613,6 +667,11 @@ Phx.vista.CuentaDocVbContaCentral = {
 
                 this.cmbDeptoLb.allowBlank = false;
                 this.cmbDeptoLb.setVisible(true);
+
+                //Setea el campo saldo con el saldo original y moneda original
+                this.txtSaldo.setValue(this.txtSaldoOriginal.getValue());
+                this.txtMonedaProc.setValue(this.txtMoneda.getValue());
+                this.idMoneda = rec.data.id_moneda
             }  else {
                 //Reseteo de campos de caja y cheque
                 this.cmbCaja.setValue('');
@@ -622,6 +681,11 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.cmbCuentaBancaria.selectedIndex=-1;
                 this.cmbDeptoLb.setValue('');
                 this.cmbDeptoLb.selectedIndex=-1;
+
+                //Setea el campo saldo con el saldo original y moneda original
+                this.txtSaldo.setValue(this.txtSaldoOriginal.getValue());
+                this.txtMonedaProc.setValue(this.txtMoneda.getValue());
+                this.idMoneda = rec.data.id_moneda
             }
         },this);
 
@@ -667,6 +731,8 @@ Phx.vista.CuentaDocVbContaCentral = {
             dev_saldo: this.txtSaldo.getValue(),
             id_cuenta_bancaria: this.cmbCuentaBancaria.getValue(),
             id_depto_lb: this.cmbDeptoLb.getValue(),
+            dev_saldo_original: this.txtSaldoOriginal.getValue(),
+            id_moneda_dev: this.idMoneda
         };
 
         if(obj.id_caja_dev==-1){
@@ -779,6 +845,45 @@ Phx.vista.CuentaDocVbContaCentral = {
             scope:this
         });
 
+    },
+
+    obtenerMonedaBase: function(){
+        //Obtención de la moneda base
+        Ext.Ajax.request({
+            url: '../../sis_parametros/control/Moneda/getMonedaBase',
+            params: {moneda:'si'},
+            success: function(res,params){
+                var response = Ext.decode(res.responseText).ROOT.datos;
+                this.idMonedaBase = response.id_moneda;
+                this.monedaBase = response.codigo;
+            },
+            argument: this.argumentSave,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
+
+    },
+
+    convertirSaldo: function(monto,idMoneda,fecha,tipo){
+        Ext.Ajax.request({
+            url: '../../sis_parametros/control/TipoCambio/obtenerTipoCambio',
+            params: {
+                id_moneda: idMoneda,
+                fecha: fecha,
+                tipo: tipo
+            },
+            success: function(res,params){
+                var response = Ext.decode(res.responseText).ROOT.datos;
+                var aux = 1*monto*(response.tipo_cambio*1);
+                this.txtSaldo.setValue(Math.round(aux * 100) / 100);
+                this.txtMonedaProc.setValue(this.monedaBase);
+            },
+            argument: this.argumentSave,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
     }
 
 };

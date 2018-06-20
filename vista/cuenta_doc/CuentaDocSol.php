@@ -203,7 +203,7 @@ Phx.vista.CuentaDocSol = {
 		} else {
 			this.getBoton('ant_estado').disable();
 			this.getBoton('sig_estado').disable();
-			this.getBoton('btnSIGEMA').disable();
+			this.getBoton('btnSIGEMA').enable();
 		}
 
 		if (data.estado == 'contabiizado') {

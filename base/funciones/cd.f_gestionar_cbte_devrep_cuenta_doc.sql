@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_devrep_cuenta_doc (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -9,7 +7,6 @@ CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_devrep_cuenta_doc (
 )
 RETURNS boolean AS
 $body$
-
 /*
 Autor: RCM
 Fecha:   25/02/2018
@@ -19,47 +16,47 @@ Descripcion  Esta funcion gestiona los cbtes de devolucion/reposicion de cuenta_
 
 DECLARE
 
-	 v_nombre_funcion   			text;
-	 v_resp							varchar;
-     v_registros 					record;
-     v_registros_tmp				record;
-     v_id_estado_actual  			integer;
-     va_id_tipo_estado 				integer[];
-     va_codigo_estado 				varchar[];
-     va_disparador    				varchar[];
-     va_regla        				varchar[]; 
-     va_prioridad     				integer[];    
-     v_tipo_sol   					varchar;    
-     v_nro_cuota 					numeric;    
-     v_id_proceso_wf 				integer;
-     v_id_estado_wf 				integer;
-     v_codigo_estado 				varchar;
-     v_id_plan_pago 				integer;
-     v_verficacion  				boolean;
-     v_verficacion2 				varchar[];     
-     v_id_tipo_estado  				integer;
-     v_codigo_proceso_llave_wf   	varchar;
-	 --gonzalo
-     v_id_finalidad					integer;
-     v_respuesta_libro_bancos 		varchar;
-     v_registros_tpc				record;
-     v_codigo_tpc  					varchar;
-     v_id_proceso_caja				integer;
-     v_id_int_comprobante			integer;
-     v_sw_disparo 					boolean;
-     v_hstore_registros 			hstore;
-     v_tmp_tipo						varchar;
-     v_id_solicitud_efectivo		integer;
-     v_saldo_caja					numeric;
-     v_monto						numeric;
-     v_registros_cv					record;
-     v_total_rendido				numeric;
-     v_importe_solicitado			numeric;
+   v_nombre_funcion         text;
+   v_resp             varchar;
+     v_registros          record;
+     v_registros_tmp        record;
+     v_id_estado_actual       integer;
+     va_id_tipo_estado        integer[];
+     va_codigo_estado         varchar[];
+     va_disparador            varchar[];
+     va_regla               varchar[]; 
+     va_prioridad             integer[];    
+     v_tipo_sol             varchar;    
+     v_nro_cuota          numeric;    
+     v_id_proceso_wf        integer;
+     v_id_estado_wf         integer;
+     v_codigo_estado        varchar;
+     v_id_plan_pago         integer;
+     v_verficacion          boolean;
+     v_verficacion2         varchar[];     
+     v_id_tipo_estado         integer;
+     v_codigo_proceso_llave_wf    varchar;
+   --gonzalo
+     v_id_finalidad         integer;
+     v_respuesta_libro_bancos     varchar;
+     v_registros_tpc        record;
+     v_codigo_tpc           varchar;
+     v_id_proceso_caja        integer;
+     v_id_int_comprobante     integer;
+     v_sw_disparo           boolean;
+     v_hstore_registros       hstore;
+     v_tmp_tipo           varchar;
+     v_id_solicitud_efectivo    integer;
+     v_saldo_caja         numeric;
+     v_monto            numeric;
+     v_registros_cv         record;
+     v_total_rendido        numeric;
+     v_importe_solicitado     numeric;
      v_rec_saldo                    record;
     
 BEGIN
 
-	v_nombre_funcion = 'cd.f_gestionar_cbte_devrep_cuenta_doc';
+  v_nombre_funcion = 'cd.f_gestionar_cbte_devrep_cuenta_doc';
  
    -- 1) con el id_comprobante identificar el plan de pago
    
@@ -100,10 +97,10 @@ BEGIN
       from  cd.tcuenta_doc pc
       
       inner join cd.ttipo_cuenta_doc tpc on tpc.id_tipo_cuenta_doc = pc.id_tipo_cuenta_doc and tpc.estado_reg = 'activo'
-      inner join conta.tint_comprobante  c on c.id_int_comprobante = pc.id_int_comprobante 
-	  inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
+      inner join conta.tint_comprobante  c on c.id_int_comprobante = pc.id_int_comprobante_devrep 
+    inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
       left join param.tdepto dpc on dpc.id_depto = pc.id_depto_conta
-	  left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
+    left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
       where  pc.id_int_comprobante_devrep = p_id_int_comprobante; 
     
     
@@ -296,13 +293,13 @@ BEGIN
    RETURN  TRUE;
 
 EXCEPTION
-					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+          
+  WHEN OTHERS THEN
+      v_resp='';
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+      raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_cuenta_doc (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -9,7 +7,6 @@ CREATE OR REPLACE FUNCTION cd.f_gestionar_cbte_cuenta_doc (
 )
 RETURNS boolean AS
 $body$
-
 /*
 Autor: RAC KPLIAN
 Fecha:   17  abril  de 2016
@@ -19,50 +16,52 @@ Descripcion  Esta funcion gestiona los cbtes de cuenta_documentada cuando son va
 
 DECLARE
 
-	 v_nombre_funcion   			text;
-	 v_resp							varchar;
-     v_registros 					record;
-     v_registros_tmp				record;
-     v_id_estado_actual  			integer;
-     va_id_tipo_estado 				integer[];
-     va_codigo_estado 				varchar[];
-     va_disparador    				varchar[];
-     va_regla        				varchar[]; 
-     va_prioridad     				integer[];    
-     v_tipo_sol   					varchar;    
-     v_nro_cuota 					numeric;    
-     v_id_proceso_wf 				integer;
-     v_id_estado_wf 				integer;
-     v_codigo_estado 				varchar;
-     v_id_plan_pago 				integer;
-     v_verficacion  				boolean;
-     v_verficacion2 				varchar[];     
-     v_id_tipo_estado  				integer;
-     v_codigo_proceso_llave_wf   	varchar;
-	 --gonzalo
-     v_id_finalidad					integer;
-     v_respuesta_libro_bancos 		varchar;
-     v_registros_tpc				record;
-     v_codigo_tpc  					varchar;
-     v_id_proceso_caja				integer;
-     v_id_int_comprobante			integer;
-     v_sw_disparo 					boolean;
-     v_hstore_registros 			hstore;
-     v_tmp_tipo						varchar;
-     v_id_solicitud_efectivo		integer;
-     v_saldo_caja					numeric;
-     v_monto						numeric;
-     v_registros_cv					record;
-     v_total_rendido				numeric;
-     v_importe_solicitado			numeric;
+   v_nombre_funcion         text;
+   v_resp             varchar;
+     v_registros          record;
+     v_registros_tmp        record;
+     v_id_estado_actual       integer;
+     va_id_tipo_estado        integer[];
+     va_codigo_estado         varchar[];
+     va_disparador            varchar[];
+     va_regla               varchar[]; 
+     va_prioridad             integer[];    
+     v_tipo_sol             varchar;    
+     v_nro_cuota          numeric;    
+     v_id_proceso_wf        integer;
+     v_id_estado_wf         integer;
+     v_codigo_estado        varchar;
+     v_id_plan_pago         integer;
+     v_verficacion          boolean;
+     v_verficacion2         varchar[];     
+     v_id_tipo_estado         integer;
+     v_codigo_proceso_llave_wf    varchar;
+   --gonzalo
+     v_id_finalidad         integer;
+     v_respuesta_libro_bancos     varchar;
+     v_registros_tpc        record;
+     v_codigo_tpc           varchar;
+     v_id_proceso_caja        integer;
+     v_id_int_comprobante     integer;
+     v_sw_disparo           boolean;
+     v_hstore_registros       hstore;
+     v_tmp_tipo           varchar;
+     v_id_solicitud_efectivo    integer;
+     v_saldo_caja         numeric;
+     v_monto            numeric;
+     v_registros_cv         record;
+     v_total_rendido        numeric;
+     v_importe_solicitado     numeric;
      v_rec_saldo                    record;
+     v_rec_saldo1         record;
+     v_saldo            numeric;
     
 BEGIN
 
-	v_nombre_funcion = 'cd.f_gestionar_cbte_cuenta_doc';
+  v_nombre_funcion = 'cd.f_gestionar_cbte_cuenta_doc';
  
    -- 1) con el id_comprobante identificar el plan de pago
-   
+
       select 
             pc.id_cuenta_doc,
             pc.id_estado_wf,
@@ -101,9 +100,9 @@ BEGIN
       
       inner join cd.ttipo_cuenta_doc tpc on tpc.id_tipo_cuenta_doc = pc.id_tipo_cuenta_doc and tpc.estado_reg = 'activo'
       inner join conta.tint_comprobante  c on c.id_int_comprobante = pc.id_int_comprobante 
-	  inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
+    inner join wf.testado_wf ew on ew.id_estado_wf = pc.id_estado_wf
       left join param.tdepto dpc on dpc.id_depto = pc.id_depto_conta
-	  left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
+    left join param.tdepto dpl on dpl.id_depto = pc.id_depto_lb
       where  pc.id_int_comprobante = p_id_int_comprobante; 
     
     
@@ -172,7 +171,7 @@ BEGIN
             --  si es una rendición verificamos si queda saldo
             --  si no queda saldo finalizamos la solicitud
             --------------------------------------------------
-            
+
             IF v_registros.sw_solicitud = 'no' and v_registros.id_cuenta_doc_fk is not null  THEN
             
                   -- sumamos todas las rendiciones que estan contabilizadas
@@ -183,8 +182,8 @@ BEGIN
                   from cd.tcuenta_doc c
                   where  c.id_cuenta_doc_fk = v_registros.id_cuenta_doc_fk
                        and c.estado = 'rendido' and c.estado_reg = 'activo';*/
-
-                    
+         
+                                        
                     
                     v_total_rendido = v_rec_saldo.o_total_rendido;
                        
@@ -237,15 +236,22 @@ BEGIN
                   where pc.id_cuenta_doc  = v_registros.id_cuenta_doc_fk; 
                   
                   
+                  --Si el saldo es null, obtiene el saldo para verificar si es distinto a cero
+                  v_saldo = v_registros.dev_saldo;  
+                  if v_registros.dev_saldo is null and v_registros.tipo_rendicion='final' then
+                      select * into v_rec_saldo1 from cd.f_get_saldo_totales_cuenta_doc(v_registros.id_cuenta_doc);
+                        v_saldo = v_rec_saldo1.o_saldo;
+                  end if;
+ 
                   
                   --IF  v_total_rendido >= v_registros_cv.importe   THEN
                   --if v_rec_saldo.o_saldo = 0 then
                   --if (v_rec_saldo.o_a_favor_de='funcionario' and v_rec_saldo.o_saldo = 0) or (v_rec_saldo.o_a_favor_de='empresa' and v_rec_saldo.o_saldo >= 0) then
                   --RCM 04-02-2018 se cambia la linea de arriba por esta, para corregir la finalizacion de la solicitud
-                  if (v_registros.tipo_rendicion='final' and v_registros.dev_saldo is not null) then
+--                  raise exception 'tipo_rendicion: %  saldo: % ',v_registros.tipo_rendicion,v_saldo;
+                  if (v_registros.tipo_rendicion='final' and v_saldo = 0) then
                   
-                        
-                        /************************************
+                         /************************************
                            CAMBIA DE ESTADO LA SOLICITUD
                         *************************************/
                        
@@ -292,17 +298,17 @@ BEGIN
 
                   END IF;
             END IF;
-            
+   
    RETURN  TRUE;
 
 EXCEPTION
-					
-	WHEN OTHERS THEN
-			v_resp='';
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
-			v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
-			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
-			raise exception '%',v_resp;
+          
+  WHEN OTHERS THEN
+      v_resp='';
+      v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
+      v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
+      v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
+      raise exception '%',v_resp;
 END;
 $body$
 LANGUAGE 'plpgsql'

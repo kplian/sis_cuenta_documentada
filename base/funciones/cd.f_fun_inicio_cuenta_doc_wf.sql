@@ -72,6 +72,10 @@ DECLARE
     va_prioridad                    integer[];
     v_id_estado_actual              integer;
     v_rec_devrep                    record;
+    v_rec_saldo                     record;
+    v_id_tipo_estado                integer;
+    v_resp2                         varchar;
+    v_reg_cuenta_doc_padre          record;
    
 BEGIN
 
@@ -122,7 +126,7 @@ BEGIN
     usuario_ai      = p_usuario_ai,
     fecha_mod       = now()                     
     where id_proceso_wf = p_id_proceso_wf;
-      
+
     --------------------------------------------------------------------------------
     --(2) Solicitudes 
     --------------------------------------------------------------------------------
@@ -307,7 +311,7 @@ BEGIN
     ------------------
     --Verifica que el total de depósitos y facturas cuadre con la rendición
     if v_reg_cuenta_doc.sw_solicitud = 'no' then
-      
+
         if v_reg_cuenta_doc.id_cuenta_doc_fk is null then
             raise exception 'No es una rendición, verifique el tipo de cuenta documentada %',v_reg_cuenta_doc.nombre;
         end if;
@@ -363,7 +367,7 @@ BEGIN
         where c.estado_reg = 'activo'
         and c.id_cuenta_doc = v_reg_cuenta_doc.id_cuenta_doc;
 
-        --Actualziación del importe de la rendición
+        --Actualización del importe de la rendición
         update cd.tcuenta_doc set 
         importe = v_total_documentos + v_importe_depositos       
         where id_proceso_wf = p_id_proceso_wf;
@@ -375,7 +379,7 @@ BEGIN
     --------------------------------
     --Si el estado es pendiente genera el comprobante
     if p_codigo_estado = 'pendiente' then
-        
+                    
         --Si es solicitud y el pago es por caja no genera comprobante. Si es rendicion siempre genera comprobante
         if v_reg_cuenta_doc.sw_solicitud = 'si' then
         
@@ -410,33 +414,72 @@ BEGIN
             end if;
         
         elsif v_reg_cuenta_doc.sw_solicitud = 'no' then
+        
+            --RCM 29/03/2018: Verifica si la rendición tiene documentos, si no tiene no genera comprobante y pasa directo al siguiente estado
+            if not exists(select 1 from cd.trendicion_det
+                        where id_cuenta_doc_rendicion = v_reg_cuenta_doc.id_cuenta_doc) then
+                --NO TIENE FACTURAS EN LA RENDICIÓN
+                select * into v_rec_saldo from cd.f_get_saldo_totales_cuenta_doc(v_reg_cuenta_doc.id_cuenta_doc);
+--                raise exception 'tt: %   %   %',v_rec_saldo.o_saldo, v_reg_cuenta_doc.id_cuenta_doc, v_reg_cuenta_doc.tipo_rendicion;
+                
+                if v_rec_saldo.o_saldo != 0  then
+                    if v_reg_cuenta_doc.tipo_rendicion = 'final' then
+                        --Tiene saldo, entonces cambia el estado de la rendición a vbtesoreria para que se defina la forma de devolución
+                        v_resp2 = cd.f_cambiar_estado_wf(p_id_usuario,p_id_usuario_ai,p_id_proceso_wf,'vbtesoreria',p_id_estado_wf,null);
+
+                    else
+                        --Tiene saldo pero no es rendición final. Sólo finaliza la rendición
+                        v_resp2 = cd.f_cambiar_estado_wf(p_id_usuario,p_id_usuario_ai,p_id_proceso_wf,'rendido',p_id_estado_wf,null);
+                    end if;
+                else
+                    --No tiene facturas ni saldo, entonces finaliza la solicitud y la rendición
+                    v_resp2 = cd.f_cambiar_estado_wf(p_id_usuario,p_id_usuario_ai,p_id_proceso_wf,'rendido',p_id_estado_wf,null);
+                    
+                    --Obtiene datos de la solicitud para finalizarla
+                    select 
+                    c.id_cuenta_doc,
+                    c.id_estado_wf,
+                    c.id_proceso_wf
+                    into
+                    v_reg_cuenta_doc_padre
+                    from cd.tcuenta_doc c
+                    where c.id_cuenta_doc = v_reg_cuenta_doc.id_cuenta_doc_fk;
+                    
+                    v_resp2 = cd.f_cambiar_estado_wf(p_id_usuario,p_id_usuario_ai,v_reg_cuenta_doc_padre.id_proceso_wf,'finalizado',v_reg_cuenta_doc_padre.id_estado_wf,null);
+                    
+                end if;
             
-            --Variable global para sincronización con ENDESIS
-            v_sincronizar = pxp.f_get_variable_global('sincronizar');
+            else
+            
+                --Variable global para sincronización con ENDESIS
+                v_sincronizar = pxp.f_get_variable_global('sincronizar');
 
-            --Inicio de sincronización si corresponde
-            if v_sincronizar = 'true' then
-                select * into v_nombre_conexion from migra.f_crear_conexion();     
+                --Inicio de sincronización si corresponde
+                if v_sincronizar = 'true' then
+                    select * into v_nombre_conexion from migra.f_crear_conexion();     
+                end if;
+
+                --Generación del comprobante
+                v_id_int_comprobante = conta.f_gen_comprobante(v_reg_cuenta_doc.id_cuenta_doc, 
+                                                                v_reg_cuenta_doc.codigo_plantilla_cbte,
+                                                                p_id_estado_wf,                                                     
+                                                                p_id_usuario,
+                                                                p_id_usuario_ai, 
+                                                                p_usuario_ai, 
+                                                                v_nombre_conexion);
+
+                --Actualización del Id del comprobante en la cuenta documentada
+                update cd.tcuenta_doc set 
+                id_int_comprobante = v_id_int_comprobante          
+                where id_proceso_wf = p_id_proceso_wf;
+
+                --Fin de sincronización si corresponde
+                if v_sincronizar = 'true' then
+                    select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
+                end if;
+            
             end if;
 
-            --Generación del comprobante
-            v_id_int_comprobante = conta.f_gen_comprobante(v_reg_cuenta_doc.id_cuenta_doc, 
-                                                            v_reg_cuenta_doc.codigo_plantilla_cbte,
-                                                            p_id_estado_wf,                                                     
-                                                            p_id_usuario,
-                                                            p_id_usuario_ai, 
-                                                            p_usuario_ai, 
-                                                            v_nombre_conexion);
-
-            --Actualización del Id del comprobante en la cuenta documentada
-            update cd.tcuenta_doc set 
-            id_int_comprobante = v_id_int_comprobante          
-            where id_proceso_wf = p_id_proceso_wf;
-
-            --Fin de sincronización si corresponde
-            if v_sincronizar = 'true' then
-                select * into v_resp from migra.f_cerrar_conexion(v_nombre_conexion,'exito'); 
-            end if;
         else
             raise exception 'No se generó comprobante porque no se pudo identificar si era una solicitud de fondos o rendición';
         end if;
@@ -516,7 +559,7 @@ BEGIN
         end if;
      
     end if;
-   
+
     --Respuesta
     return true;
 
