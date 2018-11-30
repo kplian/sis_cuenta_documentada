@@ -723,3 +723,18 @@ CREATE TABLE cd.tcuenta_doc_excepcion (
 
 WITH (oids = false);
 /***********************************F-SCP-CD-RCM-1-26/02/2018****************************************/
+
+
+/***********************************I-SCP-CD-RCM-1-12/04/2018****************************************/
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN dev_saldo_original NUMERIC(18,2);
+
+COMMENT ON COLUMN cd.tcuenta_doc.dev_saldo_original
+IS 'Saldo en la moneda original';
+
+ALTER TABLE cd.tcuenta_doc
+  ADD COLUMN id_moneda_dev INTEGER;
+
+COMMENT ON COLUMN cd.tcuenta_doc.id_moneda_dev
+IS 'Moneda de la devolucion del campo dev_saldo';
+/***********************************F-SCP-CD-RCM-1-12/04/2018****************************************/
