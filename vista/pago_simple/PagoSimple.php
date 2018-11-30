@@ -5,6 +5,12 @@
 *@author  (admin)
 *@date 31-12-2017 12:33:30
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+ * 
+ ****************************************************************************
+                     HISTORIAL DE MODIFICACIONES:
+#ISSUE				FECHA				AUTOR				DESCRIPCION
+ #0				31-12-2017			     RAC			Creación	
+ #0001             22/06/2018               RAC            Considera el Devenga y pagar con prorrateo automatico y nro de tramite tipo   DVPGPROP
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -1204,7 +1210,16 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 			this.Cmp.importe.allowBlank=false;
 			this.Cmp.id_obligacion_pago.show();
 			this.Cmp.id_obligacion_pago.allowBlank=false;
-		} else if(codigo == 'ADU_GEST_ANT'){
+		} 
+		
+		else if(codigo == 'DVPGPROP'){  //#  0001
+			this.Cmp.id_proveedor.setDisabled(false);
+			this.Cmp.id_proveedor.allowBlank=false; 
+			this.Cmp.id_obligacion_pago.show();
+			this.Cmp.id_obligacion_pago.allowBlank=false;
+		} 
+			
+		else if(codigo == 'ADU_GEST_ANT'){
 			this.Cmp.id_proveedor.setDisabled(false);
 			this.Cmp.id_proveedor.allowBlank=false;    			
 			this.Cmp.importe.setVisible(true);

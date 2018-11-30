@@ -5,7 +5,8 @@
  *@author  RCM
  *@date 04/09/2017
  *@description 
- *
+ *ISSUE			FECHA 				AUTHOR				DESCRIPCION
+ * #1 				24/09/2018		EGS					se modifico el campo moneda para carga automatica segun tipo de viaje
  */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -195,6 +196,8 @@ Phx.vista.CuentaDocSol = {
 		var data = this.getSelectedData();
 		var tb = this.tbar;
 		Phx.vista.CuentaDocSol.superclass.preparaMenu.call(this, n);
+
+		
 		this.getBoton('chkpresupuesto').enable(); 
 		if (data.estado == 'borrador') {
 			this.getBoton('ant_estado').disable();
@@ -344,9 +347,113 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.id_sigema.setValue('');
 		},this)*/
 
+		 //#1 				24/09/2018		EGS	
+		
+		this.Cmp.tipo_viaje.on('select', function(combo, record, index) {
+			 console.log('record', record.data.codigo);		
+			if(record.data.codigo == 'nacional'){
+			  this.cargarMonedaBase();	
+
+			}
+			
+			if(record.data.codigo =='internacional'){
+					
+			console.log('hola');
+			
+			 this.cargarMonedaTriangulacion();
+					
+			}
+
+				}, this);
+		//#1 				24/09/2018		EGS	
+	
+	
+	
 	},
+	
+		     
+//#1 				24/09/2018		EGS	
+
+  cargarMonedaBase: function ( ) {
+    	//Obtención de la moneda base
+       	Phx.CP.loadingShow();
+		Ext.Ajax.request({
+            url: '../../sis_parametros/control/Moneda/getMonedaBase',
+            params: {moneda:'si'},
+            success: function(res,params){
+                Phx.CP.loadingHide();
+                var response = Ext.decode(res.responseText).ROOT.datos;    
+                //console.log('id_moneda',response.id_moneda);
+   
+                this.Cmp.id_moneda.store.baseParams.query =response.moneda;
+                this.Cmp.id_moneda.store.load({params:{start:0,limit:this.tam_pag}, 
+
+				callback : function (r) { 
+						console.log('r',r);
+						                       
+						if (r.length > 0 ) {                        
+							                    	
+							this.Cmp.id_moneda.setValue(r[0].data.id_moneda);
+							
+							
+							                }     
+							                                    
+							                }, scope : this
+							            });
+               
+            },
+            argument: this.argumentSave,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
+    },
+  	cargarMonedaTriangulacion: function ( ) {
+    	//Obtención de la moneda base
+       	Phx.CP.loadingShow();
+		Ext.Ajax.request({
+            url: '../../sis_parametros/control/Moneda/getMonedaTriangulacion',
+            params: {moneda:'si'},
+            success: function(res,params){
+            	
+            	//console.log('params',params)
+                Phx.CP.loadingHide();
+                var response = Ext.decode(res.responseText).ROOT.datos;
+                 
+                 //console.log('id_moneda',response.id_moneda);
+                
+				
+				this.Cmp.id_moneda.store.baseParams.query = response.moneda;
+                this.Cmp.id_moneda.store.load({params:{start:0,limit:this.tam_pag}, 
+					callback : function (r) { 
+						console.log('r2',r);                       
+						
+						if (r.length > 0 ) {                        							                    	
+							 this.Cmp.id_moneda.setValue(r[0].data.id_moneda);	  
+							                }     
+							                                    
+							                }, scope : this
+							            });
+             
+               
+            },
+            argument: this.argumentSave,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        });
+    },  
+  
+	//#1 				24/09/2018		EGS	
+	
 	onButtonNew: function() {
 		Phx.vista.CuentaDocSol.superclass.onButtonNew.call(this);
+		this.Cmp.id_tipo_cuenta_doc.on('select', function(combo, record, index) {
+			 console.log('record', record.data.codigo);		
+					this.Cmp.id_moneda.reset();
+
+				}, this);
+		
 		this.Cmp.id_funcionario.enable();
 		this.ocultarComponente(this.Cmp.nombre_cheque);
 		this.ocultarComponente(this.Cmp.id_funcionario_cuenta_bancaria);
@@ -453,7 +560,8 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.id_centro_costo.allowBlank = true;
 		this.Cmp.cantidad_personas.allowBlank = true;
 		this.Cmp.aplicar_regla_15.allowBlank = true;
-
+		
+		
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
 		this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(true);
@@ -488,11 +596,25 @@ Phx.vista.CuentaDocSol = {
 			this.Cmp.id_centro_costo.allowBlank = true;
 			this.Cmp.cantidad_personas.allowBlank = false;
 			this.Cmp.aplicar_regla_15.allowBlank = false;
+			
+			  
+			 //#1 				24/09/2018		EGS	
+			
+			this.Cmp.id_moneda.disable();
+			 //#1 				24/09/2018		EGS	
 
+		
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-0').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
 			this.TabPanelSouth.getItem(this.idContenedor + '-south-2').setDisabled(false);
 		}
+		else{
+			 //#1 				24/09/2018		EGS	
+			
+			this.Cmp.id_moneda.enable();
+			 //#1 				24/09/2018		EGS	
+		}
+		
 	},
 	tabsouth: [{
             url: '../../../sis_cuenta_documentada/vista/cuenta_doc_prorrateo/CuentaDocProrrateo.php',

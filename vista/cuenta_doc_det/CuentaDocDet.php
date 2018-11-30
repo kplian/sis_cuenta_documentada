@@ -418,9 +418,9 @@ Phx.vista.CuentaDocDet=Ext.extend(Phx.gridInterfaz,{
         };
 
         if(this.maestro.codigo_tipo_cuenta_doc=='SOLFONAVA'){
-        	bp.autorizacion = 'fondo_avance';
+        	bp.sw_autorizacion = 'fondo_avance';
         } else if(this.maestro.codigo_tipo_cuenta_doc=='SOLVIA'){
-        	bp.autorizacion = 'viatico';
+        	bp.sw_autorizacion = 'viatico';
         } else if(this.maestro.codigo_tipo_cuenta_doc=='RFA'){
 
         }

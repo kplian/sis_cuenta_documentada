@@ -114,7 +114,8 @@ Phx.vista.PagoSimplePro=Ext.extend(Phx.gridInterfaz,{
                     totalProperty: 'total',
                     fields: ['id_concepto_ingas','tipo','desc_ingas','movimiento','desc_partida','id_grupo_ots','filtro_ot','requiere_ot','desc_gestion'],
                     remoteSort: true,
-                    baseParams: { par_filtro: 'desc_ingas#par.codigo',movimiento:'gasto'}//, autorizacion: 'viatico'}
+                    //MANU 07/11/2018, PARA LA FILTRACION EN CONCEPTOS DE GASTOS SE AGREGARON ESTOS FILTROS, autorizacion: 'pago_directo',autorizacion_nulos:'no'
+                    baseParams: { par_filtro: 'desc_ingas#par.codigo',movimiento:'gasto', autorizacion: 'pago_directo',autorizacion_nulos:'no'}
                 }),
                	valueField: 'id_concepto_ingas',
 				displayField: 'desc_ingas',

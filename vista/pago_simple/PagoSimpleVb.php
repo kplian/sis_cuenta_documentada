@@ -77,6 +77,11 @@ Phx.vista.PagoSimpleVb = {
             if(data.estado=='rendicion'||data.estado=='vbconta'&&(data.codigo_tipo_pago_simple=='PAG_DEV'||data.codigo_tipo_pago_simple=='ADU_GEST_ANT'||data.codigo_tipo_pago_simple=='SOLO_DEV'||data.codigo_tipo_pago_simple==  'DVPGPR')){
                 this.getBoton('btnAgregarDoc').enable();   
             }
+            
+            
+            if(data.estado=='vbconta'&&(data.codigo_tipo_pago_simple=='DVPGPROP')){
+                this.getBoton('btnAgregarDoc').enable();   
+            }
 
             if(data.estado=='borrador'&&data.codigo_tipo_pago_simple=='DVPGPR'){
                 this.getBoton('btnAgregarDoc').enable();   

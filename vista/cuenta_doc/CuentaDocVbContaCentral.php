@@ -4,7 +4,7 @@
 *@file CuentaDocVbContaCentral.php
 *@author  Gonzalo Sarmiento
 *@date 17-08-2016
-*@description Archivo con la interfaz de usuario que permite 
+*@description Archivo con la interfaz de usuario que permite
 *dar el visto a rendiciones desde la oficina Central
 *
 */
@@ -24,9 +24,9 @@ Phx.vista.CuentaDocVbContaCentral = {
     idMonedaBase: 0,
     monedaBase: '',
     idMoneda: 0,
-    
+
     constructor: function(config) {
-       
+
         //funcionalidad para listado de historicos
         this.historico = 'no';
         this.tbarItems = ['-',{
@@ -34,23 +34,23 @@ Phx.vista.CuentaDocVbContaCentral = {
             enableToggle: true,
             pressed: false,
             toggleHandler: function(btn, pressed) {
-               
+
                 if(pressed){
                     this.historico = 'si';
                      this.desBotoneshistorico();
                 }
                 else{
-                   this.historico = 'no' 
+                   this.historico = 'no'
                 }
-                
+
                 this.store.baseParams.historico = this.historico;
                 this.reload();
              },
             scope: this
            }];
-           
+
         var me = this;
-        this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {  
+        this.Atributos[this.getIndAtributo('importe')].config.renderer = function(value, p, record) {
             if (record.data.estado == 'vbrendicion') {
                 var saldo = me.roundTwo(record.data.importe_documentos) + me.roundTwo(record.data.importe_depositos) - me.roundTwo(record.data.importe_retenciones);
                 saldo = me.roundTwo(saldo);
@@ -84,10 +84,10 @@ Phx.vista.CuentaDocVbContaCentral = {
             grid:true,
             form:false
         });
-       
+
         Phx.vista.CuentaDocVbContaCentral.superclass.constructor.call(this,config);
         this.init();
-       
+
         this.addButton('onBtnRepSol', {
                 grupo : [0,1,2,3],
                 text : 'Reporte Sol.',
@@ -96,7 +96,7 @@ Phx.vista.CuentaDocVbContaCentral = {
                 handler : this.onBtnRepSol,
                 tooltip : '<b>Reporte de solicitud de fondos</b>'
         });
-        
+
         this.addButton('onBtnMemo', {
                 grupo : [0,1,2,3],
                 text : 'Memo',
@@ -114,11 +114,11 @@ Phx.vista.CuentaDocVbContaCentral = {
                 handler : this.onButtonSaldo,
                 tooltip : '<b>Devolucion/Reposicion para cierre de la cuenta documentada</b>'
         });
-        
-        
-       
+
+
+
         this.store.baseParams = { tipo_interfaz: this.nombreVista };
-        
+
         if(config.filtro_directo){
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
@@ -126,33 +126,33 @@ Phx.vista.CuentaDocVbContaCentral = {
         //primera carga
         this.store.baseParams.pes_estado = 'borrador';
         this.load({params:{start:0, limit:this.tam_pag}});
-        
-        
-        
+
+
+
         this.finCons = true;
 
         //Crea ventana para devoluci�n de saldos
         //this.crearVentanaDevolucion();
    },
-   
+
     preparaMenu:function(n){
         var data = this.getSelectedData();
         var tb =this.tbar;
-        Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n); 
+        Phx.vista.CuentaDoc.superclass.preparaMenu.call(this,n);
         this.getBoton('btnChequeoDocumentosWf').enable();
         this.getBoton('diagrama_gantt').enable();
         this.getBoton('btnObs').enable();
-        this.getBoton('chkpresupuesto').enable(); 
+        this.getBoton('chkpresupuesto').enable();
 
         if(this.sw_solicitud == 'si'){
-            this.getBoton('onBtnRepSol').enable(); 
+            this.getBoton('onBtnRepSol').enable();
         }
         else{
-            this.getBoton('onBtnRepSol').disable(); 
+            this.getBoton('onBtnRepSol').disable();
         }
 
         if(this.historico == 'no'){
-          
+
             if(data.estado == 'anulado' || data.estado == 'finalizado' || data.estado == 'pendiente'|| data.estado == 'contabilizado'|| data.estado=='rendido'||data.estado=='pendiente_tes'){
                 this.getBoton('ant_estado').disable();
                 this.getBoton('sig_estado').disable();
@@ -173,13 +173,13 @@ Phx.vista.CuentaDocVbContaCentral = {
             if(!data.dev_tipo&&data.estado == 'vbtesoreria'){
             this.getBoton('btnSaldo').enable();
             }
-        }     
+        }
         else{
           this.desBotoneshistorico();
-        }   
-        return tb 
+        }
+        return tb
    },
-   
+
    liberaMenu:function(){
         var tb = Phx.vista.CuentaDoc.superclass.liberaMenu.call(this);
         if(tb){
@@ -188,12 +188,12 @@ Phx.vista.CuentaDocVbContaCentral = {
             this.getBoton('btnChequeoDocumentosWf').disable();
             this.getBoton('diagrama_gantt').disable();
             this.getBoton('btnObs').disable();
-            this.getBoton('onBtnRepSol').disable(); 
-            this.getBoton('btnSaldo').disable(); 
+            this.getBoton('onBtnRepSol').disable();
+            this.getBoton('btnSaldo').disable();
         }
         return tb
     },
-    
+
     onButtonMemoDesignacion: function(){
                 var rec=this.sm.getSelected();
                 Ext.Ajax.request({
@@ -209,19 +209,19 @@ Phx.vista.CuentaDocVbContaCentral = {
                     scope:this
                 });
         },
-        
-     
-    
+
+
+
    tabsouth:[
          {
               url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetTes.php',
-              title:'Facturas', 
+              title:'Facturas',
               height:'50%',
               cls: 'RendicionDetTes'
          },
          /*{
              url:'../../../sis_cuenta_documentada/vista/rendicion_det/RendicionDetReg.php',
-             title:'Facturas', 
+             title:'Facturas',
              height:'50%',
              cls:'RendicionDetReg'
         },*/
@@ -345,7 +345,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             qtip: 'Monto a considerar para procesar la devolución, si va por Caja corresponde a la conversión del saldo a Bolivianos. En otros casos se mantiene el saldo en moneda original',
             style: 'background-color: #ffffb3; background-image: none;'
         });
-        
+
         //Combo moneda
         this.cmbMoneda = new Ext.form.ComboBox({
             name: 'cmbMoneda',
@@ -497,7 +497,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             width: 200
 
         });
- 
+
         //Combo cuenta bancaria
         this.cmbCuentaBancaria = new Ext.form.ComboBox({
             name: 'id_cuenta_bancaria',
@@ -576,7 +576,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             padding: this.paddingForm,
             bodyStyle: this.bodyStyleForm,
             border: this.borderForm,
-            frame: this.frameForm, 
+            frame: this.frameForm,
             autoScroll: false,
             autoDestroy: true,
             autoScroll: true,
@@ -613,7 +613,7 @@ Phx.vista.CuentaDocVbContaCentral = {
         this.cmbFormaDev.on('select', function(combo,record,index){
             var rec=this.sm.getSelected();
 
-            //Inicializaci�n
+            //Inicialización
             this.cmbCaja.allowBlank = true;
             this.cmbCaja.setVisible(false);
             this.txtNombreCheque.allowBlank=true;
@@ -623,7 +623,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             this.cmbDeptoLb.allowBlank = true;
             this.cmbDeptoLb.setVisible(false);
 
-            //L�gica
+            //Lógica
             if(record.data.valor=='caja'){
                 this.cmbCaja.allowBlank = false;
                 this.cmbCaja.setVisible(true);
@@ -657,6 +657,19 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.txtSaldo.setValue(this.txtSaldoOriginal.getValue());
                 this.txtMonedaProc.setValue(this.txtMoneda.getValue());
                 this.idMoneda = rec.data.id_moneda
+
+                //RCM 13-11-2018: Caso VI-2914-2018 Max Fernandez, la devolución a favor funcionario en USD solicita vaya por cheque pero en BS
+                if(rec.data.id_cuenta_doc == 10085){
+                    var fecha = new Date();
+                    this.convertirSaldo(this.txtSaldoOriginal.getValue(),rec.data.id_moneda,fecha.format("d/m/Y"),'O')
+                    this.idMoneda = this.idMonedaBase;
+                }
+
+                //Setea el store de la cuenta bancaria
+                Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: this.idMoneda});
+                this.cmbCuentaBancaria.setValue('');
+                this.cmbCuentaBancaria.modificado = true;
+
             } else if(record.data.valor=='deposito'){
                 //Reseteo de campos de caja
                 this.cmbCaja.setValue('');
@@ -672,6 +685,12 @@ Phx.vista.CuentaDocVbContaCentral = {
                 this.txtSaldo.setValue(this.txtSaldoOriginal.getValue());
                 this.txtMonedaProc.setValue(this.txtMoneda.getValue());
                 this.idMoneda = rec.data.id_moneda
+
+                //Setea el store de la cuenta bancaria
+                Ext.apply(this.cmbCuentaBancaria.store.baseParams, {id_moneda: this.idMoneda});
+                this.cmbCuentaBancaria.setValue('');
+                this.cmbCuentaBancaria.modificado = true;
+
             }  else {
                 //Reseteo de campos de caja y cheque
                 this.cmbCaja.setValue('');
@@ -797,8 +816,8 @@ Phx.vista.CuentaDocVbContaCentral = {
                                 //Valida que se hayan registrado los dep�sitos
                                 this.validaDepositos(rec,reg.datos);
                             } else {
-                                Ext.MessageBox.alert('Información','Debe registrar los datos de la Devolucion/Reposicion para continuar.');    
-                            } 
+                                Ext.MessageBox.alert('Información','Debe registrar los datos de la Devolucion/Reposicion para continuar.');
+                            }
                         } else {
                             Ext.MessageBox.alert('Información','Debe registrar los datos de la Devolucion/Reposicion para continuar.');
                         }
@@ -816,7 +835,7 @@ Phx.vista.CuentaDocVbContaCentral = {
             });
         }
     },
-    
+
     validaDepositos: function(rec, obj){
         Phx.CP.loadingShow();
         Ext.Ajax.request({

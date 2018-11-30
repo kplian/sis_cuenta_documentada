@@ -507,6 +507,31 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			grid: true,
 			form: true
 		},*/
+		
+			{
+			config: {
+				name: 'tipo_viaje',
+				fieldLabel: 'Tipo de Viaje',
+				tinit: false,
+				allowBlank: true,
+				origen: 'CATALOGO',
+				gdisplayField: 'tipo_viaje',
+				hiddenName: 'tipo_viaje',
+				gwidth: 100,
+				anchor: '100%',
+				baseParams:{
+					cod_subsistema:'CD',
+					catalogo_tipo:'tdestino__tipo'
+				},
+				valueField: 'codigo',
+				hidden: true
+			},
+			type: 'ComboRec',
+			id_grupo: 1,
+			filters:{pfiltro:'cdoc.tipo_viaje',type:'string'},
+			grid: true,
+			form: true
+		},
 		{
             config:{
                 name: 'id_moneda',
@@ -882,30 +907,7 @@ Phx.vista.CuentaDoc = Ext.extend(Phx.gridInterfaz,{
 			grid:true,
 			form:true
 		},
-		{
-			config: {
-				name: 'tipo_viaje',
-				fieldLabel: 'Tipo de Viaje',
-				tinit: false,
-				allowBlank: true,
-				origen: 'CATALOGO',
-				gdisplayField: 'tipo_viaje',
-				hiddenName: 'tipo_viaje',
-				gwidth: 100,
-				anchor: '100%',
-				baseParams:{
-					cod_subsistema:'CD',
-					catalogo_tipo:'tdestino__tipo'
-				},
-				valueField: 'codigo',
-				hidden: true
-			},
-			type: 'ComboRec',
-			id_grupo: 1,
-			filters:{pfiltro:'cdoc.tipo_viaje',type:'string'},
-			grid: true,
-			form: true
-		},
+	
 		{
 			config: {
 				name: 'medio_transporte',
