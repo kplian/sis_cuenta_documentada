@@ -1,18 +1,24 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_control_dui_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION cd.ft_control_dui_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_control_dui_sel
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tcontrol_dui'
  AUTOR: 		 (jjimenez)
- FECHA:	        29-11-2018 20:36:19
+ FECHA:	        13-09-2018 15:32:16
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				29-11-2018 20:36:19								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tcontrol_dui'	
+ #0				13-09-2018 15:32:16								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tcontrol_dui'	
  #
  ***************************************************************************/
 
@@ -29,46 +35,49 @@ BEGIN
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'CD_CONDUI_SEL'
+ 	#TRANSACCION:  'CD_CDUI_SEL'
  	#DESCRIPCION:	Consulta de datos
  	#AUTOR:		jjimenez	
- 	#FECHA:		29-11-2018 20:36:19
+ 	#FECHA:		13-09-2018 15:32:16
 	***********************************/
 
-	if(p_transaccion='CD_CONDUI_SEL')then
+	if(p_transaccion='CD_CDUI_SEL')then
      				
     	begin
     		--Sentencia de la consulta
 			v_consulta:='select
-						condui.id_control_dui,
-						condui.tramite_comision_agencia,
-						condui.id_agencia_despachante,
-						condui.monto_dui,
-						condui.nro_comprobante_pago_dui,
-						condui.dui,
-						condui.nro_comprobante_diario_dui,
-						condui.tramite_anticipo_dui,
-						condui.monto_comision,
-						condui.estado_reg,
-						condui.archivo_dui,
-						condui.observaciones,
-						condui.archivo_comision,
-						condui.pedido_sap,
-						condui.nro_comprobante_diario_comision,
-						condui.nro_factura_proveedor,
-						condui.tramite_pedido_endesis,
-						condui.nro_comprobante_pago_comision,
-						condui.id_usuario_reg,
-						condui.fecha_reg,
-						condui.usuario_ai,
-						condui.id_usuario_ai,
-						condui.fecha_mod,
-						condui.id_usuario_mod,
+						cdui.id_control_dui,
+						cdui.tramite_anticipo_dui,
+						cdui.dui,
+						cdui.archivo_comision,
+						cdui.nro_comprobante_diario_dui,
+						cdui.archivo_dui,
+						cdui.nro_comprobante_diario_comision,
+						cdui.nro_comprobante_pago_dui,
+						cdui.estado_reg,
+						cdui.monto_comision,
+						cdui.tramite_pedido_endesis,
+						cdui.monto_dui,
+						cdui.nro_factura_proveedor,
+						cdui.tramite_comision_agencia,
+						cdui.pedido_sap,
+						ad.nombre as agencia_despachante,
+						cdui.nro_comprobante_pago_comision,
+						cdui.fecha_reg,
+						cdui.usuario_ai,
+						cdui.id_usuario_reg,
+						cdui.id_usuario_ai,
+						cdui.fecha_mod,
+						cdui.id_usuario_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
-						from cd.tcontrol_dui condui
-						inner join segu.tusuario usu1 on usu1.id_usuario = condui.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = condui.id_usuario_mod
+						usu2.cuenta as usr_mod,
+                        --ad.nombre::varchar as nombre_agencia_despachante,
+                        cdui.id_agencia_despachante	,
+                        cdui.observaciones::text
+						from cd.tcontrol_dui cdui
+						inner join segu.tusuario usu1 on usu1.id_usuario = cdui.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = cdui.id_usuario_mod
+                        join cd.tagencia_despachante ad on ad.id_agencia_despachante=cdui.id_agencia_despachante
 				        where  ';
 			
 			--Definicion de la respuesta
@@ -81,20 +90,20 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'CD_CONDUI_CONT'
+ 	#TRANSACCION:  'CD_CDUI_CONT'
  	#DESCRIPCION:	Conteo de registros
  	#AUTOR:		jjimenez	
- 	#FECHA:		29-11-2018 20:36:19
+ 	#FECHA:		13-09-2018 15:32:16
 	***********************************/
 
-	elsif(p_transaccion='CD_CONDUI_CONT')then
+	elsif(p_transaccion='CD_CDUI_CONT')then
 
 		begin
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select count(id_control_dui)
-					    from cd.tcontrol_dui condui
-					    inner join segu.tusuario usu1 on usu1.id_usuario = condui.id_usuario_reg
-						left join segu.tusuario usu2 on usu2.id_usuario = condui.id_usuario_mod
+					    from cd.tcontrol_dui cdui
+					    inner join segu.tusuario usu1 on usu1.id_usuario = cdui.id_usuario_reg
+						left join segu.tusuario usu2 on usu2.id_usuario = cdui.id_usuario_mod
 					    where ';
 			
 			--Definicion de la respuesta		    
@@ -120,7 +129,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_control_dui_sel"(integer, integer, character varying, character varying) OWNER TO postgres;

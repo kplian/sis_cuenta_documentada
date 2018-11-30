@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.f_fun_inicio_pago_simple_wf (
   p_id_usuario integer,
   p_id_usuario_ai integer,
@@ -87,7 +89,7 @@ BEGIN
     elsif p_estado_anterior = 'borrador' then
 
         --Verifica que tenga facturas/recibos registrados cuando sea primero devengado y luego pago
-        if v_rec.codigo_tipo_pago_simple not in ( 'PAG_DEV', 'SOLO_PAG','ADU_GEST_ANT','DVPGPR') then
+        if v_rec.codigo_tipo_pago_simple not in ( 'PAG_DEV', 'SOLO_PAG','ADU_GEST_ANT','DVPGPR','DVPGPROP') then
             if not exists(select 1 from cd.tpago_simple_det
                         where id_pago_simple = v_rec.id_pago_simple) then
                 raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para procesar el pago.';
@@ -120,8 +122,11 @@ BEGIN
                 raise exception 'Debe agregar al menos un documento (facturas, recibos, etc.) para generar el comprobante diario';
             end if;
         end if;
-
-        if v_rec.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT','SOLO_DEV','DVPGPR') then
+      
+       --RAC 10/07/2018  comentado por que exigia prorrateo para devegados automaticos       
+       -- if v_rec.codigo_tipo_pago_simple IN ('PAG_DEV','ADU_GEST_ANT','SOLO_DEV','DVPGPR') then
+       
+        if v_rec.codigo_tipo_pago_simple IN ('ADU_GEST_ANT','SOLO_DEV','DVPGPR') then
             if not exists(select 1 from cd.tpago_simple_pro
                         where id_pago_simple = v_rec.id_pago_simple) then
                 raise exception 'Debe registrar el prorrateo para generar el comprobante diario';

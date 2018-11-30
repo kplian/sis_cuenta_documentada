@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -690,7 +692,7 @@ BEGIN
         ELSE
             v_obs='---';
         END IF;
-
+        
         IF v_codigo_estado_siguiente in ('vbgerencia','vbgaf') THEN
 
             --Verifica que si la cuenta documentada va por caja no exceda el maximo de la caja
@@ -878,7 +880,9 @@ BEGIN
         --------------------------------------------------
         --  ACTUALIZA EL NUEVO ESTADO DE LA CUENTA DOCUMENTADA
         ----------------------------------------------------
-
+/*if v_parametros.id_cuenta_doc = 6039 then
+    raise exception 'En revision ... ... %',v_id_proceso_wf;
+end if;*/
         IF cd.f_fun_inicio_cuenta_doc_wf(p_id_usuario,
                                         v_parametros._id_usuario_ai,
                                         v_parametros._nombre_usuario_ai,

@@ -1,7 +1,13 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_pago_simple_pro_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION cd.ft_pago_simple_pro_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_pago_simple_pro_sel
@@ -70,8 +76,10 @@ BEGIN
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
+            
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
+            raise notice  '%',v_consulta;
 			--Devuelve la respuesta
 			return v_consulta;
 						
@@ -121,7 +129,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_pago_simple_pro_sel"(integer, integer, character varying, character varying) OWNER TO postgres;

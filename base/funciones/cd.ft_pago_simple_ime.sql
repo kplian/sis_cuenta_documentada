@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_ime (
   p_administrador integer,
   p_id_usuario integer,
@@ -17,7 +19,7 @@ $body$
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
  #0				31-12-2017 12:33:30								Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple'	
- #
+ #1             13/06/2018               RAC                    Bloquear edicion de obligacion de pago
  ***************************************************************************/
 
 DECLARE
@@ -245,6 +247,9 @@ BEGIN
  	#DESCRIPCION:	Modificacion de registros
  	#AUTOR:		admin	
  	#FECHA:		31-12-2017 12:33:30
+    #             HISTORIAL DE MODIFICACIONES:
+    #ISSUE				FECHA				AUTOR				DESCRIPCION 
+    #1             13/06/2018               RAC             Bloquear edicion de obligacion de pago
 	***********************************/
 
 	elsif(p_transaccion='CD_PAGSIM_MOD')then
@@ -261,6 +266,11 @@ BEGIN
 
             if v_parametros.id_tipo_pago_simple <> v_pago_simple.id_tipo_pago_simple then
             	raise exception 'No es posible cambiar el Tipo de Pago';
+            end if;
+            
+            --#1 blqoeuar edicion de obligacion es de pago
+            if v_parametros.id_obligacion_pago <> v_pago_simple.id_obligacion_pago then
+            	raise exception 'No es posible cambiar  la olbigacion de pago';
             end if;
 			
 			--Sentencia de la modificacion
@@ -740,10 +750,12 @@ BEGIN
                      )
                 where id_pago_simple = v_parametros.id_pago_simple;
             end if;
-
-		    v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas/Documentos agregadas');
-		    v_resp = pxp.f_agrega_clave(v_resp,'tot_fact',(v_fac_imp - v_fac_imp_ant)::varchar);
-
+            IF (v_fac_imp - v_fac_imp_ant)=0 then
+              Raise exception 'No se encontraron documentos para agregar, revise la moneda, tipo de documento y usuario que registra la factura';
+            ELSE
+              v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Facturas/Documentos agregadas');
+              v_resp = pxp.f_agrega_clave(v_resp,'tot_fact',(v_fac_imp - v_fac_imp_ant)::varchar);
+            END IF;
           	--Devuelve la respuesta
             return v_resp;
 

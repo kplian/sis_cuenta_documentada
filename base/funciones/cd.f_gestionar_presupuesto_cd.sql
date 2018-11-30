@@ -67,6 +67,7 @@ DECLARE
     v_pre_verificar_tipo_cc     varchar;
     v_control_partida           varchar;
     va_resp_pre                 varchar[];
+    v_cod_pre           varchar;
   
 BEGIN
  
@@ -83,7 +84,6 @@ BEGIN
     v_reg_sol
     from cd.tcuenta_doc c
     where c.id_cuenta_doc = p_id_cuenta_doc;
-    
     
   
     --Lógica a aplicar por operación
@@ -323,7 +323,7 @@ BEGIN
         v_pre_verificar_categoria = pxp.f_get_variable_global('pre_verificar_categoria');
         v_pre_verificar_tipo_cc = pxp.f_get_variable_global('pre_verificar_tipo_cc');
         v_control_partida = 'si'; --por defeto controlamos los monstos por partidas 
-          
+           
         --Lógica en función si la verificación es agrupada o no
         if v_pre_verificar_categoria = 'no' and v_pre_verificar_tipo_cc = 'no' then
             --Verifica agrupando por presupuesto    
@@ -379,7 +379,7 @@ BEGIN
             end loop;
         
         else
-        
+      
             IF  v_pre_verificar_categoria = 'si'  THEN
             
                   --Verifica agrupando por categoria programatica
@@ -445,7 +445,7 @@ BEGIN
             
             
             ELSEIF v_pre_verificar_tipo_cc = 'si' THEN
-            
+
                         --RAC 27/02/2018  verificacion presupeustaria por control de techo y partida
                         --Verifica agrupando por TIPO DE PRESUPUESTO TECHO    
                         for v_registros in (select                                           
@@ -489,11 +489,18 @@ BEGIN
                                                 nombre_partida_desc
                                             ) loop
                                             
+                                            select 
+                                            tp.codigo
+                                            into v_cod_pre
+                                            from pre.tpresupuesto pres
+                                            join pre.ttipo_presupuesto tp on tp.codigo = pres.tipo_pres
+                                            where pres.id_centro_costo = v_registros.id_centro_costos[1];
                                             
                                             
                                                      
-                            --Verifica que no sea partida de flujo
-                             -- if v_registros.sw_movimiento != 'flujo' then
+                              --Verifica que no sea partida de flujo
+                              --if v_registros.sw_movimiento != 'flujo' then
+                               if v_cod_pre!='0' then
                                   v_resp_pre = pre.f_verificar_presupuesto_partida ( v_registros.id_centro_costos[1],
                                                                                     v_registros.id_par,
                                                                                     v_registros.id_moneda,
@@ -502,7 +509,9 @@ BEGIN
                                                                                     
                                                                                     
                                   va_resp_pre = string_to_array(v_resp_pre,',');                                                  
-                                                                                
+/*if p_id_cuenta_doc = 6039 then
+	raise exception 'rcm verificar ... $$ %, %, %, %',v_registros.id_centro_costos[1],v_registros.id_par,v_registros.id_moneda,v_registros.precio_total_final;
+end if;*/                                                                                              
                                   if va_resp_pre[1] = 'false' then
                                       v_mensage_error = v_mensage_error||format('Presupuesto:  %s, ( %s) necesitamos %s, tenemos %s <br/>', v_registros.codigo_techo, v_registros.nombre_partida_desc,v_registros.precio_total_final::varchar,va_resp_pre[2] );    
                                       v_sw_error = true;
@@ -511,7 +520,7 @@ BEGIN
                                        --raise exception ' UTI, % , %, %, % , %',v_registros.id_centro_costos[1],  v_registros.id_par,v_registros.id_moneda, v_registros.precio_total_final, p_id_cuenta_doc;  
                                    
                                   end if;
-                          --  end if;
+                           end if;
 
                     end loop;
             
