@@ -586,6 +586,8 @@ VALUES (E'cd_solo_una_rendicion_mes', E'no', E'Habilita o no más de una rendici
 /***********************************F-DAT-RCM-CD-0-14/12/2017*****************************************/
 
 /***********************************I-DAT-RCM-CD-0-06/01/2018*****************************************/
+select pxp.f_insert_tgui ('Pagos Simplificados (aduanas, pagos sap, pasajes)', 'Pagos', 'PAGSIM', 'si', 1, '', 2, '', '', 'CD');
+select pxp.f_insert_testructura_gui ('PAGSIM', 'CD');
 select pxp.f_insert_tgui ('VoBo Pagos', 'Visto bueno de Pagos', 'PGSVOBO', 'si', 3, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleVb.php', 3, '', 'PagoSimpleVb', 'CD');
 select pxp.f_insert_testructura_gui ('PGSVOBO', 'PAGSIM');
 select pxp.f_insert_tgui ('Tipo de Pago', 'Tipo de Pago Simple', 'PGSTIPPA', 'si', 0, 'sis_cuenta_documentada/vista/tipo_pago_simple/TipoPagoSimple.php', 3, '', 'TipoPagoSimple', 'CD');

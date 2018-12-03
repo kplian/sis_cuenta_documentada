@@ -21,6 +21,9 @@ $body$
  DESCRIPCION: MODIFICACIONES PARA EL CASO DE VIATICOS
  AUTOR: RCM
  FECHA: 05/09/2017
+
+ ISSUE      FECHA         AUTHOR        DESCRIPCION
+#1        28/11/2018    RCM           Validación al editar solicitud, no permitir cambiar de gestión (CD_CDOC_MOD)
 ***************************************************************************/
 
 DECLARE
@@ -114,6 +117,8 @@ DECLARE
     v_saldo                         numeric;
     v_id_moneda                     integer;
     v_tmp_resp                      boolean;
+    v_codigos                       varchar;
+    v_id_gestion_sol                integer;
 
 BEGIN
 
@@ -538,6 +543,18 @@ BEGIN
               v_id_plantilla = v_parametros.id_plantilla;
             end if;
 
+            --#2 Inicio
+            --Verifica que no esté modificando la gestión de la fecha de la solicitud
+            select id_gestion, fecha
+            into v_registros
+            from cd.tcuenta_doc
+            where id_cuenta_doc = v_parametros.id_cuenta_doc;
+
+            if v_registros.id_gestion <> v_id_gestion then
+                raise exception 'La solicitud fue creada en la gestión % y no puede cambiarse a la gestión % debido a que el Nro. de trámite se generó para la gestión original. Si necesita cambiar de gestión, tendrá que eliminar esta solicitud y crear otra', to_char(v_registros.fecha,'yyyy'),to_char(v_parametros.fecha,'yyyy');
+            end if;
+            --#2 Fin
+
             --Sentencia de la modificacion
             update cd.tcuenta_doc set
                 nombre_cheque = v_parametros.nombre_cheque,
@@ -634,7 +651,7 @@ BEGIN
     ***********************************/
 
     elseif(p_transaccion='CD_SIGESCD_IME')then
-        
+
         begin
 
          /*   PARAMETROS
@@ -692,7 +709,7 @@ BEGIN
         ELSE
             v_obs='---';
         END IF;
-        
+
         IF v_codigo_estado_siguiente in ('vbgerencia','vbgaf') THEN
 
             --Verifica que si la cuenta documentada va por caja no exceda el maximo de la caja
@@ -743,7 +760,7 @@ BEGIN
                             where id_cuenta_doc = v_parametros.id_cuenta_doc) then
                     raise exception 'Debe registrar el Itinerario del viaje.';
                 end if;
-                
+
                 --Verificación del prorrateo
                 select sum(prorrateo)
                 into v_total_prorrateo
@@ -1079,24 +1096,25 @@ end if;*/
 
             --Recuperar datos de la solicitud
             select
-              c.id_estado_wf,
-              c.id_proceso_wf,
-              c.estado,
-              c.id_funcionario,
-              c.id_depto,
-              c.id_depto_conta,
-              c.id_depto_lb,
-              c.id_moneda,
-              c.id_uo,
-              c.id_funcionario_gerente,
-              c.nro_tramite,
-              c.id_gestion,
-              c.importe,
-              c.id_escala,
-              c.tipo_contrato,
-              c.cantidad_personas,
-              c.aplicar_regla_15,
-              c.tipo_pago
+            c.id_estado_wf,
+            c.id_proceso_wf,
+            c.estado,
+            c.id_funcionario,
+            c.id_depto,
+            c.id_depto_conta,
+            c.id_depto_lb,
+            c.id_moneda,
+            c.id_uo,
+            c.id_funcionario_gerente,
+            c.nro_tramite,
+            c.id_gestion,
+            c.importe,
+            c.id_escala,
+            c.tipo_contrato,
+            c.cantidad_personas,
+            c.aplicar_regla_15,
+            c.tipo_pago,
+            c.fecha
             into
               v_registros_cd
             from cd.tcuenta_doc c
@@ -1189,9 +1207,6 @@ end if;*/
                 end if;
 
                --contamos la cantidad rendciones para la misma solicitud
-
-
-
                select
                  count(c.id_cuenta_doc)
                into
@@ -1199,9 +1214,7 @@ end if;*/
                from cd.tcuenta_doc c
                where c.id_cuenta_doc_fk = v_parametros.id_cuenta_doc_fk;
 
-
                v_num_rend = COALESCE(v_num_rend,0) + 1;
-
 
                 --Obtencion del depto de conta
                 v_id_depto_conta = v_registros_cd.id_depto_conta;
@@ -1305,14 +1318,66 @@ end if;*/
                     v_registros_cd.tipo_pago
                 )RETURNING id_cuenta_doc into v_id_cuenta_doc;
 
+            ----------------------------------------------------------
             --Replica el prorrateo de la solicitud (usado en viaticos)
-            insert into cd.tcuenta_doc_prorrateo(
-            id_usuario_reg,fecha_reg,estado_reg,id_cuenta_doc,id_centro_costo,prorrateo
-            )
-            select
-            p_id_usuario, now(), 'activo', v_id_cuenta_doc, id_centro_costo, prorrateo
-            from cd.tcuenta_doc_prorrateo cp
-            where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+            ----------------------------------------------------------
+            if v_registros_cd.id_gestion <> v_id_gestion then
+                --Valida que existan las equivalencias de CC en la gestión de la rendición
+                if exists(select 1
+                        from cd.tcuenta_doc_prorrateo cp
+                        inner join param.tcentro_costo cc
+                        on cc.id_centro_costo = cp.id_centro_costo
+                        inner join param.ttipo_cc tcc
+                        on tcc.id_tipo_cc = cc.id_tipo_cc
+                        left join param.tcentro_costo ccd
+                        on ccd.id_tipo_cc = tcc.id_tipo_cc
+                        and ccd.id_gestion = v_id_gestion
+                        where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk
+                        and coalesce(ccd.id_centro_costo,0) = 0)  then
+
+                    --Obtiene los códigos de CC que no tienen la equivalencia
+                    select pxp.list(tcc.codigo)::varchar
+                    into v_codigos
+                    from cd.tcuenta_doc_prorrateo cp
+                    inner join param.tcentro_costo cc
+                    on cc.id_centro_costo = cp.id_centro_costo
+                    inner join param.ttipo_cc tcc
+                    on tcc.id_tipo_cc = cc.id_tipo_cc
+                    left join param.tcentro_costo ccd
+                    on ccd.id_tipo_cc = tcc.id_tipo_cc
+                    and ccd.id_gestion = v_id_gestion
+                    where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk
+                    and coalesce(ccd.id_centro_costo,0) = 0;
+
+                    raise exception 'No existen Centro de Costo: %, para la gestión %',v_codigos, to_char(v_parametros.fecha,'yyyy');
+                end if;
+
+                --Hace copia del prorrateo de la solicitud, pero busca los CC equivalentes en la gestión definida en la rendición
+                insert into cd.tcuenta_doc_prorrateo(
+                id_usuario_reg,fecha_reg,estado_reg,id_cuenta_doc,id_centro_costo,prorrateo
+                )
+                select
+                p_id_usuario, now(), 'activo', v_id_cuenta_doc, ccd.id_centro_costo, cp.prorrateo
+                from cd.tcuenta_doc_prorrateo cp
+                inner join param.tcentro_costo cc
+                on cc.id_centro_costo = cp.id_centro_costo
+                inner join param.ttipo_cc tcc
+                on tcc.id_tipo_cc = cc.id_tipo_cc
+                inner join param.tcentro_costo ccd
+                on ccd.id_tipo_cc = tcc.id_tipo_cc
+                and ccd.id_gestion = v_id_gestion
+                where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+
+            else
+                --Replica el prorrateo sin ninguna modificación
+                insert into cd.tcuenta_doc_prorrateo(
+                id_usuario_reg,fecha_reg,estado_reg,id_cuenta_doc,id_centro_costo,prorrateo
+                )
+                select
+                p_id_usuario, now(), 'activo', v_id_cuenta_doc, id_centro_costo, prorrateo
+                from cd.tcuenta_doc_prorrateo cp
+                where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+            end if;
 
             --Replica el destino registrado en la solicitud
             insert into cd.tcuenta_doc_itinerario(
@@ -1335,6 +1400,7 @@ end if;*/
 
              -- inserta documentos en estado borrador si estan configurados
             v_resp_doc =  wf.f_inserta_documento_wf(p_id_usuario, v_id_proceso_wf, v_id_estado_wf);
+
             -- verificar documentos
             v_resp_doc = wf.f_verifica_documento(p_id_usuario, v_id_estado_wf);
 
@@ -1435,6 +1501,11 @@ end if;*/
             AND cd.id_cuenta_doc!=v_parametros.id_cuenta_doc
             AND cd.estado_reg = 'activo';
 
+          select id_gestion
+          into v_id_gestion_sol
+          from cd.tcuenta_doc
+          where id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+
             if v_solo_una_rendicion_mes = 'si' then
                 IF v_fecha_ini IS NOT NULL and v_fecha_fin IS NOT NULL THEN
                   raise exception 'Ya se registro una rendicion parcial para el rango de fechas %  %', v_fecha_ini, v_fecha_fin;
@@ -1462,11 +1533,73 @@ end if;*/
                 aplicar_regla_15 = coalesce(v_parametros.aplicar_regla_15,'si')
             where id_cuenta_doc=v_parametros.id_cuenta_doc;
 
+            ----------------------------------------------------------
+        --Replica el prorrateo de la solicitud (usado en viaticos)
+        ----------------------------------------------------------
+        delete from cd.tcuenta_doc_prorrateo where id_cuenta_doc = v_parametros.id_cuenta_doc;
+        if v_id_gestion_sol <> v_id_gestion then
+            --Valida que existan las equivalencias de CC en la gestión de la rendición
+            if exists(select 1
+                    from cd.tcuenta_doc_prorrateo cp
+                    inner join param.tcentro_costo cc
+                    on cc.id_centro_costo = cp.id_centro_costo
+                    inner join param.ttipo_cc tcc
+                    on tcc.id_tipo_cc = cc.id_tipo_cc
+                    left join param.tcentro_costo ccd
+                    on ccd.id_tipo_cc = tcc.id_tipo_cc
+                    and ccd.id_gestion = v_id_gestion
+                    where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk
+                    and coalesce(ccd.id_centro_costo,0) = 0)  then
+
+                --Obtiene los códigos de CC que no tienen la equivalencia
+                select pxp.list(tcc.codigo)::varchar
+                into v_codigos
+                from cd.tcuenta_doc_prorrateo cp
+                inner join param.tcentro_costo cc
+                on cc.id_centro_costo = cp.id_centro_costo
+                inner join param.ttipo_cc tcc
+                on tcc.id_tipo_cc = cc.id_tipo_cc
+                left join param.tcentro_costo ccd
+                on ccd.id_tipo_cc = tcc.id_tipo_cc
+                and ccd.id_gestion = v_id_gestion
+                where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk
+                and coalesce(ccd.id_centro_costo,0) = 0;
+
+                raise exception 'No existen Centro de Costo: %, para la gestión %',v_codigos, to_char(v_parametros.fecha,'yyyy');
+            end if;
+
+            --Hace copia del prorrateo de la solicitud, pero busca los CC equivalentes en la gestión definida en la rendición
+            insert into cd.tcuenta_doc_prorrateo(
+            id_usuario_reg,fecha_reg,estado_reg,id_cuenta_doc,id_centro_costo,prorrateo
+            )
+            select
+            p_id_usuario, now(), 'activo', v_parametros.id_cuenta_doc, ccd.id_centro_costo, cp.prorrateo
+            from cd.tcuenta_doc_prorrateo cp
+            inner join param.tcentro_costo cc
+            on cc.id_centro_costo = cp.id_centro_costo
+            inner join param.ttipo_cc tcc
+            on tcc.id_tipo_cc = cc.id_tipo_cc
+            inner join param.tcentro_costo ccd
+            on ccd.id_tipo_cc = tcc.id_tipo_cc
+            and ccd.id_gestion = v_id_gestion
+            where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+
+        else
+            --Replica el prorrateo sin ninguna modificación
+            insert into cd.tcuenta_doc_prorrateo(
+            id_usuario_reg,fecha_reg,estado_reg,id_cuenta_doc,id_centro_costo,prorrateo
+            )
+            select
+            p_id_usuario, now(), 'activo', v_parametros.id_cuenta_doc, id_centro_costo, prorrateo
+            from cd.tcuenta_doc_prorrateo cp
+            where cp.id_cuenta_doc = v_parametros.id_cuenta_doc_fk;
+        end if;
+
             --Cálculo del viático
             if v_registros_cd.codigo_tipo_cuenta_doc in ('SOLVIA','RVI') then
                 v_resp1 = cd.f_viatico_calcular(p_id_usuario,v_parametros._id_usuario_ai,v_parametros._nombre_usuario_ai,v_parametros.id_cuenta_doc,'rendicion');
             end if;
-            
+
 
       --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Cuenta Documentada rendición  modificado(a)');
@@ -1565,7 +1698,7 @@ end if;*/
                 IF p_administrador !=1 THEN
                     IF v_id_funcionario is null THEN
                         raise exception 'El usuario no tiene un funcionario';
-                    END IF;                
+                    END IF;
                 END IF;
 
 
@@ -1795,7 +1928,7 @@ end if;*/
     elsif(p_transaccion='CD_CDRETOT_VAL')then
 
         begin
-            
+
             select * into v_registros_cd from cd.f_get_saldo_totales_cuenta_doc(v_parametros.id_cuenta_doc);
 
             --Casos especiales para devolver en bolivianos lo entregado en dólares, geda, vi-000473-2018
@@ -1985,10 +2118,10 @@ end if;*/
                     raise exception 'No se puede determinar a favor de quien es el saldo de la cuenta documentada';
                 end if;
 
-            else 
+            else
                 v_mensaje = 'Acción realizada';
             end if;
-            
+
             --Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje',v_mensaje);
             v_resp = pxp.f_agrega_clave(v_resp,'dev_tipo',v_parametros.dev_tipo);
@@ -2021,7 +2154,7 @@ end if;*/
 
             --Elimna todo el prorrateo y lo vuelve a generar
             delete from cd.tcuenta_doc_prorrateo where id_cuenta_doc = v_parametros.id_cuenta_doc;
-            
+
             if v_parametros.id_cuenta_doc = 800 then
 --              raise exception 'Procesando ... %  %',v_parametros.id_sigema,v_parametros.tipo_sol_sigema;
             end if;
