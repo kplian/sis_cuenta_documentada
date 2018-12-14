@@ -116,7 +116,6 @@ select wf.f_import_testructura_estado ('delete','vbgerencia','vbgaf','SFA',NULL,
 select wf.f_import_testructura_estado ('insert','vbgaf','vbtesoreria','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','borrador','vbgaf','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','vbgerencia','vbtesoreria','SFA',1,'');
-select wf.f_import_tfuncionario_tipo_estado ('insert','vbgaf','SFA','3027798',NULL,'');
 ----------------------------------
 --COPY LINES TO SUBSYSTEM dependencies.sql FILE  
 ---------------------------------
@@ -178,7 +177,6 @@ select wf.f_import_testructura_estado ('delete','vbgerencia','vbgaf','SFA',NULL,
 select wf.f_import_testructura_estado ('insert','vbgaf','vbtesoreria','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','borrador','vbgaf','SFA',1,'');
 select wf.f_import_testructura_estado ('insert','vbgerencia','vbtesoreria','SFA',1,'');
-select wf.f_import_tfuncionario_tipo_estado ('insert','vbgaf','SFA','3027798',NULL,'');
 --------------------------------------
 --COPY LINES TO SUBSYSTEM dependencies.sql FILE  
 ------------------------------------

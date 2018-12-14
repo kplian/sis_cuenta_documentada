@@ -282,6 +282,28 @@ COMMENT ON COLUMN cd.tcuenta_doc.importe_total_rendido
 IS 'importe rendido, solo en solicitudesse llena cuando las rendiciones son finalizadas, peude llegar a ser negativo si se rinde mas de lo solicitado';
 
 
+
+CREATE TABLE cd.tdeposito_cd (
+  id_deposito_cd SERIAL, 
+  id_cuenta_doc INTEGER, 
+  id_libro_bancos INTEGER, 
+  importe_contable_deposito NUMERIC(20,2), 
+  CONSTRAINT tdeposito_cd_pkey PRIMARY KEY(id_deposito_cd), 
+  CONSTRAINT fk_tdeposito_cd__id_cuenta_doc FOREIGN KEY (id_cuenta_doc)
+    REFERENCES cd.tcuenta_doc(id_cuenta_doc)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE, 
+  CONSTRAINT fk_tdeposito_cd__id_libro_bancos FOREIGN KEY (id_libro_bancos)
+    REFERENCES tes.tts_libro_bancos(id_libro_bancos)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE
+) INHERITS (pxp.tbase)
+
+WITH (oids = false);
+
+
 /***********************************F-SCP-CD-RAC-1-24/05/2016****************************************/
 
 
@@ -1630,3 +1652,22 @@ GRANT SELECT
 
 /***********************************F-SCP-CD-JJA-1-01/12/2018****************************************/
 
+/***********************************I-SCP-CD-CAP-0-05/12/2018****************************************/
+
+ALTER TABLE cd.tpago_simple_tmp
+  ADD CONSTRAINT tpago_simple_tmp_pkey 
+    PRIMARY KEY (id) NOT DEFERRABLE;
+
+
+ALTER TABLE cd.tcontrol_dui
+  ALTER COLUMN id_control_dui SET STATISTICS 0;
+
+ALTER TABLE cd.tcontrol_dui
+  ALTER COLUMN dui SET STATISTICS 0;
+
+ALTER TABLE cd.tcontrol_dui
+  ALTER COLUMN nro_factura_proveedor SET STATISTICS 0;
+
+
+
+/***********************************F-SCP-CD-CAP-0-05/12/2018****************************************/

@@ -2267,3 +2267,362 @@ AS
 
 /***********************************F-DEP-RCM-CD-0-03/12/2018*****************************************/
 
+/***********************************I-DEP-RCM-CD-0-04/12/2018*****************************************/
+ALTER TABLE cd.tagencia_despachante
+  ADD PRIMARY KEY (id_agencia_despachante);
+
+ALTER TABLE cd.tcontrol_dui
+  ADD PRIMARY KEY (id_control_dui);
+
+ALTER TABLE cd.tbloqueo_cd
+  ADD CONSTRAINT fk_tbloqueo_cd__id_tipo_cuenta_doc FOREIGN KEY (id_tipo_cuenta_doc)
+    REFERENCES cd.ttipo_cuenta_doc(id_tipo_cuenta_doc)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tbloqueo_cd
+  ADD CONSTRAINT fk_tbloqueo_cd__id_funcionario FOREIGN KEY (id_funcionario)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcontrol_dui
+  ADD CONSTRAINT fk_tcontrol_dui__id_agencia_despachante FOREIGN KEY (id_agencia_despachante)
+    REFERENCES cd.tagencia_despachante(id_agencia_despachante)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_funcionario_aprobador FOREIGN KEY (id_funcionario_aprobador)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc
+  ADD CONSTRAINT fk_tcuenta_doc__id_moneda_dev FOREIGN KEY (id_moneda_dev)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc_det
+  ADD CONSTRAINT fk_tcuenta_doc_det__id_partida_ejecucion FOREIGN KEY (id_partida_ejecucion)
+    REFERENCES pre.tpartida_ejecucion(id_partida_ejecucion)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc_excepcion
+  ADD CONSTRAINT fk_tcuenta_doc_excepcion__id_cuenta_doc FOREIGN KEY (id_cuenta_doc)
+    REFERENCES cd.tcuenta_doc(id_cuenta_doc)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tcuenta_doc_excepcion
+  ADD CONSTRAINT fk_tcuenta_doc_excepcion__id_usuario FOREIGN KEY (id_usuario)
+    REFERENCES segu.tusuario(id_usuario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tescala_regla
+  ADD CONSTRAINT fk_tescala_regla__id_escala FOREIGN KEY (id_escala)
+    REFERENCES cd.tescala(id_escala)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tescala_regla
+  ADD CONSTRAINT fk_tescala_regla__id_unidad_medida FOREIGN KEY (id_unidad_medida)
+    REFERENCES param.tunidad_medida(id_unidad_medida)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tescala_regla
+  ADD CONSTRAINT fk_tescala_regla__id_concepto_ingas FOREIGN KEY (id_concepto_ingas)
+    REFERENCES param.tconcepto_ingas(id_concepto_ingas)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_caja FOREIGN KEY (id_caja)
+    REFERENCES tes.tcaja(id_caja)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_depto_conta FOREIGN KEY (id_depto_conta)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_cuenta_bancaria FOREIGN KEY (id_cuenta_bancaria)
+    REFERENCES tes.tcuenta_bancaria(id_cuenta_bancaria)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_depto_lb FOREIGN KEY (id_depto_lb)
+    REFERENCES param.tdepto(id_depto)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_estado_wf FOREIGN KEY (id_estado_wf)
+    REFERENCES wf.testado_wf(id_estado_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_funcionario FOREIGN KEY (id_funcionario)
+    REFERENCES orga.tfuncionario(id_funcionario)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_moneda FOREIGN KEY (id_moneda)
+    REFERENCES param.tmoneda(id_moneda)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_obligacion_pago FOREIGN KEY (id_obligacion_pago)
+    REFERENCES tes.tobligacion_pago(id_obligacion_pago)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_proceso_wf FOREIGN KEY (id_proceso_wf)
+    REFERENCES wf.tproceso_wf(id_proceso_wf)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_proveedor FOREIGN KEY (id_proveedor)
+    REFERENCES param.tproveedor(id_proveedor)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_solicitud_pago FOREIGN KEY (id_solicitud_efectivo)
+    REFERENCES tes.tsolicitud_efectivo(id_solicitud_efectivo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple
+  ADD CONSTRAINT fk_tpago_simple__id_tipo_pago_simple FOREIGN KEY (id_tipo_pago_simple)
+    REFERENCES cd.ttipo_pago_simple(id_tipo_pago_simple)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_det
+  ADD CONSTRAINT fk_tpago_simple_det__id_pago_simple FOREIGN KEY (id_pago_simple)
+    REFERENCES cd.tpago_simple(id_pago_simple)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_det
+  ADD CONSTRAINT fk_tpago_simple_det__id_doc_compra_venta FOREIGN KEY (id_doc_compra_venta)
+    REFERENCES conta.tdoc_compra_venta(id_doc_compra_venta)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_pro
+  ADD CONSTRAINT fk_tpago_simple_pro__id_pago_simple FOREIGN KEY (id_pago_simple)
+    REFERENCES cd.tpago_simple(id_pago_simple)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_pro
+  ADD CONSTRAINT fk_tpago_simple_pro__id_concepto_ingas FOREIGN KEY (id_concepto_ingas)
+    REFERENCES param.tconcepto_ingas(id_concepto_ingas)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_pro
+  ADD CONSTRAINT fk_tpago_simple_pro__id_centro_costo FOREIGN KEY (id_centro_costo)
+    REFERENCES param.tcentro_costo(id_centro_costo)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.tpago_simple_pro
+  ADD CONSTRAINT fk_tpago_simple_pro__id_partida FOREIGN KEY (id_partida)
+    REFERENCES pre.tpartida(id_partida)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+
+ALTER TABLE cd.ttipo_categoria
+  ADD CONSTRAINT fk_ttipo_categoria__id_escala FOREIGN KEY (id_escala)
+    REFERENCES cd.tescala(id_escala)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION
+    NOT DEFERRABLE;
+/***********************************F-DEP-RCM-CD-0-04/12/2018*****************************************/
+
+/***********************************I-DEP-CAP-CD-0-04/12/2018*****************************************/
+
+CREATE OR REPLACE VIEW cd.vcuenta_doc (
+    id_cuenta_doc,
+    id_funcionario,
+    id_depto_conta,
+    fecha_cbte,
+    id_moneda,
+    id_gestion,
+    id_cuenta_bancaria,
+    id_cuenta_bancaria_mov,
+    importe,
+    nro_tramite,
+    funcionario_solicitante,
+    id_depto_lb,
+    nro_cuenta,
+    id_institucion,
+    nombre_cheque,
+    motivo,
+    tipo_pago,
+    nombre_pago,
+    prioridad,
+    id_proceso_wf,
+    correo_solicitante,
+    moneda)
+AS
+SELECT cd.id_cuenta_doc,
+    cd.id_funcionario,
+    cd.id_depto_conta,
+    cd.fecha AS fecha_cbte,
+    cd.id_moneda,
+    cd.id_gestion,
+    cd.id_cuenta_bancaria,
+    cd.id_cuenta_bancaria_mov,
+    cd.importe,
+    cd.nro_tramite,
+    f.desc_funcionario1 AS funcionario_solicitante,
+    cd.id_depto_lb,
+    fcb.nro_cuenta,
+    fcb.id_institucion,
+    cd.nombre_cheque,
+    cd.motivo,
+    cd.tipo_pago,
+        CASE
+            WHEN cd.tipo_pago::text = 'cheque'::text THEN cd.nombre_cheque
+            ELSE f.desc_funcionario1::character varying
+        END AS nombre_pago,
+    de.prioridad,
+    cd.id_proceso_wf,
+    fu.email_empresa AS correo_solicitante,
+    mo.codigo AS moneda
+FROM cd.tcuenta_doc cd
+     JOIN orga.vfuncionario f ON f.id_funcionario = cd.id_funcionario
+     JOIN orga.tfuncionario fu ON fu.id_funcionario = cd.id_funcionario
+     JOIN param.tdepto de ON de.id_depto = cd.id_depto
+     JOIN param.tmoneda mo ON mo.id_moneda = cd.id_moneda
+     LEFT JOIN orga.tfuncionario_cuenta_bancaria fcb ON
+         fcb.id_funcionario_cuenta_bancaria = cd.id_funcionario_cuenta_bancaria;
+
+/***********************************F-DEP-CAP-CD-0-04/12/2018*****************************************/
+
+/***********************************I-DEP-RCM-CD-0-07/12/2018*****************************************/
+CREATE OR REPLACE VIEW cd.vpago_simple_det_prorrateado(
+    id_pago_simple,
+    id_moneda,
+    id_depto_conta,
+    id_depto_lb,
+    id_cuenta_bancaria,
+    id_funcionario,
+    id_proveedor,
+    desc_proveedor,
+    id_proceso_wf,
+    id_estado_wf,
+    nro_tramite,
+    obs,
+    id_pago_simple_det,
+    id_doc_compra_venta,
+    id_doc_concepto,
+    id_obligacion_det,
+    id_obligacion_pago,
+    id_partida,
+    id_centro_costo,
+    factor,
+    importe_pro,
+    total_pagado,
+    id_concepto_ingas,
+    id_plantilla,
+    descripcion,
+    porc_monto_excento_var)
+AS
+  SELECT psd.id_pago_simple,
+         ps.id_moneda,
+         ps.id_depto_conta,
+         ps.id_depto_lb,
+         ps.id_cuenta_bancaria,
+         ps.id_funcionario,
+         ps.id_proveedor,
+         CASE COALESCE(ps.id_funcionario, 0)
+           WHEN 0 THEN pro.desc_proveedor::text
+           ELSE fun.desc_funcionario1
+         END AS desc_proveedor,
+         ps.id_proceso_wf,
+         ps.id_estado_wf,
+         ps.nro_tramite,
+         ps.obs,
+         psd.id_pago_simple_det,
+         dcv.id_doc_compra_venta,
+         dc.id_doc_concepto,
+         opd.id_obligacion_det,
+         op.id_obligacion_pago,
+         opd.id_partida,
+         cc1.id_centro_costo,
+         opd.monto_pago_mb / op.total_pago AS factor,
+         dc.precio_total_final *(opd.monto_pago_mo / op.total_pago) AS
+           importe_pro,
+         ps.importe AS total_pagado,
+         dc.id_concepto_ingas,
+         dcv.id_plantilla,
+         dc.descripcion,
+         (COALESCE(dcv.importe_excento, 0::numeric) + COALESCE(dcv.importe_ice,
+           0::numeric)) / dcv.importe_neto AS porc_monto_excento_var
+  FROM cd.tpago_simple ps
+       JOIN cd.tpago_simple_det psd ON psd.id_pago_simple = ps.id_pago_simple
+       JOIN conta.tdoc_compra_venta dcv ON dcv.id_doc_compra_venta =
+         psd.id_doc_compra_venta
+       JOIN conta.tdoc_concepto dc ON dc.id_doc_compra_venta =
+         dcv.id_doc_compra_venta
+       LEFT JOIN tes.tobligacion_pago op ON op.id_obligacion_pago =
+         ps.id_obligacion_pago
+       LEFT JOIN tes.tobligacion_det opd ON opd.id_obligacion_pago =
+         op.id_obligacion_pago
+       LEFT JOIN param.tcentro_costo cc on cc.id_centro_costo = opd.id_centro_costo
+       LEFT JOIN param.tcentro_costo cc1 on cc1.id_tipo_cc = cc.id_tipo_cc
+       AND cc1.id_gestion in (select id_gestion
+                  from param.tgestion ges
+                            where date_trunc('year',fecha_ini) = date_trunc('year',ps.fecha))
+       LEFT JOIN param.vproveedor pro ON pro.id_proveedor = ps.id_proveedor
+       LEFT JOIN orga.vfuncionario fun ON fun.id_funcionario = ps.id_funcionario
+       JOIN param.tperiodo per ON ps.fecha >= per.fecha_ini AND ps.fecha <=
+         per.fecha_fin;
+/***********************************F-DEP-RCM-CD-0-07/12/2018*****************************************/
