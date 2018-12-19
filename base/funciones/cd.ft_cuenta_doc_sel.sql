@@ -696,7 +696,7 @@ BEGIN
   elseif(p_transaccion='CD_REPCD_SEL')then
     
     
-        v_filtro = ' 0=0 ';
+        v_filtro = ' 0=0 '; --#1 ENDETR 19/12/2018 Juan correccion de filtro en el reporte
     
     
         IF v_parametros.codigo_tipo_cuenta_doc = 'todos' THEN
@@ -723,13 +723,13 @@ BEGIN
         
         IF  pxp.f_existe_parametro(p_tabla,'estado')  THEN
              IF v_parametros.estado is not null and v_parametros.estado != '' THEN
-                v_filtro = v_filtro||' and estado = ANY( string_to_array('''||v_parametros.estado||''','',''))  ';
+                v_filtro = v_filtro||' and estado = ANY( string_to_array('''||v_parametros.estado||''','',''))  '; --#1 ENDETR 19/12/2018 Juan correccion de filtro en el reporte
              END IF;
         END IF;
            
          IF  pxp.f_existe_parametro(p_tabla,'fuera_estado')  THEN
              IF v_parametros.fuera_estado is not null and v_parametros.fuera_estado != '' THEN
-                v_filtro = v_filtro||' and NOT (estado = ANY (string_to_array('''||v_parametros.fuera_estado||''','','')))  ';
+                v_filtro = v_filtro||' and NOT (estado = ANY (string_to_array('''||v_parametros.fuera_estado||''','','')))  '; --#1 ENDETR 19/12/2018 Juan correccion de filtro en el reporte
              END IF;
         END IF;
         
