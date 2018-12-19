@@ -19,6 +19,7 @@ class MODControlDui extends MODbase{
 		$this->transaccion='CD_CDUI_SEL';
 		$this->tipo_procedimiento='SEL';//tipo de transaccion
 				
+		//$this->setParametro('valor','valor','varchar');		
 		//Definicion de la lista del resultado del query
 		$this->captura('id_control_dui','int4');
 		$this->captura('tramite_anticipo_dui','varchar');
@@ -49,6 +50,8 @@ class MODControlDui extends MODbase{
 		$this->captura('id_agencia_despachante','int4');
 		
 		$this->captura('observaciones','text');
+		$this->captura('id_proceso_wf','int4');
+		$this->captura('id_proceso_wf_comision','int4');
 		//$this->captura('nombre_agencia_despachante','varchar');
 	
 
@@ -85,6 +88,8 @@ class MODControlDui extends MODbase{
 		$this->setParametro('nro_comprobante_pago_comision','nro_comprobante_pago_comision','varchar');
 
         $this->setParametro('observaciones','observaciones','text');
+		
+		$this->setParametro('id_gestion','id_gestion','int4');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -119,6 +124,8 @@ class MODControlDui extends MODbase{
 		$this->setParametro('nro_comprobante_pago_comision','nro_comprobante_pago_comision','varchar');
 
         $this->setParametro('observaciones','observaciones','text');
+		
+		$this->setParametro('id_gestion','id_gestion','int4');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
@@ -140,6 +147,72 @@ class MODControlDui extends MODbase{
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	function actualizarComprobantePagoComision(){
+		//Definicion de variables para ejecucion del procedimiento
+		$this->procedimiento='cd.ft_control_dui_ime';
+		$this->transaccion='CD_ACT_COMPAG_COMI';
+		$this->tipo_procedimiento='IME';
+				
+		//Define los parametros para la funcion
+		$this->setParametro('id_gestion','id_gestion','int4');
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	function reporteDui(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_control_dui_sel';
+		$this->transaccion='CD_CDUI_REPORTE_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		
+		$this->setCount(false);			
+		//$this->setParametro('valor','valor','varchar');		
+		//Definicion de la lista del resultado del query
+		$this->captura('id_control_dui','int4');
+		$this->captura('tramite_anticipo_dui','varchar');
+		$this->captura('dui','varchar');
+		$this->captura('archivo_comision','varchar');
+		$this->captura('nro_comprobante_diario_dui','varchar');
+		$this->captura('archivo_dui','varchar');
+		$this->captura('nro_comprobante_diario_comision','varchar');
+		$this->captura('nro_comprobante_pago_dui','varchar');
+		$this->captura('estado_reg','varchar');
+		$this->captura('monto_comision','numeric');
+		$this->captura('tramite_pedido_endesis','varchar');
+		$this->captura('monto_dui','numeric');
+		$this->captura('nro_factura_proveedor','varchar');
+		$this->captura('tramite_comision_agencia','varchar');
+		$this->captura('pedido_sap','varchar');
+		$this->captura('agencia_despachante','varchar');
+		$this->captura('nro_comprobante_pago_comision','varchar');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('usuario_ai','varchar');
+		$this->captura('id_usuario_reg','int4');
+		$this->captura('id_usuario_ai','int4');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('id_usuario_mod','int4');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		
+		$this->captura('id_agencia_despachante','int4');
+		
+		$this->captura('observaciones','text');
+		$this->captura('id_proceso_wf','int4');
+		$this->captura('id_proceso_wf_comision','int4');
+		//$this->captura('nombre_agencia_despachante','varchar');
+	
+
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		
 		//Devuelve la respuesta
 		return $this->respuesta;
 	}
