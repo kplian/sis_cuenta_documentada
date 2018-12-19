@@ -17,8 +17,8 @@ $body$
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
-#ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				13-09-2018 15:32:16								Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tcontrol_dui'	
+ #ISSUE				FECHA				AUTOR				DESCRIPCION
+ #1	ENDETR		13-09-2018 15:32:16		Juan				Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tcontrol_dui'	
  #
  ***************************************************************************/
 
@@ -30,7 +30,9 @@ DECLARE
 	v_resp		            varchar;
 	v_nombre_funcion        text;
 	v_mensaje_error         text;
-	v_id_control_dui	integer;
+	v_id_control_dui	    integer;
+    
+    item                    record;
 			    
 BEGIN
 
@@ -38,7 +40,7 @@ BEGIN
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'CD_CDUI_INS'
+ 	#TRANSACCION:  'CD_CDUI_INS'    #1 ENDETR
  	#DESCRIPCION:	Insercion de registros
  	#AUTOR:		jjimenez	
  	#FECHA:		13-09-2018 15:32:16
@@ -48,7 +50,7 @@ BEGIN
 					
         begin
         	--Sentencia de la insercion
-            --raise exception '%','llega';
+            --raise EXCEPTION 'er %',v_parametros.id_gestion;
         	insert into cd.tcontrol_dui(
 			tramite_anticipo_dui,
 			dui,
@@ -72,7 +74,8 @@ BEGIN
 			id_usuario_ai,
 			fecha_mod,
 			id_usuario_mod,
-            observaciones
+            observaciones,
+            id_gestion
           	) values(
 			v_parametros.tramite_anticipo_dui,
 			v_parametros.dui,
@@ -96,7 +99,8 @@ BEGIN
 			v_parametros._id_usuario_ai,
 			null,
 			null,
-            v_parametros.observaciones
+            v_parametros.observaciones,
+            v_parametros.id_gestion
 							
 			
 			
@@ -112,7 +116,7 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'CD_CDUI_MOD'
+ 	#TRANSACCION:  'CD_CDUI_MOD'    #1  ENDETR
  	#DESCRIPCION:	Modificacion de registros
  	#AUTOR:		jjimenez	
  	#FECHA:		13-09-2018 15:32:16
@@ -122,6 +126,7 @@ BEGIN
 
 		begin
 			--Sentencia de la modificacion
+            --raise EXCEPTION 'er %',v_parametros.id_gestion;
 			update cd.tcontrol_dui set
 			tramite_anticipo_dui = v_parametros.tramite_anticipo_dui,
 			dui = v_parametros.dui,
@@ -143,7 +148,7 @@ BEGIN
 			id_usuario_ai = v_parametros._id_usuario_ai,
 			usuario_ai = v_parametros._nombre_usuario_ai,
             observaciones=v_parametros.observaciones
-			where id_control_dui=v_parametros.id_control_dui;
+			where id_control_dui=v_parametros.id_control_dui ;
                
 			--Definicion de la respuesta
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Control de Duis modificado(a)'); 
@@ -155,7 +160,7 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'CD_CDUI_ELI'
+ 	#TRANSACCION:  'CD_CDUI_ELI'    #1  ENDETR
  	#DESCRIPCION:	Eliminacion de registros
  	#AUTOR:		jjimenez	
  	#FECHA:		13-09-2018 15:32:16
@@ -176,7 +181,39 @@ BEGIN
             return v_resp;
 
 		end;
-         
+
+	/*********************************    
+ 	#TRANSACCION:  'CD_ACT_COMPAG_COMI' #1 ENDETR
+ 	#DESCRIPCION:	Actualiza No de comprobante de pago comision
+ 	#AUTOR:		JUAN	
+ 	#FECHA:		13-09-2018 15:32:16
+	***********************************/
+
+	elsif(p_transaccion='CD_ACT_COMPAG_COMI')then
+
+		begin
+			--Sentencia de la modificacion
+            --raise EXCEPTION 'err %',v_parametros.id_gestion;
+            for item in(select cds.id_control_dui,monto_comision,tramite_comision_agencia from cd.tcontrol_dui cds where cds.id_gestion=v_parametros.id_gestion and (cds.nro_comprobante_pago_comision ='' or cds.nro_comprobante_pago_comision is null) ) loop
+               
+                update cd.tcontrol_dui set
+                nro_comprobante_pago_comision = (select comp.nro_cbte 
+                                                  from conta.tint_comprobante comp 
+                                                  join conta.tint_transaccion tran on tran.id_int_comprobante=comp.id_int_comprobante and tran.id_cuenta=1826
+                                                  where comp.nro_tramite=item.tramite_comision_agencia and tran.importe_debe_mb=item.monto_comision limit 1)
+                                                  
+                where id_control_dui=item.id_control_dui;
+                
+            end loop;
+		   
+			--Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Control de Duis modificado(a)'); 
+            --v_resp = pxp.f_agrega_clave(v_resp,'id_control_dui',v_parametros.id_control_dui::varchar);
+               
+            --Devuelve la respuesta
+            return v_resp;
+            
+		end; 
 	else
      
     	raise exception 'Transaccion inexistente: %',p_transaccion;

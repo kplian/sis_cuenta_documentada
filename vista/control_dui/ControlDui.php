@@ -14,12 +14,263 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 
 	constructor:function(config){
 		this.maestro=config.maestro;
+		this.initButtons = [this.cmbGestion,this.cmbFiltro];	
     	//llama al constructor de la clase padre
 		Phx.vista.ControlDui.superclass.constructor.call(this,config);
 		this.init();
+		
+
+
+        this.addButton('btnPagoComision', {
+            text: 'Migrar',
+            iconCls: 'x-btn-text bengine',
+            disabled: false,
+            handler: function () {
+                this.actualizarPagoComision()
+            },	
+            tooltip: '<b>Migrar nro comprobante pago comision</b>'
+        });
+        this.addButton('btnChequeoDocumentosWf',
+            {
+                text: 'Doc. Dui',
+                grupo:[0,1,2,3],
+                iconCls: 'bchecklist',
+                disabled: false,
+                handler: this.loadCheckDocumentosWf,
+                tooltip: '<b>Documentos del trámite de Dui</b><br/>Permite ver los documentos asociados al NRO de trámite.'
+            }
+        );
+        this.addButton('btnChequeoDocumentosAgencia',
+            {
+                text: 'Doc. Agencia',
+                grupo:[0,1,2,3],
+                iconCls: 'bchecklist',
+                disabled: false,
+                handler: this.loadCheckDocumentosAgencia,
+                tooltip: '<b>Documentos del trámite de comisión agencia</b><br/>Permite ver los documentos asociados al NRO de trámite.'
+            }
+        );
+        this.addButton('btnReporte',
+            {
+                text: 'Excel',
+                grupo:[0,1,2,3],
+                iconCls: ' x-btn-text bexcel',
+                disabled: false,
+                handler: this.loadExcel,
+                tooltip: '<b>Excel</b><br/>Exporta la grilla en formato Excel, en tres pestañas'
+            }
+        );
+        //this.getBoton('btnDocCmpVnt').enable();
+            
 		this.load({params:{start:0, limit:this.tam_pag}})
+		this.cmbGestion.on('select', this.capturaFiltros, this);
+		this.cmbFiltro.on('select', this.capturacmbFiltro, this);
 	},
-			
+	loadExcel:function() {
+		Phx.CP.loadWindows('../../../sis_cuenta_documentada/reportes/RDui.php',
+			'Formulario',
+			{
+				modal:true,
+				width:500,
+				height:500
+			}, 
+			{
+				//data:rec.data, 
+				//id_depto_lb:this.store.baseParams.desc_auxiliar
+			}, 
+			this.idContenedor,'RDui'/*,
+			{
+				config:[{
+					event:'beforesave',
+					delegate: this.addLibroMayor,
+				}],
+				scope:this
+			}*/
+		)
+	},
+    loadCheckDocumentosAgencia:function() {
+            var rec=this.sm.getSelected();
+            
+            //this.Cmp.nombre_curso.setValue('');
+            var aux=rec.data.id_proceso_wf;
+            rec.data.id_proceso_wf=rec.data.id_proceso_wf_comision;
+            //alert(rec.data.id_proceso_wf_comision);
+            
+            rec.data.nombreVista = this.nombreVista;
+            console.log('rec.data',rec.data);
+            Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+                    'Documentos del Proceso',
+                    {
+                        width:'90%',
+                        height:500
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'DocumentoWf'
+        )
+        rec.data.id_proceso_wf=aux;
+    },
+    loadCheckDocumentosWf:function() {
+            var rec=this.sm.getSelected();
+            rec.data.nombreVista = this.nombreVista;
+            //alert(rec.data.id_proceso_wf);
+            console.log('rec.data',rec.data);
+            Phx.CP.loadWindows('../../../sis_workflow/vista/documento_wf/DocumentoWf.php',
+                    'Documentos del Proceso',
+                    {
+                        width:'90%',
+                        height:500
+                    },
+                    rec.data,
+                    this.idContenedor,
+                    'DocumentoWf'
+        )
+    },
+    capturaFiltros: function (combo, record, index) {
+        this.store.baseParams = {id_gestion: this.cmbGestion.getValue()};
+        this.store.reload();
+    },
+    capturacmbFiltro: function (combo, record, index) {
+    	if(this.cmbGestion.getValue()){
+	    	//alert(this.cmbFiltro.getValue());
+	    	//alert(this.cmbGestion.getValue());
+	        this.store.baseParams = {filtro: this.cmbFiltro.getValue(), id_gestion : this.cmbGestion.getValue()};
+	        this.store.reload();
+    	}
+    	else{
+    		Ext.MessageBox.alert('ERROR!!!', 'Seleccione una gestión');
+    	}
+
+    },
+    actualizarPagoComision: function () {
+        //this.Cmp.id_proceso_wf.setValue(68410);
+    	if(this.cmbGestion.getValue()){
+	    	var me = this;
+		            Phx.CP.loadingShow();
+	                Ext.Ajax.request({
+	                    url: '../../sis_cuenta_documentada/control/ControlDui/actualizarComprobantePagoComision',
+	                    params: {
+	                        'id_gestion': this.cmbGestion.getValue()
+	                    },
+	                    success: me.successPagoComision,
+	                    failure: me.conexionFailureComision,
+	                    timeout: me.timeout,
+	                    scope: me
+	                });
+	               
+    	}
+    	else{
+    		Ext.MessageBox.alert('ERROR!!!', 'Seleccione una gestión');
+    	}
+
+        /*
+        if (this.cmbGestion.getValue()) {
+        	if(this.cmbPeriodo.getValue()||valorAprobado==0){
+            	Phx.CP.loadingShow();
+                Ext.Ajax.request({
+                    url: '../../sis_cuenta_documentada/control/ControlDui/actualizarComprobantePagoComision',
+                    params: {
+                        'id_gestion': this.cmbGestion.getValue()
+                    },
+                    success: me.successSaveAprobar,
+                    failure: me.conexionFailureAprobar,
+                    timeout: me.timeout,
+                    scope: me
+                });
+        	}
+        	else{
+        		Ext.MessageBox.alert('ERROR!!!', 'Seleccione un periodo para la evaluación');
+        	}
+
+        }
+        else {
+            Ext.MessageBox.alert('ERROR!!!', 'Seleccione primero una gestion.');
+        }*/
+    },
+    successPagoComision: function () {
+        Phx.CP.loadingHide();
+        this.reload();
+        Ext.MessageBox.alert('EXITO!!!', 'Se realizo con exito la operación.');
+    },  
+    conexionFailureComision: function () {
+        Phx.CP.loadingHide(); 		
+        alert('Errror comuniquese con el administrador')
+    },  
+    cmbGestion: new Ext.form.ComboBox({
+        fieldLabel: 'Gestion',
+        allowBlank: true,            
+        emptyText: 'Gestion...',            
+        store: new Ext.data.JsonStore(
+        {
+            url: '../../sis_parametros/control/Gestion/listarGestion',
+            id: 'id_gestion',
+            root: 'datos',
+            sortInfo: {
+                field: 'gestion',
+                direction: 'DESC'
+            },
+            
+            totalProperty: 'total',
+            fields: ['id_gestion', 'gestion'],
+            remoteSort: true,
+            baseParams: {par_filtro: 'gestion'}
+        }),
+        valueField: 'id_gestion',            
+        triggerAction: 'all',
+        displayField: 'gestion',
+        hiddenName: 'id_gestion',
+        mode: 'remote',
+        pageSize: 50,
+        queryDelay: 500,
+        listWidth: '280',
+        width: 80
+    }),
+    cmbFiltro: new Ext.form.ComboBox({
+       name:'cmbFiltro',
+        fieldLabel:'Filtro',
+        allowBlank: true,
+        emptyText:'Filtro...',
+        store: new Ext.data.ArrayStore({
+            fields: ['variable', 'valor'],
+            data :  [    
+                         ['todos', 'Todos'],
+                         ['tram_comi_agencia', 'Pendientes de comision agencias'],
+                         ['comp_pago_comision', 'Pendientes de comprobantes pago comisión']
+                    ]
+        }),
+        valueField: 'variable',
+        displayField: 'valor',
+        mode: 'local',
+        forceSelection:true,
+        typeAhead: true,
+        triggerAction: 'all',
+        lazyRender: true,
+        queryDelay: 1000,
+        width: 250,
+        minChars: 2 ,
+        enableMultiSelect: true
+    }),
+    onButtonEdit: function () {
+
+       Phx.vista.ControlDui.superclass.onButtonEdit.call(this);
+       this.Cmp.id_gestion.setValue(this.cmbGestion.getValue());
+                   
+    },
+    onButtonNew: function () {
+       //Phx.vista.ControlDui.superclass.onButtonEdit.call(this);
+       if(this.cmbGestion.getValue()){
+	        this.window.buttons[0].show();
+	        this.form.getForm().reset();
+	        this.loadValoresIniciales();
+	        this.window.show();
+	        this.Cmp.id_gestion.setValue(this.cmbGestion.getValue());
+       }
+       else{
+       	   Ext.MessageBox.alert('ERROR!!!', 'Seleccione una gestión');
+       }
+     
+    },
+    
 	Atributos:[
 		{
 			//configuracion del componente
@@ -31,6 +282,47 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 			type:'Field',
 			form:true 
 		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_gestion'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_proceso_wf'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_proceso_wf_comision'
+			},
+			type:'Field',
+			form:true 
+		},
+		{
+			//configuracion del componente
+			config:{
+					labelSeparator:'',
+					inputType:'hidden',
+					name: 'id_documento_wf'
+			},
+			type:'Field',
+			form:true 
+		},
+		
 		/*{
 			//configuracion del componente
 			config:{
@@ -325,7 +617,7 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'archivo_dui',
-				fieldLabel: 'Archivo Dui',
+				fieldLabel: 'Archivo de Diario Dui',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -341,7 +633,7 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'archivo_comision',
-				fieldLabel: 'Archivo Comision',
+				fieldLabel: 'Archivo de Diario comision',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -512,6 +804,12 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 		{name:'usr_mod', type: 'string'},
 		{name:'id_agencia_despachante', type: 'numeric'},
 		{name:'observaciones', type: 'string'},
+		
+		{name:'id_gestion', type: 'numeric'},
+		{name:'id_proceso_wf', type: 'numeric'},
+		{name:'id_documento_wf', type: 'numeric'},
+		{name:'id_proceso_wf_comision', type: 'numeric'},
+		
 	],
 	sortInfo:{
 		field: 'id_control_dui',
