@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_cuenta_doc_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -43,7 +45,7 @@ DECLARE
     v_id_cuenta_doc     integer;
     v_gestion           varchar;
     v_id_plantilla      integer;
-    v_id_moneda_base  integer;
+    v_id_moneda_base	integer;
     v_id_plantilla_1    integer;
     v_id_plantilla_2    integer;
           
@@ -694,7 +696,7 @@ BEGIN
   elseif(p_transaccion='CD_REPCD_SEL')then
     
     
-        v_filtro = ' 0=0 and';
+        v_filtro = ' 0=0 ';
     
     
         IF v_parametros.codigo_tipo_cuenta_doc = 'todos' THEN
@@ -721,13 +723,13 @@ BEGIN
         
         IF  pxp.f_existe_parametro(p_tabla,'estado')  THEN
              IF v_parametros.estado is not null and v_parametros.estado != '' THEN
-                v_filtro = v_filtro||' estado = ANY( string_to_array('''||v_parametros.estado||''','','')) and ';
+                v_filtro = v_filtro||' and estado = ANY( string_to_array('''||v_parametros.estado||''','',''))  ';
              END IF;
         END IF;
            
          IF  pxp.f_existe_parametro(p_tabla,'fuera_estado')  THEN
              IF v_parametros.fuera_estado is not null and v_parametros.fuera_estado != '' THEN
-                v_filtro = v_filtro||' NOT (estado = ANY (string_to_array('''||v_parametros.fuera_estado||''','',''))) and ';
+                v_filtro = v_filtro||' and NOT (estado = ANY (string_to_array('''||v_parametros.fuera_estado||''','','')))  ';
              END IF;
         END IF;
         
@@ -1762,7 +1764,7 @@ raise notice '%',v_consulta;
               
       end;
       
-  /*********************************    
+	/*********************************    
     #TRANSACCION: 'CD_PASAFUN_SEL'
     #DESCRIPCION: Listado de viáticos utilizados por funcionario para Form 110
     #AUTOR:       RCM
