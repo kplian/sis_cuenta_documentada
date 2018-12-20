@@ -3,7 +3,7 @@
 *@package pXP
 *@file gen-AgenciaDespachante.php
 *@author  (jjimenez)
-*@date 29-11-2018 20:41:12
+*@date 13-09-2018 17:45:23
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
 */
 
@@ -78,21 +78,6 @@ Phx.vista.AgenciaDespachante=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
-				name: 'usr_reg',
-				fieldLabel: 'Creado por',
-				allowBlank: true,
-				anchor: '80%',
-				gwidth: 100,
-				maxLength:4
-			},
-				type:'Field',
-				filters:{pfiltro:'usu1.cuenta',type:'string'},
-				id_grupo:1,
-				grid:true,
-				form:false
-		},
-		{
-			config:{
 				name: 'fecha_reg',
 				fieldLabel: 'Fecha creación',
 				allowBlank: true,
@@ -124,8 +109,23 @@ Phx.vista.AgenciaDespachante=Ext.extend(Phx.gridInterfaz,{
 		},
 		{
 			config:{
+				name: 'usr_reg',
+				fieldLabel: 'Creado por',
+				allowBlank: true,
+				anchor: '80%',
+				gwidth: 100,
+				maxLength:4
+			},
+				type:'Field',
+				filters:{pfiltro:'usu1.cuenta',type:'string'},
+				id_grupo:1,
+				grid:true,
+				form:false
+		},
+		{
+			config:{
 				name: 'id_usuario_ai',
-				fieldLabel: 'Funcionaro AI',
+				fieldLabel: 'Creado por',
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,
@@ -180,9 +180,9 @@ Phx.vista.AgenciaDespachante=Ext.extend(Phx.gridInterfaz,{
 		{name:'estado_reg', type: 'string'},
 		{name:'codigo', type: 'string'},
 		{name:'nombre', type: 'string'},
-		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'fecha_reg', type: 'date',dateFormat:'Y-m-d H:i:s.u'},
 		{name:'usuario_ai', type: 'string'},
+		{name:'id_usuario_reg', type: 'numeric'},
 		{name:'id_usuario_ai', type: 'numeric'},
 		{name:'id_usuario_mod', type: 'numeric'},
 		{name:'fecha_mod', type: 'date',dateFormat:'Y-m-d H:i:s.u'},

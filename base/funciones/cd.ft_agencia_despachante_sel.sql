@@ -1,18 +1,24 @@
-CREATE OR REPLACE FUNCTION "cd"."ft_agencia_despachante_sel"(	
-				p_administrador integer, p_id_usuario integer, p_tabla character varying, p_transaccion character varying)
-RETURNS character varying AS
-$BODY$
+--------------- SQL ---------------
+
+CREATE OR REPLACE FUNCTION cd.ft_agencia_despachante_sel (
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
+)
+RETURNS varchar AS
+$body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
  FUNCION: 		cd.ft_agencia_despachante_sel
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tagencia_despachante'
  AUTOR: 		 (jjimenez)
- FECHA:	        29-11-2018 20:41:12
+ FECHA:	        13-09-2018 17:45:23
  COMENTARIOS:	
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				29-11-2018 20:41:12								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tagencia_despachante'	
+ #1 ENDETR		13-09-2018 17:45:23		Juan				Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tagencia_despachante'	
  #
  ***************************************************************************/
 
@@ -29,10 +35,10 @@ BEGIN
     v_parametros = pxp.f_get_record(p_tabla);
 
 	/*********************************    
- 	#TRANSACCION:  'CD_AGEDES_SEL'
+ 	#TRANSACCION:  'CD_AGEDES_SEL'  #1 ENDETR
  	#DESCRIPCION:	Consulta de datos
  	#AUTOR:		jjimenez	
- 	#FECHA:		29-11-2018 20:41:12
+ 	#FECHA:		13-09-2018 17:45:23
 	***********************************/
 
 	if(p_transaccion='CD_AGEDES_SEL')then
@@ -44,18 +50,19 @@ BEGIN
 						agedes.estado_reg,
 						agedes.codigo,
 						agedes.nombre,
-						agedes.id_usuario_reg,
 						agedes.fecha_reg,
 						agedes.usuario_ai,
+						agedes.id_usuario_reg,
 						agedes.id_usuario_ai,
 						agedes.id_usuario_mod,
 						agedes.fecha_mod,
 						usu1.cuenta as usr_reg,
-						usu2.cuenta as usr_mod	
+						usu2.cuenta as usr_mod
 						from cd.tagencia_despachante agedes
 						inner join segu.tusuario usu1 on usu1.id_usuario = agedes.id_usuario_reg
 						left join segu.tusuario usu2 on usu2.id_usuario = agedes.id_usuario_mod
-				        where  ';
+
+				        where agedes.estado_reg=''activo'' and ';
 			
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
@@ -67,10 +74,10 @@ BEGIN
 		end;
 
 	/*********************************    
- 	#TRANSACCION:  'CD_AGEDES_CONT'
+ 	#TRANSACCION:  'CD_AGEDES_CONT'  #1 ENDETR
  	#DESCRIPCION:	Conteo de registros
  	#AUTOR:		jjimenez	
- 	#FECHA:		29-11-2018 20:41:12
+ 	#FECHA:		13-09-2018 17:45:23
 	***********************************/
 
 	elsif(p_transaccion='CD_AGEDES_CONT')then
@@ -106,7 +113,9 @@ EXCEPTION
 			v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 			raise exception '%',v_resp;
 END;
-$BODY$
-LANGUAGE 'plpgsql' VOLATILE
+$body$
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
 COST 100;
-ALTER FUNCTION "cd"."ft_agencia_despachante_sel"(integer, integer, character varying, character varying) OWNER TO postgres;
