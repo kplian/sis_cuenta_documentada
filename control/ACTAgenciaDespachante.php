@@ -3,7 +3,7 @@
 *@package pXP
 *@file gen-ACTAgenciaDespachante.php
 *@author  (jjimenez)
-*@date 29-11-2018 20:41:12
+*@date 13-09-2018 17:45:23
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 

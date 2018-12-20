@@ -3,7 +3,7 @@
 *@package pXP
 *@file gen-MODAgenciaDespachante.php
 *@author  (jjimenez)
-*@date 29-11-2018 20:41:12
+*@date 13-09-2018 17:45:23
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
 */
 
@@ -24,9 +24,9 @@ class MODAgenciaDespachante extends MODbase{
 		$this->captura('estado_reg','varchar');
 		$this->captura('codigo','varchar');
 		$this->captura('nombre','varchar');
-		$this->captura('id_usuario_reg','int4');
 		$this->captura('fecha_reg','timestamp');
 		$this->captura('usuario_ai','varchar');
+		$this->captura('id_usuario_reg','int4');
 		$this->captura('id_usuario_ai','int4');
 		$this->captura('id_usuario_mod','int4');
 		$this->captura('fecha_mod','timestamp');
