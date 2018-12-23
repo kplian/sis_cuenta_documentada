@@ -1,7 +1,9 @@
-Sistema de cuentas documentadas
-===============================
-
-Version cambiada para manejo en la CCB
-
+=================
+Sistema de Cuenta Documentada
 
 Requiere Framework PXP https://github.com/kplian/pxp
+
+
+## LICENSE
+
+See the [LICENSE](LICENSE.txt) file for license rights and limitations (GPLv3)
