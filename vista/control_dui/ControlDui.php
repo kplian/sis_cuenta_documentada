@@ -600,7 +600,7 @@ Phx.vista.ControlDui=Ext.extend(Phx.gridInterfaz,{
 		{
 			config:{
 				name: 'monto_comision',
-				fieldLabel: 'Monto comision/Alm/Otr', //#2 endetr Juan 28/12/2018 cambio de nombre 
+				fieldLabel: 'Monto comision/Alm/Otr', //#2 endetr Juan 28/12/2018 cambio de nombre  
 				allowBlank: true,
 				anchor: '80%',
 				gwidth: 100,

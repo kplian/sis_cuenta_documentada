@@ -161,7 +161,7 @@ class RDuiXls
 		$this->docexcel->getActiveSheet()->setCellValue('K5','Tramite comision agencia');
         $this->docexcel->getActiveSheet()->setCellValue('L5','Nro comprobante diario comision');
 		$this->docexcel->getActiveSheet()->setCellValue('M5','Nro comprobante pago comision');
-		$this->docexcel->getActiveSheet()->setCellValue('N5','Monto comision/Alm/Otr'); //#2 endetr Juan 28/12/2018 cambio de nombre 
+		$this->docexcel->getActiveSheet()->setCellValue('N5','Monto comision/Alm/Otr'); //#2 endetr Juan 28/12/2018 cambio de nombre  
 		$this->docexcel->getActiveSheet()->setCellValue('O5','Archivo Dui');
         $this->docexcel->getActiveSheet()->setCellValue('P5','Archivo comision');
 		$this->docexcel->getActiveSheet()->setCellValue('Q5','Observaciones');
