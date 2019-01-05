@@ -120,7 +120,7 @@ class RDuiXls
 		$this->docexcel->getActiveSheet()->getColumnDimension('K')->setWidth(20);
 		$this->docexcel->getActiveSheet()->getColumnDimension('L')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('M')->setWidth(30);
-        $this->docexcel->getActiveSheet()->getColumnDimension('N')->setWidth(16);
+        $this->docexcel->getActiveSheet()->getColumnDimension('N')->setWidth(24);
         $this->docexcel->getActiveSheet()->getColumnDimension('O')->setWidth(25);
         $this->docexcel->getActiveSheet()->getColumnDimension('P')->setWidth(30);
 		$this->docexcel->getActiveSheet()->getColumnDimension('Q')->setWidth(50);
@@ -161,7 +161,7 @@ class RDuiXls
 		$this->docexcel->getActiveSheet()->setCellValue('K5','Tramite comision agencia');
         $this->docexcel->getActiveSheet()->setCellValue('L5','Nro comprobante diario comision');
 		$this->docexcel->getActiveSheet()->setCellValue('M5','Nro comprobante pago comision');
-		$this->docexcel->getActiveSheet()->setCellValue('N5','Monto comision');
+		$this->docexcel->getActiveSheet()->setCellValue('N5','Monto comision/Alm/Otr'); //#2 endetr Juan 28/12/2018 cambio de nombre 
 		$this->docexcel->getActiveSheet()->setCellValue('O5','Archivo Dui');
         $this->docexcel->getActiveSheet()->setCellValue('P5','Archivo comision');
 		$this->docexcel->getActiveSheet()->setCellValue('Q5','Observaciones');
