@@ -8,9 +8,10 @@
  * 
  ****************************************************************************
                      HISTORIAL DE MODIFICACIONES:
-#ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				31-12-2017			     RAC			Creación	
- #0001             22/06/2018               RAC            Considera el Devenga y pagar con prorrateo automatico y nro de tramite tipo   DVPGPROP
+#ISSUE		FORK		FECHA				AUTOR				DESCRIPCION
+ #0						31-12-2017			     RAC			Creación	
+ #0001             		22/06/2018               RAC            Considera el Devenga y pagar con prorrateo automatico y nro de tramite tipo   DVPGPROP
+ #4         ENDEETR     09/01/2018         Manuel Guerra        se agrego en el combo de obligación de pago,en el formulario de pago simple 
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -450,7 +451,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 					return String.format('{0}', record.data['desc_obligacion_pago']);
 				},
 				minChars: 2,
-				 tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>Nro.Trámite:</b> {num_tramite}</p><p><b>Proveedor:</b> {desc_proveedor}</p></div></tpl>',
+				//#4
+				tpl: '<tpl for="."><div class="x-combo-list-item"><p><b>Nro.Trámite:</b> {num_tramite}</p><p><b>Proveedor:</b> {desc_proveedor}</p><p><b>Monto:</b> {total_pago}</p></div></tpl>',
 			},
 			type:'ComboBox',
 			id_grupo:1,
