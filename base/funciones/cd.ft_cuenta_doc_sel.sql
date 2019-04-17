@@ -20,7 +20,11 @@ $body$
 
  DESCRIPCION: 
  AUTOR:     
- FECHA:   
+ FECHA: 
+ 
+ 
+* ISSUE SIS       EMPRESA      FECHA:		      AUTOR       					DESCRIPCION
+ #5	 TES       		ETR       17/04/2019       MANUEL GUERRA       Mostrar registros de vi/fa de funcionarios  
 ***************************************************************************/
 
 DECLARE
@@ -139,10 +143,10 @@ BEGIN
            
            
             IF v_parametros.tipo_interfaz in ('CuentaDocReg','CuentaDocSol') THEN
-
+				--#5
                 IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
-                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(cdoc.fecha::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
                     or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                 END IF;
 
@@ -359,10 +363,10 @@ BEGIN
            
            
            IF v_parametros.tipo_interfaz in ('CuentaDocReg','CuentaDocSol') THEN
-        
+				--#5 		
                IF p_administrador != 1  THEN
                     v_filtro = '(ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||'  or cdoc.id_usuario_reg='||p_id_usuario||' or cdoc.id_funcionario = '||v_parametros.id_funcionario_usu::varchar||'
-                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(now()::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
+                                or cdoc.id_funcionario in (select id_funcionario FROM orga.f_get_funcionarios_x_usuario_asistente(cdoc.fecha::date, '||p_id_usuario||')  AS (id_funcionario INTEGER))
                     or (cdoc.id_cuenta_doc in (select id_cuenta_doc from cd.tcuenta_doc_excepcion where id_usuario = '||p_id_usuario||'))) and ';
                END IF;
                
