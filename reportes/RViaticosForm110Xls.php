@@ -1,4 +1,10 @@
 <?php
+/*
+**************************************************************************
+ISSUE  SIS       EMPRESA       FECHA        AUTOR           DESCRIPCION
+#10     CONTA     ETR           01/08/2019   RCM             Corrección por actualización de PHP 7. Se cambia el string Arial por cadena 'Arial'
+**************************************************************************
+*/
 class RViaticosForm110Xls
 {
 	private $docexcel;
@@ -24,8 +30,8 @@ class RViaticosForm110Xls
 
 	private $paramDepto;
 	private $dataSetDet;
-	
-	
+
+
 	function __construct(CTParametro $objParam){
 		$this->objParam = $objParam;
 		$this->url_archivo = "../../../reportes_generados/".$this->objParam->getParametro('nombre_archivo');
@@ -42,11 +48,11 @@ class RViaticosForm110Xls
 							 ->setDescription('Reporte "'.$this->objParam->getParametro('titulo_archivo').'", generado por el framework PXP')
 							 ->setKeywords("office 2007 openxml php")
 							 ->setCategory("Report File");
-							 
+
 		$this->docexcel->setActiveSheetIndex(0);
-		
+
 		$this->docexcel->getActiveSheet()->setTitle($this->objParam->getParametro('titulo_archivo'));
-		
+
 		$this->equivalencias=array(0=>'A',1=>'B',2=>'C',3=>'D',4=>'E',5=>'F',6=>'G',7=>'H',8=>'I',
 								9=>'J',10=>'K',11=>'L',12=>'M',13=>'N',14=>'O',15=>'P',16=>'Q',17=>'R',
 								18=>'S',19=>'T',20=>'U',21=>'V',22=>'W',23=>'X',24=>'Y',25=>'Z',
@@ -57,13 +63,13 @@ class RViaticosForm110Xls
 								52=>'BA',53=>'BB',54=>'BC',55=>'BD',56=>'BE',57=>'BF',58=>'BG',59=>'BH',
 								60=>'BI',61=>'BJ',62=>'BK',63=>'BL',64=>'BM',65=>'BN',66=>'BO',67=>'BP',
 								68=>'BQ',69=>'BR',70=>'BS',71=>'BT',72=>'BU',73=>'BV',74=>'BW',75=>'BX',
-								76=>'BY',77=>'BZ');	
+								76=>'BY',77=>'BZ');
 
 		$this->initializeColumnWidth($this->docexcel->getActiveSheet());
 		$this->printerConfiguration();
-									
+
 	}
-	
+
 	function datosHeader ($detalle) {
 		$this->datos_detalle = $detalle;
 	}
@@ -78,31 +84,31 @@ class RViaticosForm110Xls
 		//Set active sheet index to the first sheet, so Excel opens this as the first sheet
 		$this->docexcel->setActiveSheetIndex(0);
 		$this->objWriter = PHPExcel_IOFactory::createWriter($this->docexcel, 'Excel5');
-		$this->objWriter->save($this->url_archivo);		
+		$this->objWriter->save($this->url_archivo);
 	}
 
 	function imprimeTitulo($sheet) {
 		$sheet->setCellValueByColumnAndRow(0,1,$this->objParam->getParametro('titulo_rep'));
-		
+
 		//Título Principal
 		$titulo1 = "REPORTE LISTADO VIÁTICOS - FORM. 110";
-		$this->cell($sheet,$titulo1,'A1',0,1,"center",true,$this->tam_letra_titulo,Arial);
+		$this->cell($sheet,$titulo1,'A1',0,1,"center",true,$this->tam_letra_titulo,'Arial'); //#10
 		$sheet->mergeCells('A1:G1');
 
 		//Título 1
 		$titulo1 = $this->dataSet[0]['desc_periodo'];
-		$this->cell($sheet,$titulo1,'A2',0,2,"center",true,$this->tam_letra_titulo,Arial);
+		$this->cell($sheet,$titulo1,'A2',0,2,"center",true,$this->tam_letra_titulo,'Arial'); //#10
 		$sheet->mergeCells('A2:G2');
-		
+
 		//Título 2
 		$fecha_hasta = date("d/m/Y",strtotime($this->objParam->getParametro('fecha_hasta')));
 		$titulo2 = "Depto.: ";
-		$this->cell($sheet,$titulo2.$this->paramDepto,'A3',0,3,"center",true,$this->tam_letra_subtitulo,Arial);
+		$this->cell($sheet,$titulo2.$this->paramDepto,'A3',0,3,"center",true,$this->tam_letra_subtitulo,'Arial'); //#10
 		$sheet->mergeCells('A3:G3');
-		
+
 		//Título 3
 		$titulo3="";
-		$this->cell($sheet,$titulo3,'A4',0,4,"center",true,$this->tam_letra_subtitulo,Arial);
+		$this->cell($sheet,$titulo3,'A4',0,4,"center",true,$this->tam_letra_subtitulo,'Arial'); //#10
 		$sheet->mergeCells('A4:G4');
 
 		//Logo
@@ -156,20 +162,20 @@ class RViaticosForm110Xls
 		}
 
 		if($number==true){
-			$sheet->getStyle($cell)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00); 
+			$sheet->getStyle($cell)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_00);
 		}
 	}
 
 	function mainBox($sheet){
 		//Cabecera caja
 		$f = $this->fila;
-		$this->cell($sheet,'NRO.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NOMBRE FUNCIONARIO',"B$f",1,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'CÓDIGO',"C$f",2,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'DOCUMENTO IDENTIDAD',"D$f",3,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'VIÁTICO Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'PASAJE (EXCENTO) Bs.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'TOTAL Bs.',"G$f",6,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'NRO.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NOMBRE FUNCIONARIO',"B$f",1,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'CÓDIGO',"C$f",2,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'DOCUMENTO IDENTIDAD',"D$f",3,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'VIÁTICO Bs.',"E$f",4,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'PASAJE (EXCENTO) Bs.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'TOTAL Bs.',"G$f",6,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
 
 		//////////////////
 		//Detalle de datos
@@ -186,15 +192,15 @@ class RViaticosForm110Xls
 			if($this->dataSet[$fil]['fecha_ini_dep']!=''){
 				$fecha=date("d/m/Y",strtotime($this->dataSet[$fil]['fecha_ini_dep']));
 			}
-			$this->cell($sheet,$fil+1,"A$f",0,$f,"right",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSet[$fil]['desc_funcionario2'],"B$f",1,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSet[$fil]['codigo'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSet[$fil]['ci'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSet[$fil]['total'],"E$f",4,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSet[$fil]['total_excento'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
+			$this->cell($sheet,$fil+1,"A$f",0,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSet[$fil]['desc_funcionario2'],"B$f",1,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSet[$fil]['codigo'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSet[$fil]['ci'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSet[$fil]['total'],"E$f",4,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSet[$fil]['total_excento'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
 			$range_sum='=E'.($f).'+F'.($f);
 			//echo $range_sum;exit;
-			$this->cell($sheet,$range_sum,"G$f",6,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
+			$this->cell($sheet,$range_sum,"G$f",6,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
 
 			//Actualiza los totales
 			$arrayTotal['total']+=$this->dataSet[$fil]['total'];
@@ -207,18 +213,18 @@ class RViaticosForm110Xls
 
 		//Totales
 		$f++;
-		$this->cell($sheet,'TOTAL BS.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'TOTAL BS.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
 		$sheet->mergeCells("A$f:D$f");
 		$this->cellBorder($sheet,"A$f:D$f");
 
 
 		$range_sum='=SUM(E'.($this->fila+1).':E'.($f-1).')';
-		$this->cell($sheet,$range_sum,"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		$this->cell($sheet,$range_sum,"E$f",4,$f,"right",true,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
 		$range_sum='=SUM(F'.($this->fila+1).':F'.($f-1).')';
-		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
 		$range_sum='=SUM(G'.($this->fila+1).':G'.($f-1).')';
-		$this->cell($sheet,$range_sum,"G$f",6,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
-		
+		$this->cell($sheet,$range_sum,"G$f",6,$f,"right",true,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+
 
 		//Actualización variables
 		$this->fila=$f+6;
@@ -250,19 +256,19 @@ class RViaticosForm110Xls
 			$f++;
 
 			//Despliegue de las cantidades
-			$this->cell($sheet,"Recibos sin Comprobantes","B$f",1,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$arrayTotal['sin_cbte'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
+			$this->cell($sheet,"Recibos sin Comprobantes","B$f",1,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$arrayTotal['sin_cbte'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
 			$f++;
-			$this->cell($sheet,"Recibos con Comprobantes no Validados","B$f",1,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$arrayTotal['sin_validar'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
+			$this->cell($sheet,"Recibos con Comprobantes no Validados","B$f",1,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$arrayTotal['sin_validar'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
 			$f++;
-			$this->cell($sheet,"Recibos sin Funcionario","B$f",1,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$arrayTotal['sin_funcionario'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
+			$this->cell($sheet,"Recibos sin Funcionario","B$f",1,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$arrayTotal['sin_funcionario'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
 			$f++;
 		}
 
 		/*for($fil=0;$fil<count($this->dataSetDet);$fil++) {
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_documento'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_documento'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
 			$f++;
 		}*/
 	}
@@ -299,9 +305,9 @@ class RViaticosForm110Xls
 
 	function firmas($sheet){
 		$f=$this->fila;
-		$this->cell($sheet,'',"C$f",2,$f,"left",true,$this->tam_letra_cabecera,Arial,false,false);
+		$this->cell($sheet,'',"C$f",2,$f,"left",true,$this->tam_letra_cabecera,'Arial',false,false); //#10
 		$f++;
-		$this->cell($sheet,'',"C$f",2,$f,"left",true,$this->tam_letra_cabecera,Arial,false,false);
+		$this->cell($sheet,'',"C$f",2,$f,"left",true,$this->tam_letra_cabecera,'Arial',false,false); //#10
 	}
 
 	function setDataSet($dataset){
@@ -355,7 +361,7 @@ class RViaticosForm110Xls
 		$sheet->getColumnDimension('Z')->setWidth(15);
 		$sheet->getColumnDimension('AA')->setWidth(50);
 	}
-	
+
 	function setTipoReporte($val){
 		$this->tipo_reporte = $val;
 	}
@@ -375,9 +381,9 @@ class RViaticosForm110Xls
 		$sheet = $this->docexcel->createSheet();
         $sheet->setTitle("Detalle Recibos");
 
-        //Título 
+        //Título
         $titulo = "DETALLE DE LOS RECIBOS SIN RETENCIÓN DE VIÁTICOS";
-		$this->cell($sheet,$titulo,'A1',0,1,"center",true,$this->tam_letra_titulo,Arial);
+		$this->cell($sheet,$titulo,'A1',0,1,"center",true,$this->tam_letra_titulo,'Arial'); //#10
 		$sheet->mergeCells('A1:E1');
 
         //Ancho de columnas
@@ -386,33 +392,33 @@ class RViaticosForm110Xls
         //Cabecera caja
         $inicio=3;
 		$f = $inicio;
-		$this->cell($sheet,'NRO.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'ID.DOC.',"B$f",1,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NRO.TRÁMITE',"C$f",2,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'TIPO DOCUMENTO',"D$f",3,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'SOLICITANTE',"E$f",4,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IMPORTE BS.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'ID.CBTE',"G$f",6,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'ESTADO CBTE.',"H$f",7,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NIT',"I$f",8,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NRO. DOCUMENTO',"J$f",9,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NRO. AUTORIZACIÓN',"K$f",10,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'FECHA',"L$f",11,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'RAZÓN SOCIAL',"M$f",12,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'MONEDA',"N$f",13,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IMPORTE DOC.',"O$f",14,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'EXCENTO',"P$f",15,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'DESCUENTO',"Q$f",16,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NETO',"R$f",17,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'CÓDIGO DE CONTROL',"S$f",18,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IVA',"T$f",19,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'IT',"U$f",20,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'ICE',"V$f",21,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'LÍQUIDO PAGABLE',"W$f",22,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'DUI',"X$f",23,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'NRO.TRÁMITE VIÁTICOS',"Y$f",24,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'FECHA VIÁTICO',"Z$f",25,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
-		$this->cell($sheet,'SOLICITANTE VIÁTICO',"AA$f",26,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'NRO.',"A$f",0,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'ID.DOC.',"B$f",1,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NRO.TRÁMITE',"C$f",2,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'TIPO DOCUMENTO',"D$f",3,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'SOLICITANTE',"E$f",4,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'IMPORTE BS.',"F$f",5,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'ID.CBTE',"G$f",6,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'ESTADO CBTE.',"H$f",7,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NIT',"I$f",8,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NRO. DOCUMENTO',"J$f",9,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NRO. AUTORIZACIÓN',"K$f",10,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'FECHA',"L$f",11,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'RAZÓN SOCIAL',"M$f",12,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'MONEDA',"N$f",13,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'IMPORTE DOC.',"O$f",14,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'EXCENTO',"P$f",15,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'DESCUENTO',"Q$f",16,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NETO',"R$f",17,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'CÓDIGO DE CONTROL',"S$f",18,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'IVA',"T$f",19,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'IT',"U$f",20,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'ICE',"V$f",21,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'LÍQUIDO PAGABLE',"W$f",22,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'DUI',"X$f",23,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'NRO.TRÁMITE VIÁTICOS',"Y$f",24,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'FECHA VIÁTICO',"Z$f",25,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
+		$this->cell($sheet,'SOLICITANTE VIÁTICO',"AA$f",26,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
 
 		//////////////////
 		//Detalle de datos
@@ -424,34 +430,34 @@ class RViaticosForm110Xls
 
 		for ($fil=0; $fil < count($this->dataSetDet); $fil++) {
 			$f++;
-			$this->cell($sheet,$fil+1,"A$f",0,$f,"right",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['id_doc_compra_venta'],"B$f",1,$f,"right",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_tramite'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['desc_plantilla'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['desc_funcionario'],"E$f",4,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_mb'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['id_int_comprobante'],"G$f",6,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['estado_cbte'],"H$f",7,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nit'],"I$f",8,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_documento'],"J$f",9,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_autorizacion'],"K$f",10,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['fecha'],"L$f",11,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['razon_social'],"M$f",12,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['desc_moneda'],"N$f",13,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_doc'],"O$f",14,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_excento'],"P$f",15,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_descuento'],"Q$f",16,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_neto'],"R$f",17,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['codigo_control'],"S$f",18,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_iva'],"T$f",19,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_it'],"U$f",20,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_ice'],"V$f",21,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['importe_pago_liquido'],"W$f",22,$f,"right",false,$this->tam_letra_detalle,Arial,true,true,'center',true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_dui'],"X$f",23,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['nro_tramite_viatico'],"Y$f",24,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['fecha_viatico'],"Z$f",25,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			$this->cell($sheet,$this->dataSetDet[$fil]['desc_funcionario_sol'],"AA$f",26,$f,"left",false,$this->tam_letra_detalle,Arial,true,true);
-			
+			$this->cell($sheet,$fil+1,"A$f",0,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['id_doc_compra_venta'],"B$f",1,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_tramite'],"C$f",2,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['desc_plantilla'],"D$f",3,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['desc_funcionario'],"E$f",4,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_mb'],"F$f",5,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['id_int_comprobante'],"G$f",6,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['estado_cbte'],"H$f",7,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nit'],"I$f",8,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_documento'],"J$f",9,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_autorizacion'],"K$f",10,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['fecha'],"L$f",11,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['razon_social'],"M$f",12,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['desc_moneda'],"N$f",13,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_doc'],"O$f",14,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_excento'],"P$f",15,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_descuento'],"Q$f",16,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_neto'],"R$f",17,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['codigo_control'],"S$f",18,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_iva'],"T$f",19,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_it'],"U$f",20,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_ice'],"V$f",21,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['importe_pago_liquido'],"W$f",22,$f,"right",false,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_dui'],"X$f",23,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['nro_tramite_viatico'],"Y$f",24,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['fecha_viatico'],"Z$f",25,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+			$this->cell($sheet,$this->dataSetDet[$fil]['desc_funcionario_sol'],"AA$f",26,$f,"left",false,$this->tam_letra_detalle,'Arial',true,true); //#10
+
 
 		}
 
@@ -461,20 +467,20 @@ class RViaticosForm110Xls
 
 		//Totales
 		$f++;
-		$this->cell($sheet,'TOTAL',"A$f",0,$f,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'TOTAL',"A$f",0,$f,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
 		$sheet->mergeCells("A$f:D$f");
 		$this->cellBorder($sheet,"A$f:D$f");
-		$this->cell($sheet,number_format($arrayTotal['total'],2),"E$f",4,$f,"right",true,$this->tam_letra_detalle,Arial,false,true);
+		$this->cell($sheet,number_format($arrayTotal['total'],2),"E$f",4,$f,"right",true,$this->tam_letra_detalle,'Arial',false,true); //#10
 
 		//$objPHPExcel->getActiveSheet()->setCellValue('E11', '=SUM(E4:E9)');
-		$this->cell($sheet,'=SUM(F1:F170)',"A$f",0,$f+5,"center",true,$this->tam_letra_detalle,Arial,true,true);
+		$this->cell($sheet,'=SUM(F1:F170)',"A$f",0,$f+5,"center",true,$this->tam_letra_detalle,'Arial',true,true); //#10
 		$range_sum='=SUM(F'.($inicio+1).':F'.($f-1).')';
-		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,Arial,true,true,'center',true);
+		$this->cell($sheet,$range_sum,"F$f",5,$f,"right",true,$this->tam_letra_detalle,'Arial',true,true,'center',true); //#10
 
 
 		//Actualización variables
 		$this->fila=$f+6;
 	}
-	
+
 }
 ?>
