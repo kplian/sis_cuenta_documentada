@@ -25,6 +25,7 @@ $body$
  
 * ISSUE SIS       EMPRESA      FECHA:		      AUTOR       					DESCRIPCION
  #5	 TES       		ETR       17/04/2019       MANUEL GUERRA       Mostrar registros de vi/fa de funcionarios  
+ #7  endetr                     ETR       20/08/2019       JUAN                Se agrego AND para la correccion de filtro funcionario al momento de exportar
 ***************************************************************************/
 
 DECLARE
@@ -761,7 +762,7 @@ BEGIN
                              and v.id_tipo_cuenta_doc in ('||v_ids||') and '||v_filtro;
             
             IF v_parametros.id_funcionario != 0 THEN
-              v_consulta := v_consulta || '  v.id_funcionario = ' || v_parametros.id_funcionario;
+              v_consulta := v_consulta || ' and  v.id_funcionario = ' || v_parametros.id_funcionario; --#7 endetr JUAN 20/08/2019  se agrego AND para la correccion de filtro funcionario al momento de exportar
             END IF;
             
             raise notice  'consulta %', v_consulta;
