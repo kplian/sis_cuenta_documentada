@@ -6,6 +6,9 @@
 *@date 06/01/2018
 *@description Archivo con la interfaz de usuario
 *
+ HISTORIAL DE MODIFICACIONES:
+ISSUE           FECHA:          AUTOR:                      DESCRIPCION:
+ #9             16/12/2019      JUAN                        Corrección de habilitado de botón atrás en estado de visto bueno pagos
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -50,13 +53,13 @@ Phx.vista.PagoSimpleVb = {
         if(this.historico == 'no'){
 
             if(data.estado=='borrador'||data.estado=='pendiente'||data.estado=='pendiente_pago'||data.estado=='finalizado'){
-                this.getBoton('ant_estado').disable();
+                this.getBoton('ant_estado').disable(); 
                 this.getBoton('sig_estado').disable();
             } else if(data.estado=='vbtesoreria'){
-                this.getBoton('ant_estado').disable();
+                this.getBoton('ant_estado').enable(); //#9
                 this.getBoton('sig_estado').enable();
             } else if (data.estado=='rendicion'){
-                this.getBoton('ant_estado').disable();
+                this.getBoton('ant_estado').enable(); //#9
                 this.getBoton('sig_estado').enable();
             } else if (data.estado=='tesoreria'){
                 this.getBoton('ant_estado').enable();
