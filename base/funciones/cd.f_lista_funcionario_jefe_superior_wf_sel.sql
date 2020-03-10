@@ -78,7 +78,7 @@ BEGIN
                             ''''::text  as desc_funcionario_cargo,
                             1 as prioridad
                          FROM orga.vfuncionario fun WHERE fun.id_funcionario in (
-                         select * from orga.f_get_aprobadores_x_funcionario(CURRENT_DATE,'|| v_id_funcionario ||',''todos'',''todos'',''2,3,4,6'') as
+                         select * from orga.f_get_aprobadores_x_funcionario(CURRENT_DATE,'|| v_id_funcionario ||',''todos'',''todos'',''1,2,3,4,6'') as
 						 (id_funcionario integer)) and '||p_filtro||'
                          limit '|| p_limit::varchar||' offset '||p_start::varchar;
 
@@ -90,7 +90,7 @@ BEGIN
                   v_consulta='select
                                   COUNT(fun.id_funcionario) as total
                                  FROM orga.vfuncionario fun WHERE fun.id_funcionario in (
-                                 select * from orga.f_get_aprobadores_x_funcionario(CURRENT_DATE,'|| v_id_funcionario ||',''todos'',''todos'',''2,3,4,6'') as
+                                 select * from orga.f_get_aprobadores_x_funcionario(CURRENT_DATE,'|| v_id_funcionario ||',''todos'',''todos'',''1,2,3,4,6'') as
 						 (id_funcionario integer)) and '||p_filtro;
 
                    FOR g_registros in execute (v_consulta)LOOP
