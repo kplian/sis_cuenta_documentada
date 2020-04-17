@@ -9,11 +9,16 @@
 *
 
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
+<<<<<<< HEAD
 #13 		17/04/2020		manuel guerra			agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 #14 		29/04/2020		manuel guerra	    	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
 #15			19/05/2020		manuel guerra           filtro segun fecha para nro_tramite
 #16			30/05/2020		manuel guerra           filtrado por gestion para el nro_tramite refactorizacion
 #ETR-673	28/08/2020 		manuel guerra			agegar el calendario en fecha
+=======
+#13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
+
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -30,7 +35,11 @@ Phx.vista.FormRendicionPS = {
 	tipo_pres_gasto: 'gasto,administrativo',
 		
 	constructor: function(config) {	
+<<<<<<< HEAD
 		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);				
+=======
+		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);					
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 	},
 
     extraAtributos:[
@@ -61,7 +70,11 @@ Phx.vista.FormRendicionPS = {
 		{
 			config:{
 				name: 'nro_tramite',
+<<<<<<< HEAD
 				fieldLabel: 'Tramite-VI',				
+=======
+				fieldLabel: 'Tramite FA/VI',				
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 				emptyText:'Elija una tramite...',
 				store:new Ext.data.JsonStore(
 				{
@@ -73,9 +86,15 @@ Phx.vista.FormRendicionPS = {
 						direction:'ASC'
 					},
 					totalProperty:'total',
+<<<<<<< HEAD
 					fields: ['nro_tramite','gestion'],
 					remoteSort: true,
 					baseParams:{par_filtro:'cd.nro_tramite'}
+=======
+					fields: ['nro_tramite'],
+					remoteSort: true,
+					//baseParams:{par_filtro:'plt.nro_tramite',sw_compro:'si',sw_tesoro:'si'}
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 				}),
 				tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nro_tramite}</p></div></tpl>',
 				valueField: 'nro_tramite',
@@ -93,12 +112,18 @@ Phx.vista.FormRendicionPS = {
 				minChars:2,				
 			},
 			type:'ComboBox',
+<<<<<<< HEAD
 			filters:{pfiltro:'cd.nro_tramite',type:'string'},
 			id_grupo: 1,
+=======
+			//filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+			id_grupo: 2,
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 			bottom_filter: true,
 			form: true
 		},    
     ],
+<<<<<<< HEAD
 
 	onNew: function(){    	
 		Phx.vista.FormRendicionPS.superclass.onNew.call(this);			
@@ -106,6 +131,12 @@ Phx.vista.FormRendicionPS = {
 		//#ETR-673
 		this.Cmp.fecha.setReadOnly(false);
 		this.ocultarComponente(this.Cmp.dia);
+=======
+		
+	onNew: function(){    	
+		Phx.vista.FormRendicionPS.superclass.onNew.call(this);			
+		//#13 
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){			
 			if(rec.data.sw_nota_debito_agencia == 'si'){
 				this.mostrarComponente(this.Cmp.nota_debito_agencia);	
@@ -120,6 +151,7 @@ Phx.vista.FormRendicionPS = {
 			else{
 				this.ocultarComponente(this.Cmp.nro_tramite);				
 			}
+<<<<<<< HEAD
 		} ,this);	
 		//#122	
 		this.Cmp.fecha.on('select', function(combo, record, index){
@@ -165,5 +197,27 @@ Phx.vista.FormRendicionPS = {
             this.Cmp.nro_tramite.modificado = true;
 		}, this);
 	},		
+=======
+		} ,this);					
+    	this.Cmp.sw_pgs.setValue('reg');       
+	},
+	
+	onEdit: function(){    	
+		Phx.vista.FormRendicionPS.superclass.onEdit.call(this);
+		//#13 
+		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){			
+			if(rec.data.sw_nota_debito_agencia == 'si'){
+				this.mostrarComponente(this.Cmp.nota_debito_agencia);	
+			}
+			else{
+				this.ocultarComponente(this.Cmp.nota_debito_agencia);				
+			}
+		} ,this);		
+    	if(this.Cmp.sw_pgs.getValue()!='proc'){
+    		this.Cmp.sw_pgs.setValue('reg');
+    	}	       		
+	},	
+	
+>>>>>>> d62bfb8... #13 etr agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 };
 </script>

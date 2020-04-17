@@ -29,21 +29,32 @@ Phx.vista.DocCompraPS = {
 	
 	constructor: function(config) {
 		
+
 	    Phx.vista.DocCompraPS.superclass.constructor.call(this,config);	
 		this.addBotonesPas();
+   
+		//this.Cmp.id_plantilla.store.baseParams = Ext.apply(this.Cmp.id_plantilla.store.baseParams, {tipo_plantilla:this.tipoDoc});
+		this.addButton('btnAutorizacion',
+			{	
+				text:'Rep. Det. Pasajes',
+				iconCls: 'blist',
+				disabled: false,				
+				handler:this.repAutorizacion,
+				tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>'
+			}
+		);
     },   
     
     loadValoresIniciales: function() {
     	Phx.vista.DocCompraPS.superclass.loadValoresIniciales.call(this);
-        //this.Cmp.tipo.setValue(this.tipoDoc); 
-        
-   },
-   capturaFiltros:function(combo, record, index){
+        //this.Cmp.tipo.setValue(this.tipoDoc);         
+	},
+	   
+    capturaFiltros:function(combo, record, index){
         this.store.baseParams.tipo = this.tipoDoc;
         Phx.vista.DocCompraPS.superclass.capturaFiltros.call(this,combo, record, index);
-    },    
-	//
-	//
+    },
+   
     cmbDepto: new Ext.form.ComboBox({
 		name: 'id_depto',
 		fieldLabel: 'Depto',
@@ -194,7 +205,7 @@ Phx.vista.DocCompraPS = {
         });
 		this.tbar.add(this.menuAdqGantt);
     },
-   
+ 
    
    
 };
