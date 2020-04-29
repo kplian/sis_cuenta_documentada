@@ -9,7 +9,7 @@
 
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #13 		17/04/2020		manuel guerra	insercion de los campos(nota debito de agencia/vi-fa) para los documentos   
-
+#14 		29/04/2020		manuel guerra	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
 */
 
 class MODRendicionDet extends MODbase{
@@ -1055,6 +1055,7 @@ class MODRendicionDet extends MODbase{
 			$this->setParametro('id_funcionario','id_funcionario','integer');
 			$this->setParametro('sw_pgs','sw_pgs','varchar');			//#13
 			$this->setParametro('nota_debito_agencia','nota_debito_agencia','varchar');	//#13
+			$this->setParametro('nro_tramite','nro_tramite','varchar');	//#14
 			//Ejecuta la instruccion
             $this->armarConsulta();
 			$stmt = $link->prepare($this->consulta);		  

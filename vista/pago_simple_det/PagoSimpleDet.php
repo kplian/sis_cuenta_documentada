@@ -59,6 +59,7 @@ Phx.vista.PagoSimpleDet = {
         this.getBoton('btnExpTxt').setVisible(false);
 		//#15		
         this.getBoton('repasaj').setVisible(false);
+        
     },
    
     
