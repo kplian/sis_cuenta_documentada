@@ -24,6 +24,7 @@ $body$
 
  ISSUE      FECHA         AUTHOR        DESCRIPCION
 #1        28/11/2018    RCM           Validación al editar solicitud, no permitir cambiar de gestión (CD_CDOC_MOD)
+#12			31/03/2020   manuel guerra  la dev/rep,  ahora enviaa a insertar con el id_tipo_solicitud, reposiociom
 ***************************************************************************/
 
 DECLARE
@@ -2084,7 +2085,8 @@ end if;*/
                         v_parametros.id_caja_dev as id_caja,
                         v_parametros.dev_saldo as monto,
                         v_registros_cd.id_funcionario as id_funcionario,
-                        'solicitud' as tipo_solicitud,
+                        --'solicitud' as tipo_solicitud,
+                        'reposicion' as tipo_solicitud,--#12
                         now() as fecha,
                         'Reposición de fondos por cuenta documentada al funcionario' as motivo,
                         null::integer as id_solicitud_efectivo_fk
@@ -2270,4 +2272,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;

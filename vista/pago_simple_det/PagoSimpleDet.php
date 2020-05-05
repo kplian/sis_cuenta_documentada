@@ -5,6 +5,12 @@
 *@author  (admin)
 *@date 01-01-2018 06:21:25
 *@description Archivo con la interfaz de usuario que permite la ejecucion de todas las funcionalidades del sistema
+
+
+
+ISSUE          FECHA:		      AUTOR                 DESCRIPCION
+#14 		17/04/2020		manuel guerra	    	ocultar boton de reporte
+
 */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -50,7 +56,8 @@ Phx.vista.PagoSimpleDet = {
         this.getBoton('btnWizard').setVisible(false);
         this.getBoton('btnImprimir').setVisible(false);
         this.getBoton('btnExpTxt').setVisible(false);
-
+		//#14
+		this.getBoton('btnAutorizacion').setVisible(false);
         
     },
    
