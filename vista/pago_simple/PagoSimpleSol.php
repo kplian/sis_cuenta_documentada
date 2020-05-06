@@ -6,9 +6,6 @@
 *@date 20/01/2018
 *@description Archivo con la interfaz de usuario
 *
-ISSUE          FECHA:		      AUTOR                 DESCRIPCION
-#13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
-
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -58,16 +55,7 @@ Phx.vista.PagoSimpleSol = {
 		this.store.baseParams.pes_estado = 'borrador';
     	this.load({params:{start:0, limit:this.tam_pag}});
 
-        this.finCons = true;
-        this.addButton('btnRegPas',
-			{	
-				text:'Reg. Pasajeros',
-				iconCls: 'blist',
-				disabled: false,				
-				handler:this.regPasajeros,
-				tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>'
-			}
-		);
+		this.finCons = true;
    },
    
     preparaMenu: function(n) {
@@ -141,30 +129,7 @@ Phx.vista.PagoSimpleSol = {
               
         }
         return tb
-    },
-    //#13
-	regPasajeros : function() {		
-        var data = this.getSelectedData();
-        console.log('data',data.id_pago_simple);
-		if(data)
-		{			
-			Phx.CP.loadingShow();
-			Ext.Ajax.request({
-				url:'../../sis_contabilidad/control/DocCompraVenta/RepRegPasa',
-				params:{
-                    id_pago_simple: data.id_pago_simple
-				},
-				success:this.successExport,
-				failure: this.conexionFailure,
-				timeout:this.timeout,
-				scope:this
-			});	
-		}
-		else
-		{
-			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
-		}
-	}	   
+    }
         
 };
 </script>
