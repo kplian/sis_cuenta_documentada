@@ -9,8 +9,8 @@
 *
 
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
-#13 		17/04/2020		manuel guerra			agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
-#14 		29/04/2020		manuel guerra	    	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
+#13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
+
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -72,7 +72,7 @@ Phx.vista.FormRendicionPS = {
 					totalProperty:'total',
 					fields: ['nro_tramite'],
 					remoteSort: true,
-					baseParams:{par_filtro:'cd.nro_tramite'}
+					//baseParams:{par_filtro:'plt.nro_tramite',sw_compro:'si',sw_tesoro:'si'}
 				}),
 				tpl:'<tpl for="."><div class="x-combo-list-item"><p>{nro_tramite}</p></div></tpl>',
 				valueField: 'nro_tramite',
@@ -90,8 +90,8 @@ Phx.vista.FormRendicionPS = {
 				minChars:2,				
 			},
 			type:'ComboBox',
-			filters:{pfiltro:'cd.nro_tramite',type:'string'},
-			id_grupo: 1,
+			//filters:{pfiltro:'pla.desc_plantilla',type:'string'},
+			id_grupo: 2,
 			bottom_filter: true,
 			form: true
 		},    
@@ -131,14 +131,7 @@ Phx.vista.FormRendicionPS = {
 		} ,this);		
     	if(this.Cmp.sw_pgs.getValue()!='proc'){
     		this.Cmp.sw_pgs.setValue('reg');
-		}
-		//#14
-		this.cmpnota_debito_agencia = this.getComponente('nota_debito_agencia');
-		this.cmpnro_tramite = this.getComponente('nro_tramite');		
-		if(this.data.datosOriginales.data.id_int_comprobante){
-			this.cmpnota_debito_agencia.disable();
-			this.cmpnro_tramite.disable();
-		}  
+    	}	       		
 	},	
 	
 };
