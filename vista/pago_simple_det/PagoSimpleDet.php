@@ -10,6 +10,7 @@
 
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #14 		17/04/2020		manuel guerra	    	ocultar boton de reporte
+#15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
 
 */
 
@@ -56,9 +57,8 @@ Phx.vista.PagoSimpleDet = {
         this.getBoton('btnWizard').setVisible(false);
         this.getBoton('btnImprimir').setVisible(false);
         this.getBoton('btnExpTxt').setVisible(false);
-		//#14
-		this.getBoton('btnAutorizacion').setVisible(false);
-        
+		//#15		
+        this.getBoton('repasaj').setVisible(false);
     },
    
     

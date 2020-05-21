@@ -10,6 +10,7 @@
 
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
+#15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
 
 */
 header("content-type: text/javascript; charset=UTF-8");
@@ -28,18 +29,8 @@ Phx.vista.DocCompraPS = {
 	
 	constructor: function(config) {
 		
-	    Phx.vista.DocCompraPS.superclass.constructor.call(this,config);
-	   
-		//this.Cmp.id_plantilla.store.baseParams = Ext.apply(this.Cmp.id_plantilla.store.baseParams, {tipo_plantilla:this.tipoDoc});
-		this.addButton('btnAutorizacion',
-			{	
-				text:'Rep. Det. Pasajes',
-				iconCls: 'blist',
-				disabled: false,				
-				handler:this.repAutorizacion,
-				tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>'
-			}
-		);
+	    Phx.vista.DocCompraPS.superclass.constructor.call(this,config);	
+		this.addBotonesPas();
     },   
     
     loadValoresIniciales: function() {
@@ -50,8 +41,9 @@ Phx.vista.DocCompraPS = {
     capturaFiltros:function(combo, record, index){
         this.store.baseParams.tipo = this.tipoDoc;
         Phx.vista.DocCompraPS.superclass.capturaFiltros.call(this,combo, record, index);
-    },
-   
+    },    
+	//
+	//
     cmbDepto: new Ext.form.ComboBox({
 		name: 'id_depto',
 		fieldLabel: 'Depto',
@@ -149,8 +141,59 @@ Phx.vista.DocCompraPS = {
 		{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
 		}
-	}	   
-  
+	},
+	//#15
+	repAutorizacionPDF : function() {		
+		var tmpl =this.cmbPeriodo.getValue();		
+		var me = this;
+		if(tmpl)
+		{			
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_cuenta_documentada/control/PagoSimple/repAutorizacionPdf',
+				params:{
+					id_depto_conta : this.cmbDepto.getValue(),
+					id_gestion : me.cmbGestion.getValue(),
+					id_periodo : me.cmbPeriodo.getValue()		
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});	
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
+		}
+	},	   
+	//
+	addBotonesPas: function() {
+        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+            id: 'b-repasaj-' + this.idContenedor,
+            text:'Rep. Det. Pasajes',
+            disabled: false,
+            iconCls : 'blist',
+            handler:this.repAutorizacion,
+            scope: this,
+            menu:{
+				items: [{
+					id:'b-repasajXls-' + this.idContenedor,
+					text: 'Excel',
+					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+					handler:this.repAutorizacion,
+					scope: this
+				}, {
+					id:'b-repasajPdf-' + this.idContenedor,
+					text: 'Pdf',
+					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+					handler:this.repAutorizacionPDF,
+					scope: this
+				}]
+			}
+        });
+		this.tbar.add(this.menuAdqGantt);
+    },
    
    
    
