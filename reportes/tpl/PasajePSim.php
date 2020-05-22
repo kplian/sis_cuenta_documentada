@@ -39,6 +39,7 @@
             .post-title {
                 font-weight: bold;
                 font-size: 12px;
+                align:center;
             }
             body {
                 margin: 0px;
@@ -47,10 +48,13 @@
         
     </head>
     <body>            
-        <div id='div'>           
-            <img width="15" height="15" style="float:left" src="./../../../lib/imagenes/logos/logo.jpg">            
-            <h3 class="post-title">PROCESO DE REGISTRO DE PASAJES AEREOS</h3>                
-        </div>
+        <table>
+            <tr>
+                <td style="height:50px;" width="10%" align="center"><img width="35" height="35" src="./../../../lib/imagenes/logos/logo.jpg"></td>
+                <td width="90%" align="center"><h3 class="post-title">PROCESO DE REGISTRO DE PASAJES AEREOS</h3></td>      
+            </tr>
+        </table>
+        <p></p>
         <table class="mp_c1" border="1" >
             <thead>
                 <tr style="border: 2px solid #300BE7;font-size: 8;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">                    
@@ -60,7 +64,7 @@
                     <th style="width: 110px;">PROCESO (VI/FA)</th>
                     <th style="width: 200px;">MOTIVO, FECHA Y RUTA</th>
                     <th style="width: 250px;">CENTRO DE COSTO</th>                    
-                    <th style="width: 150px;">IMPORTE</th>
+                    <th style="width: 120px;">IMPORTE</th>
                 </tr>        
             </thead>  
             <tbody>                
@@ -96,7 +100,7 @@
                                 $tds .= '<td style="width: 250px; height=30px;">'.$value.'</td>';
                             } 
                             if($keyIn=='importe_doc'){
-                                $tds .= '<td align="right" style="width: 150px; height=30px;">'.number_format($value,2).'</td>';
+                                $tds .= '<td align="right" style="width: 120px; height=30px;">'.number_format($value,2).'</td>';
                             }  
                             if($keyIn=='tipago'){
                                 $tpopago=$value;

@@ -46,10 +46,13 @@
         
     </head>
     <body>
-        <div id='div'> 
-        <img width="15" height="15" style="float:left" src="./../../../lib/imagenes/logos/logo.jpg">               
-            <h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION </h3>                
-        </div>
+        <table>
+            <tr>
+                <td style="height:50px;" width="10%" align="center"><img width="35" height="35" src="./../../../lib/imagenes/logos/logo.jpg"></td>
+                <td width="90%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>      
+            </tr>
+        </table>
+        <p></p>
         <table class="mp_c1" border="1" >
             <thead>
                 <tr style="border: 2px solid #300BE7;font-size: 8;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
