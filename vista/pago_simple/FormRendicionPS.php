@@ -12,6 +12,7 @@ ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #13 		17/04/2020		manuel guerra			agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
 #14 		29/04/2020		manuel guerra	    	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
 #15			19/05/2020		manuel guerra           filtro segun fecha para nro_tramite
+#16			30/05/2020		manuel guerra           filtrado por gestion para el nro_tramite refactorizacion
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -28,10 +29,7 @@ Phx.vista.FormRendicionPS = {
 	tipo_pres_gasto: 'gasto,administrativo',
 		
 	constructor: function(config) {	
-		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);	
-		this.init();				
-		this.iniciarEventos();
-		this.Cmp.nro_tramite.store.baseParams = {gestion:0};
+		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);			
 	},
 
     extraAtributos:[
@@ -100,15 +98,7 @@ Phx.vista.FormRendicionPS = {
 			form: true
 		},    
     ],
-	iniciarEventos: function(){
-		//#15
-		this.Cmp.fecha.on('change',function( cmp, newValue, oldValue){				
-			var anio= this.Cmp.fecha.getValue();						
-			this.Cmp.nro_tramite.store.baseParams = {gestion:anio.getFullYear()};
-            this.Cmp.nro_tramite.modificado = true;			
-		}, this);
-		
-	},	
+
 	onNew: function(){    	
 		Phx.vista.FormRendicionPS.superclass.onNew.call(this);			
 		//#13 
@@ -126,9 +116,14 @@ Phx.vista.FormRendicionPS = {
 			else{
 				this.ocultarComponente(this.Cmp.nro_tramite);				
 			}
-		} ,this);					
-    	this.Cmp.sw_pgs.setValue('reg');  
-		     
+		} ,this);	
+		//#122
+		this.Cmp.fecha.on('change',function( cmp, newValue, oldValue){
+			var anio= this.Cmp.fecha.getValue();			
+			this.Cmp.nro_tramite.store.baseParams = {gestion:anio.getFullYear()};
+            this.Cmp.nro_tramite.modificado = true;
+		}, this);						
+    	this.Cmp.sw_pgs.setValue('reg');  		
 	},
 	
 	onEdit: function(){    	
