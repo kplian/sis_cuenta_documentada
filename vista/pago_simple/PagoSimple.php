@@ -24,7 +24,6 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 
 		//Historico
 		this.historico = 'no';
-
     	//llama al constructor de la clase padre
 		Phx.vista.PagoSimple.superclass.constructor.call(this,config);
 		this.init();
@@ -71,7 +70,6 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             });
 
         this.crearVentana();
-
         this.iniciarEventos();
         //Esconde los campos para el pago-devengado        
         this.Cmp.importe.setVisible(false);
@@ -858,8 +856,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
 		Phx.vista.PagoSimple.superclass.preparaMenu.call(this, n);
 
 		this.getBoton('ant_estado').disable();
-		this.getBoton('sig_estado').disable();
-
+		this.getBoton('sig_estado').disable();		
+		
 		//Si está en modo histórico,no habilita ninguno de los botones que generan transacciones
 		if(this.historico=='no'){
 			if(data.estado == 'borrador') {
@@ -912,7 +910,8 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('btnAgregarDoc').disable();
             
             this.getBoton('btnDetalleDocumentoPagoSimple').disable();
-              
+			this.getBoton('btnAutorizacion').disable();
+
 		}
 		return tb
 	},

@@ -347,6 +347,7 @@ class MODPagoSimple extends MODbase{
 		$this->captura('desc_moneda','varchar');
 		$this->captura('tipago','varchar');
 		$this->captura('rotulo_comercial','varchar');		
+		$this->captura('tram','varchar');	
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

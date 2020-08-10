@@ -153,7 +153,6 @@ Phx.vista.FormRendicionPS = {
 			this.Cmp.nro_tramite.store.baseParams = {gestion:anio.getFullYear()};
             this.Cmp.nro_tramite.modificado = true;
 		}, this);
-	},	
-	
+	},		
 };
 </script>

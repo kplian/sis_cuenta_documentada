@@ -48,21 +48,20 @@
     <body>
         <table>
             <tr>
-                <td style="height:50px;" width="10%" align="center"><img width="35" height="35" src="./../../../lib/imagenes/logos/logo.jpg"></td>
-                <td width="90%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>      
+                <td style="height:40px;" width="10%" align="center"><img width="110" height="75" src="./../../../lib/imagenes/logos/logo.jpg"></td>
+                <td width="90%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>                    
             </tr>
-        </table>
-        <p></p>
+        </table>        
         <table class="mp_c1" border="1" >
             <thead>
-                <tr style="border: 2px solid #300BE7;font-size: 8;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
+                <tr style="border: 2px solid #300BE7;font-size: 7;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
                     <th style="width: 70px;">NOTA DE DEBITO</th>
-                    <th style="width: 90px;">NOMBRE DEL PASAJERO</th>
+                    <th style="width: 110px;">NOMBRE DEL PASAJERO</th>
                     <th style="width: 70px;">N&ordm;  FACTURA</th>
-                    <th style="width: 80px;">PROCESO (VI/FA)</th>
-                    <th style="width: 150px;">MOTIVO, FECHA Y RUTA</th>
+                    <th style="width: 78px;">PROCESO (VI/FA)</th>
+                    <th style="width: 120px;">MOTIVO, FECHA Y RUTA</th>
                     <th style="width: 180px;">CENTRO DE COSTO</th>
-                    <th style="width: 60px;">MONEDA</th>
+                    <th style="width: 55px;">MONEDA</th>
                     <th style="width: 70px;">IMPORTE</th>
                     <th style="width: 80px;">FIRMA AUTORIZADA</th>
                     <th style="width: 80px;">NOMBRE</th>   
@@ -81,28 +80,28 @@
                                 $sum+= $value;
                             }
                             if($keyIn=='nota_debito_agencia'){
-                                $tds .= '<td style="width: 70px">'.$value.'</td>';
+                                $tds .= '<td align="center" style="width: 70px">'.$value.'</td>';
                             }
                             if($keyIn=='desc_funcionario2'){
-                                $tds .= '<td style="width: 90px">'.$value.'</td>';
+                                $tds .= '<td style="width: 110px">'.$value.'</td>';
                             }  
                             if($keyIn=='nro_documento'){
-                                $tds .= '<td style="width: 70px">'.$value.'</td>';
+                                $tds .= '<td align="center" style="width: 70px">'.$value.'</td>';
                             }  
                             if($keyIn=='nro_tramite'){
-                                $tds .= '<td style="width: 80px">'.$value.'</td>';
+                                $tds .= '<td align="center" style="width: 78px">'.$value.'</td>';
                             }  
                             if($keyIn=='obs'){
-                                $tds .= '<td style="width: 150px;">'.$value.'</td>';
+                                $tds .= '<td style="width: 120px;">'.$value.'</td>';
                             }  
                             if($keyIn=='descripcion'){
-                                $tds .= '<td style="width: 180px;">'.$value.'</td>';
+                                $tds .= '<td align="left" style="width: 180px;">'.$value.'</td>';
                             }  
                             if($keyIn=='desc_moneda'){
-                                $tds .= '<td style="width: 60px;">'.$value.'</td>';
+                                $tds .= '<td align="center" style="width: 55px;">'.$value.'</td>';
                             } 
                             if($keyIn=='importe_doc'){
-                                $tds .= '<td style="width: 70px;">'.number_format($value,2).'</td>';
+                                $tds .= '<td align="right" style="width: 70px;">'.number_format($value,2).'</td>';
                             }                            
                         } 
                         $tds .= '<td style="width: 80px;"></td><td style="width: 80px;"></td>';                
@@ -112,7 +111,20 @@
                     echo '<tr align="right" style="background-color: #81BEF7;vertical-align: middle"><td colspan="2" style="height: 15px;">TOTAL</td><td colspan="6" style="background-color: white;" align="right" height="15px">'.number_format($sum,2).'</td></tr>';                    
                 ?>                                       
             </tbody>              
-        </table>    
+        </table>
+        <p></p>
+        <div style="text-align: center;">                    
+            <table border="1" style="font-size: 8;padding: 2px 2px;">            
+                <tr>
+                    <td style='width: 100px; text-align: center;'>&nbsp;</td>
+                    <td style='width: 100px; text-align: center;'>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td style='width: 100px; text-align: center;'>Depto Contabilidad</td>
+                    <td style='width: 100px; text-align: center;'>Depto Finanzas</td>
+                </tr>                
+            </table>  
+        </div>  
     </body>
 </html>
 
