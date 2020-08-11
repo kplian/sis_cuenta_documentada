@@ -57,14 +57,14 @@
                 <tr style="border: 2px solid #300BE7;font-size: 7;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
                     <th style="width: 70px;">NOTA DE DEBITO</th>
                     <th style="width: 110px;">NOMBRE DEL PASAJERO</th>
-                    <th style="width: 70px;">N&ordm;  FACTURA</th>
+                    <th style="width: 80px;">N&ordm;  FACTURA</th>
                     <th style="width: 78px;">PROCESO (VI/FA)</th>
                     <th style="width: 120px;">MOTIVO, FECHA Y RUTA</th>
-                    <th style="width: 180px;">CENTRO DE COSTO</th>
+                    <th style="width: 160px;">CENTRO DE COSTO</th>
                     <th style="width: 55px;">MONEDA</th>
                     <th style="width: 70px;">IMPORTE</th>
-                    <th style="width: 80px;">FIRMA AUTORIZADA</th>
-                    <th style="width: 80px;">NOMBRE</th>   
+                    <th style="width: 85px;">FIRMA AUTORIZADA</th>
+                    <th style="width: 85px;">NOMBRE</th>   
                 </tr>        
             </thead>  
             <tbody>                
@@ -86,7 +86,7 @@
                                 $tds .= '<td style="width: 110px">'.$value.'</td>';
                             }  
                             if($keyIn=='nro_documento'){
-                                $tds .= '<td align="center" style="width: 70px">'.$value.'</td>';
+                                $tds .= '<td align="center" style="width: 80px">'.$value.'</td>';
                             }  
                             if($keyIn=='nro_tramite'){
                                 $tds .= '<td align="center" style="width: 78px">'.$value.'</td>';
@@ -95,7 +95,7 @@
                                 $tds .= '<td style="width: 120px;">'.$value.'</td>';
                             }  
                             if($keyIn=='descripcion'){
-                                $tds .= '<td align="left" style="width: 180px;">'.$value.'</td>';
+                                $tds .= '<td align="left" style="width: 160px;">'.$value.'</td>';
                             }  
                             if($keyIn=='desc_moneda'){
                                 $tds .= '<td align="center" style="width: 55px;">'.$value.'</td>';
@@ -104,7 +104,7 @@
                                 $tds .= '<td align="right" style="width: 70px;">'.number_format($value,2).'</td>';
                             }                            
                         } 
-                        $tds .= '<td style="width: 80px;"></td><td style="width: 80px;"></td>';                
+                        $tds .= '<td style="width: 85px;"></td><td style="width: 85px;"></td>';                
                         echo '<tr>'.$tds.'</tr>';                   
                     }                            
                     echo '<tr ><td colspan="10" style="background-color: white;" height="20px"></td></tr>';                    
@@ -112,19 +112,6 @@
                 ?>                                       
             </tbody>              
         </table>
-        <p></p>
-        <div style="text-align: center;">                    
-            <table border="1" style="font-size: 8;padding: 2px 2px;">            
-                <tr>
-                    <td style='width: 100px; text-align: center;'>&nbsp;</td>
-                    <td style='width: 100px; text-align: center;'>&nbsp;</td>
-                </tr>
-                <tr>
-                    <td style='width: 100px; text-align: center;'>Depto Contabilidad</td>
-                    <td style='width: 100px; text-align: center;'>Depto Finanzas</td>
-                </tr>                
-            </table>  
-        </div>  
     </body>
 </html>
 

@@ -51,7 +51,7 @@
     <body>            
         <table>
             <tr>
-                <td style="height:40px;" width="10%" align="center"><img width="110" height="75" src="./../../../lib/imagenes/logos/logo.jpg"></td>
+                <td style="height:40px;" width="10%" align="center"><img width="110" height="75" src="./../../../lib/imagenes/logos/logo.jpg" alt="Logo"></td>                
                 <td width="90%" align="center"><h3 class="post-title">PROCESO DE REGISTRO DE PASAJES AEREOS</h3></td>      
             </tr>
         </table>
