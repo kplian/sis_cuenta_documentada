@@ -79,7 +79,7 @@
                     <td align="center" style="width: 140px;">NOMBRE DEL PASAJERO</td>
                     <td align="center" style="width: 70px;">N&ordm;  FACTURA</td>
                     <td align="center"style="width: 70px;">NOTA DE DEBITO</td>
-                    <td align="center"style="width: 80px;">PROCESO (VI/FA)</td>
+                    <td align="center"style="width: 80px;">PROCESO (VI)</td>
                     <td align="center"style="width: 180px;"><br/>MOTIVO, FECHA Y RUTA</td>
                     <td align="center" style="vertical-align: middle;width: 250px; ">CENTRO DE COSTO</td>                    
                     <td align="center" style="width: 120px;">IMPORTE</td>
@@ -155,12 +155,10 @@
         <div style="text-align: center;">                    
             <table border="1" style="font-size: 8;padding: 2px 2px;">            
                 <tr style='text-align: center;'>
-                    <td style='width: 100px; text-align: center;'>&nbsp;</td>
-                    <td style='width: 100px;text-align: center;'>&nbsp;</td>
+                    <td style='width: 100px; text-align: center;'>&nbsp;</td>                    
                 </tr>
                 <tr>
-                    <td style='width: 100px; text-align: center;'>Depto Contabilidad</td>
-                    <td style='width: 100px; text-align: center;'>Depto Finanzas</td>
+                    <td style='width: 100px; text-align: center;'>Elaborado por:</td>                    
                 </tr>                
             </table>  
         </div>     

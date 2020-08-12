@@ -267,7 +267,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
        		    name:'id_funcionario',
        		    hiddenName: 'id_funcionario',
    				origen:'FUNCIONARIOCAR',
-   				fieldLabel:'Solicitante',
+   				fieldLabel:'Solicitantes',
    				allowBlank:false,
                 gwidth:200,
                 anchor: '100%',

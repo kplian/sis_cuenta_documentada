@@ -60,7 +60,7 @@ Phx.vista.FormRendicionPS = {
 		{
 			config:{
 				name: 'nro_tramite',
-				fieldLabel: 'Tramite FA/VI',				
+				fieldLabel: 'Tramite-VI',				
 				emptyText:'Elija una tramite...',
 				store:new Ext.data.JsonStore(
 				{
