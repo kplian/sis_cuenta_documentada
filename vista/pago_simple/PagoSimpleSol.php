@@ -176,16 +176,17 @@ Phx.vista.PagoSimpleSol = {
             disabled: true,
             //grupo:[0,1,2,3],
             iconCls : 'blist',
-            handler:this.regPasajeros,
+            handler:this.regPasajerosPDF,
             scope: this,
             menu:{
-				items: [{
+				items: [
+                /*{
 					id:'b-pasajeroXls-' + this.idContenedor,
 					text: 'Excel',
 					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
 					handler:this.regPasajeros,
 					scope: this
-				}, {
+				},*/ {
 					id:'b-pasajeroPdf-' + this.idContenedor,
 					text: 'Pdf',
 					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',

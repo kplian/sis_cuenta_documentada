@@ -174,7 +174,7 @@ Phx.vista.DocCompraPS = {
             text:'Rep. Det. Pasajes',
             disabled: false,
             iconCls : 'blist',
-            handler:this.repAutorizacion,
+            handler:this.repAutorizacionPDF,
             scope: this,
             menu:{
 				items: [{
