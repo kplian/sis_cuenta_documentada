@@ -112,6 +112,17 @@
                 ?>                                       
             </tbody>              
         </table>
+        <p></p>
+        <div style="text-align: center;">                    
+            <table border="1" style="font-size: 8;padding: 2px 2px;">            
+                <tr style='text-align: center;'>
+                    <td width="280px" height="25px" style=' text-align: center;'>&nbsp;</td>                
+                </tr>
+                <tr>
+                    <td style='text-align: center;'>Elaborado por:</td>                   
+                </tr>                
+            </table>  
+        </div>  
     </body>
 </html>
 

@@ -154,11 +154,13 @@
         <p></p>
         <div style="text-align: center;">                    
             <table border="1" style="font-size: 8;padding: 2px 2px;">            
-                <tr style='text-align: center;'>
-                    <td style='width: 100px; text-align: center;'>&nbsp;</td>                    
+                <tr valign="middle" align="center" style='text-align: center;'>
+                    <td width="280px" height="25px" style='text-align: center;'>&nbsp;</td>     
+                    <td width="280px" height="25px" style='text-align: center;'>&nbsp;</td>                
                 </tr>
                 <tr>
-                    <td style='width: 100px; text-align: center;'>Elaborado por:</td>                    
+                    <td style='text-align: center;'>Depto Contabilidad</td> 
+                    <td style='text-align: center;'>Depto Finanzas</td>                    
                 </tr>                
             </table>  
         </div>     
