@@ -58,8 +58,8 @@
                     <th style="width: 70px;">NOTA DE DEBITO</th>
                     <th style="width: 110px;">NOMBRE DEL PASAJERO</th>
                     <th style="width: 80px;">N&ordm;  FACTURA</th>
-                    <th style="width: 78px;">PROCESO (VI)</th>
-                    <th style="width: 120px;">MOTIVO, FECHA Y RUTA</th>
+                    <th style="width: 78px;">PROCESO VI</th>
+                    <th style="width: 120px;">RUTA, MOTIVO Y FECHA</th>
                     <th style="width: 160px;">CENTRO DE COSTO</th>
                     <th style="width: 55px;">MONEDA</th>
                     <th style="width: 70px;">IMPORTE</th>

@@ -79,8 +79,8 @@
                     <td align="center" style="width: 140px;">NOMBRE DEL PASAJERO</td>
                     <td align="center" style="width: 70px;">N&ordm;  FACTURA</td>
                     <td align="center"style="width: 70px;">NOTA DE DEBITO</td>
-                    <td align="center"style="width: 80px;">PROCESO (VI)</td>
-                    <td align="center"style="width: 180px;"><br/>MOTIVO, FECHA Y RUTA</td>
+                    <td align="center"style="width: 80px;">PROCESO VI</td>
+                    <td align="center"style="width: 180px;"><br/>RUTA, MOTIVO Y FECHA</td>
                     <td align="center" style="vertical-align: middle;width: 250px; ">CENTRO DE COSTO</td>                    
                     <td align="center" style="width: 120px;">IMPORTE</td>
                 </tr>        
