@@ -5,6 +5,10 @@
 *@author  (admin)
 *@date 31-12-2017 12:33:30
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
+
+ISSUE          FECHA:		      AUTOR                 DESCRIPCION
+#15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
+
 */
 require_once(dirname(__FILE__).'/../reportes/RDetallePago.php');
 
@@ -13,7 +17,8 @@ require_once(dirname(__FILE__).'/../../pxp/pxpReport/DataSource.php');
 require_once dirname(__FILE__).'/../../pxp/lib/lib_reporte/ReportePDFFormulario.php';
 require_once(dirname(__FILE__).'/../reportes/RLcv.php');
 //require_once(dirname(__FILE__).'/../reportes/RLcvVentas.php');
-
+require_once(dirname(__FILE__).'/../reportes/RepPasajes.php');
+require_once(dirname(__FILE__).'/../reportes/RepPasajesPSim.php');
 
 class ACTPagoSimple extends ACTbase{    
 			
@@ -197,8 +202,68 @@ class ACTPagoSimple extends ACTbase{
 			exit;
 		}              
 	}*/
-	
+	//#15
+	function repAutorizacionPdf(){	
+		
+		if($this->objParam->getParametro('id_pago_simple')!=''){
+			$this->objParam->addFiltro("paside.id_pago_simple =".$this->objParam->getParametro('id_pago_simple'));
+		}
+		$this->objFun=$this->create('MODPagoSimple');	
+		$this->res = $this->objFun->repAutorizacionPdf();
+		if($this->res->getTipo()=='ERROR'){
+			$this->res->imprimirRespuesta($this->res->generarJson());
+			exit;
+		}
 			
+		$nombreArchivo = uniqid(md5(session_id()).'-Pasajes') . '.pdf'; 		
+		$tamano = 'LETTER';
+		$orientacion = 'L';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		$reporte = new RepPasajes($this->objParam); 		
+		$reporte->datosHeader($this->res->datos);
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}
+	//#15
+	function RepRegPasaPdf(){	
+		
+		if($this->objParam->getParametro('id_pago_simple')!=''){
+			$this->objParam->addFiltro("paside.id_pago_simple =".$this->objParam->getParametro('id_pago_simple'));
+		}
+		$this->objFun=$this->create('MODPagoSimple');	
+		$this->res = $this->objFun->RepRegPasaPdf();
+		if($this->res->getTipo()=='ERROR'){
+			$this->res->imprimirRespuesta($this->res->generarJson());
+			exit;
+		}
+			
+		$nombreArchivo = uniqid(md5(session_id()).'-Pasajes') . '.pdf'; 		
+		$tamano = 'LETTER';
+		$orientacion = 'L';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);		
+		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		$reporte = new RepPasajesPSim($this->objParam); 		
+		$reporte->datosHeader($this->res->datos);
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}		
 }
 
 ?>
