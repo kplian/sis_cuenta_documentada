@@ -29,7 +29,7 @@ Phx.vista.FormRendicionPS = {
 	tipo_pres_gasto: 'gasto,administrativo',
 		
 	constructor: function(config) {	
-		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);			
+		Phx.vista.FormRendicionPS.superclass.constructor.call(this,config);				
 	},
 
     extraAtributos:[
@@ -102,6 +102,7 @@ Phx.vista.FormRendicionPS = {
 	onNew: function(){    	
 		Phx.vista.FormRendicionPS.superclass.onNew.call(this);			
 		//#13 
+		this.ocultarComponente(this.Cmp.dia);
 		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){			
 			if(rec.data.sw_nota_debito_agencia == 'si'){
 				this.mostrarComponente(this.Cmp.nota_debito_agencia);	
@@ -117,12 +118,26 @@ Phx.vista.FormRendicionPS = {
 				this.ocultarComponente(this.Cmp.nro_tramite);				
 			}
 		} ,this);	
-		//#122
-		this.Cmp.fecha.on('change',function( cmp, newValue, oldValue){
-			var anio= this.Cmp.fecha.getValue();			
+		//#122	
+		this.Cmp.fecha.on('select', function(combo, record, index){
+			this.Cmp.nro_tramite.enable();
+			this.Cmp.nro_tramite.reset();
+			var anio= this.Cmp.fecha.getValue();
+			anio = anio.getFullYear();	
+			this.Cmp.nro_tramite.store.baseParams = Ext.apply(
+				this.Cmp.nro_tramite.store.baseParams, {
+					gestion: anio
+				});
+			this.Cmp.nro_tramite.modificado = true;
+		},this);
+		
+		/*this.Cmp.fecha.on('change',function( cmp, newValue, oldValue){
+			var anio= this.Cmp.fecha.getValue();
+			this.Cmp.nro_tramite.enable();
+			this.Cmp.nro_tramite.reset();			
 			this.Cmp.nro_tramite.store.baseParams = {gestion:anio.getFullYear()};
             this.Cmp.nro_tramite.modificado = true;
-		}, this);						
+		}, this);				*/	
     	this.Cmp.sw_pgs.setValue('reg');  		
 	},
 	

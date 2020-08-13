@@ -153,8 +153,8 @@
        
         <p></p>
         <div style="text-align: center;">                    
-            <table border="1" style="font-size: 8;padding: 2px 2px;">            
-                <tr valign="middle" align="center" style='text-align: center;'>
+            <table align="center" valign="middle" border="1" style="font-size: 8;padding: 2px 2px;">            
+                <tr align="center" style='text-align: center;'>
                     <td width="280px" height="25px" style='text-align: center;'>&nbsp;</td>     
                     <td width="280px" height="25px" style='text-align: center;'>&nbsp;</td>                
                 </tr>
