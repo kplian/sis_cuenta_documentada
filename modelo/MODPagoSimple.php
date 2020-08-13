@@ -5,6 +5,9 @@
 *@author  (admin)
 *@date 31-12-2017 12:33:30
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+ISSUE          FECHA:		      AUTOR                 DESCRIPCION
+#15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
+
 */
 
 class MODPagoSimple extends MODbase{
@@ -298,7 +301,57 @@ class MODPagoSimple extends MODbase{
 		  //Devuelve la respuesta
 		  return $this->respuesta;
 	}
-
-			
+	//#15
+	function repAutorizacionPdf(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='conta.ft_doc_compra_venta_sel';
+		$this->transaccion='CONTA_REPAUT_SEL';
+		$this->tipo_procedimiento='SEL';//tipo de transaccion
+		$this-> setCount(false);
+		$this->setParametro('id_depto_conta','id_depto_conta','int4');
+		//$this->setParametro('id_gestion','id_gestiongestion','int4');		
+		$this->setParametro('id_periodo','id_periodo','int4');		
+		//Definicion de la lista del resultado del query		
+		$this->captura('nota_debito_agencia','varchar');
+		$this->captura('desc_funcionario2','varchar');
+		$this->captura('nro_documento','varchar');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('obs','varchar');
+		$this->captura('descripcion','varchar');	
+		$this->captura('desc_moneda','varchar');
+		$this->captura('importe_doc','numeric');
+		
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}
+	//#15
+	function RepRegPasaPdf(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='conta.ft_doc_compra_venta_sel';
+		$this->transaccion='CONTA_REPREPAS_SEL';
+		$this->tipo_procedimiento='SEL';
+		$this-> setCount(false);
+		$this->setParametro('id_pago_simple','id_pago_simple','int4');
+		
+		//Definicion de la lista del resultado del query
+		
+		$this->captura('desc_funcionario2','varchar');
+		$this->captura('nro_documento','varchar');
+		$this->captura('nota_debito_agencia','varchar');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('obs','varchar');
+		$this->captura('descripcion','varchar');	
+		$this->captura('importe_doc','numeric');
+		$this->captura('desc_moneda','varchar');
+		$this->captura('tipago','varchar');
+		$this->captura('rotulo_comercial','varchar');		
+		$this->captura('tram','varchar');	
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		return $this->respuesta;
+	}		
 }
 ?>

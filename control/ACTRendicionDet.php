@@ -85,9 +85,8 @@ class ACTRendicionDet extends ACTbase{
 	
 	function insertarPSDocCompleto(){
 		
-		$this->objParam->addParametro('tipo_solicitud','rendicion');
-		
-		$this->objFunc=$this->create('MODRendicionDet');	
+		$this->objParam->addParametro('tipo_solicitud','rendicion');		
+		$this->objFunc=$this->create('MODRendicionDet');			
 		if($this->objParam->insertar('id_doc_compra_venta')){
 			$this->res=$this->objFunc->insertarPSDocCompleto($this->objParam);			
 		} else{
@@ -112,10 +111,6 @@ class ACTRendicionDet extends ACTbase{
 		$this->res=$this->objFunc->eliminarCdDeposito($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
-	
-	
-	
-			
-}
 
+}
 ?>

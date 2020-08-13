@@ -6,6 +6,10 @@
 *@date 20/01/2018
 *@description Archivo con la interfaz de usuario
 *
+ISSUE          FECHA:		      AUTOR                 DESCRIPCION
+#13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
+#15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
+
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -23,8 +27,7 @@ Phx.vista.PagoSimpleSol = {
             text: 'Histórico',
             enableToggle: true,
             pressed: false,
-            toggleHandler: function(btn, pressed) {
-               
+            toggleHandler: function(btn, pressed) {               
                 if(pressed){
                     this.historico = 'si';
                     this.getBoton('ant_estado').disable();
@@ -32,30 +35,27 @@ Phx.vista.PagoSimpleSol = {
                 }
                 else{
                    this.historico = 'no' 
-                }
-                
+                }                
                 this.store.baseParams.historico = this.historico;
                 this.reload();
-             },
+            },
             scope: this
-           }];
+        }];
            
-        var me = this;
-	   
+        var me = this;	   
         Phx.vista.PagoSimpleSol.superclass.constructor.call(this,config);
-        this.init();
-       
+        this.init();       
 		this.store.baseParams = { tipo_interfaz: this.nombreVista };
 		
 		if(config.filtro_directo){
            this.store.baseParams.filtro_valor = config.filtro_directo.valor;
            this.store.baseParams.filtro_campo = config.filtro_directo.campo;
-        }
+        }   
 		//primera carga
 		this.store.baseParams.pes_estado = 'borrador';
     	this.load({params:{start:0, limit:this.tam_pag}});
-
-		this.finCons = true;
+        this.finCons = true;
+        this.addBotones();
    },
    
     preparaMenu: function(n) {
@@ -94,7 +94,7 @@ Phx.vista.PagoSimpleSol = {
         }
 
         //Habilita el resto de los botones
-        this.getBoton('diagrama_gantt').enable();
+        this.getBoton('pasajero').enable();
         this.getBoton('btnObs').enable();
         this.getBoton('btnChequeoDocumentosWf').enable();
 
@@ -102,15 +102,9 @@ Phx.vista.PagoSimpleSol = {
         this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
         if(data.codigo_tipo_pago_simple=='ADU_GEST_ANT'||data.codigo_tipo_pago_simple!='PAG_DEV'&&data.codigo_tipo_pago_simple!='ADU_GEST_ANT'||data.codigo_tipo_pago_simple=='DVPGPR'){
             this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
-        }
-
-        
-        
-
-
+        }            
         //agregado
-        this.getBoton('btnDetalleDocumentoPagoSimple').enable();
-        
+        this.getBoton('btnDetalleDocumentoPagoSimple').enable();        
         return tb
     },
 
@@ -120,16 +114,89 @@ Phx.vista.PagoSimpleSol = {
         if (tb) {
             this.getBoton('sig_estado').disable();
             this.getBoton('ant_estado').disable();
-            this.getBoton('diagrama_gantt').disable();
+            this.getBoton('pasajero').disable();
             this.getBoton('btnObs').disable();
             this.getBoton('btnChequeoDocumentosWf').disable();
-            this.getBoton('btnAgregarDoc').disable();
-            
-            this.getBoton('btnDetalleDocumentoPagoSimple').disable();
-              
+            this.getBoton('btnAgregarDoc').disable();            
+            this.getBoton('btnDetalleDocumentoPagoSimple').disable();              
         }
         return tb
-    }
+    },
+    //#13
+	regPasajeros : function() {		
+        var data = this.getSelectedData();
+        console.log('data',data.id_pago_simple);
+		if(data)
+		{			
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_contabilidad/control/DocCompraVenta/RepRegPasa',
+				params:{
+                    id_pago_simple: data.id_pago_simple
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});	
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
+		}
+	},
+    //#15
+    regPasajerosPDF : function() {		
+        var data = this.getSelectedData();
+        console.log('data',data.id_pago_simple);
+		if(data)
+		{			
+			Phx.CP.loadingShow();
+			Ext.Ajax.request({
+				url:'../../sis_cuenta_documentada/control/PagoSimple/RepRegPasaPdf',
+				params:{
+                    id_pago_simple: data.id_pago_simple
+				},
+				success:this.successExport,
+				failure: this.conexionFailure,
+				timeout:this.timeout,
+				scope:this
+			});	
+		}
+		else
+		{
+			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
+		}
+	},
+    //
+	addBotones: function() {
+        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+            id: 'b-pasajero-' + this.idContenedor,
+            text:'Reg. Pasajeros',
+            disabled: true,
+            //grupo:[0,1,2,3],
+            iconCls : 'blist',
+            handler:this.regPasajerosPDF,
+            scope: this,
+            menu:{
+				items: [
+                /*{
+					id:'b-pasajeroXls-' + this.idContenedor,
+					text: 'Excel',
+					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+					handler:this.regPasajeros,
+					scope: this
+				},*/ {
+					id:'b-pasajeroPdf-' + this.idContenedor,
+					text: 'Pdf',
+					tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+					handler:this.regPasajerosPDF,
+					scope: this
+				}]
+			}
+        });
+		this.tbar.add(this.menuAdqGantt);
+    },		   
         
 };
 </script>
