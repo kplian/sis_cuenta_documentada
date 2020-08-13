@@ -208,6 +208,12 @@ class ACTPagoSimple extends ACTbase{
 		if($this->objParam->getParametro('id_pago_simple')!=''){
 			$this->objParam->addFiltro("paside.id_pago_simple =".$this->objParam->getParametro('id_pago_simple'));
 		}
+		if($this->objParam->getParametro('id_depto_conta')!=''){
+			$this->objParam->addFiltro("dcv.id_depto_conta =".$this->objParam->getParametro('id_depto_conta'));
+		}
+		if($this->objParam->getParametro('id_periodo')!=''){
+			$this->objParam->addFiltro("dcv.id_periodo =".$this->objParam->getParametro('id_periodo'));
+		}
 		$this->objFun=$this->create('MODPagoSimple');	
 		$this->res = $this->objFun->repAutorizacionPdf();
 		if($this->res->getTipo()=='ERROR'){
