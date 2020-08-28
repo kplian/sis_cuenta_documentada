@@ -34,15 +34,7 @@ Phx.vista.DocCompraPS = {
 		this.addBotonesPas();
    
 		//this.Cmp.id_plantilla.store.baseParams = Ext.apply(this.Cmp.id_plantilla.store.baseParams, {tipo_plantilla:this.tipoDoc});
-		this.addButton('btnAutorizacion',
-			{	
-				text:'Rep. Det. Pasajes',
-				iconCls: 'blist',
-				disabled: false,				
-				handler:this.repAutorizacion,
-				tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>'
-			}
-		);
+		
     },   
     
     loadValoresIniciales: function() {

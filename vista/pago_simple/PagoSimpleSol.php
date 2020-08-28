@@ -56,15 +56,7 @@ Phx.vista.PagoSimpleSol = {
     	this.load({params:{start:0, limit:this.tam_pag}});
         this.finCons = true;
         this.addBotones();
-        this.addButton('btnRegPas',
-			{	
-				text:'Reg. Pasajeros',
-				iconCls: 'blist',
-				disabled: false,				
-				handler:this.regPasajeros,
-				tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>'
-			}
-		);
+       
    },
    
     preparaMenu: function(n) {
