@@ -14,8 +14,6 @@ ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #15			19/05/2020		manuel guerra           filtro segun fecha para nro_tramite
 #16			30/05/2020		manuel guerra           filtrado por gestion para el nro_tramite refactorizacion
 #ETR-673	28/08/2020 		manuel guerra			agegar el calendario en fecha
-#13 		17/04/2020		manuel guerra	agrega los campos(nota_debito_agencia,nro_tramite) segun el doc seleccionado
-#14 		29/04/2020		manuel guerra	    	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -148,9 +146,18 @@ Phx.vista.FormRendicionPS = {
 	},
 	
 	onEdit: function(){    	
-    	Phx.vista.FormRendicionPS.superclass.onEdit.call(this);	
+		Phx.vista.FormRendicionPS.superclass.onEdit.call(this);
 		//#ETR-673
 		this.Cmp.fecha.setReadOnly(false);
+		//#13 
+		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){			
+			if(rec.data.sw_nota_debito_agencia == 'si'){
+				this.mostrarComponente(this.Cmp.nota_debito_agencia);	
+			}
+			else{
+				this.ocultarComponente(this.Cmp.nota_debito_agencia);				
+			}
+		} ,this);		
     	if(this.Cmp.sw_pgs.getValue()!='proc'){
     		this.Cmp.sw_pgs.setValue('reg');
 		}
