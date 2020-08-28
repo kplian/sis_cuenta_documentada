@@ -13,6 +13,7 @@ ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #14 		29/04/2020		manuel guerra	    	ocultar campos si cbte validado, agregar filtro de busqueda en nrotramite
 #15			19/05/2020		manuel guerra           filtro segun fecha para nro_tramite
 #16			30/05/2020		manuel guerra           filtrado por gestion para el nro_tramite refactorizacion
+#ETR-673	28/08/2020 		manuel guerra			agegar el calendario en fecha
 */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -102,6 +103,8 @@ Phx.vista.FormRendicionPS = {
 	onNew: function(){    	
 		Phx.vista.FormRendicionPS.superclass.onNew.call(this);			
 		//#13 
+		//#ETR-673
+		this.Cmp.fecha.setReadOnly(false);
 		this.ocultarComponente(this.Cmp.dia);
 		this.Cmp.id_plantilla.on('select',function(cmb,rec,i){			
 			if(rec.data.sw_nota_debito_agencia == 'si'){
@@ -143,6 +146,8 @@ Phx.vista.FormRendicionPS = {
 	
 	onEdit: function(){    	
     	Phx.vista.FormRendicionPS.superclass.onEdit.call(this);	
+		//#ETR-673
+		this.Cmp.fecha.setReadOnly(false);
     	if(this.Cmp.sw_pgs.getValue()!='proc'){
     		this.Cmp.sw_pgs.setValue('reg');
 		}
