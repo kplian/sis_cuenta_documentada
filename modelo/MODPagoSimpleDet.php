@@ -5,6 +5,8 @@
 *@author  (admin)
 *@date 01-01-2018 06:21:25
 *@description Clase que envia los parametros requeridos a la Base de datos para la ejecucion de las funciones, y que recibe la respuesta del resultado de la ejecucion de las mismas
+
+#ETR-779	29/09/2020		manuel guerra			mostrar nota de debitoe en grilla
 */
 
 class MODPagoSimpleDet extends MODbase{
@@ -102,7 +104,7 @@ class MODPagoSimpleDet extends MODbase{
 		$this->captura('desc_funcionario2','varchar');
 		
 		$this->captura('sw_pgs','varchar');
-		
+		$this->captura('nota_debito_agencia','varchar');
 		
 
 		

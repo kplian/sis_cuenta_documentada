@@ -11,6 +11,7 @@
 ISSUE          FECHA:		      AUTOR                 DESCRIPCION
 #14 		17/04/2020		manuel guerra	    	ocultar boton de reporte
 #15			19/05/2020		manuel guerra           creacion de reportes en pdf, para pasajes
+#ETR-779	29/09/2020		manuel guerra			mostrar nota de debitoe en grilla
 
 */
 
@@ -142,7 +143,7 @@ Phx.vista.PagoSimpleDet = {
 		'importe_pago_liquido','nro_dui','id_moneda','desc_moneda',
 		'desc_tipo_doc_compra_venta','id_tipo_doc_compra_venta','nro_tramite',
 		'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
-		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario','sw_pgs'
+		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario','sw_pgs','nota_debito_agencia'
 	],
 	abrirFormulario: function(tipo, record){
    	       var me = this;

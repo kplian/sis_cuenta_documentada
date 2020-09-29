@@ -1,3 +1,5 @@
+--------------- SQL ---------------
+
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_det_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -18,6 +20,7 @@ $body$
 #ISSUE				FECHA				AUTOR				DESCRIPCION
  #0				01-01-2018 06:21:25								Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple_det'	
  #99            18-06-2018              RAC                 solucion BUG donde facturas pierden estado PROC  
+ #ETR-779	29/09/2020		manuel guerra			mostrar nota de debitoe en grilla
  ***************************************************************************/
 
 DECLARE
@@ -105,8 +108,8 @@ BEGIN
                         (dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0))     as importe_aux_neto,
                         fun.id_funcionario,
                         fun.desc_funcionario2::varchar,
-                        dcv.sw_pgs  --#99+
-                        
+                        dcv.sw_pgs,  --#99+
+                        dcv.nota_debito_agencia  --#ETR-779
                         
 
 						from cd.tpago_simple_det paside
@@ -202,4 +205,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
