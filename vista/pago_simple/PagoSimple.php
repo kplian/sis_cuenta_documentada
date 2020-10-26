@@ -910,7 +910,7 @@ Phx.vista.PagoSimple=Ext.extend(Phx.gridInterfaz,{
             this.getBoton('btnAgregarDoc').disable();
             
             this.getBoton('btnDetalleDocumentoPagoSimple').disable();
-			this.getBoton('btnAutorizacion').disable();
+			// this.getBoton('btnAutorizacion').disable();
 
 		}
 		return tb

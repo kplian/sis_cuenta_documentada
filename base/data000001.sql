@@ -624,3 +624,8 @@ select pxp.f_insert_testructura_gui ('REPCDPASAJ', 'CDREPVAR');
 select pxp.f_insert_tgui ('Devoluciones/Reposiciones', 'Devoluciones/Reposiciones', 'CDDEVREP', 'si', 4, 'sis_cuenta_documentada/vista/cuenta_doc/CuentaDocDevolRepo.php', 2, '', 'CuentaDocDevolRepo', 'CD');
 select pxp.f_insert_testructura_gui ('CDDEVREP', 'CD');
 /***********************************F-DAT-RCM-CD-0-19/03/2018*****************************************/
+
+/***********************************I-DAT-MMV-CD-0-26/10/2020*****************************************/
+select pxp.f_insert_tgui ('Pagos Simple Consulta', 'Pagos Simple Consulta', 'PSC', 'si', 6, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleConsulta.php', 3, '', 'PagoSimpleConsulta', 'CD');
+select pxp.f_insert_testructura_gui ('PSC', 'PAGSIM');
+/***********************************F-DAT-MMV-CD-0-26/10/2020*****************************************/
