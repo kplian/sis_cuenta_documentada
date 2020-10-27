@@ -66,7 +66,7 @@ header("content-type: text/javascript; charset=UTF-8");
             this.load({params:{start:0, limit:this.tam_pag}});
 
             //Deshabilita el tab de prorrateo por defecto
-            this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
+            // this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
         },
         Atributos:[
             {
@@ -370,9 +370,6 @@ header("content-type: text/javascript; charset=UTF-8");
                     fieldLabel:'Obligacion de Pago',
                     allowBlank: true,
                     emptyText:'Seleccione un registro ...',
-                    typeAhead: false,
-                    lazyRender:true,
-                    mode: 'remote',
                     gwidth: 180,
                     anchor: '100%',
                     store: new Ext.data.JsonStore({
@@ -413,6 +410,22 @@ header("content-type: text/javascript; charset=UTF-8");
                 filters:{pfiltro:'op.num_tramite',type:'string'},
                 grid:true,
                 form:true
+            },
+            {
+                config:{
+                    name: 'proveedor_obligacion_pago',
+                    fieldLabel: 'Proveedor Obligacion Pago',
+                    allowBlank: false,
+                    anchor: '100%',
+                    gwidth: 300,
+                    maxLength:500
+                },
+                type:'TextArea',
+                filters:{pfiltro:'prov.desc_proveedor',type:'string'},
+                id_grupo:1,
+                grid:true,
+                form:false,
+                bottom_filter:true
             },
             {
                 config: {
@@ -613,7 +626,8 @@ header("content-type: text/javascript; charset=UTF-8");
             {name:'id_caja', type: 'numeric'},
             {name:'desc_caja', type: 'string'},
             {name:'id_gestion', type: 'numeric'},
-            {name:'id_periodo', type: 'numeric'}
+            {name:'id_periodo', type: 'numeric'},
+            {name:'proveedor_obligacion_pago', type: 'string'}
         ],
         sortInfo:{
             field: 'id_pago_simple',
@@ -678,11 +692,6 @@ header("content-type: text/javascript; charset=UTF-8");
 
             }
 
-            this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(true);
-
-            if(data.codigo_tipo_pago_simple === 'ADU_GEST_ANT'){
-                this.TabPanelSouth.getItem(this.idContenedor + '-south-1').setDisabled(false);
-            }
 
 
             return tb

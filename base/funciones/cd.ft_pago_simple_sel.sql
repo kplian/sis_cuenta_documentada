@@ -1,5 +1,3 @@
---------------- SQL ---------------
-
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_sel (
   p_administrador integer,
   p_id_usuario integer,
@@ -14,11 +12,11 @@ $body$
  DESCRIPCION:   Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'
  AUTOR:          (admin)
  FECHA:         31-12-2017 12:33:30
- COMENTARIOS:   
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 #ISSUE              FECHA               AUTOR               DESCRIPCION
- #0             31-12-2017 12:33:30                             Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'    
+ #0             31-12-2017 12:33:30                             Funcion que devuelve conjuntos de registros de las consultas relacionadas con la tabla 'cd.tpago_simple'
  #
  ***************************************************************************/
 
@@ -34,21 +32,21 @@ DECLARE
     v_inner             varchar;
     v_strg_cd           varchar;
     v_strg_obs          varchar;
-                
+
 BEGIN
 
     v_nombre_funcion = 'cd.ft_pago_simple_sel';
     v_parametros = pxp.f_get_record(p_tabla);
 
-    /*********************************    
+    /*********************************
     #TRANSACCION:  'CD_PAGSIM_SEL'
     #DESCRIPCION:   Consulta de datos
-    #AUTOR:     admin   
+    #AUTOR:     admin
     #FECHA:     31-12-2017 12:33:30
     ***********************************/
 
     if(p_transaccion='CD_PAGSIM_SEL')then
-                    
+
         begin
 
             /*if pxp.f_existe_parametro(p_tabla,'estado') then
@@ -78,14 +76,14 @@ BEGIN
 
             if v_parametros.tipo_interfaz in ('PagoSimpleVb') then
 
-                select  
+                select
                 pxp.aggarray(depu.id_depto)
-                into 
+                into
                 va_id_depto
-                from param.tdepto_usuario depu 
+                from param.tdepto_usuario depu
                 where depu.id_usuario =  p_id_usuario and depu.cargo = 'responsable';
 
-                if v_historico = 'no' then  
+                if v_historico = 'no' then
                     if p_administrador !=1 then
                         v_filtro = ' (ew.id_funcionario='||v_parametros.id_funcionario_usu::varchar||' or   (ew.id_depto  in ('|| COALESCE(array_to_string(va_id_depto,','),'0')||') and pagsim.estado in( ''vbtesoreria''))  ) and (lower(cdoc.estado)!=''borrador'') and (lower(cdoc.estado)!=''finalizado'' ) and ';
                     else
@@ -102,14 +100,14 @@ BEGIN
 
             end if;
 
-            if v_historico =  'si' then            
+            if v_historico =  'si' then
                v_inner =  'inner join wf.testado_wf ew on ew.id_proceso_wf = pagsim.id_proceso_wf';
-               v_strg_cd = 'DISTINCT(pagsim.id_pago_simple)'; 
-               v_strg_obs = '''---''::text';               
-            else            
+               v_strg_cd = 'DISTINCT(pagsim.id_pago_simple)';
+               v_strg_obs = '''---''::text';
+            else
                v_inner =  'inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf';
                v_strg_cd = 'pagsim.id_pago_simple';
-               v_strg_obs = 'ew.obs'; 
+               v_strg_obs = 'ew.obs';
             end if;*/
 
             --Filtros
@@ -135,7 +133,7 @@ BEGIN
                     if v_historico = 'no' then
                         v_filtro = v_filtro || 'pagsim.estado in (''borrador'') and ';
                     end if;
-                    
+
                 end if;
 
             elsif v_parametros.tipo_interfaz in ('PagoSimpleVb') then
@@ -189,7 +187,7 @@ BEGIN
                             op.num_tramite as desc_obligacion_pago,
                             pagsim.id_caja,
                             caj.codigo as desc_caja,
-                            (select 
+                            (select
                             ges.id_gestion
                             from param.tgestion ges
                             where ges.gestion = (date_part(''year'', pagsim.fecha))::integer
@@ -198,7 +196,8 @@ BEGIN
                             id_periodo
                             from param.tperiodo
                             where pagsim.fecha between fecha_ini and fecha_fin
-                            limit 1 offset 0) as id_periodo
+                            limit 1 offset 0) as id_periodo,
+                             prov.desc_proveedor as proveedor_obligacion_pago
                         from cd.tpago_simple pagsim
                         inner join wf.testado_wf ew on ew.id_estado_wf = pagsim.id_estado_wf
                         inner join segu.tusuario usu1 on usu1.id_usuario = pagsim.id_usuario_reg
@@ -213,33 +212,34 @@ BEGIN
                         inner join cd.ttipo_pago_simple tps on tps.id_tipo_pago_simple = pagsim.id_tipo_pago_simple
                         left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
                         left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
+                        left join param.vproveedor prov on prov.id_proveedor = op.id_proveedor
                         left join tes.tcaja caj on caj.id_caja = pagsim.id_caja
                         where  ';
 
             v_consulta = v_consulta || v_filtro;
-            
+
             --Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
             v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
             --Devuelve la respuesta
             return v_consulta;
-                        
+
         end;
-    /*********************************    
+    /*********************************
     #TRANSACCION:  'CD_DETPAG_SEL'
     #DESCRIPCION:   Consulta de datos
-    #AUTOR:     JUAN    
+    #AUTOR:     JUAN
     #FECHA:     07-01-2018 12:33:30
     ***********************************/
 
     ELSIF(p_transaccion='CD_DETPAG_SEL')then
-                    
+
         begin
 
 
             --Sentencia de la consulta
-            v_consulta:='SELECT 
+            v_consulta:='SELECT
                           cv.id_doc_compra_venta::INTEGER,
                           cv.id_funcionario::INTEGER,
                           (select vf.desc_funcionario1 from orga.tfuncionario f join orga.vfuncionario vf on vf.id_funcionario=f.id_funcionario where f.id_funcionario=cv.id_funcionario)::varchar desc_funcionario1,
@@ -251,26 +251,26 @@ BEGIN
                           cv.importe_excento::numeric,
                           cv.fecha::date fecha_compra_venta,
                           ps.fecha::date fecha_pago_simple,
-                          cv.sw_pgs::varchar sw_pgs 
-                          FROM conta.tdoc_compra_venta cv 
+                          cv.sw_pgs::varchar sw_pgs
+                          FROM conta.tdoc_compra_venta cv
                           join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                           join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
                           inner join wf.testado_wf ew on ew.id_estado_wf = ps.id_estado_wf
                         where  ';
 
-        
+
             --Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
             v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 
             --Devuelve la respuesta
             return v_consulta;
-                        
+
         end;
-    /*********************************    
+    /*********************************
     #TRANSACCION:  'CD_DETPAG_CONT'
     #DESCRIPCION:   Conteo de registros
-    #AUTOR:     JUAN    
+    #AUTOR:     JUAN
     #FECHA:     07-01-2018 12:33:30
     ***********************************/
 
@@ -278,26 +278,26 @@ BEGIN
 
         begin
             --Sentencia de la consulta de conteo de registros
-            v_consulta:='SELECT 
+            v_consulta:='SELECT
                 count(cv.id_funcionario)
-                FROM conta.tdoc_compra_venta cv 
+                FROM conta.tdoc_compra_venta cv
                 join cd.tpago_simple_det psd on psd.id_doc_compra_venta=cv.id_doc_compra_venta
                 join cd.tpago_simple ps on ps.id_pago_simple= psd.id_pago_simple
                 inner join wf.testado_wf ew on ew.id_estado_wf = ps.id_estado_wf
                         where ';
-            
-            --Definicion de la respuesta            
+
+            --Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
 
             --Devuelve la respuesta
             return v_consulta;
 
         end;
-        
-    /*********************************    
+
+    /*********************************
     #TRANSACCION:  'CD_PAGSIM_CONT'
     #DESCRIPCION:   Conteo de registros
-    #AUTOR:     admin   
+    #AUTOR:     admin
     #FECHA:     31-12-2017 12:33:30
     ***********************************/
 
@@ -351,31 +351,32 @@ BEGIN
                         left join orga.vfuncionario fun1 on fun1.id_funcionario = pagsim.id_funcionario_pago
                         left join tes.tobligacion_pago op on op.id_obligacion_pago = pagsim.id_obligacion_pago
                         left join tes.tcaja caj on caj.id_caja = pagsim.id_caja
+                        left join param.vproveedor prov on prov.id_proveedor = op.id_proveedor
                         where ';
 
             v_consulta = v_consulta || v_filtro;
-            
-            --Definicion de la respuesta            
+
+            --Definicion de la respuesta
             v_consulta:=v_consulta||v_parametros.filtro;
 
             --Devuelve la respuesta
             return v_consulta;
 
         end;
-    /*********************************    
+    /*********************************
     #TRANSACCION:  'CD_DEPASIMPLE_SEL'
     #DESCRIPCION:   Consulta de datos
-    #AUTOR:     JUAN    
+    #AUTOR:     JUAN
     #FECHA:     20-01-2018 12:33:30
     ***********************************/
 
     ELSIF(p_transaccion='CD_DEPASIMPLE_SEL')then
-                    
+
         begin
 
             --raise exception 'error provocado %',v_parametros.id_pago_simple;
             --Sentencia de la consulta
-            v_consulta:='select 
+            v_consulta:='select
                          id_doc_compra_venta::integer,
                          tipo::Varchar,
                          fecha::date,
@@ -405,7 +406,7 @@ BEGIN
                          sujeto_df::numeric,
                          importe_ice::numeric,
                          importe_excento::numeric
-                            
+
                          from conta.vldet_doc_pag_simple
                          where  id_pago_simple='||v_parametros.id_pago_simple||'  ';
 
@@ -413,22 +414,22 @@ BEGIN
             --Definicion de la respuesta
             --v_consulta:=v_consulta||v_parametros.filtro;
             --v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
-            
+
             --raise exception 'error provocado %',v_consulta;
             --Devuelve la respuesta
             return v_consulta;
-                        
+
         end;
-            
-                    
+
+
     else
-                         
+
         raise exception 'Transaccion inexistente';
-                             
+
     end if;
-                    
+
 EXCEPTION
-                    
+
     WHEN OTHERS THEN
             v_resp='';
             v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
@@ -441,4 +442,8 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
+
+ALTER FUNCTION cd.ft_pago_simple_sel (p_administrador integer, p_id_usuario integer, p_tabla varchar, p_transaccion varchar)
+  OWNER TO postgres;
