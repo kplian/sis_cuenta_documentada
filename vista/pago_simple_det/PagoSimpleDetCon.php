@@ -55,6 +55,13 @@ header("content-type: text/javascript; charset=UTF-8");
             this.getBoton('btnExpTxt').setVisible(false);
             //#15
             this.getBoton('repasaj').setVisible(false);
+            const dataPadre = Phx.CP.getPagina(this.idContenedorPadre).getSelectedData();
+            if(dataPadre){
+                this.onEnablePanel(this, dataPadre);
+            }
+            else {
+                this.bloquearMenus();
+            }
         },
 
         loadValoresIniciales: function() {
