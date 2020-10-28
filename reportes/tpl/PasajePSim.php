@@ -151,7 +151,7 @@
             </tbody>              
         </table> 
        
-        <p></p>
+        <!--p></p>
         <div style="text-align: center;">                    
             <table align="center" valign="middle" border="1" style="font-size: 8;padding: 2px 2px;">            
                 <tr align="center" style='text-align: center;'>
@@ -163,7 +163,7 @@
                     <td style='text-align: center;'>Depto Finanzas</td>                    
                 </tr>                
             </table>  
-        </div>     
+        </div-->     
     </body>
 </html>
 
