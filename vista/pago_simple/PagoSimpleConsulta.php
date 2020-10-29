@@ -18,7 +18,7 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
     Phx.vista.PagoSimpleConsulta=Ext.extend(Phx.gridInterfaz,{
-        nombreVista: 'PagoSimpleSol',
+        nombreVista: 'PagoSimpleConsulta',
         constructor:function(config){
             this.maestro=config.maestro;
             this.historico = 'no';
