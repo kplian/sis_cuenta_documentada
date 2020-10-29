@@ -69,8 +69,9 @@ class MODPagoSimple extends MODbase{
 		$this->captura('desc_caja','varchar');
 		$this->captura('id_gestion','integer');
 		$this->captura('id_periodo','integer');
-		
-		//Ejecuta la instruccion
+        $this->captura('proveedor_obligacion_pago','varchar');
+
+        //Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		
