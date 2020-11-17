@@ -629,3 +629,8 @@ select pxp.f_insert_testructura_gui ('CDDEVREP', 'CD');
 select pxp.f_insert_tgui ('Pagos Simple Consulta', 'Pagos Simple Consulta', 'PSC', 'si', 6, 'sis_cuenta_documentada/vista/pago_simple/PagoSimpleConsulta.php', 3, '', 'PagoSimpleConsulta', 'CD');
 select pxp.f_insert_testructura_gui ('PSC', 'PAGSIM');
 /***********************************F-DAT-MMV-CD-0-26/10/2020*****************************************/
+
+/***********************************I-DAT-MGM-CD-1-17/11/2020*****************************************/
+select pxp.f_insert_tgui ('Agencia Despachante', 'AGP', 'AGP', 'si', 10, '\sis_cuenta_documentada\vista\agencia_despachante\AgenciaDespachante.php', 3, '', 'AgenciaDespachante', 'CD');
+select pxp.f_insert_testructura_gui ('AGP', 'CBCONF');
+/***********************************F-DAT-MGM-CD-1-17/11/2020*****************************************/
