@@ -199,5 +199,3 @@ Phx.vista.AgenciaDespachante=Ext.extend(Phx.gridInterfaz,{
 	}
 )
 </script>
-		
-		

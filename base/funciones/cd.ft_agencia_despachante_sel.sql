@@ -42,9 +42,9 @@ BEGIN
 	***********************************/
 
 	if(p_transaccion='CD_AGEDES_SEL')then
-     				
-    	begin
-    		--Sentencia de la consulta
+					
+		begin
+			--Sentencia de la consulta
 			v_consulta:='select
 						agedes.id_agencia_despachante,
 						agedes.estado_reg,
