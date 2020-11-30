@@ -13,7 +13,7 @@
 --commit;
 
 BEGIN;
-UPDATE cd.tcuenta_doc SET estado='vbtesoreria' and tipo_rendicion='final' WHERE id_cuenta_doc=30764;
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria', tipo_rendicion='final' WHERE id_cuenta_doc=30764;
 COMMIT;
 
 --rollback
