@@ -7,7 +7,7 @@
 *@description Clase que recibe los parametros enviados por la vista para mandar a la capa de Modelo
 */
 
-class ACTAgenciaDespachante extends ACTbase{    
+class ACTAgenciaDespachante extends ACTbase{
 			
 	function listarAgenciaDespachante(){
 		$this->objParam->defecto('ordenacion','id_agencia_despachante');

@@ -41,9 +41,9 @@ BEGIN
 
 	if(p_transaccion='CD_AGEDES_INS')then
 					
-        begin
-        	--Sentencia de la insercion
-        	insert into cd.tagencia_despachante(
+		begin
+			--Sentencia de la insercion
+			insert into cd.tagencia_despachante(
 			estado_reg,
 			codigo,
 			nombre,
@@ -53,7 +53,7 @@ BEGIN
 			id_usuario_ai,
 			id_usuario_mod,
 			fecha_mod
-          	) values(
+			) values(
 			'activo',
 			v_parametros.codigo,
 			v_parametros.nombre,
