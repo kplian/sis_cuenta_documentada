@@ -954,7 +954,10 @@ BEGIN
       begin       
            --recupera el gerente financiero ...
           v_gaf = orga.f_obtener_gerente_x_codigo_uo('gerente_financiero', now()::Date);
-          
+        if v_gaf[3] is null THEN
+        	v_gaf[3]='hola';	
+        	v_gaf[4]='hola2';            
+        end if;  
         
         --Sentencia de la consulta
       v_consulta:='with sigema as (select * from cd.vsigema_gral)
