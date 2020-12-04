@@ -1004,8 +1004,8 @@ BEGIN
                             uo.nombre_unidad,
                             pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
                             cdori.motivo::varchar as motivo_ori,
-                            '''||v_gaf[3]||'''::varchar as  gerente_financiero,
-                            upper( '''||v_gaf[4]||''')::varchar as  cargo_gerente_financiero,
+                            coalesce( '''||v_gaf[3]||''','')::varchar as  gerente_financiero,
+                            coalesce( upper( '''||v_gaf[4]||'''),'')::varchar as  cargo_gerente_financiero,
                             funapro.desc_funcionario1 as aprobador,
                             upper(orga.f_get_cargo_x_funcionario_str(funapro.id_funcionario,CURRENT_DATE)) as cargo_aprobador,
                             cbte.nro_cbte,
@@ -2059,4 +2059,5 @@ LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
