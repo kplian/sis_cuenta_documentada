@@ -951,16 +951,13 @@ BEGIN
 
   elsif(p_transaccion='CD_REPCDOC_SEL')then
             
-      begin       
+	begin       
            --recupera el gerente financiero ...
-          v_gaf = orga.f_obtener_gerente_x_codigo_uo('gerente_financiero', now()::Date);
-        if v_gaf[3] is null THEN
-        	v_gaf[3]='hola';	
-        	v_gaf[4]='hola2';            
-        end if;  
+		v_gaf = orga.f_obtener_gerente_x_codigo_uo('gerente_financiero', now()::Date);
+
         
         --Sentencia de la consulta
-      v_consulta:='with sigema as (select * from cd.vsigema_gral)
+  		v_consulta:='with sigema as (select * from cd.vsigema_gral)
                               select
                               cdoc.id_cuenta_doc, 
                               cdoc.id_tipo_cuenta_doc,
@@ -1007,8 +1004,6 @@ BEGIN
                             uo.nombre_unidad,
                             pxp.f_convertir_num_a_letra(cdoc.importe)::varchar as importe_literal,
                             cdori.motivo::varchar as motivo_ori,
-                            coalesce( '''||v_gaf[3]||''','-')::varchar as  gerente_financiero,
-                            coalesce( upper( '''||v_gaf[4]||'''),'-')::varchar as  cargo_gerente_financiero,
                             funapro.desc_funcionario1 as aprobador,
                             upper(orga.f_get_cargo_x_funcionario_str(funapro.id_funcionario,CURRENT_DATE)) as cargo_aprobador,
                             cbte.nro_cbte,
