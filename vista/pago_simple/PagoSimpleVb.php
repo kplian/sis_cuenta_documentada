@@ -59,7 +59,7 @@ Phx.vista.PagoSimpleVb = {
                 this.getBoton('ant_estado').enable(); //#9
                 this.getBoton('sig_estado').enable();
             } else if (data.estado=='rendicion'){
-                this.getBoton('ant_estado').enable(); //#ETR-1799
+                this.getBoton('ant_estado').disable(); //#ETR-1799
                 this.getBoton('sig_estado').enable();
             } else if (data.estado=='tesoreria'){
                 this.getBoton('ant_estado').enable();
