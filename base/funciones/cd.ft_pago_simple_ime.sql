@@ -14,12 +14,14 @@ $body$
  DESCRIPCION:   Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple'
  AUTOR: 		 (admin)
  FECHA:	        31-12-2017 12:33:30
- COMENTARIOS:	
+ COMENTARIOS:
 ***************************************************************************
  HISTORIAL DE MODIFICACIONES:
 #ISSUE				FECHA				AUTOR				DESCRIPCION
- #0				31-12-2017 12:33:30								Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple'	
+ #0				31-12-2017 12:33:30								Funcion que gestiona las operaciones basicas (inserciones, modificaciones, eliminaciones de la tabla 'cd.tpago_simple'
  #1             13/06/2018               RAC                    Bloquear edicion de obligacion de pago
+ #ETR-1799          11/12/2020           EGS                    Bloquea el retroceso en estado  rendicion
+
  ***************************************************************************/
 
 DECLARE
@@ -67,21 +69,21 @@ DECLARE
     v_obligacion_pago		record;
     v_pago_simple			record;
     v_codigo_tipo_pago_simple varchar;
-			    
+
 BEGIN
 
     v_nombre_funcion = 'cd.ft_pago_simple_ime';
     v_parametros = pxp.f_get_record(p_tabla);
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_PAGSIM_INS'
  	#DESCRIPCION:	Insercion de registros
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		31-12-2017 12:33:30
 	***********************************/
 
 	if(p_transaccion='CD_PAGSIM_INS')then
-					
+
         begin
 
         	--Obtienen el codigo macro
@@ -112,16 +114,16 @@ BEGIN
             if v_codigo_tipo_proceso is NULL THEN
                 raise exception 'No existe un proceso inicial para el proceso macro indicado % (Revise la configuración)',v_codigo_proceso_macro;
             end if;
-            
-            --jrr: si se genera a partir de una obligacion de pago 
+
+            --jrr: si se genera a partir de una obligacion de pago
 			if (v_parametros.id_obligacion_pago is not null) then
             	--obtener datos op
             	select * into v_obligacion_pago
                 from tes.tobligacion_pago op
                 where op.id_obligacion_pago = v_parametros.id_obligacion_pago;
-                
+
                  -- disparar creacion de procesos seleccionados
-                      
+
                 SELECT
                          ps_id_proceso_wf,
                          ps_id_estado_wf,
@@ -134,18 +136,18 @@ BEGIN
                          p_id_usuario,
                          v_parametros._id_usuario_ai,
                          v_parametros._nombre_usuario_ai,
-                         v_obligacion_pago.id_estado_wf, 
-                         v_parametros.id_funcionario, 
+                         v_obligacion_pago.id_estado_wf,
+                         v_parametros.id_funcionario,
                          v_parametros.id_depto_conta,
                          'Solicitud de Pago simple obligacion de pago',
-                         v_codigo_tipo_proceso,    
+                         v_codigo_tipo_proceso,
                          v_codigo_tipo_proceso);
                 --el num tramite es el mismo
                 v_num_tramite = v_obligacion_pago.num_tramite;
             else
                 ---------------------------
                 --Inicio del tramite de WF
-                ---------------------------              
+                ---------------------------
 
                 --Obtencion de la gestion
                 select
@@ -178,7 +180,7 @@ BEGIN
                    v_parametros.id_depto_conta,
                    'Solicitud de Pago simple',
                    '' );
-            end if;			
+            end if;
 
         	--Sentencia de la insercion
         	insert into cd.tpago_simple(
@@ -202,7 +204,7 @@ BEGIN
 			id_proveedor,
 			id_moneda,
 			id_tipo_pago_simple,
-			id_funcionario_pago,			
+			id_funcionario_pago,
 			importe,
 			id_obligacion_pago,
 			id_caja
@@ -227,14 +229,14 @@ BEGIN
 			v_parametros.id_proveedor,
 			v_parametros.id_moneda,
 			v_parametros.id_tipo_pago_simple,
-			v_parametros.id_funcionario_pago,			
+			v_parametros.id_funcionario_pago,
 			v_parametros.importe,
 			v_parametros.id_obligacion_pago,
 			v_parametros.id_caja
 			) RETURNING id_pago_simple into v_id_pago_simple;
-			
+
 			--Definicion de la respuesta
-			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple almacenado(a) con exito (id_pago_simple'||v_id_pago_simple||')'); 
+			v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple almacenado(a) con exito (id_pago_simple'||v_id_pago_simple||')');
             v_resp = pxp.f_agrega_clave(v_resp,'id_pago_simple',v_id_pago_simple::varchar);
 
             --Devuelve la respuesta
@@ -242,24 +244,24 @@ BEGIN
 
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_PAGSIM_MOD'
  	#DESCRIPCION:	Modificacion de registros
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		31-12-2017 12:33:30
     #             HISTORIAL DE MODIFICACIONES:
-    #ISSUE				FECHA				AUTOR				DESCRIPCION 
+    #ISSUE				FECHA				AUTOR				DESCRIPCION
     #1             13/06/2018               RAC             Bloquear edicion de obligacion de pago
 	***********************************/
 
 	elsif(p_transaccion='CD_PAGSIM_MOD')then
 
 		begin
-        
+
         	select * into v_pago_simple
             from cd.tpago_simple
             where id_pago_simple = v_parametros.id_pago_simple;
-            
+
             if (v_pago_simple.estado != 'borrador') then
             	raise exception 'No se puede modificar un pago que no esta en estado borrador. Envie el pago a estado borrador para poder modificarlo';
             end if;
@@ -267,12 +269,12 @@ BEGIN
             if v_parametros.id_tipo_pago_simple <> v_pago_simple.id_tipo_pago_simple then
             	raise exception 'No es posible cambiar el Tipo de Pago';
             end if;
-            
+
             --#1 blqoeuar edicion de obligacion es de pago
             if v_parametros.id_obligacion_pago <> v_pago_simple.id_obligacion_pago then
             	raise exception 'No es posible cambiar  la olbigacion de pago';
             end if;
-			
+
 			--Sentencia de la modificacion
 			update cd.tpago_simple set
 			id_depto_conta = v_parametros.id_depto_conta,
@@ -288,25 +290,25 @@ BEGIN
 			id_moneda = v_parametros.id_moneda,
 			id_proveedor = v_parametros.id_proveedor,
 			id_tipo_pago_simple = v_parametros.id_tipo_pago_simple,
-			id_funcionario_pago = v_parametros.id_funcionario_pago,			
+			id_funcionario_pago = v_parametros.id_funcionario_pago,
 			importe = v_parametros.importe,
 			id_obligacion_pago = v_parametros.id_obligacion_pago,
 			id_caja = v_parametros.id_caja
 			where id_pago_simple=v_parametros.id_pago_simple;
-               
+
 			--Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple modificado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple modificado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_pago_simple',v_parametros.id_pago_simple::varchar);
-               
+
             --Devuelve la respuesta
             return v_resp;
-            
+
 		end;
 
-	/*********************************    
+	/*********************************
  	#TRANSACCION:  'CD_PAGSIM_ELI'
  	#DESCRIPCION:	Eliminacion de registros
- 	#AUTOR:		admin	
+ 	#AUTOR:		admin
  	#FECHA:		31-12-2017 12:33:30
 	***********************************/
 
@@ -316,18 +318,18 @@ BEGIN
         	select * into v_pago_simple
             from cd.tpago_simple
             where id_pago_simple = v_parametros.id_pago_simple;
-            
+
             if (v_pago_simple.estado != 'borrador') then
             	raise exception 'No se puede eliminar un pago que no esta en estado borrador. Envie el pago a estado borrador para poder eliminarlo';
             end if;
 			--Sentencia de la eliminacion
 			delete from cd.tpago_simple
             where id_pago_simple=v_parametros.id_pago_simple;
-               
+
             --Definicion de la respuesta
-            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple eliminado(a)'); 
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Pago Simple eliminado(a)');
             v_resp = pxp.f_agrega_clave(v_resp,'id_pago_simple',v_parametros.id_pago_simple::varchar);
-              
+
             --Devuelve la respuesta
             return v_resp;
 
@@ -341,7 +343,7 @@ BEGIN
 	***********************************/
 
   	elseif(p_transaccion='CD_SIGEPS_INS')then
-        
+
         begin
 
 	        /*   PARAMETROS
@@ -516,7 +518,7 @@ BEGIN
 				end if;
 
 			end if;
-			
+
 
 
 			-- si hay mas de un estado disponible  preguntamos al usuario
@@ -554,6 +556,10 @@ BEGIN
 
 
         	v_id_proceso_wf = v_registros_proc.id_proceso_wf;
+
+            IF v_registros_proc.estado = 'rendicion' THEN  --#ETR-1799
+                RAISE EXCEPTION 'No puede retroceder el estado';
+            END IF;
 
             --------------------------------------------------
             --Retrocede al estado inmediatamente anterior
@@ -637,11 +643,11 @@ BEGIN
   	elseif(p_transaccion='CD_PSAGRDOC_IME')then
 
         begin
-        
+
         	select * into v_pago_simple
             from cd.tpago_simple
             where id_pago_simple = v_parametros.id_pago_simple;
-            
+
             if (v_pago_simple.estado not in ( 'borrador', 'rendicion','vbconta')) then
             	raise exception 'No se puede agregar documentos por|que no esta en estado Borrador, Rendicion o Vbconta. Envie el pago a dichos estados para poder modificarlo';
             end if;
@@ -696,7 +702,7 @@ BEGIN
         		else
         			v_where = ' 0=0';
         		end if;
-        		
+
         	else
         		v_where = 'dcv.id_usuario_reg = '||v_parametros.id_usuario;
 
@@ -760,26 +766,27 @@ BEGIN
             return v_resp;
 
         end;
-         
+
 	else
-     
+
     	raise exception 'Transaccion inexistente: %',p_transaccion;
 
 	end if;
 
 EXCEPTION
-				
+
 	WHEN OTHERS THEN
 		v_resp='';
 		v_resp = pxp.f_agrega_clave(v_resp,'mensaje',SQLERRM);
 		v_resp = pxp.f_agrega_clave(v_resp,'codigo_error',SQLSTATE);
 		v_resp = pxp.f_agrega_clave(v_resp,'procedimientos',v_nombre_funcion);
 		raise exception '%',v_resp;
-				        
+
 END;
 $body$
 LANGUAGE 'plpgsql'
 VOLATILE
 CALLED ON NULL INPUT
 SECURITY INVOKER
+PARALLEL UNSAFE
 COST 100;
