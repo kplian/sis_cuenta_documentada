@@ -25,3 +25,24 @@ BEGIN;
 UPDATE wf.testado_wf SET id_tipo_estado=695 WHERE id_estado_wf=1162541;
 COMMIT;
 /********************************************F-DAUP-MANU-CD-0-30/11/2020********************************************/
+
+
+
+/********************************************I-DAUP-MANU-CD-0-30/12/2020********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET id_sigema='15495' WHERE id_cuenta_doc=31776;
+--commit;
+BEGIN;
+UPDATE cd.tcuenta_doc SET id_sigema='16600' WHERE id_cuenta_doc=31776;
+COMMIT;
+
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc_prorrateo SET id_centro_costo='7784' WHERE id_cuenta_doc=31776;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc_prorrateo SET id_centro_costo='2632' WHERE id_cuenta_doc=31776;
+COMMIT;
+/********************************************F-DAUP-MANU-CD-0-30/12/2020********************************************/
