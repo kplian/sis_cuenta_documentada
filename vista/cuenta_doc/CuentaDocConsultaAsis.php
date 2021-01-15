@@ -47,7 +47,7 @@ header("content-type: text/javascript; charset=UTF-8");
                 }
                 this.reload();
             }, this)
-            this.store.baseParams = {estado: 'borrador', tipo_interfaz: this.nombreVista};
+            this.store.baseParams = {tipo_interfaz: this.nombreVista};
             this.load({params: {start: 0, limit: this.tam_pag}});
 
             this.finCons = true;
