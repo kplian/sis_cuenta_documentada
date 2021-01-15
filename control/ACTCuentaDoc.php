@@ -109,6 +109,10 @@ class ACTCuentaDoc extends ACTbase{
 		if($this->objParam->getParametro('id_gestion')!=''){
             $this->objParam->addFiltro("cdoc.id_gestion = ".$this->objParam->getParametro('id_gestion'));    
         }
+
+		if($this->objParam->getParametro('id_tipo_cuenta_doc')!=''){
+            $this->objParam->addFiltro("cdoc.id_tipo_cuenta_doc = ".$this->objParam->getParametro('id_tipo_cuenta_doc'));
+        }
 		
 		
 		
