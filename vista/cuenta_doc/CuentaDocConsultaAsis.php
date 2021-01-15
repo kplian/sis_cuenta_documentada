@@ -47,7 +47,10 @@ header("content-type: text/javascript; charset=UTF-8");
                 }
                 this.reload();
             }, this)
-            this.store.baseParams = {tipo_interfaz: this.nombreVista};
+            this.store.baseParams = {
+                tipo_interfaz: this.nombreVista,
+                id_tipo_cuenta_doc: '5' //TODO Tipo de cuenta documentada Rendicion de Viaticos
+            };
             this.load({params: {start: 0, limit: this.tam_pag}});
 
             this.finCons = true;
