@@ -510,8 +510,8 @@ class MODCuentaDoc extends MODbase{
 		$this->captura('nombre_unidad','VARCHAR');
 		$this->captura('importe_literal','VARCHAR');
 		$this->captura('motivo_ori','VARCHAR');
-		$this->captura('gerente_financiero','VARCHAR');
-		$this->captura('cargo_gerente_financiero','VARCHAR');
+		//$this->captura('gerente_financiero','VARCHAR');
+		//$this->captura('cargo_gerente_financiero','VARCHAR');
 		
 		$this->captura('aprobador','TEXT');
 		$this->captura('cargo_aprobador','TEXT');
