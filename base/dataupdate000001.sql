@@ -46,3 +46,16 @@ BEGIN;
 UPDATE cd.tcuenta_doc_prorrateo SET id_centro_costo='2632' WHERE id_cuenta_doc=31776;
 COMMIT;
 /********************************************F-DAUP-MANU-CD-0-30/12/2020********************************************/
+
+
+/********************************************I-DAUP-MANU-CD-0-29/01/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET id_gestion=4 WHERE id_cuenta_doc=32812;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET id_gestion=5 WHERE id_cuenta_doc=32812;
+COMMIT;
+
+/********************************************F-DAUP-MANU-CD-0-29/01/2021********************************************/
