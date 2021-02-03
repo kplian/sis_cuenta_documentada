@@ -59,3 +59,14 @@ UPDATE cd.tcuenta_doc SET id_gestion=5 WHERE id_cuenta_doc=32812;
 COMMIT;
 
 /********************************************F-DAUP-MANU-CD-0-29/01/2021********************************************/
+/********************************************I-DAUP-EGS-CD-ETR-2825-03/02/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET id_depto=6 WHERE id_cuenta_doc=32757;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET id_depto=27 WHERE id_cuenta_doc=32757;
+COMMIT;
+
+/********************************************F-DAUP-EGS-CD-ETR-2825-03/02/2021********************************************/
