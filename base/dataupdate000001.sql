@@ -71,6 +71,21 @@ COMMIT;
 
 /********************************************F-DAUP-EGS-CD-ETR-2825-03/02/2021********************************************/
 
+/********************************************I-DAUP-EGS-CD-ETR-3022-03/02/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET
+-- motivo = 'Servicio Desarmado de Mampara de Aluminio Oficina Central Piso 2'
+-- WHERE id_cuenta_doc=33204;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET
+    motivo = 'Servicio Desarmado de Mampara de Aluminio Oficina Central Piso 1'
+WHERE id_cuenta_doc=33204;
+COMMIT;
+
+/********************************************F-DAUP-EGS-CD-ETR-3022-03/02/2021********************************************/
 
 
 /********************************************I-DAUP-MGM-CD-ETR-3115-02/03/2021********************************************/
