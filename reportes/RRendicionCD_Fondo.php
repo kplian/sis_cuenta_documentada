@@ -59,7 +59,11 @@ class RSolicitudCD_Fondo extends  ReportePDF {
 	    $this->writeHTML($content, true, false, true, false, '');
 		$this->revisarfinPagina();
 		//YMR se quitaron los cuadros de firmas ETR-2672
+<<<<<<< HEAD
 		//$this->Firmas();		
+=======
+		//$this->Firmas();	
+>>>>>>> remotes/origin/dev
 		
 	} 
 	
