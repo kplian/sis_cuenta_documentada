@@ -7,6 +7,8 @@
  *@description 
  *ISSUE			FECHA 				AUTHOR				DESCRIPCION
  * #1 				24/09/2018		EGS					se modifico el campo moneda para carga automatica segun tipo de viaje
+    #ETR-3133   02/03/2021          EGS                 Se resetea el formulario al cambiar de tipo cuando se crea una solicitud y al editar
+ *                                                      no se puede cambiar de tipo
  */
 header("content-type: text/javascript; charset=UTF-8");
 ?>
@@ -451,7 +453,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.id_tipo_cuenta_doc.on('select', function(combo, record, index) {
 			 console.log('record', record.data.codigo);		
 					this.Cmp.id_moneda.reset();
-
+                    this.resetCmpForm();//#ETR-3133
 				}, this);
 		
 		this.Cmp.id_funcionario.enable();
@@ -461,6 +463,7 @@ Phx.vista.CuentaDocSol = {
 		this.Cmp.id_caja.allowBlank = true;
 		this.Cmp.fecha.setValue(new Date());
         this.Cmp.fecha.fireEvent('change');
+        this.Cmp.id_tipo_cuenta_doc.enable('true');//#ETR-3133
 	},
 	onButtonEdit: function() {
 		Phx.vista.CuentaDocSol.superclass.onButtonEdit.call(this);
@@ -485,6 +488,7 @@ Phx.vista.CuentaDocSol = {
 
         //Oculta muestra componentes
 		this.ocultarMostrarComp(this.Cmp.codigo_tipo_cuenta_doc.getValue());
+		this.Cmp.id_tipo_cuenta_doc.disable('true');//#ETR-3133
 	},
 
 	onBtnRendicion: function() {
@@ -831,6 +835,25 @@ Phx.vista.CuentaDocSol = {
 			scope:this
 		});		
     	
+    },
+    resetCmpForm:function () {//#ETR-3133
+        this.Cmp.motivo.reset();
+        this.Cmp.id_funcionario.reset();
+        this.Cmp.tipo_contrato.reset();
+        this.Cmp.id_depto.reset();
+        this.Cmp.importe.reset();
+        this.Cmp.tipo_pago.reset();
+
+
+        this.Cmp.tipo_viaje.reset();
+        this.Cmp.id_caja.reset();
+        this.Cmp.fecha_salida.reset();
+        this.Cmp.fecha_llegada.reset();
+        this.Cmp.medio_transporte.reset();
+        this.Cmp.cobertura.reset();
+        this.Cmp.cantidad_personas.reset();
+        this.Cmp.aplicar_regla_15.reset();
+
     }
     
 }; 

@@ -306,3 +306,18 @@ UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1221328,id_moneda_de
 
 
 /********************************************F-DAUP-MGM-CD-ETR-3115-02/03/2021********************************************/
+/********************************************I-DAUP-EGS-CD-ETR-3161-03/03/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET
+-- motivo = 'Extracción de muestras de S/E Qollpana, pago a personal eventual relacionado a servicio de análisis de muestras de aceite dieléctrico de S/E Qollpana y pago parcial por elaboración de estructura de base de datos para laboratorio de aceites.'
+-- WHERE id_cuenta_doc=33658;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET
+    motivo = 'Pago personal eventual relacionado a servicio de análisis de muestras de aceite dieléctrico de S/E Qollpana y pago parcial por elaboración de estructura de base de datos para laboratorio de aceites.'
+WHERE id_cuenta_doc=33658;
+COMMIT;
+
+/********************************************F-DAUP-EGS-CD-ETR-3161-03/03/2021********************************************/
