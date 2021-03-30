@@ -321,3 +321,40 @@ WHERE id_cuenta_doc=33658;
 COMMIT;
 
 /********************************************F-DAUP-EGS-CD-ETR-3161-03/03/2021********************************************/
+
+
+/********************************************I-DAUP-MGM-CD-ETR-3403-30/03/2021********************************************/
+--finalizado
+--rollback  
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1291694;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1291694;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1249582;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1249582;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1291694 WHERE id_cuenta_doc=32824;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1249582 WHERE id_cuenta_doc=32824;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1291693;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1291693;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1256127;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1256127;
+
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1291693,id_moneda_dev= 1,dev_saldo_original=371,id_int_comprobante_devrep = 104079,dev_saldo=371,dev_tipo='deposito',dev_a_favor_de='empresa' WHERE id_cuenta_doc=33629;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1256127,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=33629;
+
+/********************************************F-DAUP-MGM-CD-ETR-3403-30/03/2021********************************************/
