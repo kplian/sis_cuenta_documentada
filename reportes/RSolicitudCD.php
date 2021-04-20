@@ -111,7 +111,19 @@ class RSolicitudCD extends  ReportePDF {
 		$fill = 0;
 		$this->total = count($detalle);						
 		$this->imprimirLinea($val,$count,$fill);
+        $this->Firmas();
 	}
+    function Firmas() {
+
+
+        $newDate = date("d/m/Y", strtotime( $this->cabecera[0]['fecha']));
+        $dataSource = $this->datos_detalle;
+        ob_start();
+        include(dirname(__FILE__).'/../reportes/tpl/cuadroFirmas.php');
+        $content = ob_get_clean();
+        $this->writeHTML($content, true, false, true, false, '');
+
+    }
 	//itinerario
 	function generarReporte_iti() {
 		$this->generarCuerpo_iti($this->datos_itinerario);

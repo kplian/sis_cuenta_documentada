@@ -39,7 +39,7 @@ class RSolicitudCD_Fondo extends  ReportePDF {
 		$newDate = date("d/m/Y", strtotime( $this->cabecera[0]['fecha']));		
 		$dataSource = $this->datos_detalle; 
 	    ob_start();
-		include(dirname(__FILE__).'/../reportes/tpl/firmas.php');
+		include(dirname(__FILE__).'/../reportes/tpl/cuadroFirmasFondos.php');
         $content = ob_get_clean();
 		$this->writeHTML($content, true, false, true, false, '');
 		
@@ -59,7 +59,8 @@ class RSolicitudCD_Fondo extends  ReportePDF {
 	    $this->writeHTML($content, true, false, true, false, '');
 		$this->revisarfinPagina();
 		//YMR se quitaron los cuadros de firmas ETR-2672
-		//$this->Firmas();		
+        //YMR solicitaron que se agregue el cuadro de firmas ETR-3666
+		$this->Firmas();
 	} 
 	
 	
