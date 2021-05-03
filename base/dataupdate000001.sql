@@ -358,3 +358,8 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1256127;
 UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1256127,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=33629;
 
 /********************************************F-DAUP-MGM-CD-ETR-3403-30/03/2021********************************************/
+
+/********************************************I-DAUP-MGM-CD-ETR-3628-03/05/2021********************************************/
+--UPDATE cd.tcuenta_doc SET importe=750 WHERE id_cuenta_doc=35661;
+UPDATE cd.tcuenta_doc SET importe=700 WHERE id_cuenta_doc=35661;
+/********************************************F-DAUP-MGM-CD-ETR-3628-03/05/2021********************************************/
