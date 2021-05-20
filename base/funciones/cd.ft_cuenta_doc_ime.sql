@@ -671,14 +671,18 @@ BEGIN
         c.estado,
         c.tipo_pago,
         c.id_caja,
-        c.tipo_contrato
+        c.tipo_contrato,
+        c.nro_tramite,
+        c.id_funcionario
         into
         v_id_proceso_wf,
         v_id_estado_wf,
         v_codigo_estado,
         v_tipo_pago,
         v_id_caja,
-        v_tipo_contrato
+        v_tipo_contrato,
+        v_num_tramite,
+        v_id_funcionario
         from cd.tcuenta_doc c
         where c.id_cuenta_doc = v_parametros.id_cuenta_doc;
 
@@ -914,7 +918,13 @@ end if;*/
                                         ) THEN
 
         END IF;
-
+         IF v_codigo_estado_siguiente = 'vbgaf' THEN
+             v_resp = param.f_insertar_notificacion(p_administrador, p_id_usuario, v_parametros.id_cuenta_doc, v_id_proceso_wf,
+                                                      v_parametros.id_tipo_estado, v_id_funcionario,
+                                                      v_parametros.id_funcionario_wf, 'cuenta_documentada', 'adq',
+                                                      'El tramite ' || v_num_tramite || ' esta pendiente de liberación',
+                                                      'Solicitud de Fondos - ' || v_num_tramite,'CuentaDocVb');
+        END IF;
         --Respuesta
         v_resp = pxp.f_agrega_clave(v_resp,'mensaje','Se realizo el cambio de estado del cuenta documentada id='||v_parametros.id_cuenta_doc);
         v_resp = pxp.f_agrega_clave(v_resp,'operacion','cambio_exitoso');
