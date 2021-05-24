@@ -12,6 +12,7 @@ HISTORIAL DE MODIFICACIONES:
 #0						31-12-2017			     RAC			Creación
 #0001             		22/06/2018               RAC            Considera el Devenga y pagar con prorrateo automatico y nro de tramite tipo   DVPGPROP
 #4         ENDEETR     09/01/2018         Manuel Guerra        se agrego en el combo de obligación de pago,en el formulario de pago simple
+#ETR-4074			    24/05/2021		    yamil medina        adicion del boton pasajeros
  */
 
 header("content-type: text/javascript; charset=UTF-8");
@@ -63,6 +64,9 @@ header("content-type: text/javascript; charset=UTF-8");
                 estado: 'borrador',
                 tipo_interfaz: this.nombreVista
             });
+
+            this.addBotones();
+
             this.load({params:{start:0, limit:this.tam_pag}});
 
             //Deshabilita el tab de prorrateo por defecto
@@ -687,6 +691,7 @@ header("content-type: text/javascript; charset=UTF-8");
 
             this.getBoton('diagrama_gantt').enable();
             this.getBoton('btnChequeoDocumentosWf').enable();
+            this.getBoton('pasajero').enable();
 
             if(this.historico === 'no'){
 
@@ -703,6 +708,7 @@ header("content-type: text/javascript; charset=UTF-8");
             if (tb) {
                 this.getBoton('diagrama_gantt').disable();
                 this.getBoton('btnChequeoDocumentosWf').disable();
+                this.getBoton('pasajero').disable();
             }
             return tb
         },
@@ -763,7 +769,51 @@ header("content-type: text/javascript; charset=UTF-8");
                 scope:this
             });
 
-        }
+        },
+        //#ETR-4074
+        regPasajerosPDF : function() {
+            var data = this.getSelectedData();
+            console.log('data',data.id_pago_simple);
+            if(data)
+            {
+                Phx.CP.loadingShow();
+                Ext.Ajax.request({
+                    url:'../../sis_cuenta_documentada/control/PagoSimple/RepRegPasaPdf',
+                    params:{
+                        id_pago_simple: data.id_pago_simple
+                    },
+                    success:this.successExport,
+                    failure: this.conexionFailure,
+                    timeout:this.timeout,
+                    scope:this
+                });
+            }
+            else
+            {
+                Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
+            }
+        },
+        addBotones: function() {
+            this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+                id: 'b-pasajero-' + this.idContenedor,
+                text:'Reg. Pasajeros',
+                disabled: true,
+                //grupo:[0,1,2,3],
+                iconCls : 'blist',
+                handler:this.regPasajerosPDF,
+                scope: this,
+                menu:{
+                    items: [{
+                            id:'b-pasajeroPdf-' + this.idContenedor,
+                            text: 'Pdf',
+                            tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+                            handler:this.regPasajerosPDF,
+                            scope: this
+                        }]
+                }
+            });
+            this.tbar.add(this.menuAdqGantt);
+        },
 
     })
 </script>
