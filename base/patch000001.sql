@@ -1675,3 +1675,7 @@ ALTER TABLE cd.tcontrol_dui
 ALTER TABLE cd.tcontrol_dui
   ADD COLUMN id_gestion INTEGER;
 /***********************************F-SCP-CD-JJA-1-12/12/2018****************************************/
+/***********************************I-SCP-CD-MMV-1-12/12/2021****************************************/
+ALTER TABLE cd.tcuenta_doc
+    ADD COLUMN id_funcionarios INTEGER [];
+/***********************************F-SCP-CD-MMV-1-12/12/2021****************************************/
