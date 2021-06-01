@@ -6,9 +6,9 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
     ActList: '../../sis_cuenta_documentada/control/PagoSimple/listarDocCompraVenta',
 
     title: 'Libro de Compras',
-    nombreVista: 'Filtro',
     tipoDoc: 'compra',
     tabEnter: true,
+    nombreVista: 'DocCompraPS',
 
     bnew:false,
     bedit:false,
