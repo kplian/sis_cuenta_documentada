@@ -353,6 +353,113 @@ class MODPagoSimple extends MODbase{
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
 		return $this->respuesta;
-	}		
+	}
+	//
+	function listarDocCompraVenta(){
+		//Definicion de variables para ejecucion del procedimientp
+		$this->procedimiento='cd.ft_pago_simple_sel';
+		$this->transaccion='CD_DCV_SEL';
+		$this->tipo_procedimiento='SEL';
+		//captura parametros adicionales para el count
+		$this->capturaCount('total_importe_ice','numeric');
+		$this->capturaCount('total_importe_excento','numeric');
+		$this->capturaCount('total_importe_it','numeric');
+		$this->capturaCount('total_importe_iva','numeric');
+		$this->capturaCount('total_importe_descuento','numeric');
+		$this->capturaCount('total_importe_doc','numeric');
+		$this->capturaCount('total_importe_retgar','numeric');
+		$this->capturaCount('total_importe_anticipo','numeric');
+		$this->capturaCount('tota_importe_pendiente','numeric');
+		$this->capturaCount('total_importe_neto','numeric');
+		$this->capturaCount('total_importe_descuento_ley','numeric');
+		$this->capturaCount('total_importe_pago_liquido','numeric');
+		$this->capturaCount('total_importe_aux_neto','numeric');
+
+		$this->setParametro('nombre_vista','nombre_vista','varchar');
+		//Definicion de la lista del resultado del query
+		$this->captura('id_doc_compra_venta','int8');
+		$this->captura('revisado','varchar');
+		$this->captura('movil','varchar');
+		$this->captura('tipo','varchar');
+		$this->captura('importe_excento','numeric');
+		$this->captura('id_plantilla','int4');
+		$this->captura('fecha','date');
+		$this->captura('nro_documento','varchar');
+		$this->captura('nit','varchar');
+		$this->captura('importe_ice','numeric');
+		$this->captura('nro_autorizacion','varchar');
+		$this->captura('importe_iva','numeric');
+		$this->captura('importe_descuento','numeric');
+		$this->captura('importe_doc','numeric');
+		$this->captura('sw_contabilizar','varchar');
+		$this->captura('tabla_origen','varchar');
+		$this->captura('estado','varchar');
+		$this->captura('id_depto_conta','int4');
+		$this->captura('id_origen','int4');
+		$this->captura('obs','varchar');
+		$this->captura('estado_reg','varchar');
+		$this->captura('codigo_control','varchar');
+		$this->captura('importe_it','numeric');
+		$this->captura('razon_social','varchar');
+		$this->captura('id_usuario_ai','int4');
+		$this->captura('id_usuario_reg','int4');
+		$this->captura('fecha_reg','timestamp');
+		$this->captura('usuario_ai','varchar');
+		$this->captura('id_usuario_mod','int4');
+		$this->captura('fecha_mod','timestamp');
+		$this->captura('usr_reg','varchar');
+		$this->captura('usr_mod','varchar');
+		
+		$this->captura('desc_depto','varchar');
+		$this->captura('desc_plantilla','varchar');
+		$this->captura('importe_descuento_ley','numeric');
+		$this->captura('importe_pago_liquido','numeric');
+		$this->captura('nro_dui','varchar');
+		$this->captura('id_moneda','int4');
+		$this->captura('desc_moneda','varchar');
+		$this->captura('id_int_comprobante','int4');
+		$this->captura('nro_tramite','varchar');
+		$this->captura('desc_comprobante','varchar');
+		
+		$this->captura('importe_pendiente','numeric');
+		$this->captura('importe_anticipo','numeric');
+		$this->captura('importe_retgar','numeric');
+		$this->captura('importe_neto','numeric');		
+		$this->captura('id_auxiliar','integer');
+		$this->captura('codigo_auxiliar','varchar');
+		$this->captura('nombre_auxiliar','varchar');		
+		$this->captura('id_tipo_doc_compra_venta','integer');
+		$this->captura('desc_tipo_doc_compra_venta','varchar');		
+		$this->captura('importe_aux_neto','numeric');
+		$this->captura('id_funcionario','integer');		
+		$this->captura('desc_funcionario2','varchar');
+		$this->captura('fecha_cbte','date');
+		$this->captura('estado_cbte','varchar');
+		$this->captura('codigo_aplicacion','varchar');
+		
+		$this->captura('tipo_informe','varchar');
+		$this->captura('id_doc_compra_venta_fk','int8');
+		$this->captura('nota_debito_agencia','varchar');
+		$this->captura('consumido','varchar');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//var_dump($this->respuesta); exit;
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
+	//
+	function cambiarRevision(){
+		$this->procedimiento='cd.ft_pago_simple_ime';
+		$this->transaccion='CD_CAMREV_IME';
+		$this->tipo_procedimiento='IME';
+		//Define los parametros para la funcion
+		$this->setParametro('id_doc_compra_venta','id_doc_compra_venta','int8');
+		//Ejecuta la instruccion
+		$this->armarConsulta();
+		$this->ejecutarConsulta();
+		//Devuelve la respuesta
+		return $this->respuesta;
+	}
 }
 ?>

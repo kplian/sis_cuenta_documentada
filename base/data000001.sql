@@ -634,3 +634,8 @@ select pxp.f_insert_testructura_gui ('PSC', 'PAGSIM');
 select pxp.f_insert_tgui ('Agencia Despachante', 'AGP', 'AGP', 'si', 10, '\sis_cuenta_documentada\vista\agencia_despachante\AgenciaDespachante.php', 3, '', 'AgenciaDespachante', 'CD');
 select pxp.f_insert_testructura_gui ('AGP', 'CBCONF');
 /***********************************F-DAT-MGM-CD-1-17/11/2020*****************************************/
+
+/***********************************I-DAT-MGM-CD-2-01/06/2021*****************************************/
+select pxp.f_insert_tgui ('Consulta de Pasajes', 'Consulta de Pasajes', 'CONPAS', 'si', 9, 'sis_cuenta_documentada/vista/pago_simple/Filtro.php', 3, '', 'Filtro', 'CD');
+select pxp.f_insert_testructura_gui ('CONPAS', 'PAGSIM');
+/***********************************F-DAT-MGM-CD-2-01/06/2021*****************************************/

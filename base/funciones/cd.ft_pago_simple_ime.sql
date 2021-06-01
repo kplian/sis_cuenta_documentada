@@ -1,12 +1,12 @@
 --------------- SQL ---------------
 
 CREATE OR REPLACE FUNCTION cd.ft_pago_simple_ime (
-    p_administrador integer,
-    p_id_usuario integer,
-    p_tabla varchar,
-    p_transaccion varchar
+  p_administrador integer,
+  p_id_usuario integer,
+  p_tabla varchar,
+  p_transaccion varchar
 )
-    RETURNS varchar AS
+RETURNS varchar AS
 $body$
 /**************************************************************************
  SISTEMA:		Cuenta Documenta
@@ -737,7 +737,8 @@ BEGIN
 		        	and id_moneda = '||v_id_moneda||'
 		        	and ';
             v_sql = v_sql || v_where;
-
+			raise notice '%',v_sql;
+            			raise exception '%',v_sql;
             execute(v_sql);
 
             update conta.tdoc_compra_venta set
@@ -772,6 +773,40 @@ BEGIN
             return v_resp;
 
         end;
+        
+      /*********************************
+      #TRANSACCION:  'CD_CAMREV_IME'
+      #DESCRIPCION:	Cambia el estado de la revisón del documento de compra o venta
+      #AUTOR:		admin
+      #FECHA:		09-09-2015 15:57:09
+      ***********************************/
+
+	elsif(p_transaccion='CD_CAMREV_IME')then
+
+        begin
+            select dcv.consumido
+            into v_registros_proc
+            from conta.tdoc_compra_venta dcv 
+            where dcv.id_doc_compra_venta =v_parametros.id_doc_compra_venta;
+
+            IF v_registros_proc.consumido = 'si' THEN
+                v_parametros_ad = 'no';
+            ELSE
+                v_parametros_ad = 'si';
+            END IF;
+
+            update conta.tdoc_compra_venta 
+            set consumido = v_parametros_ad
+            where id_doc_compra_venta=v_parametros.id_doc_compra_venta;
+
+            --Definicion de la respuesta
+            v_resp = pxp.f_agrega_clave(v_resp,'mensaje','cambio del documento a revisado '||v_parametros_ad|| ' id: '||v_parametros.id_doc_compra_venta);
+            v_resp = pxp.f_agrega_clave(v_resp,'id_doc_compra_venta',v_parametros.id_doc_compra_venta::varchar);
+
+            --Devuelve la respuesta
+            return v_resp;
+
+        end;    
 
     else
 
@@ -790,9 +825,9 @@ EXCEPTION
 
 END;
 $body$
-    LANGUAGE 'plpgsql'
-    VOLATILE
-    CALLED ON NULL INPUT
-    SECURITY INVOKER
-    PARALLEL UNSAFE
-    COST 100;
+LANGUAGE 'plpgsql'
+VOLATILE
+CALLED ON NULL INPUT
+SECURITY INVOKER
+PARALLEL UNSAFE
+COST 100;
