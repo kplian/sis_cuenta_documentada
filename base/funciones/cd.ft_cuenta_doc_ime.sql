@@ -295,9 +295,9 @@ BEGIN
                 raise exception 'Ya superó la cantidad máxima permitida de solicitudes abiertas. (Máximo permitido: %). Solicitudes abiertas: %', v_regla_max_sol,v_sol_abiertas;
             END IF;
 
-            --Preparación ids de funcionarios
-            v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
-            --#8
+            if pxp.f_existe_parametro(p_tabla, 'id_funcionarios') then
+                v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
+            end if;
 
             --Sentencia de la insercion
             INSERT INTO cd.tcuenta_doc(id_tipo_cuenta_doc,
@@ -552,9 +552,9 @@ BEGIN
             end if;
             --#2 Fin
 
-            --Preparación ids de funcionarios
-            v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
-            --#8
+            if pxp.f_existe_parametro(p_tabla, 'id_funcionarios') then
+                v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
+            end if;
 
             --Sentencia de la modificacion
             update cd.tcuenta_doc
