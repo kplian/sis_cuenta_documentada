@@ -796,7 +796,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             form:false
         },{
             config:{
-                name: 'obs',
+                name: 'obs', 
                 fieldLabel: 'Observaciones',
                 allowBlank: true,
                 anchor: '80%',
@@ -805,8 +805,8 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             },
             type:'TextArea',
             filters:{ pfiltro:'dcv.obs',type:'string' },
-            id_grupo:0,
-            grid: false,
+            id_grupo:1,
+            grid: true,
             bottom_filter: true,
             form: false
         },{
@@ -1219,7 +1219,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
         'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
         'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario',
         {name:'fecha_cbte', type: 'date',dateFormat:'Y-m-d'},
-        {name:'estado_cbte', type: 'string'},'codigo_aplicacion','tipo_informe','id_doc_compra_venta_fk','nota_debito_agencia','consumido','descripcion'
+        {name:'estado_cbte', type: 'string'},'codigo_aplicacion','tipo_informe','id_doc_compra_venta_fk','nota_debito_agencia','consumido','descripcion','tramite_relacionado'
     ],
     sortInfo:{
         field: 'id_doc_compra_venta',

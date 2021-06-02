@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION cd.ft_pago_simple_sel (
   p_transaccion varchar
 )
 RETURNS varchar AS
-$body$
+$body$ 
 /**************************************************************************
  SISTEMA:       Cuenta Documenta
  FUNCION:       cd.ft_pago_simple_sel

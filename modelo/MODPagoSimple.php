@@ -442,7 +442,7 @@ class MODPagoSimple extends MODbase{
 		$this->captura('nota_debito_agencia','varchar');
 		$this->captura('consumido','varchar');
 		$this->captura('descripcion','varchar');
-		$this->captura('tramite_relacionado','varchar');
+		$this->captura('tramite_relacionado','varchar'); 
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
