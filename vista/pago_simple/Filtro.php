@@ -267,6 +267,19 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             form:false
         },{
             config:{
+                name: 'descripcion',
+                fieldLabel: 'Cecos',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 200,
+                maxLength:10
+            },
+            type:'TextField',
+            id_grupo:1,
+            grid:true,
+            form:false
+        },{
+            config:{
                 name: 'nit',
                 fieldLabel: 'NIT/CI',
                 qtip: 'Número de indentificación del proveedor o Ci en caso de recibos con retenciones',
@@ -574,7 +587,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             type:'NumberField',
             filters:{pfiltro:'dcv.importe_pago_liquido',type:'numeric'},
             id_grupo:1,
-            grid:true,
+            grid:false,
             form: false
         },{
             config:{
@@ -696,7 +709,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             },
             type:'TextField',
             id_grupo:0,
-            grid:true,
+            grid:false,
             form:false,
             bottom_filter: true,
             filters:{pfiltro:'ic.id_int_comprobante',type:'numeric'}
@@ -796,6 +809,19 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             grid: false,
             bottom_filter: true,
             form: false
+        },{
+            config:{
+                name: 'tramite_relacionado',
+                fieldLabel: 'Tramite Relacionado',
+                allowBlank: true,
+                anchor: '80%',
+                gwidth: 100,
+                maxLength:4
+            },
+            type:'Field',
+            id_grupo:1,
+            grid:true,
+            form:false
         },{
             config:{
                 name: 'importe_pendiente',
@@ -1193,7 +1219,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
         'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
         'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario',
         {name:'fecha_cbte', type: 'date',dateFormat:'Y-m-d'},
-        {name:'estado_cbte', type: 'string'},'codigo_aplicacion','tipo_informe','id_doc_compra_venta_fk','nota_debito_agencia','consumido'
+        {name:'estado_cbte', type: 'string'},'codigo_aplicacion','tipo_informe','id_doc_compra_venta_fk','nota_debito_agencia','consumido','descripcion'
     ],
     sortInfo:{
         field: 'id_doc_compra_venta',

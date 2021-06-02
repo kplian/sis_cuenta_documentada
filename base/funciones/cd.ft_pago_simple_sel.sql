@@ -508,7 +508,23 @@ BEGIN
                         pla.tipo_informe,
                         dcv.id_doc_compra_venta_fk,
                         dcv.nota_debito_agencia,
-                        dcv.consumido
+                        dcv.consumido,
+                        (
+                        select
+                        CASE 
+                        WHEN (pres.descripcion like ''P1%'') THEN
+                        vtcc.descripcion_techo::varchar	
+                        ELSE
+                        ceco.codigo_cc::varchar	
+                        END as descripcion    	             
+                        from conta.tdoc_compra_venta dcven     
+                        left join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcven.id_doc_compra_venta
+                        left join param.vcentro_costo ceco on ceco.id_centro_costo=cc.id_centro_costo
+                        left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=ceco.id_tipo_cc
+                        group by ceco.codigo_cc,vtcc.descripcion_techo,ceco.id_centro_costo                             
+                        ) as descripcion,
+                        ps.nro_tramite as tramite_relacionado
+                                                
 						from conta.tdoc_compra_venta dcv
                         inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
                         inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
@@ -519,12 +535,19 @@ BEGIN
                         left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
                         left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
                         left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
+                        
+                        join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
+                        join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
+                        join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
+                        
+                        left join cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
+						left join cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where '||v_filtro;
 
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
             raise notice '%',v_consulta;
-            --raise EXCEPTION '%',v_consulta;
+          -- raise EXCEPTION '%',v_consulta;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			--Devuelve la respuesta
 			return v_consulta;
@@ -555,30 +578,35 @@ BEGIN
 
 			--Sentencia de la consulta de conteo de registros
 			v_consulta:='select
-                              count(dcv.id_doc_compra_venta),
-                              COALESCE(sum(dcv.importe_ice),0)::numeric  as total_importe_ice,
-                              COALESCE(sum(dcv.importe_excento),0)::numeric  as total_importe_excento,
-                              COALESCE(sum(dcv.importe_it),0)::numeric  as total_importe_it,
-                              COALESCE(sum(dcv.importe_iva),0)::numeric  as total_importe_iva,
-                              COALESCE(sum(dcv.importe_descuento),0)::numeric  as total_importe_descuento,
-                              COALESCE(sum(dcv.importe_doc),0)::numeric  as total_importe_doc,
-                              COALESCE(sum(dcv.importe_retgar),0)::numeric  as total_importe_retgar,
-                              COALESCE(sum(dcv.importe_anticipo),0)::numeric  as total_importe_anticipo,
-                              COALESCE(sum(dcv.importe_pendiente),0)::numeric  as tota_importe_pendiente,
-                              COALESCE(sum(dcv.importe_neto),0)::numeric  as total_importe_neto,
-                              COALESCE(sum(dcv.importe_descuento_ley),0)::numeric  as total_importe_descuento_ley,
-                              COALESCE(sum(dcv.importe_pago_liquido),0)::numeric  as total_importe_pago_liquido,
-                              COALESCE(sum(dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0)),0) as total_importe_aux_neto
+                        count(dcv.id_doc_compra_venta),
+                        COALESCE(sum(dcv.importe_ice),0)::numeric  as total_importe_ice,
+                        COALESCE(sum(dcv.importe_excento),0)::numeric  as total_importe_excento,
+                        COALESCE(sum(dcv.importe_it),0)::numeric  as total_importe_it,
+                        COALESCE(sum(dcv.importe_iva),0)::numeric  as total_importe_iva,
+                        COALESCE(sum(dcv.importe_descuento),0)::numeric  as total_importe_descuento,
+                        COALESCE(sum(dcv.importe_doc),0)::numeric  as total_importe_doc,
+                        COALESCE(sum(dcv.importe_retgar),0)::numeric  as total_importe_retgar,
+                        COALESCE(sum(dcv.importe_anticipo),0)::numeric  as total_importe_anticipo,
+                        COALESCE(sum(dcv.importe_pendiente),0)::numeric  as tota_importe_pendiente,
+                        COALESCE(sum(dcv.importe_neto),0)::numeric  as total_importe_neto,
+                        COALESCE(sum(dcv.importe_descuento_ley),0)::numeric  as total_importe_descuento_ley,
+                        COALESCE(sum(dcv.importe_pago_liquido),0)::numeric  as total_importe_pago_liquido,
+                        COALESCE(sum(dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0)),0) as total_importe_aux_neto
 						from conta.tdoc_compra_venta dcv
-                          inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
-                          inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
-                          inner join param.tmoneda mon on mon.id_moneda = dcv.id_moneda
-                          inner join conta.ttipo_doc_compra_venta tdcv on tdcv.id_tipo_doc_compra_venta = dcv.id_tipo_doc_compra_venta
-                          left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
-                          left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
-                          left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
-                          left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
-                          left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
+                        inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
+                        inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
+                        inner join param.tmoneda mon on mon.id_moneda = dcv.id_moneda
+                        inner join conta.ttipo_doc_compra_venta tdcv on tdcv.id_tipo_doc_compra_venta = dcv.id_tipo_doc_compra_venta
+                        left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
+                        left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
+                        left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
+                        left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
+                        left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
+                        join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
+                        join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
+                        join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
+                        left join cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
+						left join cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where  '||v_filtro;
 
 			--Definicion de la respuesta

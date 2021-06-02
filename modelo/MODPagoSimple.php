@@ -424,14 +424,14 @@ class MODPagoSimple extends MODbase{
 		$this->captura('importe_pendiente','numeric');
 		$this->captura('importe_anticipo','numeric');
 		$this->captura('importe_retgar','numeric');
-		$this->captura('importe_neto','numeric');		
+		$this->captura('importe_neto','numeric');
 		$this->captura('id_auxiliar','integer');
 		$this->captura('codigo_auxiliar','varchar');
-		$this->captura('nombre_auxiliar','varchar');		
+		$this->captura('nombre_auxiliar','varchar');
 		$this->captura('id_tipo_doc_compra_venta','integer');
-		$this->captura('desc_tipo_doc_compra_venta','varchar');		
+		$this->captura('desc_tipo_doc_compra_venta','varchar');
 		$this->captura('importe_aux_neto','numeric');
-		$this->captura('id_funcionario','integer');		
+		$this->captura('id_funcionario','integer');
 		$this->captura('desc_funcionario2','varchar');
 		$this->captura('fecha_cbte','date');
 		$this->captura('estado_cbte','varchar');
@@ -441,6 +441,8 @@ class MODPagoSimple extends MODbase{
 		$this->captura('id_doc_compra_venta_fk','int8');
 		$this->captura('nota_debito_agencia','varchar');
 		$this->captura('consumido','varchar');
+		$this->captura('descripcion','varchar');
+		$this->captura('tramite_relacionado','varchar');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();
