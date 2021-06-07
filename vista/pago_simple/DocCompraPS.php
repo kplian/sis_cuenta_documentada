@@ -132,7 +132,8 @@ Phx.vista.DocCompraPS = {
 				params:{
 					id_depto_conta : this.cmbDepto.getValue(),
 					id_gestion : me.cmbGestion.getValue(),
-					id_periodo : me.cmbPeriodo.getValue()		
+					id_periodo : me.cmbPeriodo.getValue(),
+					revisado: 'si'
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,
@@ -157,7 +158,8 @@ Phx.vista.DocCompraPS = {
 				params:{
 					id_depto_conta : this.cmbDepto.getValue(),
 					id_gestion : me.cmbGestion.getValue(),
-					id_periodo : me.cmbPeriodo.getValue()		
+					id_periodo : me.cmbPeriodo.getValue(),
+					revisado: 'si'
 				},
 				success:this.successExport,
 				failure: this.conexionFailure,

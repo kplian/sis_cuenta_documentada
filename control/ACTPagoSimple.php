@@ -214,22 +214,38 @@ class ACTPagoSimple extends ACTbase{
 		if($this->objParam->getParametro('id_periodo')!=''){
 			$this->objParam->addFiltro("dcv.id_periodo =".$this->objParam->getParametro('id_periodo'));
 		}
-		$this->objFun=$this->create('MODPagoSimple');	
+
+		if($this->objParam->getParametro('id_funcionario')!=''){
+			$this->objParam->addFiltro("dcv.id_funcionario = ".$this->objParam->getParametro('id_funcionario'));
+		}
+
+		if($this->objParam->getParametro('consumido') !=''){
+			if($this->objParam->getParametro('consumido') =='todos'){
+			}elseif ($this->objParam->getParametro('consumido') =='si' || $this->objParam->getParametro('consumido') =='no') {
+				$this->objParam->addFiltro("dcv.consumido = ''".$this->objParam->getParametro('consumido')."''");
+			}
+		}
+
+		if($this->objParam->getParametro('revisado') !=''){
+			$this->objParam->addFiltro("dcv.revisado = ''".$this->objParam->getParametro('revisado')."''");
+		}
+
+		$this->objFun=$this->create('MODPagoSimple');
 		$this->res = $this->objFun->repAutorizacionPdf();
 		if($this->res->getTipo()=='ERROR'){
 			$this->res->imprimirRespuesta($this->res->generarJson());
 			exit;
 		}
 			
-		$nombreArchivo = uniqid(md5(session_id()).'-Pasajes') . '.pdf'; 		
+		$nombreArchivo = uniqid(md5(session_id()).'-Pasajes') . '.pdf'; 
 		$tamano = 'LETTER';
 		$orientacion = 'L';
 		$this->objParam->addParametro('orientacion',$orientacion);
-		$this->objParam->addParametro('tamano',$tamano);		
-		$this->objParam->addParametro('titulo_archivo',$titulo);        
+		$this->objParam->addParametro('tamano',$tamano);
+		$this->objParam->addParametro('titulo_archivo',$titulo);
 		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
 		
-		$reporte = new RepPasajes($this->objParam); 		
+		$reporte = new RepPasajes($this->objParam);
 		$reporte->datosHeader($this->res->datos);
 		$reporte->generarReporte();
 		$reporte->output($reporte->url_archivo,'F');

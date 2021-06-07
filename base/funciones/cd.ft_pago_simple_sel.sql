@@ -7,7 +7,7 @@ CREATE OR REPLACE FUNCTION cd.ft_pago_simple_sel (
   p_transaccion varchar
 )
 RETURNS varchar AS
-$body$ 
+$body$
 /**************************************************************************
  SISTEMA:       Cuenta Documenta
  FUNCION:       cd.ft_pago_simple_sel
@@ -522,8 +522,7 @@ BEGIN
                         left join param.vcentro_costo ceco on ceco.id_centro_costo=cc.id_centro_costo
                         left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=ceco.id_tipo_cc
                         group by ceco.codigo_cc,vtcc.descripcion_techo,ceco.id_centro_costo                             
-                        ) as descripcion,
-                        ps.nro_tramite as tramite_relacionado
+                        ) as descripcion
                                                 
 						from conta.tdoc_compra_venta dcv
                         inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
@@ -539,15 +538,12 @@ BEGIN
                         join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
                         join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
                         join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
-                        
-                        left join cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
-						left join cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where '||v_filtro;
 
 			--Definicion de la respuesta
 			v_consulta:=v_consulta||v_parametros.filtro;
             raise notice '%',v_consulta;
-          -- raise EXCEPTION '%',v_consulta;
+            --raise EXCEPTION '%',v_consulta;
 			v_consulta:=v_consulta||' order by ' ||v_parametros.ordenacion|| ' ' || v_parametros.dir_ordenacion || ' limit ' || v_parametros.cantidad || ' offset ' || v_parametros.puntero;
 			--Devuelve la respuesta
 			return v_consulta;
@@ -605,8 +601,6 @@ BEGIN
                         join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
                         join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
                         join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
-                        left join cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
-						left join cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where  '||v_filtro;
 
 			--Definicion de la respuesta

@@ -46,7 +46,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             disabled:false,
             handler:this.reset
         });
-
+        this.addBotonesPas();
         this.init();
         this.grid.addListener('cellclick', this.oncellclick,this);
     },
@@ -1475,6 +1475,86 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             this.store.baseParams.id_funcionario = this.cmbFuncionario.getValue();
             this.store.baseParams.consumido = this.cmbConsumido.getValue();
             this.load();
+        }
+    },
+    //
+    addBotonesPas: function() {
+        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+            id: 'b-repasaj-' + this.idContenedor,
+            text:'Rep. Det. Pasajes',
+            disabled: false,
+            iconCls : 'blist',
+            handler:this.repAutorizacionPDF,
+            scope: this,
+            menu:{
+                items: [{
+                    id:'b-repasajXls-' + this.idContenedor,
+                    text: 'Excel',
+                    tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+                    handler:this.repAutorizacion,
+                    scope: this
+                }, {
+                    id:'b-repasajPdf-' + this.idContenedor,
+                    text: 'Pdf',
+                    tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
+                    handler:this.repAutorizacionPDF,
+                    scope: this
+                }]
+            }
+        });
+        this.tbar.add(this.menuAdqGantt);
+    },
+    //
+    repAutorizacion : function() {
+        var tmpl =this.cmbPeriodo.getValue();
+        var me = this;
+        if(tmpl)
+        {
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_contabilidad/control/DocCompraVenta/repAutorizacion',
+                params:{
+                    id_depto_conta : this.cmbDepto.getValue(),
+                    id_gestion : me.cmbGestion.getValue(),
+                    id_periodo : me.cmbPeriodo.getValue()
+                },
+                success:this.successExport,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+        }
+        else
+        {
+            Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
+        }
+    },
+    //#1
+    repAutorizacionPDF : function() {
+        var tmpl =this.cmbPeriodo.getValue();
+        var me = this;
+        if(tmpl)
+        {
+            Phx.CP.loadingShow();
+            Ext.Ajax.request({
+                url:'../../sis_cuenta_documentada/control/PagoSimple/repAutorizacionPdf',
+                params:{
+                    id_depto_conta : this.cmbDepto.getValue(),
+                    id_gestion : me.cmbGestion.getValue(),
+                    id_periodo : me.cmbPeriodo.getValue(),
+                    id_funcionario:me.cmbFuncionario.getValue(),
+                    consumido:me.cmbConsumido.getValue(),
+                    //revisado: 'no'
+                },
+                success:this.successExport,
+                failure: this.conexionFailure,
+                timeout:this.timeout,
+                scope:this
+            });
+        }
+        else
+        {
+            Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
         }
     },
 });
