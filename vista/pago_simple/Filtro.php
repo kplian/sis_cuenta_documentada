@@ -1512,11 +1512,12 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
         {
             Phx.CP.loadingShow();
             Ext.Ajax.request({
-                url:'../../sis_contabilidad/control/DocCompraVenta/repAutorizacion',
+                url:'../../sis_cuenta_documentada/control/PagoSimple/repXls',
                 params:{
                     id_depto_conta : this.cmbDepto.getValue(),
                     id_gestion : me.cmbGestion.getValue(),
-                    id_periodo : me.cmbPeriodo.getValue()
+                    id_periodo : me.cmbPeriodo.getValue(),
+                    consumido:me.cmbConsumido.getValue(),
                 },
                 success:this.successExport,
                 failure: this.conexionFailure,
@@ -1537,7 +1538,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
         {
             Phx.CP.loadingShow();
             Ext.Ajax.request({
-                url:'../../sis_cuenta_documentada/control/PagoSimple/repAutorizacionPdf',
+                url:'../../sis_cuenta_documentada/control/PagoSimple/repPdf',
                 params:{
                     id_depto_conta : this.cmbDepto.getValue(),
                     id_gestion : me.cmbGestion.getValue(),

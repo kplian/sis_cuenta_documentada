@@ -438,7 +438,7 @@ BEGIN
 
             IF  pxp.f_existe_parametro(p_tabla, 'nombre_vista') THEN
                 IF v_parametros.nombre_vista = 'DocCompraPS' THEN
-                   v_filtro = ' dcv.sw_pgs = ''reg'' and  ';
+                	v_filtro = ' (dcv.sw_pgs = ''reg'' or dcv.sw_pgs = ''proc'') and trim(dcv.nota_debito_agencia)!='''' and  dcv.tipo = ''compra'' AND ';
                    IF  p_administrador != 1 THEN
                       v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
                    END IF;
@@ -450,79 +450,47 @@ BEGIN
 			v_consulta:='select
                         dcv.id_doc_compra_venta,
                         dcv.revisado,
-                        dcv.movil,
-                        dcv.tipo,
                         COALESCE(dcv.importe_excento,0)::numeric as importe_excento,
-                        dcv.id_plantilla,
                         dcv.fecha,
                         dcv.nro_documento,
                         dcv.nit,
                         COALESCE(dcv.importe_ice,0)::numeric as importe_ice,
-                        dcv.nro_autorizacion,
                         COALESCE(dcv.importe_iva,0)::numeric as importe_iva,
                         COALESCE(dcv.importe_descuento,0)::numeric as importe_descuento,
                         COALESCE(dcv.importe_doc,0)::numeric as importe_doc,
-                        dcv.sw_contabilizar,
-                        COALESCE(dcv.tabla_origen,''ninguno'') as tabla_origen,
                         dcv.estado,
-                        dcv.id_depto_conta,
-                        dcv.id_origen,
                         dcv.obs,
-                        dcv.estado_reg,
-                        dcv.codigo_control,
-                        COALESCE(dcv.importe_it,0)::numeric as importe_it,
                         dcv.razon_social,
-                        dcv.id_usuario_ai,
-                        dcv.id_usuario_reg,
                         dcv.fecha_reg,
-                        dcv.usuario_ai,
-                        dcv.id_usuario_mod,
-                        dcv.fecha_mod,
-                        usu1.cuenta as usr_reg,
-                        usu2.cuenta as usr_mod,
-                        dep.nombre as desc_depto,
-                        pla.desc_plantilla,
                         COALESCE(dcv.importe_descuento_ley,0)::numeric as importe_descuento_ley,
                         COALESCE(dcv.importe_pago_liquido,0)::numeric as importe_pago_liquido,
-                        dcv.nro_dui,
-                        dcv.id_moneda,
                         mon.codigo as desc_moneda,
-                        dcv.id_int_comprobante,
                         COALESCE(dcv.nro_tramite,''''),
-                        COALESCE(ic.nro_cbte,dcv.id_int_comprobante::varchar)::varchar  as desc_comprobante,
                         COALESCE(dcv.importe_pendiente,0)::numeric as importe_pendiente,
                         COALESCE(dcv.importe_anticipo,0)::numeric as importe_anticipo,
                         COALESCE(dcv.importe_retgar,0)::numeric as importe_retgar,
                         COALESCE(dcv.importe_neto,0)::numeric as importe_neto,
-                        aux.id_auxiliar,
                         aux.codigo_auxiliar,
                         aux.nombre_auxiliar,
-                        dcv.id_tipo_doc_compra_venta,
-                        (tdcv.codigo||'' - ''||tdcv.nombre)::Varchar as desc_tipo_doc_compra_venta,
                         (dcv.importe_doc -  COALESCE(dcv.importe_descuento,0) - COALESCE(dcv.importe_excento,0))     as importe_aux_neto,
-                        fun.id_funcionario,
                         fun.desc_funcionario2::varchar,
                         ic.fecha as fecha_cbte,
-                        ic.estado_reg as estado_cbte,
-                        COALESCE(dcv.codigo_aplicacion,'''') as  codigo_aplicacion,
-                        pla.tipo_informe,
-                        dcv.id_doc_compra_venta_fk,
                         dcv.nota_debito_agencia,
                         dcv.consumido,
                         (
                         select
                         CASE 
                         WHEN (pres.descripcion like ''P1%'') THEN
-                        vtcc.descripcion_techo::varchar	
+                            vtcc.descripcion_techo::varchar	
                         ELSE
-                        ceco.codigo_cc::varchar	
+                            ceco.codigo_cc::varchar	
                         END as descripcion    	             
-                        from conta.tdoc_compra_venta dcven     
-                        left join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcven.id_doc_compra_venta
-                        left join param.vcentro_costo ceco on ceco.id_centro_costo=cc.id_centro_costo
+                        from param.vcentro_costo ceco     
                         left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=ceco.id_tipo_cc
+                        where ceco.id_centro_costo=cc.id_centro_costo and cop.id_doc_compra_venta=dcv.id_doc_compra_venta
                         group by ceco.codigo_cc,vtcc.descripcion_techo,ceco.id_centro_costo                             
-                        ) as descripcion
+                        ) as descripcion,
+                        ps.nro_tramite as tramite_relacionado
                                                 
 						from conta.tdoc_compra_venta dcv
                         inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
@@ -538,6 +506,8 @@ BEGIN
                         join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
                         join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
                         join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
+                        LEFT JOIN cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
+						left JOIN cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where '||v_filtro;
 
 			--Definicion de la respuesta
@@ -565,7 +535,7 @@ BEGIN
 
             IF  pxp.f_existe_parametro(p_tabla,'nombre_vista') THEN
               IF v_parametros.nombre_vista = 'DocCompraPS' THEN
-                 v_filtro = '  dcv.sw_pgs = ''reg''   and   ';
+            	 v_filtro = ' (dcv.sw_pgs = ''reg'' or dcv.sw_pgs = ''proc'') and trim(dcv.nota_debito_agencia)!='''' and  dcv.tipo = ''compra'' AND ';
                  IF  p_administrador != 1 THEN
                     v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
                  END IF;
@@ -601,6 +571,9 @@ BEGIN
                         join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
                         join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
                         join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
+                        
+                        LEFT JOIN cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
+						left JOIN cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
 				        where  '||v_filtro;
 
 			--Definicion de la respuesta
@@ -611,6 +584,66 @@ BEGIN
 
 		end;    
 	
+    	/*********************************
+        #TRANSACCION:  'CD_REPPAS_SEL'
+        #DESCRIPCION:	Reporte de DETALLE DE AUTORIZAIOCN DE PASAJES AEREOS
+        #AUTOR:		mp  
+        #FECHA:		29-08-2013 00:28:30
+        ***********************************/
+		elsif(p_transaccion='CD_REPPAS_SEL') then
+        
+     		BEGIN  
+            	v_filtro = ' 0 = 0 and ';          	            	                             
+            	IF  p_administrador != 1 THEN
+                    v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
+                 END IF;                  
+				v_consulta:='select
+                            COALESCE(dcv.nota_debito_agencia,''-'')::VARCHAR,
+                            COALESCE(fun.desc_funcionario2,''-'')::VARCHAR,
+                            COALESCE(dcv.nro_documento,''-'')::VARCHAR,
+                            COALESCE(dcv.nro_tramite,''-'')::VARCHAR,
+                            COALESCE(dcv.obs,''-'')::VARCHAR,
+                            (
+                            select
+                            CASE 
+                            WHEN (pres.descripcion like ''P1%'') THEN
+                                vtcc.descripcion_techo::varchar	
+                            ELSE
+                                ceco.codigo_cc::varchar	
+                            END as descripcion    	             
+                            from param.vcentro_costo ceco     
+                            left join param.vtipo_cc_techo vtcc on vtcc.id_tipo_cc=ceco.id_tipo_cc
+                            where ceco.id_centro_costo=cc.id_centro_costo and cop.id_doc_compra_venta=dcv.id_doc_compra_venta
+                            group by ceco.codigo_cc,vtcc.descripcion_techo,ceco.id_centro_costo                             
+                            ) as descripcion,
+                            COALESCE(mon.codigo,''-'')::VARCHAR	 as desc_moneda,
+                            COALESCE(dcv.importe_neto,0)::numeric as importe_doc
+                            from conta.tdoc_compra_venta dcv
+                            inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
+                            inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
+                            inner join param.tmoneda mon on mon.id_moneda = dcv.id_moneda
+                            inner join conta.ttipo_doc_compra_venta tdcv on tdcv.id_tipo_doc_compra_venta = dcv.id_tipo_doc_compra_venta
+                            left join conta.tauxiliar aux on aux.id_auxiliar = dcv.id_auxiliar
+                            left join conta.tint_comprobante ic on ic.id_int_comprobante = dcv.id_int_comprobante
+                            left join param.tdepto dep on dep.id_depto = dcv.id_depto_conta
+                            left join segu.tusuario usu2 on usu2.id_usuario = dcv.id_usuario_mod
+                            left join orga.vfuncionario fun on fun.id_funcionario = dcv.id_funcionario
+                                                    
+                            join conta.tdoc_concepto cop on cop.id_doc_compra_venta=dcv.id_doc_compra_venta
+                            join param.tcentro_costo cc on cc.id_centro_costo=cop.id_centro_costo
+                            join pre.tpresupuesto pres on pres.id_centro_costo=cc.id_centro_costo
+                            left JOIN cd.tpago_simple_det psd on psd.id_doc_compra_venta=dcv.id_doc_compra_venta
+                            left JOIN cd.tpago_simple ps on ps.id_pago_simple=psd.id_pago_simple
+                            where
+                            (dcv.sw_pgs = ''reg'' or dcv.sw_pgs = ''proc'') and
+                            trim(dcv.nota_debito_agencia)!='''' and 
+                            dcv.tipo = ''compra'' AND                            
+                            '||v_filtro;
+                v_consulta:=v_consulta||v_parametros.filtro;
+                raise notice '%',v_consulta;
+                --raise EXCEPTION '%',v_consulta;
+				return v_consulta;
+			END;
     
     else
 

@@ -386,6 +386,59 @@ class ACTPagoSimple extends ACTbase{
 		$this->res=$this->objFunc->cambiarRevision($this->objParam);
 		$this->res->imprimirRespuesta($this->res->generarJson());
 	}
+	//
+	function repPdf(){	
+		
+		if($this->objParam->getParametro('id_pago_simple')!=''){
+			$this->objParam->addFiltro("paside.id_pago_simple =".$this->objParam->getParametro('id_pago_simple'));
+		}
+		if($this->objParam->getParametro('id_depto_conta')!=''){
+			$this->objParam->addFiltro("dcv.id_depto_conta =".$this->objParam->getParametro('id_depto_conta'));
+		}
+		if($this->objParam->getParametro('id_periodo')!=''){
+			$this->objParam->addFiltro("dcv.id_periodo =".$this->objParam->getParametro('id_periodo'));
+		}
+
+		if($this->objParam->getParametro('id_funcionario')!=''){
+			$this->objParam->addFiltro("dcv.id_funcionario = ".$this->objParam->getParametro('id_funcionario'));
+		}
+
+		if($this->objParam->getParametro('consumido') !=''){
+			if($this->objParam->getParametro('consumido') =='todos'){
+			}elseif ($this->objParam->getParametro('consumido') =='si' || $this->objParam->getParametro('consumido') =='no') {
+				$this->objParam->addFiltro("dcv.consumido = ''".$this->objParam->getParametro('consumido')."''");
+			}
+		}
+
+		if($this->objParam->getParametro('revisado') !=''){
+			$this->objParam->addFiltro("dcv.revisado = ''".$this->objParam->getParametro('revisado')."''");
+		}
+
+		$this->objFun=$this->create('MODPagoSimple');
+		$this->res = $this->objFun->repPdf();
+		if($this->res->getTipo()=='ERROR'){
+			$this->res->imprimirRespuesta($this->res->generarJson());
+			exit;
+		}
+			
+		$nombreArchivo = uniqid(md5(session_id()).'-Pasajes') . '.pdf'; 
+		$tamano = 'LETTER';
+		$orientacion = 'L';
+		$this->objParam->addParametro('orientacion',$orientacion);
+		$this->objParam->addParametro('tamano',$tamano);
+		$this->objParam->addParametro('titulo_archivo',$titulo);
+		$this->objParam->addParametro('nombre_archivo',$nombreArchivo);
+		
+		$reporte = new RepPasajes($this->objParam);
+		$reporte->datosHeader($this->res->datos);
+		$reporte->generarReporte();
+		$reporte->output($reporte->url_archivo,'F');
+		
+		$this->mensajeExito=new Mensaje();
+		$this->mensajeExito->setMensaje('EXITO','Reporte.php','Reporte generado','Se generó con éxito el reporte: '.$nombreArchivo,'control');
+		$this->mensajeExito->setArchivoGenerado($nombreArchivo);
+		$this->mensajeExito->imprimirRespuesta($this->mensajeExito->generarJson());
+	}
 }
 
 ?>
