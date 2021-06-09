@@ -5,7 +5,7 @@ class RepPasajes extends ReportePDF {
 	function datosHeader ($detalle) {      
         $this->datos_detalle = $detalle;          
 		$this->ancho_hoja = $this->getPageWidth() - PDF_MARGIN_LEFT - PDF_MARGIN_RIGHT-10;					
-		$this->SetMargins(10, 17, 10,10);
+		$this->SetMargins(10, 10, 10,10);
 	}
 	
 	function Header() {			
@@ -20,18 +20,18 @@ class RepPasajes extends ReportePDF {
 		ob_start();
 		include(dirname(__FILE__).'/../reportes/tpl/Pasaje.php');
 		$content = ob_get_clean();
-		$this->writeHTML($content, false, false, false, false, '');		
+		$this->writeHTML($content, false, false, false, false, '');
 	}
 	
 	function Footer() {
-	    $this->setY(-15);
+	    $this->setY(-14);
 		$ormargins = $this->getOriginalMargins();
 		$this->SetTextColor(0, 0, 0);
 		//set style for cell border
 		$line_width = 0.85 / $this->getScaleFactor();
 		$this->SetLineStyle(array('width' => $line_width, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 0)));
 		$ancho = round(($this->getPageWidth() - $ormargins['left'] - $ormargins['right']) / 3);
-		$this->Ln(2);
+		$this->Ln(1);
 		$cur_y = $this->GetY();
 		$this->Cell($ancho, 0, 'Usuario: '.$_SESSION['_LOGIN'], '', 0, 'L');
 		$pagenumtxt = 'Página'.' '.$this->getAliasNumPage().' de '.$this->getAliasNbPages();

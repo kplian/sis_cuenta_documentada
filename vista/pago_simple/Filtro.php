@@ -1487,13 +1487,13 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
             handler:this.repAutorizacionPDF,
             scope: this,
             menu:{
-                items: [{
+                items: [/*{
                     id:'b-repasajXls-' + this.idContenedor,
                     text: 'Excel',
                     tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
                     handler:this.repAutorizacion,
                     scope: this
-                }, {
+                }, */{
                     id:'b-repasajPdf-' + this.idContenedor,
                     text: 'Pdf',
                     tooltip: '<b> Detalle de pasajes para firmas de autorización de jefe inmediato</b>',
@@ -1517,6 +1517,7 @@ Phx.vista.Filtro=Ext.extend(Phx.gridInterfaz,{
                     id_depto_conta : this.cmbDepto.getValue(),
                     id_gestion : me.cmbGestion.getValue(),
                     id_periodo : me.cmbPeriodo.getValue(),
+                    id_funcionario:me.cmbFuncionario.getValue(),
                     consumido:me.cmbConsumido.getValue(),
                 },
                 success:this.successExport,

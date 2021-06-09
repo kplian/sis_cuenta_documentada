@@ -6,28 +6,38 @@
             {
                 width:80px;
                 height: 35px;
-                vertical-align:middle;                  
+                vertical-align:middle;
                 text-align: center;
             }     
             table.mp_c1 {
                 font-family: Verdana, Geneva, sans-serif;
                 border: 2px solid #000000;
-                background-color: #F0F1EB;        
+                background-color: #F0F1EB;
                 text-align: left;
+                font-size: 9px;
+                text-align: left;
+                height: 22px;
+                display: table-header-group;
+                page-break-inside:auto ;
             }
-            table.mp_c1 td{
+            tr{ 
+                page-break-inside:avoid;page-break-after:auto;
+                height: 50px;
+            }
+            
+            /*table.mp_c1 td{
                 border: 1px solid #000000;       
                 font-size: 9px;
                 text-align: left;
                 height: 22px;
             }
-            table.mp_c2 tr{
+             table.mp_c2 tr{
                 border: 1px solid #000000;       
                 font-size: 9px;
                 text-align: center;
                 padding: 2px 2px;                
             }  
-                 
+                
             .post-container {                
                 border: 1px solid #333;
                 overflow: auto
@@ -41,7 +51,7 @@
             .post-title {
                 font-weight: bold;
                 font-size: 12px;
-            }    
+            }    */
         </style>
         
     </head>
@@ -49,12 +59,13 @@
         <table>
             <tr>
                 <td style="height:40px;" width="10%" align="center"><img width="110" height="75" src="./../../../lib/imagenes/logos/logo.jpg"></td>
-                <td width="90%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>                    
+                <td width="90%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>
             </tr>
-        </table>        
+        </table>
+        <p style="height: 50px;"></p>
         <table class="mp_c1" border="1" >
             <thead>
-                <tr style="border: 2px solid #300BE7;font-size: 7;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
+                <tr style="border: 2px solid #300BE7;display:table-header-group;font-size: 7;padding: 2px 2px;text-align: center;background-color: #81BEF7;border-left: 2px solid #000000;">
                     <th style="width: 70px;">NOTA DE DEBITO</th>
                     <th style="width: 110px;">NOMBRE DEL PASAJERO</th>
                     <th style="width: 80px;">N&ordm;  FACTURA</th>
@@ -66,7 +77,8 @@
                     <th style="width: 85px;">FIRMA AUTORIZADA</th>
                     <th style="width: 85px;">NOMBRE</th>   
                 </tr>        
-            </thead>  
+            </thead>
+            <p></p>
             <tbody>                
                 <?php  
                     $sum=0;           
@@ -102,15 +114,15 @@
                             } 
                             if($keyIn=='importe_doc'){
                                 $tds .= '<td align="right" style="width: 70px;">'.number_format($value,2).'</td>';
-                            }                            
+                            }
                         } 
-                        $tds .= '<td style="width: 85px;"></td><td style="width: 85px;"></td>';                
-                        echo '<tr>'.$tds.'</tr>';                   
-                    }                            
-                    echo '<tr ><td colspan="10" style="background-color: white;" height="20px"></td></tr>';                    
-                    echo '<tr align="right" style="background-color: #81BEF7;vertical-align: middle"><td colspan="2" style="height: 15px;">TOTAL</td><td colspan="6" style="background-color: white;" align="right" height="15px">'.number_format($sum,2).'</td></tr>';                    
+                        $tds .= '<td style="width: 85px;"></td><td style="width: 85px;"></td>';
+                        echo '<tr style="page-break-inside:avoid;page-break-after:auto;">'.$tds.'</tr>';
+                    }
+                    echo '<tr style="page-break-inside:avoid;page-break-after:auto;"><td colspan="10" style="background-color: white;" height="20px"></td></tr>';
+                    echo '<tr align="right" style="page-break-inside:avoid;page-break-after:auto;background-color: #81BEF7;vertical-align: middle"><td colspan="2" style="height: 15px;">TOTAL</td><td colspan="6" style="background-color: white;" align="right" height="15px">'.number_format($sum,2).'</td></tr>';                    
                 ?>                                       
-            </tbody>              
+            </tbody>
         </table>
         <p></p>
         <div style="text-align: center;">                    
