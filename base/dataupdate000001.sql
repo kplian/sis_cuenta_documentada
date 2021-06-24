@@ -396,4 +396,47 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1337144;
 --UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1354793,id_moneda_dev= 1,dev_saldo_original=2260.66,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=36331;
 --commit
 UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1337144,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=36331;
+<<<<<<< HEAD
 /********************************************F-DAUP-MGM-CD-ETR-4063-26/05/2021********************************************/
+=======
+/********************************************F-DAUP-MGM-CD-ETR-4063-26/05/2021********************************************/
+/********************************************I-DAUP-MGM-CD-ETR-4329-26/05/2021********************************************/
+--VI-001936-2021
+--finalizado
+--rollback  
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1386745;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1386745;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1361761;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1361761;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='finalizado',id_estado_wf=1386745 WHERE id_cuenta_doc=37077;
+--commit
+UPDATE cd.tcuenta_doc SET estado='contabilizado',id_estado_wf=1361761 WHERE id_cuenta_doc=37077;
+
+--rendido
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1386744;
+--commit
+UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1386744;
+
+--rollback
+--UPDATE wf.testado_wf SET estado_reg='inactivo' WHERE id_estado_wf=1369269;
+--commit
+UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1369269;
+
+--rollback
+--UPDATE cd.tcuenta_doc SET estado='rendido',id_estado_wf=1386744,id_moneda_dev= 1,dev_saldo_original=null,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=37340;
+--commit
+UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1369269,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=37340;
+/********************************************F-DAUP-MGM-CD-ETR-4329-26/05/2021********************************************/
+
+
+
+
+
+>>>>>>> 92a3c8a... #ETR-4329 retroceder a dev/rep
