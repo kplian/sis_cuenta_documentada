@@ -431,3 +431,18 @@ UPDATE wf.testado_wf SET estado_reg='activo' WHERE id_estado_wf=1369269;
 --commit
 UPDATE cd.tcuenta_doc SET estado='vbtesoreria',id_estado_wf=1369269,id_moneda_dev= NULL,dev_saldo_original=NULL,id_int_comprobante_devrep = NULL,dev_saldo=NULL,dev_tipo=NULL,dev_a_favor_de=NULL WHERE id_cuenta_doc=37340;
 /********************************************F-DAUP-MGM-CD-ETR-4329-26/05/2021********************************************/
+/********************************************I-DAUP-EGS-CD-ETR-4372-25/06/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET
+-- motivo = 'INSPECCION CONSTRUCCION DE OBRAS DE PROTRECCION DE TALUD T276'
+-- WHERE id_cuenta_doc=37963;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET
+    motivo = 'INSPECCION CONSTRUCCION DE OBRAS DE PROTECCION DE TALUD T276 - ZONA VILLA TURANI'
+WHERE id_cuenta_doc=37963;
+COMMIT;
+
+/********************************************F-DAUP-EGS-CD-ETR-4372-25/06/2021********************************************/
