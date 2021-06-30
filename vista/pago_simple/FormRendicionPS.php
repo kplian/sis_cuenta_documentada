@@ -61,7 +61,7 @@ Phx.vista.FormRendicionPS = {
 		},//#13 
 		{
 			config:{
-				name: 'nro_tramite',
+				name: 'nro_tramite_aux',
 				fieldLabel: 'Tramite-VI',				
 
 				emptyText:'Elija una tramite...',
