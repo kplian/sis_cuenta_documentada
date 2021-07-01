@@ -553,7 +553,9 @@ BEGIN
             --#2 Fin
 
             if pxp.f_existe_parametro(p_tabla, 'id_funcionarios') then
-                v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
+                if (v_parametros.id_funcionarios != '{}')then
+                    v_id_funcionarios = string_to_array(v_parametros.id_funcionarios, ',');
+                end if;
             end if;
 
             --Sentencia de la modificacion
