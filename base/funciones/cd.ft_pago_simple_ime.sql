@@ -738,7 +738,7 @@ BEGIN
 		        	and ';
             v_sql = v_sql || v_where;
 			raise notice '%',v_sql;
-            			raise exception '%',v_sql;
+            			--raise exception '%',v_sql;
             execute(v_sql);
 
             update conta.tdoc_compra_venta set
