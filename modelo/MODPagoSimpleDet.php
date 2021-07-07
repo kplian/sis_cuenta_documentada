@@ -105,7 +105,7 @@ class MODPagoSimpleDet extends MODbase{
 		
 		$this->captura('sw_pgs','varchar');
 		$this->captura('nota_debito_agencia','varchar');
-		
+		$this->captura('nro_tramite_aux','varchar');
 
 		
 		//Ejecuta la instruccion

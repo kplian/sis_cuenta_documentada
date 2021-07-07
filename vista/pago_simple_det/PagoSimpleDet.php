@@ -143,7 +143,7 @@ Phx.vista.PagoSimpleDet = {
 		'importe_pago_liquido','nro_dui','id_moneda','desc_moneda',
 		'desc_tipo_doc_compra_venta','id_tipo_doc_compra_venta','nro_tramite',
 		'desc_comprobante','id_int_comprobante','id_auxiliar','codigo_auxiliar','nombre_auxiliar','tipo_reg',
-		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario','sw_pgs','nota_debito_agencia'
+		'estacion', 'id_punto_venta', 'nombre', 'id_agencia', 'codigo_noiata','desc_funcionario2','id_funcionario','sw_pgs','nota_debito_agencia','nro_tramite_aux'
 	],
 	abrirFormulario: function(tipo, record){
    	       var me = this;

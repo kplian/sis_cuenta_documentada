@@ -109,8 +109,8 @@ BEGIN
                         fun.id_funcionario,
                         fun.desc_funcionario2::varchar,
                         dcv.sw_pgs,  --#99+
-                        dcv.nota_debito_agencia  --#ETR-779
-                        
+                        dcv.nota_debito_agencia,  --#ETR-779
+                        COALESCE(dcv.nro_tramite_aux,'''') as nro_tramite_aux
 
 						from cd.tpago_simple_det paside
 						inner join segu.tusuario usu1 on usu1.id_usuario = paside.id_usuario_reg
