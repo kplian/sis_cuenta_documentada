@@ -440,7 +440,7 @@ BEGIN
                 IF v_parametros.nombre_vista = 'DocCompraPS' THEN
                 	v_filtro = ' (dcv.sw_pgs = ''reg'' or dcv.sw_pgs = ''proc'') and trim(dcv.nota_debito_agencia)!='''' and  dcv.tipo = ''compra'' AND ';
                    IF  p_administrador != 1 THEN
-                      v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
+                      --v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
                    END IF;
 
                 END IF;
