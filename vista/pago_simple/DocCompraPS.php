@@ -17,29 +17,25 @@ header("content-type: text/javascript; charset=UTF-8");
 ?>
 <script>
 Phx.vista.DocCompraPS = {
-    
+
 	require: '../../../sis_contabilidad/vista/doc_compra_venta/DocCompraVenta.php',
-    ActList:'../../sis_contabilidad/control/DocCompraVenta/listarDocCompraVenta',
+	ActList:'../../sis_contabilidad/control/DocCompraVenta/listarDocCompraVenta',
 	requireclase: 'Phx.vista.DocCompraVenta',
 	title: 'Libro de Compras',
 	nombreVista: 'DocCompraPS',
 	tipoDoc: 'compra',
-	
 	formTitulo: 'Formulario de Documento Compra',
-	
-	constructor: function(config) {
-		
 
-	    Phx.vista.DocCompraPS.superclass.constructor.call(this,config);	
+	constructor: function(config) {
+		Phx.vista.DocCompraPS.superclass.constructor.call(this,config);
 		this.addBotonesPas();
-   
+		this.mostrarColumna(2);
 		//this.Cmp.id_plantilla.store.baseParams = Ext.apply(this.Cmp.id_plantilla.store.baseParams, {tipo_plantilla:this.tipoDoc});
-		
-    },   
-    
-    loadValoresIniciales: function() {
-    	Phx.vista.DocCompraPS.superclass.loadValoresIniciales.call(this);
-        //this.Cmp.tipo.setValue(this.tipoDoc);         
+	},
+
+	loadValoresIniciales: function() {
+		Phx.vista.DocCompraVenta.superclass.loadValoresIniciales.call(this);
+		//this.Cmp.tipo.setValue(this.tipoDoc);
 	},
 	   
     capturaFiltros:function(combo, record, index){
@@ -199,7 +195,29 @@ Phx.vista.DocCompraPS = {
         });
 		this.tbar.add(this.menuAdqGantt);
     },
- 
+	//
+	oncellclick : function(grid, rowIndex, columnIndex, e) {
+        var record = this.store.getAt(rowIndex);
+        var fieldName = grid.getColumnModel().getDataIndex(columnIndex);
+        if(fieldName == 'consumido') {
+            if(record.data.tipo_reg != 'summary'){
+                this.cambiarRevision(record);
+            }
+        }
+    },
+    //
+    cambiarRevision: function(record){
+        Phx.CP.loadingShow();
+        var d = record.data
+        Ext.Ajax.request({
+            url:'../../sis_cuenta_documentada/control/PagoSimple/cambiarRevision',
+            params:{ id_doc_compra_venta: d.id_doc_compra_venta},
+            success: this.successRevision,
+            failure: this.conexionFailure,
+            timeout: this.timeout,
+            scope: this
+        }); 
+    },
    
    
 };
