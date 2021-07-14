@@ -482,7 +482,7 @@ class MODPagoSimple extends MODbase{
 		$this->captura('descripcion','varchar');	
 		$this->captura('desc_moneda','varchar');
 		$this->captura('importe_doc','numeric');
-		
+		$this->captura('consumido','varchar');
 		//Ejecuta la instruccion
 		$this->armarConsulta();
 		$this->ejecutarConsulta();

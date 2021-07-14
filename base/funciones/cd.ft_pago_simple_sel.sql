@@ -465,7 +465,7 @@ BEGIN
                         COALESCE(dcv.importe_descuento_ley,0)::numeric as importe_descuento_ley,
                         COALESCE(dcv.importe_pago_liquido,0)::numeric as importe_pago_liquido,
                         mon.codigo as desc_moneda,
-                        COALESCE(dcv.nro_tramite_aux,'''') as nro_tramite,
+                        COALESCE(dcv.nro_tramite_aux,''''),
                         COALESCE(dcv.importe_pendiente,0)::numeric as importe_pendiente,
                         COALESCE(dcv.importe_anticipo,0)::numeric as importe_anticipo,
                         COALESCE(dcv.importe_retgar,0)::numeric as importe_retgar,
@@ -537,7 +537,7 @@ BEGIN
               IF v_parametros.nombre_vista = 'DocCompraPS' THEN
             	 v_filtro = ' (dcv.sw_pgs = ''reg'' or dcv.sw_pgs = ''proc'') and trim(dcv.nota_debito_agencia)!='''' and  dcv.tipo = ''compra'' AND ';
                  IF  p_administrador != 1 THEN
-                    --v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
+                    v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
                  END IF;
               END IF;
             END IF;
@@ -598,11 +598,11 @@ BEGIN
                     v_filtro = v_filtro || ' dcv.id_usuario_reg = '||p_id_usuario|| ' and ';
                  END IF;                  
 				v_consulta:='select
-                            COALESCE(dcv.nota_debito_agencia,''-'')::VARCHAR,
-                            COALESCE(fun.desc_funcionario2,''-'')::VARCHAR,
-                            COALESCE(dcv.nro_documento,''-'')::VARCHAR,
+                            COALESCE(dcv.nota_debito_agencia,''-'')::VARCHAR as nota_debito_agencia,
+                            COALESCE(fun.desc_funcionario2,''-'')::VARCHAR as desc_funcionario2,
+                            COALESCE(dcv.nro_documento,''-'')::VARCHAR as nro_documento,
                             COALESCE(dcv.nro_tramite_aux,''-'')::VARCHAR as nro_tramite,
-                            COALESCE(dcv.obs,''-'')::VARCHAR,
+                            COALESCE(dcv.obs,''-'')::VARCHAR as obs,
                             (
                             select
                             CASE 
@@ -617,7 +617,8 @@ BEGIN
                             group by ceco.codigo_cc,vtcc.descripcion_techo,ceco.id_centro_costo                             
                             ) as descripcion,
                             COALESCE(mon.codigo,''-'')::VARCHAR	 as desc_moneda,
-                            COALESCE(dcv.importe_neto,0)::numeric as importe_doc
+                            COALESCE(dcv.importe_neto,0)::numeric as importe_doc,
+                            dcv.consumido
                             from conta.tdoc_compra_venta dcv
                             inner join segu.tusuario usu1 on usu1.id_usuario = dcv.id_usuario_reg
                             inner join param.tplantilla pla on pla.id_plantilla = dcv.id_plantilla
