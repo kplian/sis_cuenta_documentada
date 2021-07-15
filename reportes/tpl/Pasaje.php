@@ -20,42 +20,15 @@
                 display: table-header-group;
                 page-break-inside:auto ;
             }
-            /*table.mp_c1 td{
-                border: 1px solid #000000;       
-                font-size: 9px;
-                text-align: left;
-                height: 22px;
-            }
-             table.mp_c2 tr{
-                border: 1px solid #000000;       
-                font-size: 9px;
-                text-align: center;
-                padding: 2px 2px;                
-            }  
-                
-            .post-container {                
-                border: 1px solid #333;
-                overflow: auto
-            }
-            .post-thumb {
-                float: left
-            }
-            .post-content {
-                margin-left: 50px
-            }
-            .post-title {
-                font-weight: bold;
-                font-size: 12px;
-            }    */
         </style>
         
     </head>
     <body>
         <table>
             <tr>
-                <td style="height:35px;border:1px solid #999;" width="10%" align="center"><img width="105" height="55" src="./../../../lib/imagenes/logos/logo.jpg"></td>
-                <td style="border:1px solid #999;" width="70%" align="center"><h3 class="post-title">DETALLE DE PASAJES PARA AUTORIZACION</h3></td>
-                <td style="border:1px solid #999;display: table-cell; vertical-align: middle;font-size: 11;" width="20%" align="center" >REGISTRO  5-R-272</td>
+                <td style="height:25;border:1px solid #999;" width="15%" align="center"><h1 style="font-size:20%;color:white;">This is a heading</h1><img width="80" height="50" src="./../../../lib/imagenes/logos/logo.jpg"></td>
+                <td style="border:1px solid #999;text-align: center;" width="65%"><h1 style="font-size:35%;color:white;">This is a heading</h1><h2 style="font-family:courier,arial,helvética;">DETALLE DE PASAJES PARA AUTORIZACION</h2></td>
+                <td style="border:1px solid #999;text-align: center;" width="20%"><h1 style="font-size:50%;color:white;">This is a heading</h1><h4 style="font-family:courier,arial,helvética;">REGISTRO 5-R-272</h4></td>
             </tr>
         </table>
         <p style="height: 50px;"></p>
@@ -72,15 +45,15 @@
                     <th style="width: 68px;">IMPORTE</th>
                     <th style="width: 48px;font-size: 5;word-wrap: break-word;overflow-wrap: break-word;">PASAJE UTILIZADO / PENDIENTE</th>
                     <th style="width: 80px;">FIRMA AUTORIZADA</th>
-                    <th style="width: 80px;">NOMBRE</th>   
-                </tr>        
+                    <th style="width: 80px;">NOMBRE</th>
+                </tr>
             </thead>
             <p></p>
-            <tbody>                
+            <tbody>
                 <?php  
-                    $sum=0;           
+                    $sum=0;
                     $datos = array(); 
-                    $datos = $this->datos_detalle;            
+                    $datos = $this->datos_detalle;
                     
                     foreach ($datos as $keyOut => $out) {
                         $tds = ''; 
@@ -120,19 +93,19 @@
                         echo '<tr style="page-break-inside:avoid;page-break-after:auto;">'.$tds.'</tr>';
                     }
                     echo '<tr style="page-break-inside:avoid;page-break-after:auto;"><td colspan="11" style="background-color: white;" height="20px"></td></tr>';
-                    echo '<tr align="right" style="page-break-inside:avoid;page-break-after:auto;background-color: #81BEF7;vertical-align: middle"><td colspan="2" style="height: 15px;">TOTAL</td><td colspan="6" style="background-color: white;" align="right" height="15px">'.number_format($sum,2).'</td></tr>';                    
-                ?>                                       
+                    echo '<tr align="right" style="page-break-inside:avoid;page-break-after:auto;background-color: #81BEF7;vertical-align: middle"><td colspan="2" style="height: 15px;">TOTAL</td><td colspan="6" style="background-color: white;" align="right" height="15px">'.number_format($sum,2).'</td></tr>';
+                ?>
             </tbody>
         </table>
         <p></p>
-        <div style="text-align: center;">                    
-            <table border="1" style="font-size: 8;padding: 2px 2px;">            
+        <div style="text-align: center;">
+            <table border="1" style="font-size: 8;padding: 2px 2px;">
                 <tr style='text-align: center;'>
-                    <td width="280px" height="25px" style=' text-align: center;'>&nbsp;</td>                
+                    <td width="280px" height="25px" style=' text-align: center;'>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td style='text-align: center;'>Elaborado por:</td>                   
-                </tr>                
+                    <td style='text-align: center;'>Elaborado por:</td>
+                </tr>
             </table>  
         </div>  
     </body>

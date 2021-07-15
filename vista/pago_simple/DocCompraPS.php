@@ -37,13 +37,13 @@ Phx.vista.DocCompraPS = {
 		Phx.vista.DocCompraVenta.superclass.loadValoresIniciales.call(this);
 		//this.Cmp.tipo.setValue(this.tipoDoc);
 	},
-	   
-    capturaFiltros:function(combo, record, index){
-        this.store.baseParams.tipo = this.tipoDoc;
-        Phx.vista.DocCompraPS.superclass.capturaFiltros.call(this,combo, record, index);
-    },
-   
-    cmbDepto: new Ext.form.ComboBox({
+
+	capturaFiltros:function(combo, record, index){
+		this.store.baseParams.tipo = this.tipoDoc;
+		Phx.vista.DocCompraPS.superclass.capturaFiltros.call(this,combo, record, index);
+	},
+
+	cmbDepto: new Ext.form.ComboBox({
 		name: 'id_depto',
 		fieldLabel: 'Depto',
 		blankText: 'Depto',
@@ -80,20 +80,20 @@ Phx.vista.DocCompraPS = {
 		resizable:true,
 		minChars: 2
 	}),
-    //
-    abrirFormulario: function(tipo, record){
-   	    var me = this;
-   	    me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/pago_simple/FormRendicionPS.php',
+	//
+	abrirFormulario: function(tipo, record){
+		var me = this;
+		me.objSolForm = Phx.CP.loadWindows('../../../sis_cuenta_documentada/vista/pago_simple/FormRendicionPS.php',
 			me.formTitulo,
 			{
 				modal:true,
 				width:'90%',
-				height:(me.regitrarDetalle == 'si')? '100%':'60%',							                                    
-			}, { 
-				data: 
+				height:(me.regitrarDetalle == 'si')? '100%':'60%',
+			},{
+				data:
 				{ 
 					objPadre: me ,
-					tipoDoc: me.tipoDoc,	                                	 
+					tipoDoc: me.tipoDoc,
 					id_gestion: me.cmbGestion.getValue(),
 					id_periodo: me.cmbPeriodo.getValue(),
 					id_depto: this.cmbDepto.getValue(),
@@ -103,22 +103,22 @@ Phx.vista.DocCompraPS = {
 					datosOriginales: record
 				},
 				regitrarDetalle: 'si'
-			}, 
+			},
 			this.idContenedor,
 			'FormRendicionPS',
 			{
 				config:
 				[{
 					event:'successsave',
-					delegate: this.onSaveForm,			                                              
-				}],			                                    
+					delegate: this.onSaveForm,
+				}],
 				scope:this
 			}
-		); 	                                                      
-  	},
+		);
+	},
 	//#13
-	repAutorizacion : function() {		
-		var tmpl =this.cmbPeriodo.getValue();		
+	repAutorizacion : function() {
+		var tmpl =this.cmbPeriodo.getValue();
 		var me = this;
 		if(tmpl)
 		{			
@@ -143,8 +143,8 @@ Phx.vista.DocCompraPS = {
 		}
 	},
 	//#15
-	repAutorizacionPDF : function() {		
-		var tmpl =this.cmbPeriodo.getValue();		
+	repAutorizacionPDF : function() {
+		var tmpl =this.cmbPeriodo.getValue();
 		var me = this;
 		if(tmpl)
 		{			
@@ -167,17 +167,17 @@ Phx.vista.DocCompraPS = {
 		{
 			Ext.MessageBox.alert('Alerta', 'Antes debe seleccionar un periodo' );
 		}
-	},	   
+	},
 	//
 	addBotonesPas: function() {
-        this.menuAdqGantt = new Ext.Toolbar.SplitButton({
-            id: 'b-repasaj-' + this.idContenedor,
-            text:'Rep. Det. Pasajes',
-            disabled: false,
-            iconCls : 'blist',
-            handler:this.repAutorizacionPDF,
-            scope: this,
-            menu:{
+		this.menuAdqGantt = new Ext.Toolbar.SplitButton({
+			id: 'b-repasaj-' + this.idContenedor,
+			text:'Rep. Det. Pasajes',
+			disabled: false,
+			iconCls : 'blist',
+			handler:this.repAutorizacionPDF,
+			scope: this,
+			menu:{
 				items: [{
 					id:'b-repasajXls-' + this.idContenedor,
 					text: 'Excel',
@@ -192,33 +192,31 @@ Phx.vista.DocCompraPS = {
 					scope: this
 				}]
 			}
-        });
+		});
 		this.tbar.add(this.menuAdqGantt);
-    },
+	},
 	//
 	oncellclick : function(grid, rowIndex, columnIndex, e) {
-        var record = this.store.getAt(rowIndex);
-        var fieldName = grid.getColumnModel().getDataIndex(columnIndex);
-        if(fieldName == 'consumido') {
-            if(record.data.tipo_reg != 'summary'){
-                this.cambiarRevision(record);
-            }
-        }
-    },
-    //
-    cambiarRevision: function(record){
-        Phx.CP.loadingShow();
-        var d = record.data
-        Ext.Ajax.request({
-            url:'../../sis_cuenta_documentada/control/PagoSimple/cambiarRevision',
-            params:{ id_doc_compra_venta: d.id_doc_compra_venta},
-            success: this.successRevision,
-            failure: this.conexionFailure,
-            timeout: this.timeout,
-            scope: this
-        }); 
-    },
-   
-   
+		var record = this.store.getAt(rowIndex);
+		var fieldName = grid.getColumnModel().getDataIndex(columnIndex);
+		if(fieldName == 'consumido') {
+			if(record.data.tipo_reg != 'summary'){
+				this.cambiarRevision(record);
+			}
+		}
+	},
+	//
+	cambiarRevision: function(record){
+		Phx.CP.loadingShow();
+		var d = record.data
+		Ext.Ajax.request({
+			url:'../../sis_cuenta_documentada/control/PagoSimple/cambiarRevision',
+			params:{ id_doc_compra_venta: d.id_doc_compra_venta},
+			success: this.successRevision,
+			failure: this.conexionFailure,
+			timeout: this.timeout,
+			scope: this
+		});
+	},
 };
 </script>
