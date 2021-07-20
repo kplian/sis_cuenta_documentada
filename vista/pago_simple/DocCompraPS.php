@@ -196,27 +196,6 @@ Phx.vista.DocCompraPS = {
 		this.tbar.add(this.menuAdqGantt);
 	},
 	//
-	oncellclick : function(grid, rowIndex, columnIndex, e) {
-		var record = this.store.getAt(rowIndex);
-		var fieldName = grid.getColumnModel().getDataIndex(columnIndex);
-		if(fieldName == 'consumido') {
-			if(record.data.tipo_reg != 'summary'){
-				this.cambiarRevision(record);
-			}
-		}
-	},
-	//
-	cambiarRevision: function(record){
-		Phx.CP.loadingShow();
-		var d = record.data
-		Ext.Ajax.request({
-			url:'../../sis_cuenta_documentada/control/PagoSimple/cambiarRevision',
-			params:{ id_doc_compra_venta: d.id_doc_compra_venta},
-			success: this.successRevision,
-			failure: this.conexionFailure,
-			timeout: this.timeout,
-			scope: this
-		});
-	},
+	
 };
 </script>
