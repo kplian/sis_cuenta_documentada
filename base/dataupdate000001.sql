@@ -446,3 +446,18 @@ WHERE id_cuenta_doc=37963;
 COMMIT;
 
 /********************************************F-DAUP-EGS-CD-ETR-4372-25/06/2021********************************************/
+/********************************************I-DAUP-EGS-CD-ETR-4648-21/07/2021********************************************/
+--rollback
+--begin;
+--UPDATE cd.tcuenta_doc SET
+-- motivo = 'Participación en los talleres de consulta pública para el Estudio de Evaluación de Impacto Ambiental del Proyecto Línea 230 kV Mizque - Sehuencas'
+-- WHERE id_cuenta_doc=38871;
+--commit;
+
+BEGIN;
+UPDATE cd.tcuenta_doc SET
+    motivo = 'Participación en los talleres de consulta pública para el Estudio de Evaluación de Impacto Ambiental del Proyecto Línea 230 kV Mizque - Sehuencas, a desarrollarse en las poblaciones de Totora, Pocona y Mizque del departamento de Cochabamba.'
+WHERE id_cuenta_doc=38871;
+COMMIT;
+
+/********************************************F-DAUP-EGS-CD-ETR-4648-21/07/2021********************************************/
